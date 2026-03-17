@@ -1,1 +1,429 @@
-Hello World
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>即時報價</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Noto+Sans+TC:wght@400;500;700&display=swap');
+
+  :root {
+    --bg:       #0a0e14;
+    --surface:  #111620;
+    --border:   #1e2736;
+    --muted:    #3a4a5c;
+    --text:     #c8d8e8;
+    --dim:      #5a7080;
+    --up:       #00c98a;
+    --down:     #ff4d6a;
+    --neutral:  #5a9eff;
+    --accent:   #f0b429;
+    --mono:     'IBM Plex Mono', monospace;
+    --sans:     'Noto Sans TC', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    padding: 24px 16px 48px;
+  }
+
+  /* ── Header ── */
+  header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 28px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  header h1 {
+    font-family: var(--mono);
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  #clock {
+    font-family: var(--mono);
+    font-size: .8rem;
+    color: var(--dim);
+    letter-spacing: .06em;
+  }
+
+  /* ── Refresh button ── */
+  #refreshBtn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: none;
+    border: 1px solid var(--muted);
+    color: var(--dim);
+    font-family: var(--mono);
+    font-size: .75rem;
+    letter-spacing: .08em;
+    padding: 6px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: border-color .2s, color .2s;
+  }
+  #refreshBtn:hover { border-color: var(--accent); color: var(--accent); }
+  #refreshBtn.spinning svg { animation: spin .8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Grid layout ── */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+  }
+
+  /* ── Card ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity .4s ease, transform .4s ease, border-color .2s;
+  }
+  .card.loaded { opacity: 1; transform: translateY(0); }
+  .card:hover { border-color: var(--muted); }
+
+  /* left accent bar */
+  .card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 16px; bottom: 16px;
+    width: 3px;
+    border-radius: 0 2px 2px 0;
+    background: var(--neutral);
+  }
+  .card.up::before   { background: var(--up); }
+  .card.down::before { background: var(--down); }
+
+  .card-title {
+    font-family: var(--mono);
+    font-size: .7rem;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-bottom: 14px;
+  }
+
+  /* ── Rows inside card ── */
+  .row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 5px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .row:last-child { border-bottom: none; }
+  .row-label {
+    font-size: .78rem;
+    color: var(--dim);
+  }
+  .row-value {
+    font-family: var(--mono);
+    font-size: .88rem;
+    color: var(--text);
+  }
+  .row-value.up   { color: var(--up); }
+  .row-value.down { color: var(--down); }
+  .row-value.accent { color: var(--accent); font-size: 1.1rem; font-weight: 600; }
+
+  /* ── Section label ── */
+  .section-label {
+    font-family: var(--mono);
+    font-size: .65rem;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 20px 0 10px;
+  }
+
+  /* ── Loading skeleton ── */
+  .skeleton {
+    height: 14px;
+    background: linear-gradient(90deg, var(--border) 25%, var(--muted) 50%, var(--border) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.2s infinite;
+    border-radius: 3px;
+    margin: 8px 0;
+  }
+  @keyframes shimmer { to { background-position: -200% 0; } }
+
+  /* ── Error state ── */
+  .error-text {
+    font-family: var(--mono);
+    font-size: .75rem;
+    color: var(--down);
+    opacity: .7;
+  }
+
+  /* ── Update time ── */
+  .update-time {
+    font-family: var(--mono);
+    font-size: .68rem;
+    color: var(--muted);
+    margin-top: 12px;
+    text-align: right;
+  }
+
+  /* ── CNBC card spans full width on wide screens ── */
+  .card-wide {
+    grid-column: 1 / -1;
+  }
+  @media (max-width: 680px) {
+    .card-wide { grid-column: auto; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>&#9632; 即時報價</h1>
+  <div style="display:flex;align-items:center;gap:16px;">
+    <span id="clock">--:--:--</span>
+    <button id="refreshBtn" onclick="loadAll()">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M23 4v6h-6"/><path d="M1 20v-6h6"/>
+        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+      </svg>
+      REFRESH
+    </button>
+  </div>
+</header>
+
+<div class="grid" id="grid">
+
+  <!-- 台積電期貨 -->
+  <div class="card" id="card-taifex">
+    <div class="card-title">台積電期貨 · TAIFEX</div>
+    <div class="skeleton"></div><div class="skeleton" style="width:70%"></div>
+  </div>
+
+  <!-- 台股期貨 FITX -->
+  <div class="card" id="card-fitx">
+    <div class="card-title">台股期貨 · FITX</div>
+    <div class="skeleton"></div><div class="skeleton" style="width:60%"></div>
+  </div>
+
+  <!-- 富台指 TWN -->
+  <div class="card" id="card-twn">
+    <div class="card-title">富台指 · TWN</div>
+    <div class="skeleton"></div><div class="skeleton" style="width:60%"></div>
+  </div>
+
+  <!-- 布蘭特原油 -->
+  <div class="card" id="card-brent">
+    <div class="card-title">布蘭特原油 · BRENT</div>
+    <div class="skeleton"></div>
+  </div>
+
+  <!-- 美股指數 + 盤前 (wide) -->
+  <div class="card card-wide" id="card-cnbc">
+    <div class="card-title">美股市場 · CNBC</div>
+    <div class="skeleton"></div><div class="skeleton" style="width:80%"></div>
+  </div>
+
+  <!-- 台積電 ADR -->
+  <div class="card" id="card-rh">
+    <div class="card-title">台積電 ADR · TSM</div>
+    <div class="skeleton"></div>
+  </div>
+
+</div>
+
+<script>
+const WORKER = "https://billowing-queen-4a58.bau720123.workers.dev";
+
+// ── 時鐘 ──
+function updateClock() {
+  document.getElementById('clock').textContent =
+    new Date().toLocaleTimeString('zh-TW', { hour12: false });
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ── 工具 ──
+function changeClass(val) {
+  if (typeof val === 'string') {
+    if (val.startsWith('▲') || val.startsWith('+')) return 'up';
+    if (val.startsWith('▼') || val.startsWith('-')) return 'down';
+  }
+  if (typeof val === 'number') {
+    if (val > 0) return 'up';
+    if (val < 0) return 'down';
+  }
+  return '';
+}
+
+function formatChange(val) {
+  if (typeof val === 'number') {
+    return (val > 0 ? '+' : '') + val.toFixed(2);
+  }
+  return val;
+}
+
+function row(label, value, cls = '') {
+  return `<div class="row">
+    <span class="row-label">${label}</span>
+    <span class="row-value ${cls}">${value}</span>
+  </div>`;
+}
+
+function setCard(id, updown, html) {
+  const card = document.getElementById(id);
+  card.className = 'card ' + (updown > 0 ? 'up' : updown < 0 ? 'down' : '');
+  card.innerHTML = html;
+  setTimeout(() => card.classList.add('loaded'), 20);
+}
+
+// ── 各資料渲染 ──
+async function loadTaifex() {
+  const d = await fetch(WORKER + '/taifex').then(r => r.json());
+  const title = '<div class="card-title">台積電期貨 · TAIFEX</div>';
+  if (!d.success || d.price === 0) {
+    setCard('card-taifex', 0, title + '<div class="error-text">資料從缺（盤中更新）</div>');
+    return;
+  }
+  const updown = d.updown;
+  const sign = updown > 0 ? '▲' : updown < 0 ? '▼' : '';
+  const cls = changeClass(updown);
+  setCard('card-taifex', updown,
+    title +
+    row('現價', d.price.toFixed(1), 'accent') +
+    row('漲跌', sign + Math.abs(updown).toFixed(0), cls)
+  );
+}
+
+async function loadHiStock(no, cardId, label) {
+  const d = await fetch(`${WORKER}/${no}`).then(r => r.json());
+  const title = `<div class="card-title">${label}</div>`;
+  if (!d.success) {
+    setCard(cardId, 0, title + '<div class="error-text">無法取得資料</div>');
+    return;
+  }
+  const cls = changeClass(d.changeText);
+  const updown = d.changeText.startsWith('▲') ? 1 : d.changeText.startsWith('▼') ? -1 : 0;
+  setCard(cardId, updown,
+    title +
+    row('成交', d.current.toFixed(0), 'accent') +
+    row('漲跌', d.changeText, cls) +
+    row('開盤', d.open.toFixed(0)) +
+    row('最高', d.high.toFixed(0)) +
+    row('最低', d.low.toFixed(0)) +
+    `<div class="update-time">${d.updateTime}</div>`
+  );
+}
+
+async function loadBrent() {
+  const d = await fetch(WORKER + '/brent').then(r => r.json());
+  const title = '<div class="card-title">布蘭特原油 · BRENT</div>';
+  if (!d.success) {
+    setCard('card-brent', 0, title + '<div class="error-text">無法取得資料</div>');
+    return;
+  }
+  setCard('card-brent', 0,
+    title + row('價格 (USD)', d.price.toFixed(2), 'accent')
+  );
+}
+
+async function loadCnbc() {
+  const d = await fetch(WORKER + '/cnbc').then(r => r.json());
+  const title = '<div class="card-title">美股市場 · CNBC</div>';
+  if (!d.success) {
+    setCard('card-cnbc', 0, title + '<div class="error-text">無法取得資料</div>');
+    return;
+  }
+  const m = d.market;
+  const fv = d.fairValue;
+
+  // 美股四大指數
+  let html = title;
+  html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 24px;">';
+  html += row('道瓊', m.dji, changeClass(m.dji));
+  html += row('標普500', m.sp500, changeClass(m.sp500));
+  html += row('納斯達克', m.ixic, changeClass(m.ixic));
+  html += row('費城半導體', m.sox, changeClass(m.sox));
+  html += '</div>';
+
+  // TSM ADR
+  html += '<div class="section-label">台積電 ADR · TSM</div>';
+  html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 24px;">';
+  html += row('盤中 / 收盤', m.tsmRegular, changeClass(m.tsmRegular));
+  if (m.tsmType === 'PRE_MKT' || m.tsmType === 'POST_MKT_PREV') {
+    html += row('盤前', m.tsmMarket, changeClass(m.tsmMarket));
+  } else if (m.tsmType === 'POST_MKT') {
+    html += row('盤後', m.tsmMarket, changeClass(m.tsmMarket));
+  }
+  html += '</div>';
+
+  // 盤前電子盤
+  html += '<div class="section-label">盤前電子盤 Fair Value</div>';
+  html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 24px;">';
+  html += row('道瓊期貨', formatChange(fv.dow), changeClass(fv.dow));
+  html += row('標普500期貨', formatChange(fv.sp), changeClass(fv.sp));
+  html += row('納斯達克期貨', formatChange(fv.nasdaq), changeClass(fv.nasdaq));
+  html += row('羅素2000期貨', formatChange(fv.russell), changeClass(fv.russell));
+  html += '</div>';
+  html += `<div class="update-time">${fv.updateTime}</div>`;
+
+  setCard('card-cnbc', 0, html);
+}
+
+async function loadRH() {
+  const d = await fetch(WORKER + '/rh').then(r => r.json());
+  const title = '<div class="card-title">台積電 ADR · RobinHood</div>';
+  if (!d.success) {
+    setCard('card-rh', 0, title + '<div class="error-text">無法取得資料</div>');
+    return;
+  }
+  const cls = changeClass(d.changeText);
+  let html = title + row('變動', d.changeText, cls);
+  if (d.tertiaryText) html += row('額外資訊', d.tertiaryText);
+  setCard('card-rh', cls === 'up' ? 1 : cls === 'down' ? -1 : 0, html);
+}
+
+// ── 全部載入 ──
+async function loadAll() {
+  const btn = document.getElementById('refreshBtn');
+  btn.classList.add('spinning');
+
+  // 重置為 skeleton
+  document.querySelectorAll('.card').forEach(c => {
+    c.className = 'card';
+    c.innerHTML = c.querySelector('.card-title')?.outerHTML ||
+      '<div class="skeleton"></div>';
+    const sk = document.createElement('div');
+    sk.className = 'skeleton';
+    sk.style.width = '60%';
+    c.appendChild(sk);
+  });
+
+  await Promise.allSettled([
+    loadTaifex(),
+    loadHiStock('fitx', 'card-fitx', '台股期貨 · FITX'),
+    loadHiStock('twn',  'card-twn',  '富台指 · TWN'),
+    loadBrent(),
+    loadCnbc(),
+    loadRH(),
+  ]);
+
+  btn.classList.remove('spinning');
+}
+
+loadAll();
+</script>
+</body>
+</html>
