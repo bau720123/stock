@@ -232,13 +232,13 @@
 
   <!-- 美股指數 + 盤前 (wide) -->
   <div class="card card-wide" id="card-cnbc">
-    <div class="card-title">美股市場 · CNBC</div>
+    <div class="card-title">美股市場</div>
     <div class="skeleton"></div><div class="skeleton" style="width:80%"></div>
   </div>
 
   <!-- 台積電 ADR -->
   <div class="card" id="card-rh">
-    <div class="card-title">台積電 ADR · TSM</div>
+    <div class="card-title">台積電 ADR</div>
     <div class="skeleton"></div>
   </div>
 
@@ -318,11 +318,11 @@ async function loadHiStock(no, cardId, label) {
   const updown = d.changeText.startsWith('▲') ? 1 : d.changeText.startsWith('▼') ? -1 : 0;
   setCard(cardId, updown,
     title +
-    row('成交', d.current.toFixed(0), 'accent') +
-    row('漲跌', d.changeText, cls) +
     row('開盤', d.open.toFixed(0)) +
     row('最高', d.high.toFixed(0)) +
     row('最低', d.low.toFixed(0)) +
+    row('漲跌', d.changeText, cls) +
+    row('成交', d.current.toFixed(0), 'accent') +
     `<div class="update-time">${d.updateTime}</div>`
   );
 }
@@ -348,6 +348,16 @@ async function loadCnbc() {
   }
   const m = d.market;
   const fv = d.fairValue;
+  
+  // 盤前電子盤
+  html += '<div class="section-label">盤前電子盤 Fair Value</div>';
+  html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 24px;">';
+  html += row('道瓊期貨', formatChange(fv.dow), changeClass(fv.dow));
+  html += row('標普500期貨', formatChange(fv.sp), changeClass(fv.sp));
+  html += row('納斯達克期貨', formatChange(fv.nasdaq), changeClass(fv.nasdaq));
+  html += row('羅素2000期貨', formatChange(fv.russell), changeClass(fv.russell));
+  html += '</div>';
+  html += `<div class="update-time">${fv.updateTime}</div>`;
 
   // 美股四大指數
   let html = title;
@@ -368,16 +378,6 @@ async function loadCnbc() {
     html += row('盤後', m.tsmMarket, changeClass(m.tsmMarket));
   }
   html += '</div>';
-
-  // 盤前電子盤
-  html += '<div class="section-label">盤前電子盤 Fair Value</div>';
-  html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 24px;">';
-  html += row('道瓊期貨', formatChange(fv.dow), changeClass(fv.dow));
-  html += row('標普500期貨', formatChange(fv.sp), changeClass(fv.sp));
-  html += row('納斯達克期貨', formatChange(fv.nasdaq), changeClass(fv.nasdaq));
-  html += row('羅素2000期貨', formatChange(fv.russell), changeClass(fv.russell));
-  html += '</div>';
-  html += `<div class="update-time">${fv.updateTime}</div>`;
 
   setCard('card-cnbc', 0, html);
 }
