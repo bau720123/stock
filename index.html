@@ -294,7 +294,7 @@ async function loadTaifex() {
   const d = await fetch(WORKER + '/taifex').then(r => r.json());
   const title = '<div class="card-title">台積電期貨 · TAIFEX</div>';
   if (!d.success || d.price === 0) {
-    setCard('card-taifex', 0, title + '<div class="error-text">資料從缺（盤中更新）</div>');
+    setCard('card-taifex', 0, title + '<div class="error-text">無法取得資料</div>');
     return;
   }
   const updown = d.updown;
