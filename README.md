@@ -1,2 +1,2 @@
 # stock
-stock1
+stock
