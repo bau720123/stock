@@ -348,16 +348,6 @@ async function loadCnbc() {
   }
   const m = d.market;
   const fv = d.fairValue;
-  
-  // 盤前電子盤
-  html += '<div class="section-label">盤前電子盤 Fair Value</div>';
-  html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 24px;">';
-  html += row('道瓊期貨', formatChange(fv.dow), changeClass(fv.dow));
-  html += row('標普500期貨', formatChange(fv.sp), changeClass(fv.sp));
-  html += row('納斯達克期貨', formatChange(fv.nasdaq), changeClass(fv.nasdaq));
-  html += row('羅素2000期貨', formatChange(fv.russell), changeClass(fv.russell));
-  html += '</div>';
-  html += `<div class="update-time">${fv.updateTime}</div>`;
 
   // 美股四大指數
   let html = title;
@@ -378,6 +368,16 @@ async function loadCnbc() {
     html += row('盤後', m.tsmMarket, changeClass(m.tsmMarket));
   }
   html += '</div>';
+
+  // 盤前電子盤
+  html += '<div class="section-label">盤前電子盤 Fair Value</div>';
+  html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 24px;">';
+  html += row('道瓊期貨', formatChange(fv.dow), changeClass(fv.dow));
+  html += row('標普500期貨', formatChange(fv.sp), changeClass(fv.sp));
+  html += row('納斯達克期貨', formatChange(fv.nasdaq), changeClass(fv.nasdaq));
+  html += row('羅素2000期貨', formatChange(fv.russell), changeClass(fv.russell));
+  html += '</div>';
+  html += `<div class="update-time">${fv.updateTime}</div>`;
 
   setCard('card-cnbc', 0, html);
 }
