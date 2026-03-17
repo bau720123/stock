@@ -140,6 +140,14 @@
   .row-value.up   { color: var(--up); }
   .row-value.down { color: var(--down); }
   .row-value.accent { color: var(--accent); font-size: 1.1rem; font-weight: 600; }
+  
+  .group-header {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--text);
+    margin: 14px 0 6px;
+    display: block;
+  }
 
   /* ── Section label ── */
   .section-label {
@@ -205,81 +213,49 @@
 </header>
 
 <div class="grid" id="grid">
-
-  <!-- 台積電期貨 -->
-  <div class="card" id="card-taifex">
-    <div class="card-title">台積電期貨 · TAIFEX</div>
-    <div class="skeleton"></div><div class="skeleton" style="width:70%"></div>
-  </div>
-
-  <!-- 台股期貨 FITX -->
-  <div class="card" id="card-fitx">
-    <div class="card-title">台股期貨 · FITX</div>
-    <div class="skeleton"></div><div class="skeleton" style="width:60%"></div>
-  </div>
-
-  <!-- 富台指 TWN -->
-  <div class="card" id="card-twn">
-    <div class="card-title">富台指 · TWN</div>
-    <div class="skeleton"></div><div class="skeleton" style="width:60%"></div>
-  </div>
-
-  <!-- 布蘭特原油 -->
-  <div class="card" id="card-brent">
-    <div class="card-title">布蘭特原油 · BRENT</div>
-    <div class="skeleton"></div>
-  </div>
-
-  <!-- 美股指數 + 盤前 (wide) -->
-  <div class="card card-wide" id="card-cnbc">
-    <div class="card-title">美股市場</div>
-    <div class="skeleton"></div><div class="skeleton" style="width:80%"></div>
-  </div>
-
-  <!-- 台積電 ADR -->
-  <div class="card" id="card-rh">
-    <div class="card-title">台積電 ADR</div>
-    <div class="skeleton"></div>
-  </div>
-
+  <div class="card" id="card-taifex"><div class="card-title">台積電期貨</div><div class="skeleton"></div></div>
+  <div class="card" id="card-fitx"><div class="card-title">台股期貨</div><div class="skeleton"></div></div>
+  <div class="card" id="card-twn"><div class="card-title">富台指</div><div class="skeleton"></div></div>
+  <div class="card" id="card-brent"><div class="card-title">布蘭特原油</div><div class="skeleton"></div></div>
+  <div class="card" id="card-cnbc"><div class="card-title">美股市場概況</div><div class="skeleton"></div><div class="skeleton"></div></div>
+  <div class="card" id="card-rh"><div class="card-title">台積電 ADR 監控</div><div class="skeleton"></div></div>
 </div>
 
 <script>
 const WORKER = "https://billowing-queen-4a58.bau720123.workers.dev";
+let tsmCnbcData = null; // 用於跨卡片共享資料
 
-// ── 時鐘 ──
 function updateClock() {
-  document.getElementById('clock').textContent =
-    new Date().toLocaleTimeString('zh-TW', { hour12: false });
+  const now = new Date();
+  document.getElementById('clock').textContent = now.toLocaleTimeString('zh-TW', { hour12: false });
 }
 setInterval(updateClock, 1000);
 updateClock();
 
-// ── 工具 ──
-function changeClass(val) {
-  if (typeof val === 'string') {
-    if (val.startsWith('▲') || val.startsWith('+')) return 'up';
-    if (val.startsWith('▼') || val.startsWith('-')) return 'down';
+function changeClass(val, reverse = 0) {
+  if (!val) return '';
+  const s = String(val);
+  
+  let isUp = s.includes('▲') || s.includes('+');
+  let isDown = s.includes('▼') || s.includes('-');
+
+  if (!isUp && !isDown) return '';
+
+  // 如果 reverse 為 1，則將 isUp 與 isDown 對調
+  if (reverse === 1) {
+    [isUp, isDown] = [isDown, isUp];
   }
-  if (typeof val === 'number') {
-    if (val > 0) return 'up';
-    if (val < 0) return 'down';
-  }
-  return '';
+
+  return isUp ? 'up' : 'down';
 }
 
 function formatChange(val) {
-  if (typeof val === 'number') {
-    return (val > 0 ? '+' : '') + val.toFixed(2);
-  }
+  if (typeof val === 'number') return (val > 0 ? '+' : '') + val.toFixed(2);
   return val;
 }
 
 function row(label, value, cls = '') {
-  return `<div class="row">
-    <span class="row-label">${label}</span>
-    <span class="row-value ${cls}">${value}</span>
-  </div>`;
+  return `<div class="row"><span class="row-label">${label}</span><span class="row-value ${cls}">${value}</span></div>`;
 }
 
 function setCard(id, updown, html) {
@@ -289,10 +265,60 @@ function setCard(id, updown, html) {
   setTimeout(() => card.classList.add('loaded'), 20);
 }
 
-// ── 各資料渲染 ──
+// ── 1. 美股市場：合併盤前與四大指數 ──
+async function loadCnbc() {
+  const d = await fetch(WORKER + '/cnbc').then(r => r.json());
+  if (!d.success) return;
+
+  const { market: m, fairValue: fv } = d;
+  tsmCnbcData = m; // 存下台積電的部分給 loadRH
+
+  let html = `<div class="card-title">美股市場概況</div>`;
+  
+  html += `<span class="group-header">【美股盤前電子盤】</span>`;
+  html += row('道瓊期貨', formatChange(fv.dow), changeClass(fv.dow));
+  html += row('標普500期貨', formatChange(fv.sp), changeClass(fv.sp));
+  html += row('納斯達克100期貨', formatChange(fv.nasdaq), changeClass(fv.nasdaq));
+  html += row('羅素2000期貨', formatChange(fv.russell), changeClass(fv.russell));
+
+  html += `<span class="group-header">【美股四大指數】</span>`;
+  html += row('道瓊工業指數', m.dji, changeClass(m.dji));
+  html += row('標普500指數', m.sp500, changeClass(m.sp500));
+  html += row('納斯達克指數', m.ixic, changeClass(m.ixic));
+  html += row('費城半導體指數', m.sox, changeClass(m.sox));
+
+  html += `<div class="update-time">${fv.updateTime}</div>`;
+  setCard('card-cnbc', 0, html);
+}
+
+// ── 2. 台積電 ADR：合併 CNBC 與 RobinHood ──
+async function loadRH() {
+  const d = await fetch(WORKER + '/rh').then(r => r.json());
+  let html = `<div class="card-title">台積電 ADR 監控</div>`;
+  
+  // A. CNBC 來源 (包含開盤、最高、最低)
+  if (tsmCnbcData) {
+    const m = tsmCnbcData;
+    html += `<span class="group-header">【台積電 ADR】Cnbc</span>`;
+    const preLabel = (m.tsmType === 'PRE_MKT' || m.tsmType === 'POST_MKT_PREV') ? '盤前變動' : '盤後變動';
+    html += row(preLabel, m.tsmMarket || '--', changeClass(m.tsmMarket));
+    html += row('盤中或收盤變動', m.tsmRegular || '--', changeClass(m.tsmRegular));
+  }
+
+  // B. RobinHood 來源
+  if (d.success) {
+    html += `<span class="group-header">【台積電 ADR】RobinHood</span>`;
+    html += row('變動', d.changeText, changeClass(d.changeText));
+  }
+
+  const cls = d.success ? changeClass(d.changeText) : '';
+  setCard('card-rh', cls === 'up' ? 1 : cls === 'down' ? -1 : 0, html);
+}
+
+// ── 其他功能（完全保留原始邏輯） ──
 async function loadTaifex() {
   const d = await fetch(WORKER + '/taifex').then(r => r.json());
-  const title = '<div class="card-title">台積電期貨 · TAIFEX</div>';
+  const title = '<div class="card-title">台積電期貨</div>';
   if (!d.success || d.price === 0) {
     setCard('card-taifex', 0, title + '<div class="error-text">無法取得資料</div>');
     return;
@@ -314,7 +340,7 @@ async function loadHiStock(no, cardId, label) {
     setCard(cardId, 0, title + '<div class="error-text">無法取得資料</div>');
     return;
   }
-  const cls = changeClass(d.changeText);
+  const cls = changeClass(d.changeText, 1);
   const updown = d.changeText.startsWith('▲') ? 1 : d.changeText.startsWith('▼') ? -1 : 0;
   setCard(cardId, updown,
     title +
@@ -329,73 +355,12 @@ async function loadHiStock(no, cardId, label) {
 
 async function loadBrent() {
   const d = await fetch(WORKER + '/brent').then(r => r.json());
-  const title = '<div class="card-title">布蘭特原油 · BRENT</div>';
-  if (!d.success) {
-    setCard('card-brent', 0, title + '<div class="error-text">無法取得資料</div>');
-    return;
-  }
-  setCard('card-brent', 0,
-    title + row('價格 (USD)', d.price.toFixed(2), 'accent')
-  );
+  if (!d.success) return;
+  let html = `<div class="card-title">布蘭特原油</div>`;
+  html += row('價格 (USD)', d.price.toFixed(2), 'accent');
+  setCard('card-brent', 0, html);
 }
 
-async function loadCnbc() {
-  const d = await fetch(WORKER + '/cnbc').then(r => r.json());
-  const title = '<div class="card-title">美股市場 · CNBC</div>';
-  if (!d.success) {
-    setCard('card-cnbc', 0, title + '<div class="error-text">無法取得資料</div>');
-    return;
-  }
-  const m = d.market;
-  const fv = d.fairValue;
-
-  // 美股四大指數
-  let html = title;
-  html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 24px;">';
-  html += row('道瓊', m.dji, changeClass(m.dji));
-  html += row('標普500', m.sp500, changeClass(m.sp500));
-  html += row('納斯達克', m.ixic, changeClass(m.ixic));
-  html += row('費城半導體', m.sox, changeClass(m.sox));
-  html += '</div>';
-
-  // TSM ADR
-  html += '<div class="section-label">台積電 ADR · TSM</div>';
-  html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 24px;">';
-  html += row('盤中 / 收盤', m.tsmRegular, changeClass(m.tsmRegular));
-  if (m.tsmType === 'PRE_MKT' || m.tsmType === 'POST_MKT_PREV') {
-    html += row('盤前', m.tsmMarket, changeClass(m.tsmMarket));
-  } else if (m.tsmType === 'POST_MKT') {
-    html += row('盤後', m.tsmMarket, changeClass(m.tsmMarket));
-  }
-  html += '</div>';
-
-  // 盤前電子盤
-  html += '<div class="section-label">盤前電子盤 Fair Value</div>';
-  html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 24px;">';
-  html += row('道瓊期貨', formatChange(fv.dow), changeClass(fv.dow));
-  html += row('標普500期貨', formatChange(fv.sp), changeClass(fv.sp));
-  html += row('納斯達克期貨', formatChange(fv.nasdaq), changeClass(fv.nasdaq));
-  html += row('羅素2000期貨', formatChange(fv.russell), changeClass(fv.russell));
-  html += '</div>';
-  html += `<div class="update-time">${fv.updateTime}</div>`;
-
-  setCard('card-cnbc', 0, html);
-}
-
-async function loadRH() {
-  const d = await fetch(WORKER + '/rh').then(r => r.json());
-  const title = '<div class="card-title">台積電 ADR · RobinHood</div>';
-  if (!d.success) {
-    setCard('card-rh', 0, title + '<div class="error-text">無法取得資料</div>');
-    return;
-  }
-  const cls = changeClass(d.changeText);
-  let html = title + row('變動', d.changeText, cls);
-  if (d.tertiaryText) html += row('額外資訊', d.tertiaryText);
-  setCard('card-rh', cls === 'up' ? 1 : cls === 'down' ? -1 : 0, html);
-}
-
-// ── 全部載入 ──
 async function loadAll() {
   const btn = document.getElementById('refreshBtn');
   btn.classList.add('spinning');
@@ -411,19 +376,22 @@ async function loadAll() {
     c.appendChild(sk);
   });
 
+  // 1. 先跑 CNBC 以取得 TSM 資料
+  await loadCnbc();
+
+  // 2. 跑其餘 API
   await Promise.allSettled([
-    loadTaifex(),
-    loadHiStock('fitx', 'card-fitx', '台股期貨 · FITX'),
-    loadHiStock('twn',  'card-twn',  '富台指 · TWN'),
-    loadBrent(),
-    loadCnbc(),
     loadRH(),
+    loadTaifex(),
+    loadHiStock('fitx', 'card-fitx', '台股期貨'),
+    loadHiStock('twn', 'card-twn', '富台指'),
+    loadBrent()
   ]);
 
   btn.classList.remove('spinning');
 }
 
-loadAll();
+window.onload = loadAll;
 </script>
 </body>
 </html>
