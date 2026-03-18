@@ -115,7 +115,7 @@
     font-size: .7rem;
     letter-spacing: .14em;
     text-transform: uppercase;
-    color: var(--dim);
+    // color: var(--dim);
     margin-bottom: 14px;
   }
 
@@ -144,7 +144,8 @@
   .group-header {
     font-size: 0.82rem;
     font-weight: 700;
-    color: var(--text);
+    // color: var(--text);
+    color: tan;
     margin: 14px 0 6px;
     display: block;
   }
@@ -218,7 +219,7 @@
   <div class="card" id="card-twn"><div class="card-title">富台指</div><div class="skeleton"></div></div>
   <div class="card" id="card-brent"><div class="card-title">布蘭特原油</div><div class="skeleton"></div></div>
   <div class="card" id="card-cnbc"><div class="card-title">美股市場概況</div><div class="skeleton"></div><div class="skeleton"></div></div>
-  <div class="card" id="card-rh"><div class="card-title">台積電 ADR 監控</div><div class="skeleton"></div></div>
+  <div class="card" id="card-rh"><div class="card-title">台積電 ADR</div><div class="skeleton"></div></div>
 </div>
 
 <script>
@@ -236,8 +237,8 @@ function changeClass(val, reverse = 0) {
   if (!val) return '';
   const s = String(val);
   
-  let isUp = s.includes('▲') || s.includes('+');
-  let isDown = s.includes('▼') || s.includes('-');
+  let isUp = s.includes('▲') || s.includes('+') || s > 0;
+  let isDown = s.includes('▼') || s.includes('-') || s < 0;
 
   if (!isUp && !isDown) return '';
 
@@ -287,28 +288,38 @@ async function loadCnbc() {
   html += row('納斯達克指數', m.ixic, changeClass(m.ixic));
   html += row('費城半導體指數', m.sox, changeClass(m.sox));
 
-  html += `<div class="update-time">${fv.updateTime}</div>`;
+  // html += `<div class="update-time">${fv.updateTime}</div>`;
   setCard('card-cnbc', 0, html);
 }
 
 // ── 2. 台積電 ADR：合併 CNBC 與 RobinHood ──
 async function loadRH() {
   const d = await fetch(WORKER + '/rh').then(r => r.json());
-  let html = `<div class="card-title">台積電 ADR 監控</div>`;
+  let html = `<div class="card-title">台積電 ADR</div>`;
   
   // A. CNBC 來源 (包含開盤、最高、最低)
   if (tsmCnbcData) {
     const m = tsmCnbcData;
     html += `<span class="group-header">【台積電 ADR】Cnbc</span>`;
-    const preLabel = (m.tsmType === 'PRE_MKT' || m.tsmType === 'POST_MKT_PREV') ? '盤前變動' : '盤後變動';
-    html += row(preLabel, m.tsmMarket || '--', changeClass(m.tsmMarket));
+    // const preLabel = (m.tsmType === 'PRE_MKT' || m.tsmType === 'POST_MKT_PREV') ? '盤前變動' : '盤後變動';
+
+    if (m.tsmType === 'PRE_MKT' || m.tsmType === 'POST_MKT_PREV') {
+        html += row('盤前變動', m.tsmMarket || '--', changeClass(m.tsmMarket));
+    }
+
+    // html += row(preLabel, m.tsmMarket || '--', changeClass(m.tsmMarket));
     html += row('盤中或收盤變動', m.tsmRegular || '--', changeClass(m.tsmRegular));
+
+    if (m.tsmType === 'POST_MKT') {
+        html += row('盤後變動', m.tsmMarket || '--', changeClass(m.tsmMarket));
+    }
   }
 
   // B. RobinHood 來源
   if (d.success) {
     html += `<span class="group-header">【台積電 ADR】RobinHood</span>`;
     html += row('變動', d.changeText, changeClass(d.changeText));
+    html += row('額外資訊', d.tertiaryText, changeClass(d.tertiaryText));
   }
 
   const cls = d.success ? changeClass(d.changeText) : '';
@@ -325,7 +336,11 @@ async function loadTaifex() {
   }
   const updown = d.updown;
   const sign = updown > 0 ? '▲' : updown < 0 ? '▼' : '';
-  const cls = changeClass(updown);
+  // const cls = changeClass(updown);
+  var cls = 'up';
+  if (updown > 0) {
+        cls = 'down';
+  }
   setCard('card-taifex', updown,
     title +
     row('現價', d.price.toFixed(1), 'accent') +
@@ -333,15 +348,24 @@ async function loadTaifex() {
   );
 }
 
-async function loadHiStock(no, cardId, label) {
+async function loadHiStock(no, cardId, label, reverse = 0) {
   const d = await fetch(`${WORKER}/${no}`).then(r => r.json());
   const title = `<div class="card-title">${label}</div>`;
+  
   if (!d.success) {
     setCard(cardId, 0, title + '<div class="error-text">無法取得資料</div>');
     return;
   }
+
+  // 1. 根據 reverse 決定顏色 Class
   const cls = changeClass(d.changeText, 1);
+  
+  // 2. 判斷原始漲跌趨勢 (1=上漲, -1=下跌)
   const updown = d.changeText.startsWith('▲') ? 1 : d.changeText.startsWith('▼') ? -1 : 0;
+
+  // 3. 處理時間格式：將 . 取代為 -
+  const formattedTime = d.updateTime.replace(/\./g, '-');
+
   setCard(cardId, updown,
     title +
     row('開盤', d.open.toFixed(0)) +
@@ -349,7 +373,7 @@ async function loadHiStock(no, cardId, label) {
     row('最低', d.low.toFixed(0)) +
     row('漲跌', d.changeText, cls) +
     row('成交', d.current.toFixed(0), 'accent') +
-    `<div class="update-time">${d.updateTime}</div>`
+    row('更新時間', formattedTime)
   );
 }
 
@@ -357,7 +381,7 @@ async function loadBrent() {
   const d = await fetch(WORKER + '/brent').then(r => r.json());
   if (!d.success) return;
   let html = `<div class="card-title">布蘭特原油</div>`;
-  html += row('價格 (USD)', d.price.toFixed(2), 'accent');
+  html += row('價格（USD）', d.price.toFixed(2), 'accent');
   setCard('card-brent', 0, html);
 }
 
