@@ -305,7 +305,7 @@ async function loadRH() {
   // A. CNBC 來源 (包含開盤、最高、最低)
   if (tsmCnbcData) {
     const m = tsmCnbcData;
-    html += `<span class="group-header">Cnbc</span>`;
+    html += `<span class="group-header">CNBC</span>`;
     // const preLabel = (m.tsmType === 'PRE_MKT' || m.tsmType === 'POST_MKT_PREV') ? '盤前變動' : '盤後變動';
 
     if (m.tsmType === 'PRE_MKT' || m.tsmType === 'POST_MKT_PREV') {
