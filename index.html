@@ -29,16 +29,21 @@
     color: var(--text);
     font-family: var(--sans);
     min-height: 100vh;
-    padding: 24px 16px 48px;
+    padding: 80px 16px 48px;
   }
 
   /* ── Header ── */
   header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: var(--bg);
     display: flex;
     align-items: baseline;
     justify-content: space-between;
-    margin-bottom: 28px;
-    padding-bottom: 16px;
+    padding: 16px 16px;
     border-bottom: 1px solid var(--border);
   }
   header h1 {
@@ -205,8 +210,8 @@
 <body>
 
 <header>
-  <h1 style="margin-top: 2px;">&#9632; 即時報價</h1>
-  <div style="display:flex;align-items:center;gap:16px;position: fixed;z-index: 1;right: 15px;">
+  <h1>&#9632; 即時報價</h1>
+  <div style="display:flex;align-items:center;gap:16px;">
     <span id="clock">--:--:--</span>
     <button id="refreshBtn" onclick="loadAll()">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
