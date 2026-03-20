@@ -368,7 +368,12 @@ async function loadHiStock(no, cardId, label, reverse = 0) {
   }
 
   // 1. 根據 reverse 決定顏色 Class
-  const cls = changeClass(d.changeText, 1);
+  var cls = changeClass(d.changeText, 1);
+  if (no == 'brent') {
+    if (d.changeText < 0) {
+      cls = 'down';
+    }
+  }
   
   // 2. 判斷原始漲跌趨勢 (1=上漲, -1=下跌)
   const updown = d.changeText.startsWith('▲') ? 1 : d.changeText.startsWith('▼') ? -1 : 0;
@@ -382,7 +387,7 @@ async function loadHiStock(no, cardId, label, reverse = 0) {
     row('最高', d.high.toFixed(0)) +
     row('最低', d.low.toFixed(0)) +
     row('漲跌', d.changeText, cls) +
-    row('成交', d.current.toFixed(0), 'accent') +
+    row('成交', d.current.toFixed(2), 'accent') +
     row('更新時間', formattedTime)
   );
 }
@@ -419,7 +424,8 @@ async function loadAll() {
     loadTaifex(),
     loadHiStock('fitx', 'card-fitx', '台股期貨'),
     loadHiStock('twn', 'card-twn', '富台指'),
-    loadBrent()
+    // loadBrent()
+    loadHiStock('brent', 'card-brent', '布蘭特原油'),
   ]);
 
   btn.classList.remove('spinning');

@@ -19,9 +19,10 @@ export default {
 
     const path = new URL(request.url).pathname;
 
-    if (path === "/fitx")    return await fetchHiStock("stocktop2017", "FITX");
-    if (path === "/twn")     return await fetchHiStock("stocktop2017", "TWN");
-    if (path === "/brent")   return await fetchBrent();
+    if (path === "/fitx")    return await fetchHiStock("stocktop2017", "FITX", "指數", "成交量(口)");
+    if (path === "/twn")     return await fetchHiStock("stocktop2017", "TWN", "指數", "成交量(口)");
+    // if (path === "/brent")   return await fetchBrent();
+    if (path === "/brent")    return await fetchHiStock("stocktop2017_Global", "BRENTOIL", "股價", "成交量");
     if (path === "/taifex")  return await fetchTaifex();
     if (path === "/cnbc")    return await fetchCnbc();
     if (path === "/rh")      return await fetchRobinHood();
@@ -31,7 +32,7 @@ export default {
 };
 
 // ── HiStock（台指期 / 富台指）──────────────────────────────
-async function fetchHiStock(m, no) {
+async function fetchHiStock(m, no, current_title, volume_title) {
   try {
     const res = await fetch("https://histock.tw/stock/module/function.aspx", {
       method: "POST",
@@ -62,8 +63,8 @@ async function fetchHiStock(m, no) {
       high:       toFloat(data["最高"]),
       low:        toFloat(data["最低"]),
       changeText: data["漲跌"] || "",
-      current:    toFloat(data["指數"]),
-      volume:     toInt(data["成交量(口)"]),
+      current:    toFloat(data[current_title]),
+      volume:     toInt(data[volume_title]),
       updateTime: timeMatch ? timeMatch[1].trim() : "未知",
     });
   } catch (e) {
