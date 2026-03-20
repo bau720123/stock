@@ -224,10 +224,8 @@
 </header>
 
 <div class="grid" id="grid">
-  <div class="card" id="card-taifex"><div class="card-title">台積電期貨</div><div class="skeleton"></div></div>
-  <div class="card" id="card-fitx"><div class="card-title">台股期貨</div><div class="skeleton"></div></div>
-  <div class="card" id="card-twn"><div class="card-title">富台指</div><div class="skeleton"></div></div>
-  <div class="card" id="card-brent"><div class="card-title">布蘭特原油</div><div class="skeleton"></div></div>
+  <div class="card" id="card-tw"><div class="card-title">台股市場概況</div><div class="skeleton"></div><div class="skeleton"></div></div>
+  <div class="card" id="card-commodity"><div class="card-title">原物料市場</div><div class="skeleton"></div></div>
   <div class="card" id="card-cnbc"><div class="card-title">美股市場概況</div><div class="skeleton"></div><div class="skeleton"></div></div>
   <div class="card" id="card-rh"><div class="card-title">台積電 ADR</div><div class="skeleton"></div></div>
 </div>
@@ -336,74 +334,6 @@ async function loadRH() {
   setCard('card-rh', cls === 'up' ? 1 : cls === 'down' ? -1 : 0, html);
 }
 
-// ── 其他功能（完全保留原始邏輯） ──
-async function loadTaifex() {
-  const d = await fetch(WORKER + '/taifex').then(r => r.json());
-  const title = '<div class="card-title">台積電期貨</div>';
-  if (!d.success || d.price === 0) {
-    setCard('card-taifex', 0, title + '<div class="error-text">無法取得資料</div>');
-    return;
-  }
-  const updown = d.updown;
-  const sign = updown > 0 ? '▲' : updown < 0 ? '▼' : '';
-  // const cls = changeClass(updown);
-  var cls = 'up';
-  if (updown > 0) {
-        cls = 'down';
-  }
-  setCard('card-taifex', updown,
-    title +
-    row('現價', d.price.toFixed(1), 'accent') +
-    row('漲跌', sign + Math.abs(updown).toFixed(0), cls)
-  );
-}
-
-async function loadHiStock(no, cardId, label, reverse = 0) {
-  const d = await fetch(`${WORKER}/${no}`).then(r => r.json());
-  const title = `<div class="card-title">${label}</div>`;
-  
-  if (!d.success) {
-    setCard(cardId, 0, title + '<div class="error-text">無法取得資料</div>');
-    return;
-  }
-
-  // 1. 根據 reverse 決定顏色 Class
-  var cls = changeClass(d.changeText, 1);
-
-  // 特例處理：如果是布蘭特原油，則直接根據漲跌符號判斷顏色，不考慮 reverse
-  if (no == 'brent') {
-    cls = 'up'; // 預設為上漲
-    const changeNum = parseFloat(d.changeText.replace(/[▲▼]/g, '').trim());
-    if (changeNum < 0) {
-      cls = 'down';
-    }
-  }
-  
-  // 2. 判斷原始漲跌趨勢 (1=上漲, -1=下跌)
-  const updown = d.changeText.startsWith('▲') ? 1 : d.changeText.startsWith('▼') ? -1 : 0;
-
-  // 3. 處理時間格式：將 . 取代為 -
-  const formattedTime = d.updateTime.replace(/\./g, '-');
-
-  setCard(cardId, updown,
-    title +
-    row('開盤', d.open.toFixed(0)) +
-    row('最高', d.high.toFixed(0)) +
-    row('最低', d.low.toFixed(0)) +
-    row('漲跌', d.changeText, cls) +
-    row('成交', d.current.toFixed(2), 'accent') +
-    row('更新時間', formattedTime)
-  );
-}
-
-async function loadBrent() {
-  const d = await fetch(WORKER + '/brent').then(r => r.json());
-  if (!d.success) return;
-  let html = `<div class="card-title">布蘭特原油</div>`;
-  html += row('價格（USD）', d.price.toFixed(2), 'accent');
-  setCard('card-brent', 0, html);
-}
-
 async function loadAll() {
   const btn = document.getElementById('refreshBtn');
   btn.classList.add('spinning');
@@ -425,17 +355,94 @@ async function loadAll() {
   // 2. 跑其餘 API
   await Promise.allSettled([
     loadRH(),
-    loadTaifex(),
-    loadHiStock('fitx', 'card-fitx', '台股期貨'),
-    loadHiStock('twn', 'card-twn', '富台指'),
-    // loadBrent()
-    loadHiStock('brent', 'card-brent', '布蘭特原油'),
+    loadTW(),
+    loadCommodity(),
   ]);
 
   btn.classList.remove('spinning');
 }
 
 window.onload = loadAll;
+
+async function loadTW() {
+  const [taifex, fitx, twn] = await Promise.all([
+    fetch(WORKER + '/taifex').then(r => r.json()),
+    fetch(WORKER + '/fitx').then(r => r.json()),
+    fetch(WORKER + '/twn').then(r => r.json()),
+  ]);
+
+  let html = `<div class="card-title">台股市場概況</div>`;
+
+  // 【台積電期貨】
+  html += `<span class="group-header">【台積電期貨】</span>`;
+  if (taifex.success && taifex.price > 0) {
+    const sign = taifex.updown > 0 ? '▲' : taifex.updown < 0 ? '▼' : '';
+    var cls = 'up';
+    if (taifex.updown > 0) cls = 'down';
+    html += row('現價', taifex.price.toFixed(1), 'accent');
+    html += row('漲跌', sign + Math.abs(taifex.updown).toFixed(0), cls);
+  } else {
+    html += `<div class="error-text">無法取得資料</div>`;
+  }
+
+  // 【台股期貨】
+  html += `<span class="group-header">【台股期貨】</span>`;
+  if (fitx.success) {
+    const cls = changeClass(fitx.changeText, 1);
+    const formattedTime = fitx.updateTime.replace(/\./g, '-');
+    html += row('開盤', fitx.open.toFixed(0));
+    html += row('最高', fitx.high.toFixed(0));
+    html += row('最低', fitx.low.toFixed(0));
+    html += row('漲跌', fitx.changeText, cls);
+    html += row('成交', fitx.current.toFixed(2), 'accent');
+    html += row('更新時間', formattedTime);
+  } else {
+    html += `<div class="error-text">無法取得資料</div>`;
+  }
+
+  // 【富台指】
+  html += `<span class="group-header">【富台指】</span>`;
+  if (twn.success) {
+    const cls = changeClass(twn.changeText, 1);
+    const formattedTime = twn.updateTime.replace(/\./g, '-');
+    html += row('開盤', twn.open.toFixed(0));
+    html += row('最高', twn.high.toFixed(0));
+    html += row('最低', twn.low.toFixed(0));
+    html += row('漲跌', twn.changeText, cls);
+    html += row('成交', twn.current.toFixed(2), 'accent');
+    html += row('更新時間', formattedTime);
+  } else {
+    html += `<div class="error-text">無法取得資料</div>`;
+  }
+
+  setCard('card-tw', 0, html);
+}
+
+async function loadCommodity() {
+  const [brent] = await Promise.all([
+    fetch(WORKER + '/brent').then(r => r.json()),
+  ]);
+
+  let html = `<div class="card-title">原物料市場</div>`;
+
+  // 【布蘭特原油】
+  html += `<span class="group-header">【布蘭特原油】</span>`;
+  if (brent.success) {
+    const changeNum = parseFloat(brent.changeText.replace(/[▲▼]/g, '').trim());
+    const cls = changeNum < 0 ? 'down' : 'up';
+    const formattedTime = brent.updateTime.replace(/\./g, '-');
+    html += row('開盤', brent.open.toFixed(0));
+    html += row('最高', brent.high.toFixed(0));
+    html += row('最低', brent.low.toFixed(0));
+    html += row('漲跌', brent.changeText, cls);
+    html += row('成交', brent.current.toFixed(2), 'accent');
+    // html += row('更新時間', formattedTime);
+  } else {
+    html += `<div class="error-text">無法取得資料</div>`;
+  }
+
+  setCard('card-commodity', 0, html);
+}
 </script>
 </body>
 </html>
