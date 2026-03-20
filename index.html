@@ -369,8 +369,12 @@ async function loadHiStock(no, cardId, label, reverse = 0) {
 
   // 1. 根據 reverse 決定顏色 Class
   var cls = changeClass(d.changeText, 1);
+
+  // 特例處理：如果是布蘭特原油，則直接根據漲跌符號判斷顏色，不考慮 reverse
   if (no == 'brent') {
-    if (d.changeText < 0) {
+    cls = 'up'; // 預設為上漲
+    const changeNum = parseFloat(d.changeText.replace(/[▲▼]/g, '').trim());
+    if (changeNum < 0) {
       cls = 'down';
     }
   }
