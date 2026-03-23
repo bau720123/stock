@@ -419,8 +419,9 @@ async function loadTW() {
 }
 
 async function loadCommodity() {
-  const [brent] = await Promise.all([
+  const [brent, brentStockq] = await Promise.all([
     fetch(WORKER + '/brent').then(r => r.json()),
+    fetch(WORKER + '/brent_stockq').then(r => r.json()),
   ]);
 
   let html = `<div class="card-title">原物料市場</div>`;
@@ -437,6 +438,7 @@ async function loadCommodity() {
     html += row('漲跌', brent.changeText, cls);
     html += row('成交', brent.current.toFixed(2), 'accent');
     // html += row('更新時間', formattedTime);
+    html += row('價格', brentStockq.success ? brentStockq.price.toFixed(2) : '--');
   } else {
     html += `<div class="error-text">無法取得資料</div>`;
   }

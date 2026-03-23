@@ -21,7 +21,7 @@ export default {
 
     if (path === "/fitx")    return await fetchHiStock("stocktop2017", "FITX", "指數", "成交量(口)");
     if (path === "/twn")     return await fetchHiStock("stocktop2017", "TWN", "指數", "成交量(口)");
-    // if (path === "/brent")   return await fetchBrent();
+    if (path === "/brent_stockq")   return await fetchBrent();
     if (path === "/brent")    return await fetchHiStock("stocktop2017_Global", "BRENTOIL", "股價", "成交量");
     if (path === "/taifex")  return await fetchTaifex();
     if (path === "/cnbc")    return await fetchCnbc();
