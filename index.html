@@ -457,7 +457,7 @@ async function loadCommodity() {
     html += row('最高', sinaBrent.high.toFixed(2));
     html += row('最低', sinaBrent.low.toFixed(2));
     html += row('漲跌', changeNum.toFixed(2), cls);
-    html += row('價格', sinaBrent.price.toFixed(2));
+    html += row('價格', sinaBrent.price.toFixed(2), 'accent');
     html += row('更新時間', sinaBrent.time);
   } else {
     html += `<div class="error-text">無法取得資料</div>`;
@@ -472,7 +472,7 @@ async function loadCommodity() {
     html += row('最高', sinaGold.high.toFixed(2));
     html += row('最低', sinaGold.low.toFixed(2));
     html += row('漲跌', changeNum.toFixed(2), cls);
-    html += row('價格', sinaGold.price.toFixed(2));
+    html += row('價格', sinaGold.price.toFixed(2), 'accent');
     html += row('更新時間', sinaGold.time);
   } else {
     html += `<div class="error-text">無法取得資料</div>`;
@@ -487,7 +487,7 @@ async function loadCommodity() {
     html += row('最高', sinaSilver.high.toFixed(2));
     html += row('最低', sinaSilver.low.toFixed(2));
     html += row('漲跌', changeNum.toFixed(2), cls);
-    html += row('價格', sinaSilver.price.toFixed(2));
+    html += row('價格', sinaSilver.price.toFixed(2), 'accent');
     html += row('更新時間', sinaSilver.time);
   } else {
     html += `<div class="error-text">無法取得資料</div>`;
