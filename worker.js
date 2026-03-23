@@ -26,6 +26,8 @@ export default {
     if (path === "/sina_brent") return await fetchSina("hf_OIL");
     if (path === "/sina_gold") return await fetchSina("hf_GC");
     if (path === "/sina_silver") return await fetchSina("hf_SI");
+    if (path === "/sina_usdollar") return await fetchSina("DINIW");
+    if (path === "/sina_vix") return await fetchSina("hf_VX");
     if (path === "/taifex")  return await fetchTaifex();
     if (path === "/cnbc")    return await fetchCnbc();
     if (path === "/rh")      return await fetchRobinHood();

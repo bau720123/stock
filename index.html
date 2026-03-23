@@ -206,6 +206,13 @@
     .card-wide { grid-column: auto; }
   }
 </style>
+
+<link rel="manifest" href="/stock/manifest.json">
+<meta name="theme-color" content="#0a0e14">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="即時報價">
+<link rel="apple-touch-icon" href="/stock/icon-192.png">
 </head>
 <body>
 
@@ -423,10 +430,12 @@ async function loadCommodity() {
   //   fetch(WORKER + '/brent').then(r => r.json()),
   //   fetch(WORKER + '/brent_stockq').then(r => r.json()),
   // ]);
-  const [sinaBrent, sinaGold, sinaSilver] = await Promise.all([
+  const [sinaBrent, sinaGold, sinaSilver, sinaUsdollar, sinaVix] = await Promise.all([
     fetch(WORKER + '/sina_brent').then(r => r.json()).catch(() => ({ success: false })), // 布蘭特原油
     fetch(WORKER + '/sina_gold').then(r => r.json()).catch(() => ({ success: false })), // 黃金
     fetch(WORKER + '/sina_silver').then(r => r.json()).catch(() => ({ success: false })), // 白銀
+    fetch(WORKER + '/sina_usdollar').then(r => r.json()).catch(() => ({ success: false })), // 美元
+    fetch(WORKER + '/sina_vix').then(r => r.json()).catch(() => ({ success: false })), // VIX
   ]);
 
   let html = `<div class="card-title">原物料市場</div>`;
@@ -451,12 +460,14 @@ async function loadCommodity() {
   if (sinaBrent.success) {
     const changeNum = sinaBrent.price - sinaBrent.prev;
     const cls = changeNum < 0 ? 'down' : 'up';
+    const changePercent = changeNum / sinaBrent.prev * 100;
     html += `<span class="group-header">【布蘭特原油】</span>`;
     html += row('前次', sinaBrent.prev.toFixed(2));
     html += row('開盤', sinaBrent.open.toFixed(2));
     html += row('最高', sinaBrent.high.toFixed(2));
     html += row('最低', sinaBrent.low.toFixed(2));
     html += row('漲跌', changeNum.toFixed(2), cls);
+    html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
     html += row('價格', sinaBrent.price.toFixed(2), 'accent');
     html += row('更新時間', sinaBrent.time);
   } else {
@@ -466,12 +477,14 @@ async function loadCommodity() {
   if (sinaGold.success) {
     const changeNum = sinaGold.price - sinaGold.prev;
     const cls = changeNum < 0 ? 'down' : 'up';
+    const changePercent = changeNum / sinaGold.prev * 100;
     html += `<span class="group-header">【黃金】</span>`;
     html += row('前次', sinaGold.prev.toFixed(2));
     html += row('開盤', sinaGold.open.toFixed(2));
     html += row('最高', sinaGold.high.toFixed(2));
     html += row('最低', sinaGold.low.toFixed(2));
     html += row('漲跌', changeNum.toFixed(2), cls);
+    html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
     html += row('價格', sinaGold.price.toFixed(2), 'accent');
     html += row('更新時間', sinaGold.time);
   } else {
@@ -481,20 +494,58 @@ async function loadCommodity() {
   if (sinaSilver.success) {
     const changeNum = sinaSilver.price - sinaSilver.prev;
     const cls = changeNum < 0 ? 'down' : 'up';
+    const changePercent = changeNum / sinaSilver.prev * 100;
     html += `<span class="group-header">【白銀】</span>`;
     html += row('前次', sinaSilver.prev.toFixed(2));
     html += row('開盤', sinaSilver.open.toFixed(2));
     html += row('最高', sinaSilver.high.toFixed(2));
     html += row('最低', sinaSilver.low.toFixed(2));
     html += row('漲跌', changeNum.toFixed(2), cls);
+    html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
     html += row('價格', sinaSilver.price.toFixed(2), 'accent');
     html += row('更新時間', sinaSilver.time);
   } else {
     html += `<div class="error-text">無法取得資料</div>`;
   }
 
+  if (sinaUsdollar.success) {
+    const changeNum = sinaUsdollar.price - sinaUsdollar.prev;
+    const cls = changeNum < 0 ? 'down' : 'up';
+    const changePercent = changeNum / sinaUsdollar.prev * 100;
+    html += `<span class="group-header">【美元】</span>`;
+    html += row('前次', sinaUsdollar.prev.toFixed(2));
+    html += row('開盤', sinaUsdollar.open.toFixed(2));
+    html += row('最高', sinaUsdollar.high.toFixed(2));
+    html += row('最低', sinaUsdollar.low.toFixed(2));
+    html += row('漲跌', changeNum.toFixed(2), cls);
+    html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
+    html += row('價格', sinaUsdollar.price.toFixed(2), 'accent');
+    html += row('更新時間', sinaUsdollar.time);
+  } else {
+    html += `<div class="error-text">無法取得資料</div>`;
+  }
+
+  if (sinaVix.success) {
+    const changeNum = sinaVix.price - sinaVix.prev;
+    const cls = changeNum < 0 ? 'down' : 'up';
+    const changePercent = changeNum / sinaVix.prev * 100;
+    html += `<span class="group-header">【VIX】</span>`;
+    html += row('前次', sinaVix.prev.toFixed(2));
+    html += row('開盤', sinaVix.open.toFixed(2));
+    html += row('最高', sinaVix.high.toFixed(2));
+    html += row('最低', sinaVix.low.toFixed(2));
+    html += row('漲跌', changeNum.toFixed(2), cls);
+    html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
+    html += row('價格', sinaVix.price.toFixed(2), 'accent');
+    html += row('更新時間', sinaVix.time);
+  } else {
+    html += `<div class="error-text">無法取得資料</div>`;
+  }
+
   setCard('card-commodity', 0, html);
 }
+
+setInterval(( () => loadAll() ), 60000);
 </script>
 </body>
 </html>
