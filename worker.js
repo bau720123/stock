@@ -21,8 +21,11 @@ export default {
 
     if (path === "/fitx")    return await fetchHiStock("stocktop2017", "FITX", "指數", "成交量(口)");
     if (path === "/twn")     return await fetchHiStock("stocktop2017", "TWN", "指數", "成交量(口)");
-    if (path === "/brent_stockq")   return await fetchBrent();
-    if (path === "/brent")    return await fetchHiStock("stocktop2017_Global", "BRENTOIL", "股價", "成交量");
+    // if (path === "/brent")    return await fetchHiStock("stocktop2017_Global", "BRENTOIL", "股價", "成交量");
+    // if (path === "/brent_stockq")   return await fetchBrent();
+    if (path === "/sina_brent") return await fetchSina("hf_OIL");
+    if (path === "/sina_gold") return await fetchSina("hf_GC");
+    if (path === "/sina_silver") return await fetchSina("hf_SI");
     if (path === "/taifex")  return await fetchTaifex();
     if (path === "/cnbc")    return await fetchCnbc();
     if (path === "/rh")      return await fetchRobinHood();
@@ -94,6 +97,37 @@ async function fetchBrent() {
     const price = toFloat(priceText);
 
     return json({ success: true, price, priceText });
+  } catch (e) {
+    return json({ success: false, error: e.message }, 500);
+  }
+}
+
+// ── 新浪網────────────────────────────────────
+async function fetchSina(list) {
+  // https://gu.sina.cn/ft/hq/hf.php?symbol=OIL
+  try {
+    const res = await fetch(`https://hq.sinajs.cn/list=${list}`, {
+      headers: {
+        "User-Agent": UA,
+        "Referer": "https://finance.sina.com.cn/"
+      }
+    });
+    const text = await res.text();
+
+    const match = text.match(/"([^"]+)"/);
+    if (!match) return json({ success: false, error: "解析失敗" });
+
+    const parts = match[1].split(",");
+    return json({
+      success: true,
+      price:  toFloat(parts[0]),
+      change: toFloat(parts[2]),
+      open:   toFloat(parts[3]),
+      high:   toFloat(parts[4]),
+      low:    toFloat(parts[5]),
+      time:   parts[6] || "",
+      prev:   toFloat(parts[7]),
+    });
   } catch (e) {
     return json({ success: false, error: e.message }, 500);
   }
