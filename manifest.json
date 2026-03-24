@@ -3,7 +3,6 @@
   "short_name": "報價",
   "start_url": "/stock/index.html",
   "display": "standalone",
-  "description": "這是一個監控大盤市場資訊的介面，透過這些介面上的資訊可供投資者做出相對較為客觀的決策",
   "background_color": "#0a0e14",
   "theme_color": "#0a0e14",
   "orientation": "portrait",
