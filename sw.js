@@ -1,4 +1,4 @@
-const CACHE_NAME = 'stock-v1';
+const CACHE_NAME = 'stock-v2';
 
 // 安裝事件：Service Worker 第一次註冊時觸發
 self.addEventListener('install', event => {
