@@ -256,6 +256,18 @@ if ('serviceWorker' in navigator) {
   });
 }
 
+async function sendNotification(title, body) {
+  // 確認有通知權限
+  if (Notification.permission !== 'granted') return;
+
+  const reg = await navigator.serviceWorker.ready;
+  reg.showNotification(title, {
+    body: body,
+    icon: '/stock/icon-192.png',
+    badge: '/stock/icon-192.png',
+  });
+}
+
 const WORKER = "https://billowing-queen-4a58.bau720123.workers.dev";
 let tsmCnbcData = null; // 用於跨卡片共享資料
 
@@ -480,6 +492,15 @@ async function loadCommodity() {
     const changeNum = sinaBrent.price - sinaBrent.prev;
     const cls = changeNum < 0 ? 'down' : 'up';
     const changePercent = changeNum / sinaBrent.prev * 100;
+
+  // 價格門檻通知
+  if (sinaBrent.price >= 97) {
+    sendNotification(
+      '布蘭特原油價格警示',
+      `布蘭特原油價格目前 ${sinaBrent.price.toFixed(2)}`
+    );
+  }
+
     html += row('前次', sinaBrent.prev.toFixed(2));
     html += row('開盤', sinaBrent.open.toFixed(2));
     html += row('最高', sinaBrent.high.toFixed(2));
