@@ -14,7 +14,14 @@ self.addEventListener('activate', event => {
 
 // 推播通知接收事件（之後會用到）
 self.addEventListener('push', event => {
-  const data = event.data ? event.data.json() : {};
+  let data = {};
+  try {
+    data = event.data ? event.data.json() : {};
+  } catch (e) {
+    // 純文字的情況（例如 DevTools 測試）
+    data = { body: event.data ? event.data.text() : '有新的市場資訊' };
+  }
+
   const title = data.title || '即時報價';
   const options = {
     body: data.body || '有新的市場資訊',
