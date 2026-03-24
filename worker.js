@@ -120,16 +120,30 @@ async function fetchSina(list) {
     if (!match) return json({ success: false, error: "解析失敗" });
 
     const parts = match[1].split(",");
-    return json({
-      success: true,
-      price:  toFloat(parts[0]),
-      change: toFloat(parts[2]),
-      open:   toFloat(parts[3]),
-      high:   toFloat(parts[4]),
-      low:    toFloat(parts[5]),
-      time:   parts[6] || "",
-      prev:   toFloat(parts[7]),
-    });
+
+    if (list === "DINIW") {
+      return json({
+        success: true,
+        time:   parts[0] || "",
+        price:  toFloat(parts[1]),
+        open:   toFloat(parts[3]),
+        low:    toFloat(parts[5]),
+        high:   toFloat(parts[6]),
+        prev:   toFloat(parts[7]),
+      });
+    } else {
+      return json({
+        success: true,
+        price:  toFloat(parts[0]),
+        change: toFloat(parts[2]),
+        open:   toFloat(parts[3]),
+        high:   toFloat(parts[4]),
+        low:    toFloat(parts[5]),
+        time:   parts[6] || "",
+        prev:   toFloat(parts[7]),
+      });
+    }
+
   } catch (e) {
     return json({ success: false, error: e.message }, 500);
   }
