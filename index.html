@@ -256,7 +256,7 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-async function sendNotification(title, body) {
+async function sendNotification(title, body, url = '/stock/index.html') {
   // 確認有通知權限
   if (Notification.permission !== 'granted') return;
 
@@ -265,6 +265,7 @@ async function sendNotification(title, body) {
     body: body,
     icon: '/stock/icon-192.png',
     badge: '/stock/icon-192.png',
+    data: { url: url },  // 把目標網址存進去
   });
 }
 
@@ -497,7 +498,8 @@ async function loadCommodity() {
   if (sinaBrent.price >= 97) {
     sendNotification(
       '布蘭特原油價格警示',
-      `布蘭特原油價格目前 ${sinaBrent.price.toFixed(2)}`
+      `布蘭特原油價格目前 ${sinaBrent.price.toFixed(2)}`,
+      'https://hk.investing.com/commodities/brent-oil'
     );
   }
 

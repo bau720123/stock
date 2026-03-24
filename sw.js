@@ -36,7 +36,8 @@ self.addEventListener('push', event => {
 // 使用者點擊通知時觸發
 self.addEventListener('notificationclick', event => {
   event.notification.close();
+  const url = event.notification.data?.url || '/stock/index.html';
   event.waitUntil(
-    clients.openWindow('/stock/index.html')
+    clients.openWindow(url)
   );
 });
