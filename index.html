@@ -243,7 +243,14 @@
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/stock/sw.js')
-      .then(reg => console.log('[SW] 註冊成功：', reg.scope))
+      .then(reg => {
+        console.log('[SW] 註冊成功：', reg.scope);
+        // 請求通知權限
+        return Notification.requestPermission();
+      })
+      .then(permission => {
+        console.log('[SW] 通知權限：', permission);
+      })
       .catch(err => console.log('[SW] 註冊失敗：', err));
   });
 }
