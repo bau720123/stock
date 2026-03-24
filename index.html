@@ -262,10 +262,19 @@ async function sendNotification(title, body, url = '/stock/index.html') {
 
   const reg = await navigator.serviceWorker.ready;
   reg.showNotification(title, {
-    body: body,
-    icon: '/stock/icon-192.png',
-    badge: '/stock/icon-192.png',
-    data: { url: url },  // 把目標網址存進去
+    body: body,           // 通知內文
+    icon: '/stock/icon-512.png',    // 通知圖示（大圖）
+    badge: '/stock/icon-192.png',  // 狀態列小圖示（Android）
+    image: '/stock/banner.png', // 通知內的橫幅大圖
+    tag: title,   // 同 tag 的通知會互相取代，避免洗版
+    renotify: true,       // tag 相同時是否還要震動提醒
+    silent: false,        // 是否靜音
+    vibrate: [200, 100, 200], // 震動模式（Android）
+    actions: [            // 通知上的快捷按鈕
+      { action: 'view', title: '查看詳情' },
+      { action: 'dismiss', title: '忽略' },
+    ],
+    data: { url: url }, // 把目標網址存進去
   });
 }
 
