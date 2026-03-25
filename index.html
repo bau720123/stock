@@ -240,22 +240,6 @@
 </div>
 
 <script>
-// ── Service Worker 註冊 ──
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/stock/sw.js')
-      .then(reg => {
-        console.log('[SW] 註冊成功：', reg.scope);
-        // 請求通知權限
-        return Notification.requestPermission();
-      })
-      .then(permission => {
-        console.log('[SW] 通知權限：', permission);
-      })
-      .catch(err => console.log('[SW] 註冊失敗：', err));
-  });
-}
-
 async function sendNotification(title, body, url = '/stock/index.html') {
   // 確認有通知權限
   if (Notification.permission !== 'granted') return;
@@ -278,12 +262,14 @@ async function sendNotification(title, body, url = '/stock/index.html') {
   });
 }
 
+// ── Service Worker 註冊 ──
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/stock/sw.js')
       .then(async reg => {
         console.log('[SW] 註冊成功：', reg.scope);
 
+        // 請求通知權限
         const permission = await Notification.requestPermission();
         console.log('[SW] 通知權限：', permission);
         if (permission !== 'granted') return;
@@ -307,6 +293,7 @@ if ('serviceWorker' in navigator) {
       })
       .catch(err => console.log('[SW] 註冊失敗：', err));
 
+    // 確保 SW 更新時頁面會同步刷新，拿到最新的 SW 和資料
     navigator.serviceWorker.addEventListener('controllerchange', () => {
       window.location.reload();
     });
