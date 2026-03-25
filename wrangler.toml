@@ -1,0 +1,10 @@
+name = "billowing-queen-4a58"
+main = "worker.js"
+compatibility_date = "2024-01-01"
+
+[[kv_namespaces]]
+binding = "KV"
+id = "e733a1b2b10c4c44b9aa862b241ee83f"
+
+[triggers]
+crons = ["0 0 * * *"]

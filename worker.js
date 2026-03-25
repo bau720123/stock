@@ -32,8 +32,12 @@ export default {
     if (path === "/cnbc")    return await fetchCnbc();
     if (path === "/rh")      return await fetchRobinHood();
     if (path === "/subscribe") return await handleSubscribe(request, env);
+    if (path === "/push-test") return await handlePushTest(env);
 
     return json({ error: "unknown path" }, 404);
+  },
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil(handleCron(env));
   }
 };
 
@@ -280,6 +284,213 @@ async function handleSubscribe(request, env) {
   } catch (e) {
     return json({ success: false, error: e.message }, 500);
   }
+}
+
+// ── Web Push 發送 ──────────────────────────────────────────
+async function handlePushTest(env) {
+  try {
+    const existing = await env.KV.get("subscriptions");
+    if (!existing) return json({ success: false, error: "沒有訂閱資料" });
+
+    const list = JSON.parse(existing);
+    const results = await Promise.all(
+      list.map(sub => sendWebPush(sub, {
+        title: '測試推播',
+        body: '這是來自 Cloudflare Worker 的真實推播！',
+        url: '/stock/index.html'
+      }, env))
+    );
+
+    return json({ success: true, results });
+  } catch (e) {
+    return json({ success: false, error: e.message }, 500);
+  }
+}
+
+async function sendWebPush(subscription, payload, env) {
+  try {
+    const endpoint  = subscription.endpoint;
+    const p256dh    = subscription.keys.p256dh;
+    const auth      = subscription.keys.auth;
+    const publicKey = env.VAPID_PUBLIC_KEY;
+    const privateKey = env.VAPID_PRIVATE_KEY;
+    const subject   = env.VAPID_SUBJECT;
+
+    // 1. 建立 VAPID JWT
+    const jwt = await buildVapidJwt(endpoint, subject, publicKey, privateKey);
+
+    // 2. 加密 payload
+    const body = await encryptPayload(
+      JSON.stringify(payload), p256dh, auth
+    );
+
+    // 3. 發送
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Authorization': `vapid t=${jwt},k=${publicKey}`,
+        'Content-Type': 'application/octet-stream',
+        'Content-Encoding': 'aes128gcm',
+        'TTL': '86400',
+      },
+      body,
+    });
+
+    return { endpoint, status: res.status };
+  } catch (e) {
+    return { endpoint: subscription.endpoint, error: e.message };
+  }
+}
+
+// ── VAPID JWT 建立 ─────────────────────────────────────────
+async function buildVapidJwt(endpoint, subject, publicKeyB64, privateKeyB64) {
+  const now    = Math.floor(Date.now() / 1000);
+  const origin = new URL(endpoint).origin;
+
+  const header  = b64url(JSON.stringify({ typ: 'JWT', alg: 'ES256' }));
+  const payload = b64url(JSON.stringify({ aud: origin, exp: now + 43200, sub: subject }));
+  const input   = `${header}.${payload}`;
+
+  // raw 32 bytes → PKCS8 格式（加上 EC 私鑰的 ASN.1 header）
+  const rawKey = base64UrlDecode(privateKeyB64);
+  const pkcs8  = buildPkcs8(rawKey);
+
+  const cryptoKey = await crypto.subtle.importKey(
+    'pkcs8', pkcs8,
+    { name: 'ECDSA', namedCurve: 'P-256' },
+    false, ['sign']
+  );
+
+  const sig = await crypto.subtle.sign(
+    { name: 'ECDSA', hash: 'SHA-256' },
+    cryptoKey,
+    new TextEncoder().encode(input)
+  );
+
+  return `${input}.${uint8ToB64url(new Uint8Array(sig))}`;
+}
+
+// raw EC 私鑰 → PKCS8 DER 格式
+function buildPkcs8(rawKey) {
+  // P-256 EC 私鑰的 PKCS8 ASN.1 header
+  const header = new Uint8Array([
+    0x30, 0x41, // SEQUENCE
+    0x02, 0x01, 0x00, // INTEGER 0 (version)
+    0x30, 0x13, // SEQUENCE (algorithmIdentifier)
+      0x06, 0x07, 0x2a, 0x86, 0x48, 0xce, 0x3d, 0x02, 0x01, // OID ecPublicKey
+      0x06, 0x08, 0x2a, 0x86, 0x48, 0xce, 0x3d, 0x03, 0x01, 0x07, // OID P-256
+    0x04, 0x27, // OCTET STRING
+      0x30, 0x25, // SEQUENCE
+        0x02, 0x01, 0x01, // INTEGER 1
+        0x04, 0x20, // OCTET STRING (32 bytes)
+  ]);
+  return concat(header, rawKey);
+}
+
+// ── aes128gcm 加密 ─────────────────────────────────────────
+async function encryptPayload(plaintext, p256dhB64, authB64) {
+  const encoder       = new TextEncoder();
+  const clientPublic  = base64UrlDecode(p256dhB64);
+  const authSecret    = base64UrlDecode(authB64);
+
+  // 產生伺服器端 ECDH 金鑰對
+  const serverKeyPair = await crypto.subtle.generateKey(
+    { name: 'ECDH', namedCurve: 'P-256' }, true, ['deriveBits']
+  );
+
+  const serverPublicRaw = await crypto.subtle.exportKey('raw', serverKeyPair.publicKey);
+
+  // 匯入客戶端公鑰
+  const clientKey = await crypto.subtle.importKey(
+    'raw', clientPublic,
+    { name: 'ECDH', namedCurve: 'P-256' },
+    false, []
+  );
+
+  // ECDH 共享秘密
+  const sharedBits = await crypto.subtle.deriveBits(
+    { name: 'ECDH', public: clientKey },
+    serverKeyPair.privateKey, 256
+  );
+
+  // 產生 salt
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+
+  // HKDF 建立 PRK
+  const ikm = await hkdf(
+    new Uint8Array(sharedBits), authSecret,
+    concat(encoder.encode('WebPush: info\x00'), clientPublic, new Uint8Array(serverPublicRaw)),
+    32
+  );
+
+  // 建立 CEK 和 nonce
+  const cek   = await hkdf(ikm, salt, encoder.encode('Content-Encoding: aes128gcm\x00'), 16);
+  const nonce = await hkdf(ikm, salt, encoder.encode('Content-Encoding: nonce\x00'), 12);
+
+  // 匯入 AES-GCM 金鑰
+  const aesKey = await crypto.subtle.importKey('raw', cek, 'AES-GCM', false, ['encrypt']);
+
+  // 加密（加上 padding delimiter \x02）
+  const data      = concat(encoder.encode(plaintext), new Uint8Array([2]));
+  const encrypted = await crypto.subtle.encrypt({ name: 'AES-GCM', iv: nonce }, aesKey, data);
+
+  // 組合 aes128gcm 格式：salt(16) + rs(4) + keyid_len(1) + keyid + ciphertext
+  const serverPubArray = new Uint8Array(serverPublicRaw);
+  const rs = new Uint8Array(4);
+  new DataView(rs.buffer).setUint32(0, 4096, false);
+
+  return concat(salt, rs, new Uint8Array([serverPubArray.length]), serverPubArray, new Uint8Array(encrypted));
+}
+
+// ── HKDF ──────────────────────────────────────────────────
+async function hkdf(ikm, salt, info, length) {
+  const key = await crypto.subtle.importKey('raw', ikm, 'HKDF', false, ['deriveBits']);
+  const bits = await crypto.subtle.deriveBits(
+    { name: 'HKDF', hash: 'SHA-256', salt, info },
+    key, length * 8
+  );
+  return new Uint8Array(bits);
+}
+
+// ── 工具函數（Base64）─────────────────────────────────────
+function b64url(str) {
+  return btoa(str).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
+}
+
+function uint8ToB64url(buf) {
+  return btoa(String.fromCharCode(...buf)).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
+}
+
+function base64UrlDecode(str) {
+  const s = str.replace(/-/g, '+').replace(/_/g, '/');
+  const pad = s.length % 4 === 0 ? '' : '='.repeat(4 - s.length % 4);
+  return Uint8Array.from(atob(s + pad), c => c.charCodeAt(0));
+}
+
+function concat(...arrays) {
+  const total = arrays.reduce((n, a) => n + a.length, 0);
+  const result = new Uint8Array(total);
+  let offset = 0;
+  for (const arr of arrays) {
+    result.set(arr, offset);
+    offset += arr.length;
+  }
+  return result;
+}
+
+async function handleCron(env) {
+  // 目前先簡單發一個每日摘要推播
+  const existing = await env.KV.get("subscriptions");
+  if (!existing) return;
+
+  const list = JSON.parse(existing);
+  await Promise.all(
+    list.map(sub => sendWebPush(sub, {
+      title: '每日市場摘要',
+      body: '點擊查看今日即時報價',
+      url: '/stock/index.html'
+    }, env))
+  );
 }
 
 // ── 工具函數 ───────────────────────────────────────────────

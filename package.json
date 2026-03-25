@@ -1,0 +1,9 @@
+{
+  "name": "stock",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "wrangler dev --test-scheduled --remote",
+    "deploy": "wrangler deploy",
+    "cron-test": "curl \"http://localhost:8787/__scheduled?cron=0+0+*+*+*\""
+  }
+}
