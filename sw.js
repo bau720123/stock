@@ -27,7 +27,7 @@ self.addEventListener('push', event => {
     body:     data.body || '有新的市場資訊',
     icon:     '/stock/icon-192.png',
     badge:    '/stock/icon-192.png',
-    // image:    data.image  || '/stock/banner.png',
+    image:    data.image  || '/stock/banner.png',
     tag:      data.title,
     renotify: true,
     silent:   false,
