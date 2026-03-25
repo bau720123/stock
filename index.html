@@ -278,6 +278,49 @@ async function sendNotification(title, body, url = '/stock/index.html') {
   });
 }
 
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/stock/sw.js')
+      .then(async reg => {
+        console.log('[SW] 註冊成功：', reg.scope);
+
+        const permission = await Notification.requestPermission();
+        console.log('[SW] 通知權限：', permission);
+        if (permission !== 'granted') return;
+
+        // 訂閱 Web Push
+        const VAPID_PUBLIC_KEY = 'BNKIWkZVpBlLD1R1i7eU7ZhtS-W7X5wI_v84v_rGOGBRvAKO999c1DssgaBvVRI2y5w2SkUx62upF8hs34PicbA';
+
+        const subscription = await reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+        });
+
+        // 把 subscription 傳給 Worker 儲存
+        await fetch('https://billowing-queen-4a58.bau720123.workers.dev/subscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(subscription)
+        });
+
+        console.log('[SW] Push 訂閱完成');
+      })
+      .catch(err => console.log('[SW] 註冊失敗：', err));
+
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      window.location.reload();
+    });
+  });
+}
+
+// VAPID 公鑰轉換工具函數
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const rawData = atob(base64);
+  return Uint8Array.from([...rawData].map(c => c.charCodeAt(0)));
+}
+
 const WORKER = "https://billowing-queen-4a58.bau720123.workers.dev";
 let tsmCnbcData = null; // 用於跨卡片共享資料
 

@@ -14,7 +14,7 @@ function json(data, status = 200) {
 }
 
 export default {
-  async fetch(request) {
+  async fetch(request, env) {
     if (request.method === "OPTIONS") return new Response(null, { headers: CORS });
 
     const path = new URL(request.url).pathname;
@@ -31,6 +31,7 @@ export default {
     if (path === "/taifex")  return await fetchTaifex();
     if (path === "/cnbc")    return await fetchCnbc();
     if (path === "/rh")      return await fetchRobinHood();
+    if (path === "/subscribe") return await handleSubscribe(request, env);
 
     return json({ error: "unknown path" }, 404);
   }
@@ -254,6 +255,28 @@ async function fetchRobinHood() {
 
     const success = changeText !== "" || tertiaryText !== "";
     return json({ success, changeText, tertiaryText });
+  } catch (e) {
+    return json({ success: false, error: e.message }, 500);
+  }
+}
+
+async function handleSubscribe(request, env) {
+  try {
+    const subscription = await request.json();
+
+    // 讀取現有的 subscriptions
+    const existing = await env.KV.get("subscriptions");
+    const list = existing ? JSON.parse(existing) : [];
+
+    // 避免重複儲存同一個 endpoint
+    const isDuplicate = list.some(s => s.endpoint === subscription.endpoint);
+    if (!isDuplicate) {
+      list.push(subscription);
+      await env.KV.put("subscriptions", JSON.stringify(list));
+      console.log(`[KV] 新增 subscription，目前共 ${list.length} 筆`);
+    }
+
+    return json({ success: true });
   } catch (e) {
     return json({ success: false, error: e.message }, 500);
   }
