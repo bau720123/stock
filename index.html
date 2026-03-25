@@ -547,7 +547,7 @@ async function loadCommodity() {
     const changePercent = changeNum / sinaBrent.prev * 100;
 
   // 價格門檻通知
-  if (sinaBrent.price >= 97) {
+  if (sinaBrent.price >= 100) {
     sendNotification(
       '布蘭特原油價格警示',
       `布蘭特原油價格目前 ${sinaBrent.price.toFixed(2)}`,
