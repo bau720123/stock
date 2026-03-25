@@ -12,7 +12,7 @@ self.addEventListener('activate', event => {
   event.waitUntil(clients.claim()); // 立即接管所有頁面
 });
 
-// 推播通知接收事件（之後會用到）
+// 推播通知接收事件
 self.addEventListener('push', event => {
   let data = {};
   try {
@@ -24,10 +24,21 @@ self.addEventListener('push', event => {
 
   const title = data.title || '即時報價';
   const options = {
-    body: data.body || '有新的市場資訊',
-    icon: '/stock/icon-192.png',
-    badge: '/stock/icon-192.png',
+    body:     data.body || '有新的市場資訊',
+    icon:     '/stock/icon-192.png',
+    badge:    '/stock/icon-192.png',
+    image:    data.image  || '/stock/banner.png',
+    tag:      data.title,
+    renotify: true,
+    silent:   false,
+    vibrate:  [200, 100, 200],
+    actions:  data.actions || [
+      { action: 'view',    title: '查看詳情' },
+      { action: 'dismiss', title: '忽略' },
+    ],
+    data: { url: data.url || '/stock/index.html' },
   };
+
   event.waitUntil(
     self.registration.showNotification(title, options)
   );

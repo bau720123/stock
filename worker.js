@@ -479,16 +479,62 @@ function concat(...arrays) {
 }
 
 async function handleCron(env) {
-  // 目前先簡單發一個每日摘要推播
   const existing = await env.KV.get("subscriptions");
   if (!existing) return;
 
   const list = JSON.parse(existing);
+
+  // 平行抓取所有資料
+  const [taifexRes, fitxRes, twnRes, brentRes, vixRes] = await Promise.all([
+    fetchTaifex(),
+    fetchHiStock("stocktop2017", "FITX", "指數", "成交量(口)"),
+    fetchHiStock("stocktop2017", "TWN", "指數", "成交量(口)"),
+    fetchSina("hf_OIL"),
+    fetchSina("hf_VX"),
+  ]);
+
+  const taifex = await taifexRes.json();
+  const fitx   = await fitxRes.json();
+  const twn    = await twnRes.json();
+  const brent  = await brentRes.json();
+  const vix    = await vixRes.json();
+
+  // 組合摘要文案
+  const lines = [];
+
+  if (taifex.success && taifex.price > 0) {
+    const sign = taifex.updown > 0 ? '▲' : taifex.updown < 0 ? '▼' : '';
+    lines.push(`台積電期貨 ${taifex.price.toFixed(0)} (${sign}${Math.abs(taifex.updown).toFixed(0)})`);
+  }
+
+  if (fitx.success) {
+    lines.push(`台股期貨漲跌 ${fitx.changeText}`);
+  }
+
+  if (twn.success) {
+    lines.push(`富台指漲跌 ${twn.changeText}`);
+  }
+
+  if (brent.success) {
+    lines.push(`布蘭特原油 ${brent.price.toFixed(2)} 元`);
+  }
+
+  if (vix.success) {
+    lines.push(`VIX 恐慌指數 ${vix.price.toFixed(2)}`);
+  }
+
+  const body = lines.length > 0 ? lines.join('\n') : '點擊查看即時報價';
+
   await Promise.all(
     list.map(sub => sendWebPush(sub, {
-      title: '每日市場摘要',
-      body: '點擊查看今日即時報價',
-      url: '/stock/index.html'
+      title: '每小時市場摘要',
+      body,
+      url: '/stock/index.html',
+      image: '/stock/banner.png',
+      actions: [
+        { action: 'view', title: '查看詳情' },
+        { action: 'dismiss', title: '忽略' },
+      ]
     }, env))
   );
 }

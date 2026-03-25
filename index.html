@@ -554,8 +554,8 @@ async function loadCommodity() {
     html += `<div class="error-text">無法取得資料</div>`;
   }
 
-  // 【白金】
-  html += `<span class="group-header">【白金】</span>`;
+  // 【黃金】
+  html += `<span class="group-header">【黃金】</span>`;
   if (sinaGold.success) {
     const changeNum = sinaGold.price - sinaGold.prev;
     const cls = changeNum < 0 ? 'down' : 'up';
