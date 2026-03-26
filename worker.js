@@ -541,8 +541,8 @@ async function handleCron(env) {
       url: '/stock/index.html',
       // image: '/stock/banner.png',
       actions: [
-        { action: '/stock/detail.html', title: '查看詳情E', icon: '/stock/icon-192.png' },
-        { action: '/stock/index.html?action=ignore', title: '忽略E', icon: '/stock/icon-192.png' }
+        { action: '/stock/detail.html', title: '查看詳情F', icon: '/stock/icon-192.png' },
+        { action: '/stock/index.html?action=ignore', title: '忽略F', icon: '/stock/icon-192.png' }
       ]
     }, env))
   );

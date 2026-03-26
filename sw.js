@@ -33,8 +33,8 @@ self.addEventListener('push', event => {
     silent:   false,
     vibrate:  [200, 100, 200],
     actions:  data.actions || [
-      { action: '/stock/detail.html', title: '查看詳情E', icon: '/stock/icon-192.png' },
-      { action: '/stock/index.html?action=ignore', title: '忽略E', icon: '/stock/icon-192.png' }
+      { action: '/stock/detail.html', title: '查看詳情F', icon: '/stock/icon-192.png' },
+      { action: '/stock/index.html?action=ignore', title: '忽略F', icon: '/stock/icon-192.png' }
     ],
     data: { url: data.url || '/stock/index.html' },
   };
@@ -67,22 +67,29 @@ self.addEventListener('push', event => {
 self.addEventListener('notificationclick', event => {
   event.notification.close();
   
-  const action = event.action;
-  const title = event.title;
-  const fullname = action + ' - ' + title;
-
-  // 如果點擊通知本體 (default)，給一個預設網址
-  let targetUrl = '/stock/index.html';
-
-  if (action && action !== 'default') {
-      // 直接把 action 當作 URL 使用
-      targetUrl = action; 
+  const action = event.action; // 系統傳回來的 action ID (例如：/stock/index.html?action=ignore)
+  const notifTitle = event.notification.title; // 推播的主標題 (例如：即時報價)
+  
+  // 嘗試找出被點擊的按鈕標題 (例如：忽略E)
+  let buttonTitle = '點擊通知本體';
+  if (action !== 'default' && event.notification.actions) {
+    const clickedBtn = event.notification.actions.find(btn => btn.action === action);
+    if (clickedBtn) {
+      buttonTitle = clickedBtn.title;
+    }
   }
+
+  // 將資訊組合，方便你從後端 Log 一目了然
+  const fullname = `Action:[${action}] - BtnTitle:[${buttonTitle}] - NotifTitle:[${notifTitle}]`;
 
   event.waitUntil(
     fetch(`https://billowing-queen-4a58.bau720123.workers.dev/log?action=${encodeURIComponent(fullname)}`)
       .then(() => {
-        return clients.openWindow(targetUrl);
+        // 暫時不作任何設定，讓前端根據未來的值來決定要不要打開頁面
+        console.log('Log 傳送成功:', fullname);
+      })
+      .catch(err => {
+        console.error('Log 傳送失敗:', err);
       })
   );
 });
