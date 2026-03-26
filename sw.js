@@ -51,17 +51,38 @@ self.addEventListener('push', event => {
 //   const url = event.notification.data?.url || '/stock/index.html';
 //   event.waitUntil(clients.openWindow(url));
 // });
+// self.addEventListener('notificationclick', event => {
+//   event.notification.close();
+
+//   const action = event.action || '(點擊通知本身)';
+
+//   event.waitUntil(
+//     fetch(`https://billowing-queen-4a58.bau720123.workers.dev/log?action=${encodeURIComponent(action)}`)
+//       .then(() => {
+//         if (event.action === 'dismiss') return;
+//         const url = event.notification.data?.url || '/stock/index.html';
+//         return clients.openWindow(url);
+//       })
+//   );
+// });
 self.addEventListener('notificationclick', event => {
   event.notification.close();
+  if (event.action === 'dismiss') return;
 
-  const action = event.action || '(點擊通知本身)';
+  const targetUrl = new URL(event.notification.data?.url || '/stock/index.html', self.location.origin).href;
 
   event.waitUntil(
-    fetch(`https://billowing-queen-4a58.bau720123.workers.dev/log?action=${encodeURIComponent(action)}`)
-      .then(() => {
-        if (event.action === 'dismiss') return;
-        const url = event.notification.data?.url || '/stock/index.html';
-        return clients.openWindow(url);
-      })
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(windowClients => {
+      // 1. 檢查是否已經有開啟這個網頁的分頁了
+      for (let client of windowClients) {
+        if (client.url === targetUrl && 'focus' in client) {
+          return client.focus(); // 直接跳轉到該分頁
+        }
+      }
+      // 2. 如果沒開啟，才打開新視窗
+      if (clients.openWindow) {
+        return clients.openWindow(targetUrl);
+      }
+    })
   );
 });

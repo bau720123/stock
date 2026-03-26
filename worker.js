@@ -541,7 +541,7 @@ async function handleCron(env) {
       url: '/stock/index.html',
       // image: '/stock/banner.png',
       actions: [
-        { action: 'view', title: '查看詳情' },
+        { action: 'view', title: '查看詳情A' },
         { action: 'dismiss', title: '忽略' },
       ]
     }, env))
