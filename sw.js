@@ -28,13 +28,13 @@ self.addEventListener('push', event => {
     icon:     '/stock/icon-192.png',
     badge:    '/stock/icon-192.png',
     // image:    data.image  || '/stock/banner.png',
-    tag:      data.title,
+    tag: data.title || '即時報價',
     renotify: true,
     silent:   false,
     vibrate:  [200, 100, 200],
     actions:  data.actions || [
-      { action: 'dismiss', title: '忽略' },
       { action: 'view',    title: '查看詳情' },
+      { action: 'dismiss', title: '忽略' },
     ],
     data: { url: data.url || '/stock/index.html' },
   };

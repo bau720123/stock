@@ -539,10 +539,10 @@ async function handleCron(env) {
       title: '每小時市場摘要',
       body,
       url: '/stock/index.html',
-      image: '/stock/banner.png',
+      // image: '/stock/banner.png',
       actions: [
-        { action: 'dismiss', title: '忽略' },
         { action: 'view', title: '查看詳情' },
+        { action: 'dismiss', title: '忽略' },
       ]
     }, env))
   );
