@@ -58,7 +58,7 @@ self.addEventListener('notificationclick', event => {
   event.waitUntil(
     fetch(`https://billowing-queen-4a58.bau720123.workers.dev/log?action=${encodeURIComponent(action)}`)
       .then(() => {
-        if (event.action === 'btn_ignore_msg') return;
+        if (action === 'btn_ignore_msg') return;
         const url = event.notification.data?.url || '/stock/index.html';
         return clients.openWindow(url);
       })
