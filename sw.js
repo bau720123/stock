@@ -67,7 +67,9 @@ self.addEventListener('push', event => {
 self.addEventListener('notificationclick', event => {
   event.notification.close();
   
-  const action = event.action; 
+  const action = event.action;
+  const title = event.title;
+  const fullname = action + ' - ' + title;
 
   // 如果點擊通知本體 (default)，給一個預設網址
   let targetUrl = '/stock/index.html';
@@ -78,7 +80,7 @@ self.addEventListener('notificationclick', event => {
   }
 
   event.waitUntil(
-    fetch(`https://billowing-queen-4a58.bau720123.workers.dev/log?action=${encodeURIComponent(action)}`)
+    fetch(`https://billowing-queen-4a58.bau720123.workers.dev/log?action=${encodeURIComponent(fullname)}`)
       .then(() => {
         return clients.openWindow(targetUrl);
       })
