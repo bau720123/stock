@@ -45,9 +45,21 @@ self.addEventListener('push', event => {
 });
 
 // 使用者點擊通知時觸發
+// self.addEventListener('notificationclick', event => {
+//   event.notification.close();
+//   if (event.action === 'dismiss') return; // 忽略就直接關掉
+//   const url = event.notification.data?.url || '/stock/index.html';
+//   event.waitUntil(clients.openWindow(url));
+// });
 self.addEventListener('notificationclick', event => {
   event.notification.close();
-  if (event.action === 'dismiss') return; // 忽略就直接關掉
+
+  const action = event.action || '(點擊通知本身)';
+
+  // 發送 log 到 Worker 記錄
+  fetch(`https://billowing-queen-4a58.bau720123.workers.dev/log?action=${encodeURIComponent(action)}`);
+
+  if (event.action === 'dismiss') return;
   const url = event.notification.data?.url || '/stock/index.html';
   event.waitUntil(clients.openWindow(url));
 });

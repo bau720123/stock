@@ -412,6 +412,11 @@ async function loadRH() {
 }
 
 async function loadAll() {
+  // iOS 補救：如果權限還沒授予，嘗試請求
+  if (Notification.permission === 'default') {
+    await Notification.requestPermission();
+  }
+
   const btn = document.getElementById('refreshBtn');
   btn.classList.add('spinning');
 

@@ -33,6 +33,15 @@ export default {
     if (path === "/rh")      return await fetchRobinHood();
     if (path === "/subscribe") return await handleSubscribe(request, env);
     if (path === "/push-test") return await handlePushTest(env);
+    if (path === "/log") {
+      const action = new URL(request.url).searchParams.get('action') || '';
+      await env.KV.put("last_click_action", action);
+      return json({ success: true });
+    }
+    if (path === "/debug-log") {
+      const val = await env.KV.get("last_click_action");
+      return json({ last_click_action: val });
+    }
 
     return json({ error: "unknown path" }, 404);
   },
