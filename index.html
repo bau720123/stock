@@ -226,7 +226,7 @@
         <path d="M23 4v6h-6"/><path d="M1 20v-6h6"/>
         <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
       </svg>
-      重新整理
+      重新整理（<span id="countdown">60</span>）
     </button>
   </div>
 </header>
@@ -244,6 +244,8 @@ async function sendNotification(title, body, url = '/stock/index.html') {
   // 確認有通知權限
   if (Notification.permission !== 'granted') return;
 
+  const isAndroid = /Android/i.test(navigator.userAgent);
+
   const reg = await navigator.serviceWorker.ready;
   reg.showNotification(title, {
     body: body,           // 通知內文
@@ -254,7 +256,7 @@ async function sendNotification(title, body, url = '/stock/index.html') {
     renotify: true,       // tag 相同時是否還要震動提醒
     silent: false,        // 是否靜音
     vibrate: [200, 100, 200], // 震動模式（Android）
-    actions: [            // 通知上的快捷按鈕
+    actions: isAndroid ? [] : [ // 通知上的快捷按鈕
       { action: 'view', title: '查看詳情' },
       { action: 'dismiss', title: '忽略' },
     ],
@@ -448,6 +450,7 @@ async function loadAll() {
   ]);
 
   btn.classList.remove('spinning');
+  startCountdown();
 }
 
 window.onload = loadAll;
@@ -650,8 +653,23 @@ async function loadSentiment() {
   setCard('card-sentiment', 0, html);
 }
 
-var link = document.getElementById('refreshBtn');
-setInterval(( () => link.click() ), 60000);
+const REFRESH_INTERVAL = 60; // 秒，改這個就通吃
+let _countdownTimer = null;
+
+function startCountdown() {
+  clearInterval(_countdownTimer);
+  let count = REFRESH_INTERVAL;
+  document.getElementById('countdown').textContent = count;
+
+  _countdownTimer = setInterval(() => {
+    count--;
+    document.getElementById('countdown').textContent = count;
+    if (count <= 0) {
+      clearInterval(_countdownTimer);
+      loadAll();
+    }
+  }, 1000);
+}
 </script>
 </body>
 </html>
