@@ -33,8 +33,8 @@ self.addEventListener('push', event => {
     silent:   false,
     vibrate:  [200, 100, 200],
     actions:  data.actions || [
-      { action: 'view',    title: '查看詳情' },
-      { action: 'dismiss', title: '忽略' },
+      { action: 'btn_show_detail', title: '查看詳情C', icon: '/stock/icon-192.png' },
+      { action: 'btn_ignore_msg', title: '忽略C', icon: '/stock/icon-192.png' },
     ],
     data: { url: data.url || '/stock/index.html' },
   };
@@ -52,13 +52,13 @@ self.addEventListener('push', event => {
 //   event.waitUntil(clients.openWindow(url));
 // });
 self.addEventListener('notificationclick', event => {
-  const action = event.action || '(點擊通知本身)';
   event.notification.close();
+  const action = event.action || '(點擊通知本身)';
 
   event.waitUntil(
     fetch(`https://billowing-queen-4a58.bau720123.workers.dev/log?action=${encodeURIComponent(action)}`)
       .then(() => {
-        if (action === 'dismiss') return;
+        if (event.action === 'btn_ignore_msg') return;
         const url = event.notification.data?.url || '/stock/index.html';
         return clients.openWindow(url);
       })
