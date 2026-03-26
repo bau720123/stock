@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>即時報價</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Noto+Sans+TC:wght@400;500;700&display=swap');
+
+  :root {
+    --bg:       #0a0e14;
+    --surface:  #111620;
+    --border:   #1e2736;
+    --muted:    #3a4a5c;
+    --text:     #c8d8e8;
+    --dim:      #5a7080;
+    --up:       #00c98a;
+    --down:     #ff4d6a;
+    --neutral:  #5a9eff;
+    --accent:   #f0b429;
+    --mono:     'IBM Plex Mono', monospace;
+    --sans:     'Noto Sans TC', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    padding: 80px 16px 48px;
+  }
+
+  /* ── Header ── */
+  header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: var(--bg);
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding: 16px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  header h1 {
+    font-family: var(--mono);
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  #clock {
+    font-family: var(--mono);
+    font-size: .8rem;
+    color: var(--dim);
+    letter-spacing: .06em;
+  }
+
+  /* ── Refresh button ── */
+  #refreshBtn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: none;
+    border: 1px solid var(--muted);
+    /* color: var(--dim); */
+    color: aqua;
+    font-family: var(--mono);
+    font-size: .75rem;
+    letter-spacing: .08em;
+    padding: 6px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: border-color .2s, color .2s;
+    border-color: aqua;
+    background-color: black;
+  }
+  #refreshBtn:hover { border-color: var(--accent); color: var(--accent); }
+  #refreshBtn.spinning svg { animation: spin .8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Grid layout ── */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+  }
+
+  /* ── Card ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity .4s ease, transform .4s ease, border-color .2s;
+  }
+  .card.loaded { opacity: 1; transform: translateY(0); }
+  .card:hover { border-color: var(--muted); }
+
+  /* left accent bar */
+  .card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 16px; bottom: 16px;
+    width: 3px;
+    border-radius: 0 2px 2px 0;
+    background: var(--neutral);
+  }
+  /* .card.up::before   { background: var(--up); }
+  .card.down::before { background: var(--down); } */
+  .card.up::before   { background: var(--neutral); }
+  .card.down::before { background: var(--neutral); }
+
+  .card-title {
+    font-family: var(--mono);
+    font-size: .7rem;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    /* color: var(--dim); */
+    margin-bottom: 14px;
+  }
+
+  /* ── Rows inside card ── */
+  .row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 5px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .row:last-child { border-bottom: none; }
+  .row-label {
+    font-size: .78rem;
+    color: var(--dim);
+  }
+  .row-value {
+    font-family: var(--mono);
+    font-size: .88rem;
+    color: var(--text);
+  }
+  .row-value.up   { color: var(--up); }
+  .row-value.down { color: var(--down); }
+  .row-value.accent { color: var(--accent); font-size: 1.1rem; font-weight: 600; }
+  
+  .group-header {
+    font-size: 0.82rem;
+    font-weight: 700;
+    /* color: var(--text); */
+    color: tan;
+    margin: 14px 0 6px;
+    display: block;
+  }
+
+  /* ── Section label ── */
+  .section-label {
+    font-family: var(--mono);
+    font-size: .65rem;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 20px 0 10px;
+  }
+
+  /* ── Loading skeleton ── */
+  .skeleton {
+    height: 14px;
+    background: linear-gradient(90deg, var(--border) 25%, var(--muted) 50%, var(--border) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.2s infinite;
+    border-radius: 3px;
+    margin: 8px 0;
+  }
+  @keyframes shimmer { to { background-position: -200% 0; } }
+
+  /* ── Error state ── */
+  .error-text {
+    font-family: var(--mono);
+    /*font-size: .75rem;*/
+    color: var(--down);
+    opacity: .7;
+  }
+
+  /* ── Update time ── */
+  .update-time {
+    font-family: var(--mono);
+    font-size: .68rem;
+    color: var(--muted);
+    margin-top: 12px;
+    text-align: right;
+  }
+
+  /* ── CNBC card spans full width on wide screens ── */
+  .card-wide {
+    grid-column: 1 / -1;
+  }
+  @media (max-width: 680px) {
+    .card-wide { grid-column: auto; }
+  }
+</style>
+
+<link rel="manifest" href="/stock/manifest.json">
+<meta name="theme-color" content="#0a0e14">
+<meta name="mobile-web-app-capable" content="yes"> <!-- Android Chrome -->
+<meta name="apple-mobile-web-app-capable" content="yes"> <!-- iOS Safari，舊版仍需要 -->
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="即時報價">
+<link rel="apple-touch-icon" href="/stock/icon-192.png">
+</head>
+<body>
+
+這是查看詳情頁面，實際上不會有什麼內容，目前只適用於測試通知按鈕的點擊事件。
+
+</body>
+</html>

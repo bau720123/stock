@@ -33,8 +33,8 @@ self.addEventListener('push', event => {
     silent:   false,
     vibrate:  [200, 100, 200],
     actions:  data.actions || [
-      { action: 'btn_ignore_msg', title: '忽略D', icon: '/stock/icon-192.png' },
-      { action: 'btn_show_detail', title: '查看詳情D', icon: '/stock/icon-192.png' },
+      { action: '/stock/detail.html', title: '查看詳情E', icon: '/stock/icon-192.png' },
+      { action: '/stock/index.html?action=ignore', title: '忽略E', icon: '/stock/icon-192.png' }
     ],
     data: { url: data.url || '/stock/index.html' },
   };
@@ -51,16 +51,36 @@ self.addEventListener('push', event => {
 //   const url = event.notification.data?.url || '/stock/index.html';
 //   event.waitUntil(clients.openWindow(url));
 // });
+// self.addEventListener('notificationclick', event => {
+//   event.notification.close();
+//   const action = event.action || '(點擊通知本身)';
+
+//   event.waitUntil(
+//     fetch(`https://billowing-queen-4a58.bau720123.workers.dev/log?action=${encodeURIComponent(action)}`)
+//       .then(() => {
+//         if (action === 'btn_ignore_msg') return;
+//         const url = event.notification.data?.url || '/stock/index.html';
+//         return clients.openWindow(url);
+//       })
+//   );
+// });
 self.addEventListener('notificationclick', event => {
   event.notification.close();
-  const action = event.action || '(點擊通知本身)';
+  
+  const action = event.action; 
+
+  // 如果點擊通知本體 (default)，給一個預設網址
+  let targetUrl = '/stock/index.html';
+
+  if (action && action !== 'default') {
+      // 直接把 action 當作 URL 使用
+      targetUrl = action; 
+  }
 
   event.waitUntil(
     fetch(`https://billowing-queen-4a58.bau720123.workers.dev/log?action=${encodeURIComponent(action)}`)
       .then(() => {
-        if (action === 'btn_ignore_msg') return;
-        const url = event.notification.data?.url || '/stock/index.html';
-        return clients.openWindow(url);
+        return clients.openWindow(targetUrl);
       })
   );
 });
