@@ -282,11 +282,14 @@ if ('serviceWorker' in navigator) {
           applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
         });
 
-        // 把 subscription 傳給 Worker 儲存
+        // 把 subscription 傳給 Worker 時，順便帶上 User-Agent
         await fetch('https://billowing-queen-4a58.bau720123.workers.dev/subscribe', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(subscription)
+          body: JSON.stringify({
+            ...subscription.toJSON(),
+            userAgent: navigator.userAgent  // ← 加這行
+          })
         });
 
         console.log('[SW] Push 訂閱完成');

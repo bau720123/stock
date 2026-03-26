@@ -275,7 +275,10 @@ async function fetchRobinHood() {
 
 async function handleSubscribe(request, env) {
   try {
-    const subscription = await request.json();
+    const body = await request.json();
+    const { userAgent, ...subscription } = body;
+
+    const isAndroid = userAgent && /Android/i.test(userAgent);
 
     // 讀取現有的 subscriptions
     const existing = await env.KV.get("subscriptions");
@@ -284,9 +287,8 @@ async function handleSubscribe(request, env) {
     // 避免重複儲存同一個 endpoint
     const isDuplicate = list.some(s => s.endpoint === subscription.endpoint);
     if (!isDuplicate) {
-      list.push(subscription);
+      list.push({ ...subscription, isAndroid }); // 存入裝置類型
       await env.KV.put("subscriptions", JSON.stringify(list));
-      console.log(`[KV] 新增 subscription，目前共 ${list.length} 筆`);
     }
 
     return json({ success: true });
@@ -540,9 +542,9 @@ async function handleCron(env) {
       body,
       url: '/stock/index.html',
       // image: '/stock/banner.png',
-      actions: [
-        { action: '/stock/detail.html', title: '查看詳情F', icon: '/stock/icon-192.png' },
-        { action: '/stock/index.html?action=ignore', title: '忽略F', icon: '/stock/icon-192.png' }
+      actions: sub.isAndroid ? [] : [ // Android 不帶 actions
+        { action: 'view',    title: '查看詳情', icon: '/stock/icon-192.png' },
+        { action: 'dismiss', title: '忽略', icon: '/stock/icon-192.png' },
       ]
     }, env))
   );
