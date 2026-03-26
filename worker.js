@@ -542,7 +542,10 @@ async function handleCron(env) {
       body,
       url: '/stock/index.html',
       // image: '/stock/banner.png',
-      actions: sub.isAndroid ? [] : [ // Android 不帶 actions
+      actions: sub.isAndroid ? [ // Android 不帶 actions
+        { action: 'view',    title: '查看詳情', icon: '/stock/icon-192.png' },
+        { action: 'dismiss', title: '忽略', icon: '/stock/icon-192.png' },
+      ] : [ // Android 不帶 actions
         { action: 'view',    title: '查看詳情', icon: '/stock/icon-192.png' },
         { action: 'dismiss', title: '忽略', icon: '/stock/icon-192.png' },
       ]
