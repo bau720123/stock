@@ -547,15 +547,6 @@ async function loadCommodity() {
     const cls = changeNum < 0 ? 'down' : 'up';
     const changePercent = changeNum / sinaBrent.prev * 100;
 
-  // 價格門檻通知
-  if (sinaBrent.price >= 100) {
-    sendNotification(
-      '布蘭特原油價格警示',
-      `布蘭特原油價格目前 ${sinaBrent.price.toFixed(2)}`,
-      'https://hk.investing.com/commodities/brent-oil'
-    );
-  }
-
     html += row('前次', sinaBrent.prev.toFixed(2));
     html += row('開盤', sinaBrent.open.toFixed(2));
     html += row('最高', sinaBrent.high.toFixed(2));
@@ -564,6 +555,15 @@ async function loadCommodity() {
     html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
     html += row('價格', sinaBrent.price.toFixed(2), 'accent');
     html += row('更新時間', sinaBrent.time);
+
+    // 價格門檻通知
+    if (sinaBrent.price >= 100) {
+      sendNotification(
+        '布蘭特原油價格警示',
+        `目前價格 ${sinaBrent.price.toFixed(2)} 元`,
+        'https://hk.investing.com/commodities/brent-oil'
+      );
+    }
   } else {
     html += `<div class="error-text">無法取得資料</div>`;
   }
@@ -647,6 +647,15 @@ async function loadSentiment() {
     html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
     html += row('數值', sinaVix.price.toFixed(2), 'accent');
     html += row('更新時間', sinaVix.time);
+
+    // 數值門檻通知
+    if (sinaVix.price >= 25) {
+      sendNotification(
+        'VIX 恐慌指數警示',
+        `目前數值 ${sinaVix.price.toFixed(2)}`,
+        'https://hk.investing.com/indices/volatility-s-p-500'
+      );
+    }
   } else {
     html += `<div class="error-text">無法取得資料</div>`;
   }
