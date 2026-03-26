@@ -33,8 +33,8 @@ self.addEventListener('push', event => {
     silent:   false,
     vibrate:  [200, 100, 200],
     actions:  data.actions || [
-      { action: 'view',    title: '查看詳情' },
       { action: 'dismiss', title: '忽略' },
+      { action: 'view',    title: '查看詳情' },
     ],
     data: { url: data.url || '/stock/index.html' },
   };
