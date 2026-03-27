@@ -205,7 +205,7 @@ async function fetchCnbc() {
   try {
     // 盤前 Fair Value
     const fvRes = await fetch(
-      "https://quote.cnbc.com/quote-html-webservice/fvquote.htm?requestMethod=quick&noform=0&realtime=1&output=json&symbols=DJ%7CSP%7CND%7CTF",
+      "https://quote.cnbc.com/quote-html-webservice/fvquote.htm?requestMethod=quick&noform=0&realtime=0&client=fairValue&output=json&symbols=DJ%7CSP%7CND%7CTF",
       { headers: { "User-Agent": UA } }
     );
     const fvData = await fvRes.json();
@@ -213,7 +213,7 @@ async function fetchCnbc() {
 
     const fv = { DJ: 0, SP: 0, ND: 0, TF: 0, updateTime: "未知" };
     for (const q of fvQuotes) {
-      if (q.symbol in fv) fv[q.symbol] = q.fv_change || 0;
+      if (q.symbol in fv) fv[q.symbol] = q.fmt_change || 0;
       if (fv.updateTime === "未知" && q.last_timedate) fv.updateTime = q.last_timedate;
     }
 
