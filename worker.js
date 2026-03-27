@@ -217,16 +217,16 @@ async function fetchCnbc() {
 
     // 四大指數 + TSM ADR
     const qRes = await fetch(
-      "https://quote.cnbc.com/quote-html-webservice/restQuote/symbolType/symbol?symbols=.DJI%7C.SP500%7C.IXIC%7C.SOX%7CTSM&requestMethod=itv&noform=1&partnerId=2&fund=1&exthrs=1&output=json&events=1",
+      "https://quote.cnbc.com/quote-html-webservice/restQuote/symbolType/symbol?symbols=.DJI%7C.SPX%7C.IXIC%7C.SOX%7CTSM&requestMethod=itv&noform=1&partnerId=2&fund=1&exthrs=1&output=json&events=1",
       { headers: { "User-Agent": UA } }
     );
     const qData = await qRes.json();
     const quotes = qData?.FormattedQuoteResult?.FormattedQuote || [];
 
-    const market = { dji: "N/A", sp500: "N/A", ixic: "N/A", sox: "N/A", tsmRegular: "N/A", tsmType: "", tsmMarket: "N/A" };
+    const market = { dji: "N/A", spx: "N/A", ixic: "N/A", sox: "N/A", tsmRegular: "N/A", tsmType: "", tsmMarket: "N/A" };
     for (const q of quotes) {
       if (q.symbol === ".DJI")   market.dji    = q.change || "N/A";
-      if (q.symbol === ".SP500") market.sp500  = q.change || "N/A";
+      if (q.symbol === ".SPX")   market.spx    = q.change || "N/A";
       if (q.symbol === ".IXIC")  market.ixic   = q.change || "N/A";
       if (q.symbol === ".SOX")   market.sox    = q.change || "N/A";
       if (q.symbol === "TSM") {
