@@ -28,8 +28,6 @@ export default {
     if (path === "/sina_silver") return await fetchSina("hf_SI");
     if (path === "/sina_usdollar") return await fetchSina("DINIW");
     if (path === "/sina_vix") return await fetchSina("hf_VX");
-    if (path === "/sina_tsm") return await fetchSina("gb_TSM");
-    if (path === "/debug-sina-tsm") return await debugYahooTSM();
     if (path === "/taifex")  return await fetchTaifex();
     if (path === "/cnbc")    return await fetchCnbc();
     if (path === "/rh")      return await fetchRobinHood();
@@ -46,7 +44,6 @@ export default {
     }
     if (path === "/debug-subs") return await debugSubs(env);
     if (path === "/clear-subs") return await clearSubs(env);
-    if (path === "/debug-rh") return await debugRH();
 
     return json({ error: "unknown path" }, 404);
   },
@@ -54,45 +51,6 @@ export default {
     ctx.waitUntil(handleCron(env));
   }
 };
-
-async function debugRH() {
-  const res = await fetch(
-    "https://bonfire.robinhood.com/instruments/ca4821f9-06c3-4c22-bbb8-efe569f23d2b/detail-page-live-updating-data/?display_span=day&hide_extended_hours=false",
-    { headers: { "User-Agent": UA, "Accept": "application/json" } }
-  );
-  const text = await res.text();
-  return new Response(text.substring(0, 500), {
-    headers: { ...CORS, "Content-Type": "text/plain; charset=utf-8" }
-  });
-}
-
-async function debugSinaTSM() {
-  const symbols = ["gb_TSM", "usstock_TSM", "us_TSM", "NYSE_TSM", "s_TSM", "TSM"].join(",");
-  const res = await fetch(`https://hq.sinajs.cn/list=${symbols}`, {
-    headers: { "User-Agent": UA, "Referer": "https://finance.sina.com.cn/" }
-  });
-  const text = await res.text();
-  return new Response(text, {
-    headers: { ...CORS, "Content-Type": "text/plain; charset=utf-8" }
-  });
-}
-
-async function debugYahooTSM() {
-  const res = await fetch(
-    "https://query1.finance.yahoo.com/v7/finance/quote?symbols=TSM",
-    {
-      headers: {
-        "User-Agent": UA,
-        "Accept": "application/json",
-        "Referer": "https://finance.yahoo.com/",
-      }
-    }
-  );
-  const text = await res.text();
-  return new Response(text.substring(0, 1000), {
-    headers: { ...CORS, "Content-Type": "text/plain; charset=utf-8" }
-  });
-}
 
 // ── HiStock（台指期 / 富台指）──────────────────────────────
 async function fetchHiStock(m, no, current_title, volume_title) {
