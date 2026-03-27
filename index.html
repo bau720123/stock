@@ -674,8 +674,9 @@ async function loadRH() {
   //   html += row('額外資訊', d.tertiaryText, changeClass(d.tertiaryText));
   // }
 
-  const cls = d.success ? changeClass(d.changeText) : '';
-  setCard('card-rh', cls === 'up' ? 1 : cls === 'down' ? -1 : 0, html);
+  // const cls = d.success ? changeClass(d.changeText) : '';
+  // setCard('card-rh', cls === 'up' ? 1 : cls === 'down' ? -1 : 0, html);
+  setCard('card-rh', 0, html);
 }
 
 const REFRESH_INTERVAL = 60; // 秒，改這個就通吃
