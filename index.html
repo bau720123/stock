@@ -333,7 +333,7 @@ if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/stock/sw.js')
       .then(reg => {
-        alert('[SW] 註冊成功' + reg.scope);
+        alert('[SW] 註冊成功：' + reg.scope);
 
         // 先檢查 Notification 是否存在
         if (typeof Notification === 'undefined') {
