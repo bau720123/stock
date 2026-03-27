@@ -268,26 +268,46 @@ async function sendNotification(title, body, url = '/stock/index.html') {
   });
 }
 
-// 1. 將訂閱邏輯封裝成一個函數
+// 將訂閱邏輯封裝成一個函數
 async function subscribeUser() {
-  if (!('serviceWorker' in navigator)) return;
+  if (!('serviceWorker' in navigator)) {
+    alert('瀏覽器不支援 Service Worker');
+    return;
+  }
 
   try {
+    // 確保 SW 已啟動
     const reg = await navigator.serviceWorker.ready;
+
+    // iOS 偵測與提醒
+    const isStandalone = window.navigator.standalone === true;
+    if (!isStandalone && /iPhone|iPad|iPod/.test(navigator.userAgent)) {
+      alert('iOS 必須先「加入主畫面」成為 PWA 才能開啟通知！');
+      return;
+    }
     
-    // iOS 強制要求：必須在點擊事件的 Call Stack 中觸發此請求
+    // 請求通知權限
     const permission = await Notification.requestPermission();
+    alert('[SW] 通知權限：' + permission);
     if (permission !== 'granted') {
-      alert('請至「系統設定 > 通知」手動開啟權限');
+      alert('權限被拒絕，請至「設定 > 通知 > 即時報價」手動開啟');
       return;
     }
 
-    // 訂閱 Web Push (VAPID 邏輯)
+    // 訂閱 Web Push
     const VAPID_PUBLIC_KEY = 'BNKIWkZVpBlLD1R1i7eU7ZhtS-W7X5wI_v84v_rGOGBRvAKO999c1DssgaBvVRI2y5w2SkUx62upF8hs34PicbA';
-    const subscription = await reg.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
-    });
+
+    let subscription;
+    try {
+      subscription = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+      });
+      alert('[SW] 訂閱成功：' + subscription.endpoint.substring(0, 50));
+    } catch (e) {
+      alert('[SW] 訂閱失敗：' + e.message);
+      return;
+    }
 
     try {
       // 把 subscription 傳給 Worker 時，順便帶上 User-Agent
@@ -303,15 +323,18 @@ async function subscribeUser() {
     } catch (e) {
       alert('[SW] 傳送到 Worker 失敗：' + e.message);
     }
-  } catch (e) {
-    alert('訂閱發生錯誤：' + e.message);
+  } catch (err) {
+    alert('[SW] 註冊失敗：' + err)
   }
 }
 
+// Service Worker 註冊
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/stock/sw.js')
-      .then(reg => alert('[SW] 註冊成功' + reg.scope))
+      .then(reg => {
+        alert('[SW] 註冊成功' + reg.scope)
+      })
       .catch(err => alert('[SW] 註冊失敗' + err));
   });
 }
@@ -428,10 +451,9 @@ function setCard(id, updown, html) {
 }
 
 async function loadAll() {
-  // iOS 補救：如果權限還沒授予，嘗試請求
-  // if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
-  //   Notification.requestPermission();
-  // }
+  if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
+    Notification.requestPermission();
+  }
 
   const btn = document.getElementById('refreshBtn');
   btn.classList.add('spinning');
