@@ -43,6 +43,7 @@ export default {
       return json({ last_click_action: val });
     }
     if (path === "/debug-subs") return await debugSubs(env);
+    if (path === "/clear-subs") return await clearSubs(env);
 
     return json({ error: "unknown path" }, 404);
   },
@@ -204,7 +205,7 @@ async function fetchCnbc() {
   try {
     // 盤前 Fair Value
     const fvRes = await fetch(
-      "https://quote.cnbc.com/quote-html-webservice/fvquote.htm?requestMethod=quick&noform=0&realtime=1&client=fairValue&output=json&symbols=DJ%7CSP%7CND%7CTF",
+      "https://quote.cnbc.com/quote-html-webservice/fvquote.htm?requestMethod=quick&noform=0&realtime=1&output=json&symbols=DJ%7CSP%7CND%7CTF",
       { headers: { "User-Agent": UA } }
     );
     const fvData = await fvRes.json();
@@ -500,6 +501,11 @@ async function debugSubs(env) {
     isAndroid: s.isAndroid ?? null,
   }));
   return json({ count: list.length, list: summary });
+}
+
+async function clearSubs(env) {
+  await env.KV.put("subscriptions", JSON.stringify([]));
+  return json({ success: true, message: "已清除所有 subscriptions" });
 }
 
 async function handleCron(env) {
