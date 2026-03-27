@@ -373,7 +373,7 @@ function setCard(id, updown, html) {
 async function loadAll() {
   // iOS 補救：如果權限還沒授予，嘗試請求
   if (Notification.permission === 'default') {
-    await Notification.requestPermission();
+    Notification.requestPermission();
   }
 
   const btn = document.getElementById('refreshBtn');
