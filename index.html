@@ -329,6 +329,7 @@ function urlBase64ToUint8Array(base64String) {
 const WORKER = "https://billowing-queen-4a58.bau720123.workers.dev";
 let tsmCnbcData = null; // 用於跨卡片共享資料
 
+// 系統即時時間顯示
 function updateClock() {
   const now = new Date();
   document.getElementById('clock').textContent = now.toLocaleTimeString('zh-TW', { hour24: false });
@@ -395,9 +396,9 @@ async function loadAll() {
   // 2. 跑其餘 API
   await Promise.allSettled([
     loadTW(),
-    loadRH(),
     loadCommodity(),
     loadSentiment(),
+    loadRH(),
   ]);
 
   btn.classList.remove('spinning');
@@ -406,6 +407,33 @@ async function loadAll() {
 
 window.onload = loadAll;
 
+// 美股市場：合併盤前與四大指數
+async function loadCnbc() {
+  const d = await fetch(WORKER + '/cnbc').then(r => r.json());
+  if (!d.success) return;
+
+  const { market: m, fairValue: fv } = d;
+  tsmCnbcData = m; // 存下台積電的部分給 loadRH
+
+  let html = `<div class="card-title">美股市場概況</div>`;
+  
+  html += `<span class="group-header">【美股盤前電子盤】</span>`;
+  html += row('道瓊期貨', formatChange(fv.dow), changeClass(fv.dow));
+  html += row('標普500期貨', formatChange(fv.sp), changeClass(fv.sp));
+  html += row('納斯達克100期貨', formatChange(fv.nasdaq), changeClass(fv.nasdaq));
+  html += row('羅素2000期貨', formatChange(fv.russell), changeClass(fv.russell));
+
+  html += `<span class="group-header">【美股四大指數】</span>`;
+  html += row('道瓊工業指數', m.dji, changeClass(m.dji));
+  html += row('標普500指數', m.spx, changeClass(m.spx));
+  html += row('納斯達克指數', m.ixic, changeClass(m.ixic));
+  html += row('費城半導體指數', m.sox, changeClass(m.sox));
+
+  // html += `<div class="update-time">${fv.updateTime}</div>`;
+  setCard('card-cnbc', 0, html);
+}
+
+// 台股市場概況
 async function loadTW() {
   const [taifex, fitx, twn] = await Promise.all([
     fetch(WORKER + '/taifex').then(r => r.json()),
@@ -460,32 +488,7 @@ async function loadTW() {
   setCard('card-tw', 0, html);
 }
 
-// 美股市場：合併盤前與四大指數
-async function loadCnbc() {
-  const d = await fetch(WORKER + '/cnbc').then(r => r.json());
-  if (!d.success) return;
-
-  const { market: m, fairValue: fv } = d;
-  tsmCnbcData = m; // 存下台積電的部分給 loadRH
-
-  let html = `<div class="card-title">美股市場概況</div>`;
-  
-  html += `<span class="group-header">【美股盤前電子盤】</span>`;
-  html += row('道瓊期貨', formatChange(fv.dow), changeClass(fv.dow));
-  html += row('標普500期貨', formatChange(fv.sp), changeClass(fv.sp));
-  html += row('納斯達克100期貨', formatChange(fv.nasdaq), changeClass(fv.nasdaq));
-  html += row('羅素2000期貨', formatChange(fv.russell), changeClass(fv.russell));
-
-  html += `<span class="group-header">【美股四大指數】</span>`;
-  html += row('道瓊工業指數', m.dji, changeClass(m.dji));
-  html += row('標普500指數', m.spx, changeClass(m.spx));
-  html += row('納斯達克指數', m.ixic, changeClass(m.ixic));
-  html += row('費城半導體指數', m.sox, changeClass(m.sox));
-
-  // html += `<div class="update-time">${fv.updateTime}</div>`;
-  setCard('card-cnbc', 0, html);
-}
-
+// 原物料市場
 async function loadCommodity() {
   // const [brent, brentStockq] = await Promise.all([
   //   fetch(WORKER + '/brent').then(r => r.json()),
@@ -583,6 +586,7 @@ async function loadCommodity() {
   setCard('card-commodity', 0, html);
 }
 
+// 市場情緒
 async function loadSentiment() {
   const [sinaUsdollar, sinaVix] = await Promise.all([
     fetch(WORKER + '/sina_usdollar').then(r => r.json()).catch(() => ({ success: false })),
