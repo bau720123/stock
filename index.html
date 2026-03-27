@@ -272,6 +272,12 @@ if ('serviceWorker' in navigator) {
       .then(async reg => {
         alert('[SW] 註冊成功：' + reg.scope);
 
+        // 先檢查 Notification 是否存在
+        if (typeof Notification === 'undefined') {
+          alert('[SW] 此環境不支援通知功能');
+          return;
+        }
+
         // 請求通知權限
         const permission = await Notification.requestPermission();
         alert('[SW] 通知權限：' + permission);
@@ -372,7 +378,7 @@ function setCard(id, updown, html) {
 
 async function loadAll() {
   // iOS 補救：如果權限還沒授予，嘗試請求
-  if (Notification.permission === 'default') {
+  if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
     Notification.requestPermission();
   }
 
