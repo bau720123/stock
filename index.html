@@ -229,6 +229,9 @@
       </svg>
       重新整理 <span id="countdown">60</span>
     </button>
+    <button id="test" onclick="test()">
+      測試通知
+    </button>
   </div>
 </header>
 
@@ -376,11 +379,18 @@ function setCard(id, updown, html) {
   setTimeout(() => card.classList.add('loaded'), 20);
 }
 
-async function loadAll() {
+function test() {
   // iOS 補救：如果權限還沒授予，嘗試請求
   if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
     Notification.requestPermission();
   }
+}
+
+async function loadAll() {
+  // iOS 補救：如果權限還沒授予，嘗試請求
+  // if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
+  //   Notification.requestPermission();
+  // }
 
   const btn = document.getElementById('refreshBtn');
   btn.classList.add('spinning');
