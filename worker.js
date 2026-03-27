@@ -29,6 +29,7 @@ export default {
     if (path === "/sina_usdollar") return await fetchSina("DINIW");
     if (path === "/sina_vix") return await fetchSina("hf_VX");
     if (path === "/sina_tsm") return await fetchSina("gb_TSM");
+    if (path === "/debug-sina-tsm") return await debugSinaTSM();
     if (path === "/taifex")  return await fetchTaifex();
     if (path === "/cnbc")    return await fetchCnbc();
     if (path === "/rh")      return await fetchRobinHood();
@@ -61,6 +62,17 @@ async function debugRH() {
   );
   const text = await res.text();
   return new Response(text.substring(0, 500), {
+    headers: { ...CORS, "Content-Type": "text/plain; charset=utf-8" }
+  });
+}
+
+async function debugSinaTSM() {
+  const symbols = ["gb_TSM", "usstock_TSM", "us_TSM", "NYSE_TSM", "s_TSM", "TSM"].join(",");
+  const res = await fetch(`https://hq.sinajs.cn/list=${symbols}`, {
+    headers: { "User-Agent": UA, "Referer": "https://finance.sina.com.cn/" }
+  });
+  const text = await res.text();
+  return new Response(text, {
     headers: { ...CORS, "Content-Type": "text/plain; charset=utf-8" }
   });
 }
