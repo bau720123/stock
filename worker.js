@@ -44,6 +44,7 @@ export default {
     }
     if (path === "/debug-subs") return await debugSubs(env);
     if (path === "/clear-subs") return await clearSubs(env);
+    if (path === "/debug-rh") return await debugRH();
 
     return json({ error: "unknown path" }, 404);
   },
@@ -51,6 +52,17 @@ export default {
     ctx.waitUntil(handleCron(env));
   }
 };
+
+async function debugRH() {
+  const res = await fetch(
+    "https://bonfire.robinhood.com/instruments/ca4821f9-06c3-4c22-bbb8-efe569f23d2b/detail-page-live-updating-data/?display_span=day&hide_extended_hours=false",
+    { headers: { "User-Agent": UA, "Accept": "application/json" } }
+  );
+  const text = await res.text();
+  return new Response(text.substring(0, 500), {
+    headers: { ...CORS, "Content-Type": "text/plain; charset=utf-8" }
+  });
+}
 
 // ── HiStock（台指期 / 富台指）──────────────────────────────
 async function fetchHiStock(m, no, current_title, volume_title) {
