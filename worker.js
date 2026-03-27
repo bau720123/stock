@@ -42,6 +42,7 @@ export default {
       const val = await env.KV.get("last_click_action");
       return json({ last_click_action: val });
     }
+    if (path === "/debug-subs") return await debugSubs(env);
 
     return json({ error: "unknown path" }, 404);
   },
@@ -487,6 +488,18 @@ function concat(...arrays) {
     offset += arr.length;
   }
   return result;
+}
+
+async function debugSubs(env) {
+  const existing = await env.KV.get("subscriptions");
+  if (!existing) return json({ count: 0, list: [] });
+  const list = JSON.parse(existing);
+  // 只顯示 endpoint 和 isAndroid，不顯示完整金鑰
+  const summary = list.map(s => ({
+    endpoint: s.endpoint.substring(0, 60) + '...',
+    isAndroid: s.isAndroid ?? null,
+  }));
+  return json({ count: list.length, list: summary });
 }
 
 async function handleCron(env) {
