@@ -272,10 +272,28 @@ async function fetchRobinHood() {
     const instrumentId = "ca4821f9-06c3-4c22-bbb8-efe569f23d2b";
     const res = await fetch(
       `https://bonfire.robinhood.com/instruments/${instrumentId}/detail-page-live-updating-data/?display_span=day&hide_extended_hours=false`,
-      { headers: { "User-Agent": UA, "Accept": "application/json" } }
+      {
+        headers: {
+          "User-Agent": UA,
+          "Accept": "application/json",
+          "Origin": "https://robinhood.com",
+          "Referer": "https://robinhood.com/",
+          "Accept-Language": "en-US,en;q=0.9",
+          "Accept-Encoding": "gzip, deflate, br",
+          "sec-fetch-dest": "empty",
+          "sec-fetch-mode": "cors",
+          "sec-fetch-site": "same-site",
+        }
+      }
     );
-    const data = await res.json();
+    const text = await res.text();
+    
+    // 先檢查是不是 HTML（被擋）
+    if (text.startsWith('<') || text.startsWith('<!')) {
+      return json({ success: false, error: "被封鎖，回傳 HTML：" + res.status });
+    }
 
+    const data = JSON.parse(text);
     const display = data?.chart_section?.default_display;
     const changeText   = display?.secondary_value?.main?.value || "";
     const tertiaryText = display?.tertiary_value?.main?.value  || "";
