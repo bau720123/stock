@@ -29,7 +29,7 @@ export default {
     if (path === "/sina_usdollar") return await fetchSina("DINIW");
     if (path === "/sina_vix") return await fetchSina("hf_VX");
     if (path === "/sina_tsm") return await fetchSina("gb_TSM");
-    if (path === "/debug-sina-tsm") return await debugSinaTSM();
+    if (path === "/debug-sina-tsm") return await debugYahooTSM();
     if (path === "/taifex")  return await fetchTaifex();
     if (path === "/cnbc")    return await fetchCnbc();
     if (path === "/rh")      return await fetchRobinHood();
@@ -73,6 +73,23 @@ async function debugSinaTSM() {
   });
   const text = await res.text();
   return new Response(text, {
+    headers: { ...CORS, "Content-Type": "text/plain; charset=utf-8" }
+  });
+}
+
+async function debugYahooTSM() {
+  const res = await fetch(
+    "https://query1.finance.yahoo.com/v7/finance/quote?symbols=TSM",
+    {
+      headers: {
+        "User-Agent": UA,
+        "Accept": "application/json",
+        "Referer": "https://finance.yahoo.com/",
+      }
+    }
+  );
+  const text = await res.text();
+  return new Response(text.substring(0, 1000), {
     headers: { ...CORS, "Content-Type": "text/plain; charset=utf-8" }
   });
 }
