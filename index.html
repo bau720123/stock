@@ -270,34 +270,44 @@ if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/stock/sw.js')
       .then(async reg => {
-        console.log('[SW] 註冊成功：', reg.scope);
+        alert('[SW] 註冊成功：' + reg.scope);
 
         // 請求通知權限
         const permission = await Notification.requestPermission();
-        console.log('[SW] 通知權限：', permission);
+        alert('[SW] 通知權限：' + permission);
         if (permission !== 'granted') return;
 
         // 訂閱 Web Push
         const VAPID_PUBLIC_KEY = 'BNKIWkZVpBlLD1R1i7eU7ZhtS-W7X5wI_v84v_rGOGBRvAKO999c1DssgaBvVRI2y5w2SkUx62upF8hs34PicbA';
 
-        const subscription = await reg.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
-        });
+        let subscription;
+        try {
+          subscription = await reg.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+          });
+          alert('[SW] 訂閱成功：' + subscription.endpoint.substring(0, 50));
+        } catch (e) {
+          alert('[SW] 訂閱失敗：' + e.message);
+          return;
+        }
 
-        // 把 subscription 傳給 Worker 時，順便帶上 User-Agent
-        await fetch('https://billowing-queen-4a58.bau720123.workers.dev/subscribe', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            ...subscription.toJSON(),
-            userAgent: navigator.userAgent  // ← 加這行
-          })
-        });
-
-        console.log('[SW] Push 訂閱完成');
+        try {
+          // 把 subscription 傳給 Worker 時，順便帶上 User-Agent
+          await fetch('https://billowing-queen-4a58.bau720123.workers.dev/subscribe', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              ...subscription.toJSON(),
+              userAgent: navigator.userAgent
+            })
+          });
+          alert('[SW] Push 訂閱完成，已傳送到 Worker');
+        } catch (e) {
+          alert('[SW] 傳送到 Worker 失敗：' + e.message);
+        }
       })
-      .catch(err => console.log('[SW] 註冊失敗：', err));
+      .catch(err => alert('[SW] 註冊失敗：' + err));
 
     // 確保 SW 更新時頁面會同步刷新，拿到最新的 SW 和資料
     navigator.serviceWorker.addEventListener('controllerchange', () => {
