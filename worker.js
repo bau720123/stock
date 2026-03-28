@@ -35,15 +35,6 @@ export default {
     if (path === "/rh")      return await fetchRobinHood();
     if (path === "/subscribe") return await handleSubscribe(request, env);
     if (path === "/push-test") return await handlePushTest(env);
-    if (path === "/log") {
-      const action = new URL(request.url).searchParams.get('action') || '';
-      await env.KV.put("last_click_action", action);
-      return json({ success: true });
-    }
-    if (path === "/read-button-logs") {
-      const val = await env.KV.get("last_click_action");
-      return json({ last_click_action: val });
-    }
     if (path === "/read-subs") return await readSubs(env);
     if (path === "/clear-subs") return await clearSubs(env);
     if (path === "/read-logs") return await readLogs(env);
@@ -288,6 +279,11 @@ async function handleSubscribe(request, env) {
     // 記錄完整 userAgent
     const platform = userAgent || 'unknown';
 
+    // 台灣時間（UTC+8）
+    const now = new Date();
+    const twTime = new Date(now.getTime() + 8 * 60 * 60 * 1000);
+    const time = twTime.toISOString().replace('T', ' ').substring(0, 19);
+
     // 讀取現有的 subscriptions
     const existing = await env.KV.get("subscriptions");
     const list = existing ? JSON.parse(existing) : [];
@@ -295,7 +291,7 @@ async function handleSubscribe(request, env) {
     // 避免重複儲存同一個 endpoint
     const isDuplicate = list.some(s => s.endpoint === subscription.endpoint);
     if (!isDuplicate) {
-      list.push({ ...subscription, platform }); // isAndroid 改成 platform
+      list.push({ ...subscription, platform, time });
       await env.KV.put("subscriptions", JSON.stringify(list));
     }
 
@@ -514,8 +510,9 @@ async function readSubs(env) {
   const summary = list.map(s => ({
     endpoint: s.endpoint.substring(0, 60) + '...', // 不顯示完整金鑰
     platform: s.platform || 'unknown',
+    time: s.time || 'unknown',
   }));
-  return json({ count: list.length, list: summary });
+  return json({ count: list.length, list: summary.reverse() }); // 最新的在前
 }
 
 async function clearSubs(env) {
@@ -549,7 +546,7 @@ async function writeLogs(env, tag, message) {
     const twTime = new Date(now.getTime() + 8 * 60 * 60 * 1000);
     const time = twTime.toISOString().replace('T', ' ').substring(0, 19);
 
-    logs.push({ time, tag, message });
+    logs.push({ tag, message, time });
 
     // 只保留最新 100 筆，避免 KV 無限增長
     if (logs.length > 100) logs.splice(0, logs.length - 100);

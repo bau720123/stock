@@ -63,11 +63,14 @@ self.addEventListener('notificationclick', event => {
   const action = event.action || '（點擊通知本身）';
 
   event.waitUntil(
-    fetch(`https://billowing-queen-4a58.bau720123.workers.dev/log?action=${encodeURIComponent(action)}`)
-      .then(() => {
-        if (action === 'dismiss') return; // 忽略就直接關掉
-        const url = event.notification.data?.url || '/stock/index.html';
-        return clients.openWindow(url);
-      })
+    fetch('https://billowing-queen-4a58.bau720123.workers.dev/write-logs', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tag: 'CLICK', message: '通知點擊：' + action })
+    }).then(() => {
+      if (action === 'dismiss') return;
+      const url = event.notification.data?.url || '/stock/index.html';
+      return clients.openWindow(url);
+    })
   );
 });
