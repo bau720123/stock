@@ -540,12 +540,13 @@ async function writeLog(env, tag, message) {
   try {
     const existing = await env.KV.get("logs");
     const logs = existing ? JSON.parse(existing) : [];
-    
-    logs.push({
-      time: new Date().toISOString(),
-      tag,
-      message
-    });
+
+    // 台灣時間（UTC+8）
+    const now = new Date();
+    const twTime = new Date(now.getTime() + 8 * 60 * 60 * 1000);
+    const time = twTime.toISOString().replace('T', ' ').substring(0, 19);
+
+    logs.push({ time, tag, message });
 
     // 只保留最新 100 筆，避免 KV 無限增長
     if (logs.length > 100) logs.splice(0, logs.length - 100);
