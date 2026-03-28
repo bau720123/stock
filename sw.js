@@ -3,7 +3,7 @@ const CACHE_NAME = 'stock-v3';
 // 安裝事件：Service Worker 第一次註冊時觸發
 self.addEventListener('install', event => {
   event.waitUntil(
-    fetch('https://billowing-queen-4a58.bau720123.workers.dev/write-log', {
+    fetch('https://billowing-queen-4a58.bau720123.workers.dev/write-logs', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ tag: 'SW', message: '安裝完成' })
@@ -15,7 +15,7 @@ self.addEventListener('install', event => {
 self.addEventListener('activate', event => {
   event.waitUntil(
     Promise.all([
-      fetch('https://billowing-queen-4a58.bau720123.workers.dev/write-log', {
+      fetch('https://billowing-queen-4a58.bau720123.workers.dev/write-logs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ tag: 'SW', message: '已啟動' })

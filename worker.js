@@ -15,6 +15,8 @@ function json(data, status = 200) {
 
 export default {
   async fetch(request, env) {
+    // https://billowing-queen-4a58.bau720123.workers.dev/path
+
     if (request.method === "OPTIONS") return new Response(null, { headers: CORS });
 
     const path = new URL(request.url).pathname;
@@ -38,14 +40,14 @@ export default {
       await env.KV.put("last_click_action", action);
       return json({ success: true });
     }
-    if (path === "/debug-log") {
+    if (path === "/read-button-logs") {
       const val = await env.KV.get("last_click_action");
       return json({ last_click_action: val });
     }
-    if (path === "/debug-subs") return await debugSubs(env);
+    if (path === "/read-subs") return await readSubs(env);
     if (path === "/clear-subs") return await clearSubs(env);
-    if (path === "/logs") return await readLogs(env);
-    if (path === "/write-log") return await handleWriteLog(request, env);
+    if (path === "/read-logs") return await readLogs(env);
+    if (path === "/write-logs") return await handleWriteLogs(request, env);
     if (path === "/clear-logs") return await clearLogs(env);
 
     return json({ error: "unknown path" }, 404);
@@ -505,7 +507,7 @@ function concat(...arrays) {
   return result;
 }
 
-async function debugSubs(env) {
+async function readSubs(env) {
   const existing = await env.KV.get("subscriptions");
   if (!existing) return json({ count: 0, list: [] });
   const list = JSON.parse(existing);
@@ -527,17 +529,17 @@ async function readLogs(env) {
   return json({ count: logs.length, logs: logs.reverse() }); // 最新的在前
 }
 
-async function handleWriteLog(request, env) {
+async function handleWriteLogs(request, env) {
   try {
     const body = await request.json();
-    await writeLog(env, body.tag || 'INFO', body.message || '');
+    await writeLogs(env, body.tag || 'INFO', body.message || '');
     return json({ success: true });
   } catch (e) {
     return json({ success: false, error: e.message });
   }
 }
 
-async function writeLog(env, tag, message) {
+async function writeLogs(env, tag, message) {
   try {
     const existing = await env.KV.get("logs");
     const logs = existing ? JSON.parse(existing) : [];
