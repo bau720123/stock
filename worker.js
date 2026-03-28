@@ -333,19 +333,27 @@ async function sendWebPush(subscription, payload, env) {
     const jwt = await buildVapidJwt(endpoint, subject, publicKey, privateKey);
 
     // 2. 加密 payload
-    const body = await encryptPayload(
-      JSON.stringify(payload), p256dh, auth
-    );
+    const body = await encryptPayload(JSON.stringify(payload), p256dh, auth);
+
+    const isApple = endpoint.includes('web.push.apple.com');
+
+    const headers = {
+      'Authorization': `vapid t=${jwt},k=${publicKey}`,
+      'Content-Type': 'application/octet-stream',
+      'Content-Encoding': 'aes128gcm',
+      'TTL': '86400',
+    };
+
+    // Apple 需要額外的 header
+    if (isApple) {
+      headers['apns-push-type'] = 'alert';
+      headers['apns-priority'] = '10';
+    }
 
     // 3. 發送
     const res = await fetch(endpoint, {
       method: 'POST',
-      headers: {
-        'Authorization': `vapid t=${jwt},k=${publicKey}`,
-        'Content-Type': 'application/octet-stream',
-        'Content-Encoding': 'aes128gcm',
-        'TTL': '86400',
-      },
+      headers,
       body,
     });
 
