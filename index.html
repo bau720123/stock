@@ -215,6 +215,7 @@
 <meta name="apple-mobile-web-app-title" content="即時報價">
 <link rel="apple-touch-icon" href="/stock/icon-192.png">
 <link rel="icon" href="/stock/favicon.ico" type="image/x-icon">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
 
@@ -271,7 +272,9 @@ async function sendNotification(title, body, url = '/stock/index.html') {
 // 將訂閱邏輯封裝成一個函數
 async function subscribeUser() {
   if (!('serviceWorker' in navigator)) {
-    await writeLogs('ERROR', '瀏覽器不支援 Service Worker');
+    const replyMessage = '您的瀏覽器不支援 Service Worker';
+    showSweetAlert('error', '發生錯誤', replyMessage);
+    await writeLogs('ERROR', replyMessage);
     return;
   }
 
@@ -282,15 +285,22 @@ async function subscribeUser() {
     // iOS 偵測與提醒
     const isStandalone = window.navigator.standalone === true;
     if (!isStandalone && /iPhone|iPad|iPod/.test(navigator.userAgent)) {
-      await writeLogs('ERROR', 'iOS 必須先「加入主畫面」成為 PWA 才能開啟通知！');
+      const replyMessage = 'iOS 必須先「加入主畫面」成為 PWA 才能開啟通知！';
+      showSweetAlert('error', '發生錯誤', replyMessage);
+      await writeLogs('ERROR', replyMessage);
       return;
     }
     
     // 請求通知權限
     const permission = await Notification.requestPermission();
-    await writeLogs('INFO', '[SW] 通知權限：' + permission);
+    const replyMessage = '[SW] 通知權限：' + permission;
+    showSweetAlert('info', '通知權限', replyMessage);
+    await writeLogs('INFO', replyMessage);
+  
     if (permission !== 'granted') {
-      await writeLogs('ERROR', '權限被拒絕，請至「設定 > 通知 > 即時報價」手動開啟');
+      const replyMessage = '權限被拒絕，請至「設定 > 通知 > 即時報價」手動開啟';
+      showSweetAlert('error', '發生錯誤', replyMessage);
+      await writeLogs('ERROR', replyMessage);
       return;
     }
 
@@ -303,9 +313,13 @@ async function subscribeUser() {
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
       });
-      await writeLogs('PUSH', '訂閱成功：' + subscription.endpoint.substring(0, 50));
+      const replyMessage = '訂閱成功：' + subscription.endpoint.substring(0, 50);
+      showSweetAlert('info', '訂閱狀態', replyMessage);
+      await writeLogs('PUSH', replyMessage);
     } catch (e) {
-      await writeLogs('SW', '訂閱失敗：' + e.message);
+      const replyMessage = '訂閱失敗：' + e.message;
+      showSweetAlert('error', '發生錯誤', replyMessage);
+      await writeLogs('SW', replyMessage);
       return;
     }
 
@@ -319,12 +333,18 @@ async function subscribeUser() {
           userAgent: navigator.userAgent
         })
       });
-      await writeLogs('SW', 'Push 訂閱完成，已傳送到 Worker');
+      const replyMessage = 'Push 訂閱完成，已傳送到 Worker';
+      showSweetAlert('info', '訂閱狀態', replyMessage);
+      await writeLogs('SW', replyMessage);
     } catch (e) {
-      await writeLogs('ERROR', '傳送到 Worker 失敗：' + e.message);
+      const replyMessage = '傳送到 Worker 失敗：' + e.message;
+      showSweetAlert('error', '發生錯誤', replyMessage);
+      await writeLogs('ERROR', replyMessage);
     }
   } catch (err) {
-    await writeLogs('ERROR', '註冊失敗：' + err);
+    const replyMessage = '例外失敗：' + err;
+    showSweetAlert('error', '發生錯誤', replyMessage);
+    await writeLogs('ERROR', replyMessage);
   }
 }
 
@@ -333,16 +353,22 @@ if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/stock/sw.js')
       .then(async reg => {
-        await writeLogs('SW', '註冊成功：' + reg.scope);
+        const replyMessage = '註冊成功：' + reg.scope;
+        showSweetAlert('info', '註冊狀態', replyMessage);
+        await writeLogs('SW', replyMessage);
 
         // 先檢查 Notification 是否存在
         if (typeof Notification === 'undefined') {
-          await writeLogs('ERROR', '此環境不支援通知功能');
+          const replyMessage = '此環境不支援通知功能';
+          showSweetAlert('error', '發生錯誤', replyMessage);
+          await writeLogs('ERROR', replyMessage);
           return;
         }
       })
       .catch(async err => {
-        await writeLogs('ERROR', '註冊失敗：' + err);
+        const replyMessage = '註冊失敗：' + err;
+        showSweetAlert('error', '發生錯誤', replyMessage);
+        await writeLogs('ERROR', replyMessage);
       });
   });
 }
@@ -735,6 +761,16 @@ async function writeLogs(tag, message) {
   } catch (e) {
     // log 失敗不影響主流程
   }
+}
+
+function showSweetAlert(icon = 'info', title = '', text = '') {
+  Swal.fire({
+    icon: icon,
+    title: title,
+    text: text,
+    confirmButtonText: '確定',
+    confirmButtonColor: '#0d6efd'
+  });
 }
 </script>
 </body>
