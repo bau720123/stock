@@ -230,6 +230,11 @@ Value: [
 | 每天 12:00 | 04:00 | `0 4 * * *` |
 | 每天 20:00 | 12:00 | `0 12 * * *` |
 
+**wrangler 安裝方式：**
+```toml
+npm install -g wrangler
+```
+
 **wrangler.toml 設定：**
 ```toml
 [triggers]

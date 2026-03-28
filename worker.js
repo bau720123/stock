@@ -357,7 +357,9 @@ async function sendWebPush(subscription, payload, env) {
       body,
     });
 
-    return { endpoint, status: res.status };
+    // 顯示錯誤訊息
+    const resText = await res.text();
+    return { endpoint, status: res.status, responseBody: resText };
   } catch (e) {
     return { endpoint: subscription.endpoint, error: e.message };
   }
