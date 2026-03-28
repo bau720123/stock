@@ -271,7 +271,7 @@ async function sendNotification(title, body, url = '/stock/index.html') {
 // 將訂閱邏輯封裝成一個函數
 async function subscribeUser() {
   if (!('serviceWorker' in navigator)) {
-    alert('瀏覽器不支援 Service Worker');
+    await writeLog('ERROR', '瀏覽器不支援 Service Worker');
     return;
   }
 
@@ -282,15 +282,15 @@ async function subscribeUser() {
     // iOS 偵測與提醒
     const isStandalone = window.navigator.standalone === true;
     if (!isStandalone && /iPhone|iPad|iPod/.test(navigator.userAgent)) {
-      alert('iOS 必須先「加入主畫面」成為 PWA 才能開啟通知！');
+      await writeLog('ERROR', 'iOS 必須先「加入主畫面」成為 PWA 才能開啟通知！');
       return;
     }
     
     // 請求通知權限
     const permission = await Notification.requestPermission();
-    alert('[SW] 通知權限：' + permission);
+    await writeLog('INFO', '[SW] 通知權限：' + permission);
     if (permission !== 'granted') {
-      alert('權限被拒絕，請至「設定 > 通知 > 即時報價」手動開啟');
+      await writeLog('ERROR', '權限被拒絕，請至「設定 > 通知 > 即時報價」手動開啟');
       return;
     }
 
@@ -303,9 +303,9 @@ async function subscribeUser() {
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
       });
-      alert('[SW] 訂閱成功：' + subscription.endpoint.substring(0, 50));
+      await writeLog('PUSH', '訂閱成功：' + subscription.endpoint.substring(0, 50));
     } catch (e) {
-      alert('[SW] 訂閱失敗：' + e.message);
+      await writeLog('SW', '訂閱失敗：' + e.message);
       return;
     }
 
@@ -319,12 +319,12 @@ async function subscribeUser() {
           userAgent: navigator.userAgent
         })
       });
-      alert('[SW] Push 訂閱完成，已傳送到 Worker');
+      await writeLog('SW', 'Push 訂閱完成，已傳送到 Worker');
     } catch (e) {
-      alert('[SW] 傳送到 Worker 失敗：' + e.message);
+      await writeLog('ERROR', '傳送到 Worker 失敗：' + e.message);
     }
   } catch (err) {
-    alert('[SW] 註冊失敗：' + err)
+    await writeLog('ERROR', '註冊失敗：' + err);
   }
 }
 
@@ -333,76 +333,19 @@ if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/stock/sw.js')
       .then(async reg => {
-        alert('[SW] 註冊成功：' + reg.scope);
+        await writeLog('SW', '註冊成功：' + reg.scope);
 
         // 先檢查 Notification 是否存在
         if (typeof Notification === 'undefined') {
-          alert('[SW] 此環境不支援通知功能');
+          await writeLog('ERROR', '此環境不支援通知功能');
           return;
         }
       })
-      .catch(err => alert('[SW] 註冊失敗' + err));
+      .catch(async err => {
+        await writeLog('ERROR', '註冊失敗：' + err);
+      });
   });
 }
-
-// ── Service Worker 註冊 ──
-// if ('serviceWorker' in navigator) {
-//   window.addEventListener('load', () => {
-//     navigator.serviceWorker.register('/stock/sw.js')
-//       .then(async reg => {
-//         alert('[SW] 註冊成功：' + reg.scope);
-
-//         // 先檢查 Notification 是否存在
-//         if (typeof Notification === 'undefined') {
-//           alert('[SW] 此環境不支援通知功能');
-//           return;
-//         }
-
-//         // 請求通知權限
-//         const permission = await Notification.requestPermission();
-//         alert('[SW] 通知權限：' + permission);
-//         if (permission !== 'granted') return;
-
-//         // 訂閱 Web Push
-//         const VAPID_PUBLIC_KEY = 'BNKIWkZVpBlLD1R1i7eU7ZhtS-W7X5wI_v84v_rGOGBRvAKO999c1DssgaBvVRI2y5w2SkUx62upF8hs34PicbA';
-
-//         let subscription;
-//         try {
-//           subscription = await reg.pushManager.subscribe({
-//             userVisibleOnly: true,
-//             applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
-//           });
-//           alert('[SW] 訂閱成功：' + subscription.endpoint.substring(0, 50));
-//         } catch (e) {
-//           alert('[SW] 訂閱失敗：' + e.message);
-//           return;
-//         }
-
-//         try {
-//           // 把 subscription 傳給 Worker 時，順便帶上 User-Agent
-//           await fetch('https://billowing-queen-4a58.bau720123.workers.dev/subscribe', {
-//             method: 'POST',
-//             headers: { 'Content-Type': 'application/json' },
-//             body: JSON.stringify({
-//               ...subscription.toJSON(),
-//               userAgent: navigator.userAgent
-//             })
-//           });
-//           alert('[SW] Push 訂閱完成，已傳送到 Worker');
-//         } catch (e) {
-//           alert('[SW] 傳送到 Worker 失敗：' + e.message);
-//         }
-//       })
-//       .catch(err => alert('[SW] 註冊失敗：' + err));
-
-//     // 確保 SW 更新時頁面會同步刷新，拿到最新的 SW 和資料
-//     navigator.serviceWorker.addEventListener('controllerchange', () => {
-//       if (sessionStorage.getItem('sw-reloaded')) return;
-//       sessionStorage.setItem('sw-reloaded', '1');
-//       window.location.reload();
-//     });
-//   });
-// }
 
 // VAPID 公鑰轉換工具函數
 function urlBase64ToUint8Array(base64String) {
@@ -780,6 +723,18 @@ function startCountdown() {
       loadAll();
     }
   }, 1000);
+}
+
+async function writeLog(tag, message) {
+  try {
+    await fetch(`${WORKER}/write-log`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tag, message })
+    });
+  } catch (e) {
+    // log 失敗不影響主流程
+  }
 }
 </script>
 </body>

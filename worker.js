@@ -44,6 +44,8 @@ export default {
     }
     if (path === "/debug-subs") return await debugSubs(env);
     if (path === "/clear-subs") return await clearSubs(env);
+    if (path === "/logs") return await readLogs(env);
+    if (path === "/write-log") return await handleWriteLog(request, env);
 
     return json({ error: "unknown path" }, 404);
   },
@@ -280,16 +282,17 @@ async function handleSubscribe(request, env) {
     const body = await request.json();
     const { userAgent, ...subscription } = body;
 
-    const isAndroid = userAgent && /Android/i.test(userAgent);
+    // 記錄完整 userAgent
+    const platform = userAgent || 'unknown';
 
     // 讀取現有的 subscriptions
     const existing = await env.KV.get("subscriptions");
     const list = existing ? JSON.parse(existing) : [];
-
+  
     // 避免重複儲存同一個 endpoint
     const isDuplicate = list.some(s => s.endpoint === subscription.endpoint);
     if (!isDuplicate) {
-      list.push({ ...subscription, isAndroid }); // 存入裝置類型
+      list.push({ ...subscription, platform }); // isAndroid 改成 platform
       await env.KV.put("subscriptions", JSON.stringify(list));
     }
 
@@ -505,10 +508,9 @@ async function debugSubs(env) {
   const existing = await env.KV.get("subscriptions");
   if (!existing) return json({ count: 0, list: [] });
   const list = JSON.parse(existing);
-  // 只顯示 endpoint 和 isAndroid，不顯示完整金鑰
   const summary = list.map(s => ({
-    endpoint: s.endpoint.substring(0, 60) + '...',
-    isAndroid: s.isAndroid ?? null,
+    endpoint: s.endpoint.substring(0, 60) + '...', // 不顯示完整金鑰
+    platform: s.platform || 'unknown',
   }));
   return json({ count: list.length, list: summary });
 }
@@ -516,6 +518,42 @@ async function debugSubs(env) {
 async function clearSubs(env) {
   await env.KV.put("subscriptions", JSON.stringify([]));
   return json({ success: true, message: "已清除所有 subscriptions" });
+}
+
+async function readLogs(env) {
+  const existing = await env.KV.get("logs");
+  const logs = existing ? JSON.parse(existing) : [];
+  return json({ count: logs.length, logs: logs.reverse() }); // 最新的在前
+}
+
+async function handleWriteLog(request, env) {
+  try {
+    const body = await request.json();
+    await writeLog(env, body.tag || 'INFO', body.message || '');
+    return json({ success: true });
+  } catch (e) {
+    return json({ success: false, error: e.message });
+  }
+}
+
+async function writeLog(env, tag, message) {
+  try {
+    const existing = await env.KV.get("logs");
+    const logs = existing ? JSON.parse(existing) : [];
+    
+    logs.push({
+      time: new Date().toISOString(),
+      tag,
+      message
+    });
+
+    // 只保留最新 100 筆，避免 KV 無限增長
+    if (logs.length > 100) logs.splice(0, logs.length - 100);
+
+    await env.KV.put("logs", JSON.stringify(logs));
+  } catch (e) {
+    // log 失敗不影響主流程
+  }
 }
 
 async function handleCron(env) {
@@ -571,12 +609,22 @@ async function handleCron(env) {
       body,
       url: '/stock/index.html',
       // image: '/stock/banner.png',
-      actions: sub.isAndroid ? [] : [ // Android 不帶 actions
+      actions: (isAndroidPlatform(sub.platform) || isApplePlatform(sub.platform)) ? [] : [
         { action: 'view',    title: '查看詳情', icon: '/stock/icon-192.png' },
-        { action: 'dismiss', title: '忽略', icon: '/stock/icon-192.png' },
+        { action: 'dismiss', title: '忽略',     icon: '/stock/icon-192.png' },
       ]
     }, env))
   );
+}
+
+// 是否是Android裝置（用於決定是否顯示行動按鈕，因為 Android 的 Web Push 行動按鈕支援不佳）
+function isAndroidPlatform(platform) {
+  return platform && /Android/i.test(platform);
+}
+
+// 是否是iOS或Mac裝置
+function isApplePlatform(platform) {
+  return platform && /iPhone|iPad|iPod|Mac/i.test(platform);
 }
 
 // ── 工具函數 ───────────────────────────────────────────────
