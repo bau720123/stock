@@ -46,6 +46,7 @@ export default {
     if (path === "/clear-subs") return await clearSubs(env);
     if (path === "/logs") return await readLogs(env);
     if (path === "/write-log") return await handleWriteLog(request, env);
+    if (path === "/clear-logs") return await clearLogs(env);
 
     return json({ error: "unknown path" }, 404);
   },
@@ -555,6 +556,11 @@ async function writeLog(env, tag, message) {
   } catch (e) {
     // log 失敗不影響主流程
   }
+}
+
+async function clearLogs(env) {
+  await env.KV.put("logs", JSON.stringify([]));
+  return json({ success: true, message: "已清除所有 logs" });
 }
 
 async function handleCron(env) {
