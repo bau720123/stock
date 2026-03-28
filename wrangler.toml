@@ -8,3 +8,6 @@ id = "e733a1b2b10c4c44b9aa862b241ee83f"
 
 [triggers]
 crons = ["0 */1 * * *"]
+
+[vars]
+VAPID_SUBJECT = "mailto:bau720123@gmail.com"
