@@ -372,6 +372,11 @@ if ('serviceWorker' in navigator) {
           await writeLogs('ERROR', replyMessage);
           return;
         }
+
+        // 檢查通知權限
+        if (Notification.permission === 'granted') {
+          document.getElementById("subscribeIcon").style.fill = "aliceblue";
+        }
       })
       .catch(async err => {
         const replyMessage = '註冊失敗：' + err;
