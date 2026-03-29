@@ -787,7 +787,7 @@ async function loadSentiment() {
 
 // 台積電 ADR：合併 CNBC 與 RobinHood
 async function loadRH() {
-  // const d = await fetch(WORKER + '/rh').then(r => r.json());
+  const d = await fetch(WORKER + '/rh').then(r => r.json());
   let html = `<div class="card-title">台積電 ADR</div>`;
   
   // A. CNBC 來源 (包含開盤、最高、最低)
@@ -810,15 +810,15 @@ async function loadRH() {
 
   // B. RobinHood 來源
   // 20260327 官方似乎開啟了 CloudFront WAF + TLS fingerprinting，導致無法直接從前端取得資料了，暫時先註解掉這部分
-  // if (d.success) {
-  //   html += `<span class="group-header">RobinHood</span>`;
-  //   html += row('即時變動', d.changeText, changeClass(d.changeText));
-  //   html += row('額外資訊', d.tertiaryText, changeClass(d.tertiaryText));
-  // }
+  if (d.success) {
+    html += `<span class="group-header">RobinHood</span>`;
+    html += row('即時變動', d.changeText, changeClass(d.changeText));
+    html += row('額外資訊', d.tertiaryText, changeClass(d.tertiaryText));
+  }
 
-  // const cls = d.success ? changeClass(d.changeText) : '';
-  // setCard('card-rh', cls === 'up' ? 1 : cls === 'down' ? -1 : 0, html);
-  setCard('card-rh', 0, html);
+  const cls = d.success ? changeClass(d.changeText) : '';
+  setCard('card-rh', cls === 'up' ? 1 : cls === 'down' ? -1 : 0, html);
+  // setCard('card-rh', 0, html);
 }
 
 const REFRESH_INTERVAL = 60; // 秒，改這個就通吃
