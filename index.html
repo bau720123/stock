@@ -205,6 +205,57 @@
   @media (max-width: 680px) {
     .card-wide { grid-column: auto; }
   }
+
+/* ── Slide Menu ── */
+#menuOverlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 200;
+}
+#menuOverlay.active { display: block; }
+
+#slideMenu {
+  position: fixed;
+  top: 0;
+  left: -280px;
+  width: 280px;
+  height: 100vh;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  z-index: 300;
+  transition: left .3s ease;
+  overflow-y: auto;
+}
+#slideMenu.active { left: 0; }
+
+#menuHeader {
+  font-family: var(--mono);
+  font-size: .9rem;
+  font-weight: 600;
+  color: var(--accent);
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid var(--border);
+  letter-spacing: .12em;
+}
+
+#menuList {
+  list-style: none;
+  padding: 12px 0;
+}
+#menuList li a {
+  display: block;
+  padding: 12px 20px;
+  color: var(--text);
+  text-decoration: none;
+  font-size: .88rem;
+  transition: background .15s, color .15s;
+}
+#menuList li a:hover {
+  background: var(--border);
+  color: var(--accent);
+}
 </style>
 
 <link rel="manifest" href="/stock/manifest.json">
@@ -219,8 +270,54 @@
 </head>
 <body>
 
+<!-- Overlay 背景遮罩 -->
+<div id="menuOverlay" onclick="closeMenu()"></div>
+
+<!-- Slide Menu -->
+<nav id="slideMenu">
+  <div id="menuHeader">&#9632; 即時報價</div>
+  <ul id="menuList">
+    <li><a href="/stock/index.html">📊 即時報價</a></li>
+    <li><a href="#" onclick="closeMenu()">⚙️ 設定</a></li>
+    <li><a href="#" onclick="closeMenu()">⚙️ 設定</a></li>
+    <li><a href="#" onclick="closeMenu()">⚙️ 設定</a></li>
+    <li><a href="#" onclick="closeMenu()">⚙️ 設定</a></li>
+    <li><a href="#" onclick="closeMenu()">⚙️ 設定</a></li>
+    <li><a href="#" onclick="closeMenu()">⚙️ 設定</a></li>
+    <li><a href="#" onclick="closeMenu()">⚙️ 設定</a></li>
+    <li><a href="#" onclick="closeMenu()">⚙️ 設定</a></li>
+    <li><a href="#" onclick="closeMenu()">⚙️ 設定</a></li>
+    <li><a href="#" onclick="closeMenu()">⚙️ 設定</a></li>
+    <li><a href="#" onclick="closeMenu()">⚙️ 設定</a></li>
+    <li><a href="#" onclick="closeMenu()">⚙️ 設定</a></li>
+    <li><a href="#" onclick="closeMenu()">⚙️ 設定</a></li>
+    <li><a href="#" onclick="closeMenu()">⚙️ 設定</a></li>
+    <li><a href="#" onclick="closeMenu()">⚙️ 設定</a></li>
+    <li><a href="#" onclick="closeMenu()">⚙️ 設定</a></li>
+    <li><a href="#" onclick="closeMenu()">⚙️ 設定</a></li>
+    <li><a href="#" onclick="closeMenu()">⚙️ 設定</a></li>
+    <li><a href="#" onclick="closeMenu()">⚙️ 設定</a></li>
+    <li><a href="#" onclick="closeMenu()">⚙️ 設定</a></li>
+    <li><a href="#" onclick="closeMenu()">⚙️ 設定</a></li>
+    <li><a href="#" onclick="closeMenu()">⚙️ 設定</a></li>
+    <li><a href="#" onclick="closeMenu()">⚙️ 設定</a></li>
+    <li><a href="#" onclick="closeMenu()">⚙️ 設定</a></li>
+    <li><a href="#" onclick="closeMenu()">⚙️ 設定</a></li>
+    <li><a href="#" onclick="closeMenu()">⚙️ 設定</a></li>
+    <li><a href="#" onclick="closeMenu()">⚙️ 設定</a></li>
+    <li><a href="#" onclick="closeMenu()">⚙️ 設定</a></li>
+    <li><a href="#" onclick="closeMenu()">⚙️ 設定</a></li>
+    <li><a href="#" onclick="closeMenu()">⚙️ 設定</a></li>
+    <li><a href="#" onclick="closeMenu()">⚙️ 設定</a></li>
+    <li><a href="#" onclick="closeMenu()">⚙️ 設定</a></li>
+    <li><a href="#" onclick="closeMenu()">⚙️ 設定</a></li>
+    <li><a href="#" onclick="closeMenu()">⚙️ 設定</a></li>
+    <li><a href="#" onclick="javascript:alert(1);">⚙️ 設定XYZ</a></li>
+  </ul>
+</nav>
+
 <header>
-  <h1>&#9632; 即時報價</h1>
+  <h1 onclick="openMenu()" style="cursor:pointer;">&#9632; 即時報價</h1>
   <div style="display:flex;align-items:center;gap:16px;">
     <span id="clock">--:--:--</span>
     <button id="refreshBtn" onclick="loadAll()">
@@ -796,6 +893,18 @@ function showSweetAlert(icon = 'info', title = '', text = '') {
     confirmButtonText: '確定',
     confirmButtonColor: '#0d6efd'
   });
+}
+
+function openMenu() {
+  document.getElementById('slideMenu').classList.add('active');
+  document.getElementById('menuOverlay').classList.add('active');
+  document.body.style.overflow = 'hidden'; // ← 禁止 body 滾動
+}
+
+function closeMenu() {
+  document.getElementById('slideMenu').classList.remove('active');
+  document.getElementById('menuOverlay').classList.remove('active');
+  document.body.style.overflow = ''; // ← 恢復 body 滾動
 }
 </script>
 </body>
