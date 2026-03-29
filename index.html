@@ -441,7 +441,13 @@ function setCard(id, updown, html) {
 async function loadAll() {
   if (typeof Notification !== 'undefined') {
     if (Notification.permission === 'default') {
-      Notification.requestPermission();
+      Notification.requestPermission().then(permission => {
+        if (permission === 'granted') {
+          document.getElementById("subscribeIcon").style.fill = "aliceblue";
+        } else {
+          document.getElementById("subscribeIcon").style.fill = "none";
+        }
+      });
     } else if (Notification.permission === 'granted') {
       document.getElementById("subscribeIcon").style.fill = "aliceblue";
     } else {
