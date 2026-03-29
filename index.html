@@ -471,7 +471,7 @@ async function loadAll() {
   btn.classList.remove('spinning');
   startCountdown();
 
-  if (Notification.requestPermission() === 'granted') {
+  if (Notification.permission === 'granted') {
     document.getElementById("subscribeIcon").style.fill = "aliceblue";
   }
 }
