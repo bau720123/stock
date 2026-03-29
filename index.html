@@ -62,7 +62,7 @@
   }
 
   /* ── Refresh button ── */
-  #refreshBtn {
+  #refreshBtn, #subscribeUser {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -80,7 +80,7 @@
     border-color: aqua;
     background-color: black;
   }
-  #refreshBtn:hover { border-color: var(--accent); color: var(--accent); }
+  #refreshBtn:hover, #subscribeUser:hover { border-color: var(--accent); color: var(--accent); }
   #refreshBtn.spinning svg { animation: spin .8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
@@ -228,10 +228,14 @@
         <path d="M23 4v6h-6"/><path d="M1 20v-6h6"/>
         <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
       </svg>
-      重新整理 <span id="countdown">60</span>
+      <!--重新整理 --><span id="countdown">60</span>
     </button>
     <button id="subscribeUser" onclick="subscribeUser()">
-      訂閱通知
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" id="subscribeIcon">
+        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+      </svg>
+      <!--訂閱通知 --><span id="countdown1">&nbsp;</span>
     </button>
   </div>
 </header>
@@ -302,6 +306,10 @@ async function subscribeUser() {
       showSweetAlert('error', '發生錯誤', replyMessage);
       await writeLogs('ERROR', replyMessage);
       return;
+    }
+
+    if (permission === 'granted') {
+      document.getElementById("subscribeIcon").style.fill = "aliceblue";
     }
 
     // 訂閱 Web Push
@@ -457,6 +465,10 @@ async function loadAll() {
 
   btn.classList.remove('spinning');
   startCountdown();
+
+  if (Notification.requestPermission() === 'granted') {
+    document.getElementById("subscribeIcon").style.fill = "aliceblue";
+  }
 }
 
 window.onload = loadAll;
