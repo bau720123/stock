@@ -602,11 +602,11 @@ async function loadTW() {
   if (fitx.success) {
     const cls = changeClass(fitx.changeText, 1);
     const formattedTime = fitx.updateTime.replace(/\./g, '-');
-    html += row('開盤', fitx.open.toFixed(0));
-    html += row('最高', fitx.high.toFixed(0));
-    html += row('最低', fitx.low.toFixed(0));
+    html += row('開盤價', fitx.open.toFixed(0));
+    html += row('最高價', fitx.high.toFixed(0));
+    html += row('最低價', fitx.low.toFixed(0));
     html += row('漲跌', fitx.changeText, cls);
-    html += row('成交', fitx.current.toFixed(2), 'accent');
+    html += row('成交價', fitx.current.toFixed(2), 'accent');
     html += row('更新時間', formattedTime);
   } else {
     html += `<div class="error-text">無法取得資料</div>`;
@@ -617,11 +617,11 @@ async function loadTW() {
   if (twn.success) {
     const cls = changeClass(twn.changeText, 1);
     const formattedTime = twn.updateTime.replace(/\./g, '-');
-    html += row('開盤', twn.open.toFixed(0));
-    html += row('最高', twn.high.toFixed(0));
-    html += row('最低', twn.low.toFixed(0));
+    html += row('開盤價', twn.open.toFixed(0));
+    html += row('最高價', twn.high.toFixed(0));
+    html += row('最低價', twn.low.toFixed(0));
     html += row('漲跌', twn.changeText, cls);
-    html += row('成交', twn.current.toFixed(2), 'accent');
+    html += row('成交價', twn.current.toFixed(2), 'accent');
     html += row('更新時間', formattedTime);
   } else {
     html += `<div class="error-text">無法取得資料</div>`;
@@ -650,11 +650,11 @@ async function loadCommodity() {
   //   const changeNum = parseFloat(brent.changeText.replace(/[▲▼]/g, '').trim());
   //   const cls = changeNum < 0 ? 'down' : 'up';
   //   const formattedTime = brent.updateTime.replace(/\./g, '-');
-  //   html += row('開盤', brent.open.toFixed(0));
-  //   html += row('最高', brent.high.toFixed(0));
-  //   html += row('最低', brent.low.toFixed(0));
+  //   html += row('開盤價', brent.open.toFixed(0));
+  //   html += row('最高價', brent.high.toFixed(0));
+  //   html += row('最低價', brent.low.toFixed(0));
   //   html += row('漲跌', brent.changeText, cls);
-  //   html += row('成交', brent.current.toFixed(2), 'accent');
+  //   html += row('成交價', brent.current.toFixed(2), 'accent');
   //   html += row('更新時間', formattedTime);
   //   html += row('價格', brentStockq.success ? brentStockq.price.toFixed(2) : '--');
   // } else {
@@ -669,9 +669,9 @@ async function loadCommodity() {
     const changePercent = changeNum / sinaBrent.prev * 100;
 
     html += row('前次', sinaBrent.prev.toFixed(2));
-    html += row('開盤', sinaBrent.open.toFixed(2));
-    html += row('最高', sinaBrent.high.toFixed(2));
-    html += row('最低', sinaBrent.low.toFixed(2));
+    html += row('開盤價', sinaBrent.open.toFixed(2));
+    html += row('最高價', sinaBrent.high.toFixed(2));
+    html += row('最低價', sinaBrent.low.toFixed(2));
     html += row('漲跌', changeNum.toFixed(2), cls);
     html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
     html += row('價格', sinaBrent.price.toFixed(2), 'accent');
@@ -696,9 +696,9 @@ async function loadCommodity() {
     const cls = changeNum < 0 ? 'down' : 'up';
     const changePercent = changeNum / sinaGold.prev * 100;
     html += row('前次', sinaGold.prev.toFixed(2));
-    html += row('開盤', sinaGold.open.toFixed(2));
-    html += row('最高', sinaGold.high.toFixed(2));
-    html += row('最低', sinaGold.low.toFixed(2));
+    html += row('開盤價', sinaGold.open.toFixed(2));
+    html += row('最高價', sinaGold.high.toFixed(2));
+    html += row('最低價', sinaGold.low.toFixed(2));
     html += row('漲跌', changeNum.toFixed(2), cls);
     html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
     html += row('價格', sinaGold.price.toFixed(2), 'accent');
@@ -714,9 +714,9 @@ async function loadCommodity() {
     const cls = changeNum < 0 ? 'down' : 'up';
     const changePercent = changeNum / sinaSilver.prev * 100;
     html += row('前次', sinaSilver.prev.toFixed(2));
-    html += row('開盤', sinaSilver.open.toFixed(2));
-    html += row('最高', sinaSilver.high.toFixed(2));
-    html += row('最低', sinaSilver.low.toFixed(2));
+    html += row('開盤價', sinaSilver.open.toFixed(2));
+    html += row('最高價', sinaSilver.high.toFixed(2));
+    html += row('最低價', sinaSilver.low.toFixed(2));
     html += row('漲跌', changeNum.toFixed(2), cls);
     html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
     html += row('價格', sinaSilver.price.toFixed(2), 'accent');
@@ -744,9 +744,9 @@ async function loadSentiment() {
     const cls = changeNum < 0 ? 'down' : 'up';
     const changePercent = changeNum / sinaUsdollar.prev * 100;
     html += row('前次', sinaUsdollar.prev.toFixed(2));
-    html += row('開盤', sinaUsdollar.open.toFixed(2));
-    html += row('最高', sinaUsdollar.high.toFixed(2));
-    html += row('最低', sinaUsdollar.low.toFixed(2));
+    html += row('開盤價', sinaUsdollar.open.toFixed(2));
+    html += row('最高價', sinaUsdollar.high.toFixed(2));
+    html += row('最低價', sinaUsdollar.low.toFixed(2));
     html += row('漲跌', changeNum.toFixed(2), cls);
     html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
     html += row('數值', sinaUsdollar.price.toFixed(2), 'accent');
@@ -762,9 +762,9 @@ async function loadSentiment() {
     const cls = changeNum < 0 ? 'down' : 'up';
     const changePercent = changeNum / sinaVix.prev * 100;
     html += row('前次', sinaVix.prev.toFixed(2));
-    html += row('開盤', sinaVix.open.toFixed(2));
-    html += row('最高', sinaVix.high.toFixed(2));
-    html += row('最低', sinaVix.low.toFixed(2));
+    html += row('開盤價', sinaVix.open.toFixed(2));
+    html += row('最高價', sinaVix.high.toFixed(2));
+    html += row('最低價', sinaVix.low.toFixed(2));
     html += row('漲跌', changeNum.toFixed(2), cls);
     html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
     html += row('數值', sinaVix.price.toFixed(2), 'accent');
@@ -790,7 +790,7 @@ async function loadRH() {
   const d = await fetch(WORKER + '/rh').then(r => r.json());
   let html = `<div class="card-title">台積電 ADR</div>`;
   
-  // A. CNBC 來源 (包含開盤、最高、最低)
+  // A. CNBC 來源 (包含開盤價、最高價、最低價)
   if (tsmCnbcData) {
     const m = tsmCnbcData;
     html += `<span class="group-header">CNBC</span>`;

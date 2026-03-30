@@ -40,6 +40,7 @@ export default {
     if (path === "/read-logs") return await readLogs(env);
     if (path === "/write-logs") return await handleWriteLogs(request, env);
     if (path === "/clear-logs") return await clearLogs(env);
+    if (path === "/tsmc") return await fetchFugleQuote("2330", env);
 
     return json({ error: "unknown path" }, 404);
   },
@@ -560,6 +561,52 @@ async function writeLogs(env, tag, message) {
 async function clearLogs(env) {
   await env.KV.put("logs", JSON.stringify([]));
   return json({ success: true, message: "已清除所有 logs" });
+}
+
+async function fetchFugleQuote(symbol, env) {
+  try {
+    const res = await fetch(
+      `https://api.fugle.tw/marketdata/v1.0/stock/intraday/quote/${symbol}`,
+      {
+        headers: {
+          "X-API-KEY": env.FUGLE_KEY,
+          "Accept": "application/json"
+        }
+      }
+    );
+
+    if (!res.ok) {
+      return json({ success: false, error: `HTTP ${res.status}` });
+    }
+
+    const d = await res.json();
+
+    // 解析委買委賣
+    const bids = (d.bids || []).map(b => ({ price: b.price, size: b.size }));
+    const asks = (d.asks || []).map(a => ({ price: a.price, size: a.size }));
+
+    return json({
+      success: true,
+      symbol:        d.symbol        || "",
+      name:          d.name          || "",
+      previousClose: d.previousClose || 0,
+      openPrice:     d.openPrice     || 0,
+      highPrice:     d.highPrice     || 0,
+      lowPrice:      d.lowPrice      || 0,
+      closePrice:    d.closePrice    || 0,
+      avgPrice:      d.avgPrice      || 0,
+      change:        d.change        || 0,
+      changePercent: d.changePercent || 0,
+      bids,
+      asks,
+      tradeVolume:       d.total?.tradeVolume       || 0,
+      tradeVolumeAtBid:  d.total?.tradeVolumeAtBid  || 0,
+      tradeVolumeAtAsk:  d.total?.tradeVolumeAtAsk  || 0,
+      transaction:       d.total?.transaction        || 0,
+    });
+  } catch (e) {
+    return json({ success: false, error: e.message }, 500);
+  }
 }
 
 async function handleCron(env) {
