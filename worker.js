@@ -610,6 +610,15 @@ async function fetchFugleQuote(symbol, env) {
 }
 
 async function handleCron(env) {
+  // 判斷台灣時間是否在週一至週五 05:00～00:00
+  const now = new Date();
+  const twHour = (now.getUTCHours() + 8) % 24;
+  const twDay  = new Date(now.getTime() + 8 * 3600 * 1000).getUTCDay(); // 0=週日
+
+  // 週一(1)至週五(5)，05:00～23:59
+  if (twDay === 0 || twDay === 6) return; // 週六、週日不執行
+  if (twHour < 5) return;                 // 00:00～04:59 不執行
+
   const existing = await env.KV.get("subscriptions");
   if (!existing) return;
 
