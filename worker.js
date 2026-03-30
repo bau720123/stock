@@ -616,12 +616,13 @@ async function handleCron(env) {
   const list = JSON.parse(existing);
 
   // 平行抓取所有資料
-  const [taifexRes, fitxRes, twnRes, brentRes, vixRes] = await Promise.all([
+  const [taifexRes, fitxRes, twnRes, brentRes, vixRes, tsmcStock] = await Promise.all([
     fetchTaifex(),
     fetchHiStock("stocktop2017", "FITX", "指數", "成交量(口)"),
     fetchHiStock("stocktop2017", "TWN", "指數", "成交量(口)"),
     fetchSina("hf_OIL"),
     fetchSina("hf_VX"),
+    fetchFugleQuote("2330", env),
   ]);
 
   const taifex = await taifexRes.json();
@@ -629,6 +630,7 @@ async function handleCron(env) {
   const twn    = await twnRes.json();
   const brent  = await brentRes.json();
   const vix    = await vixRes.json();
+  const tsmc   = await tsmcStock.json();
 
   // 組合摘要文案
   const lines = [];
@@ -652,6 +654,11 @@ async function handleCron(env) {
 
   if (vix.success) {
     lines.push(`VIX 恐慌指數 ${vix.price.toFixed(2)}`);
+  }
+
+  if (tsmc.success) {
+    const sign = tsmc.change > 0 ? '▲' : '▼';
+    lines.push(`台積電現貨 ${tsmc.closePrice.toFixed(0)} (${sign}${Math.abs(tsmc.change).toFixed(0)})`);
   }
 
   const body = lines.length > 0 ? lines.join('\n') : '點擊查看即時報價';

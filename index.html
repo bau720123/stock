@@ -577,10 +577,11 @@ async function loadCnbc() {
 
 // 台股市場概況
 async function loadTW() {
-  const [taifex, fitx, twn] = await Promise.all([
+  const [taifex, fitx, twn, tsmc] = await Promise.all([
     fetch(WORKER + '/taifex').then(r => r.json()),
     fetch(WORKER + '/fitx').then(r => r.json()),
     fetch(WORKER + '/twn').then(r => r.json()),
+    fetch(WORKER + '/tsmc').then(r => r.json()),
   ]);
 
   let html = `<div class="card-title">台股市場概況</div>`;
@@ -623,6 +624,50 @@ async function loadTW() {
     html += row('漲跌', twn.changeText, cls);
     html += row('成交價', twn.current.toFixed(2), 'accent');
     html += row('更新時間', formattedTime);
+  } else {
+    html += `<div class="error-text">無法取得資料</div>`;
+  }
+
+  // 【台積電現貨】
+  html += `<span class="group-header">【${tsmc.name || '位定義'}現貨】</span>`;
+  if (tsmc.success) {
+    const cls = changeClass(tsmc.change, 1);
+    const sign = tsmc.change > 0 ? '▲' : tsmc.change < 0 ? '▼' : '';
+    const lowMinusOpen = (tsmc.lowPrice - tsmc.openPrice).toFixed(0);
+    const lowMinusOpenCls = lowMinusOpen > 0 ? 'up' : lowMinusOpen < 0 ? 'down' : '';
+
+    html += row('上個收盤價', tsmc.previousClose.toFixed(0));
+    html += row('開盤價', tsmc.openPrice.toFixed(0));
+    html += row('最高價', tsmc.highPrice.toFixed(0));
+    html += row('最低價', tsmc.lowPrice.toFixed(0));
+    html += row('現價價', tsmc.closePrice.toFixed(0), 'accent');
+    html += row('均價價', tsmc.avgPrice.toFixed(2));
+    html += row('漲跌', sign + tsmc.change, cls);
+    html += row('低減開', lowMinusOpen, lowMinusOpenCls);
+
+    // 委託簿（並排顯示）
+    html += `
+      <div style="margin-top:10px;">
+        <div style="display:grid;grid-template-columns:1fr auto auto 1fr;gap:4px;font-family:var(--mono);font-size:.75rem;text-align:center;">
+          <span style="color:var(--dim)">張數</span>
+          <span style="color:var(--up)">委買</span>
+          <span style="color:var(--down)">委賣</span>
+          <span style="color:var(--dim)">張數</span>
+        </div>`;
+
+    const maxRows = Math.max(tsmc.bids.length, tsmc.asks.length);
+    for (let i = 0; i < maxRows; i++) {
+      const bid = tsmc.bids[i];
+      const ask = tsmc.asks[i];
+      html += `
+        <div style="display:grid;grid-template-columns:1fr auto auto 1fr;gap:4px;font-family:var(--mono);font-size:.75rem;text-align:center;padding:2px 0;border-bottom:1px solid var(--border);">
+          <span style="color:var(--up)">${bid ? bid.size : ''}</span>
+          <span style="color:var(--up)">${bid ? bid.price : ''}</span>
+          <span style="color:var(--down)">${ask ? ask.price : ''}</span>
+          <span style="color:var(--down)">${ask ? ask.size : ''}</span>
+        </div>`;
+    }
+    html += `</div>`;
   } else {
     html += `<div class="error-text">無法取得資料</div>`;
   }
