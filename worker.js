@@ -29,7 +29,10 @@ export default {
     if (path === "/sina_gold") return await fetchSina("hf_GC");
     if (path === "/sina_silver") return await fetchSina("hf_SI");
     if (path === "/sina_usdollar") return await fetchSina("DINIW");
-    if (path === "/sina_vix") return await fetchSina("znb_VIX"); // f_VX 是期貨
+
+    // https://quotes.sina.cn/index/global/vix
+    if (path === "/sina_vix") return await fetchSina("znb_VIX"); // hf_VX 是期貨
+
     if (path === "/taifex")  return await fetchTaifex();
     if (path === "/cnbc")    return await fetchCnbc();
     if (path === "/rh")      return await fetchRobinHood();
