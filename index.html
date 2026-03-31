@@ -641,7 +641,7 @@ async function loadTW() {
     html += row('最高價', tsmc.highPrice.toFixed(0));
     html += row('最低價', tsmc.lowPrice.toFixed(0));
     html += row('現價', tsmc.closePrice.toFixed(0), 'accent');
-    html += row('均價價', tsmc.avgPrice.toFixed(2));
+    html += row('均價', tsmc.avgPrice.toFixed(2));
     html += row('漲跌', sign + tsmc.change, cls);
     html += row('低減開', lowMinusOpen, lowMinusOpenCls);
 
