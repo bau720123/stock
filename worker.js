@@ -29,7 +29,7 @@ export default {
     if (path === "/sina_gold") return await fetchSina("hf_GC");
     if (path === "/sina_silver") return await fetchSina("hf_SI");
     if (path === "/sina_usdollar") return await fetchSina("DINIW");
-    if (path === "/sina_vix") return await fetchSina("hf_VX");
+    if (path === "/sina_vix") return await fetchSina("znb_VIX"); // f_VX 是期貨
     if (path === "/taifex")  return await fetchTaifex();
     if (path === "/cnbc")    return await fetchCnbc();
     if (path === "/rh")      return await fetchRobinHood();
@@ -143,6 +143,16 @@ async function fetchSina(list) {
         low:    toFloat(parts[5]),
         high:   toFloat(parts[6]),
         prev:   toFloat(parts[7]),
+      });
+    } else if (list === "znb_VIX") {
+      return json({
+        success: true,
+        time:   parts[7] || "",
+        price:  toFloat(parts[1]),
+        open:   toFloat(parts[8]),
+        low:    toFloat(parts[11]),
+        high:   toFloat(parts[10]),
+        prev:   toFloat(parts[9]),
       });
     } else {
       return json({
