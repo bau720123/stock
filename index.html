@@ -640,7 +640,7 @@ async function loadTW() {
     html += row('開盤價', tsmc.openPrice.toFixed(0));
     html += row('最高價', tsmc.highPrice.toFixed(0));
     html += row('最低價', tsmc.lowPrice.toFixed(0));
-    html += row('現價價', tsmc.closePrice.toFixed(0), 'accent');
+    html += row('現價', tsmc.closePrice.toFixed(0), 'accent');
     html += row('均價價', tsmc.avgPrice.toFixed(2));
     html += row('漲跌', sign + tsmc.change, cls);
     html += row('低減開', lowMinusOpen, lowMinusOpenCls);
@@ -674,9 +674,9 @@ async function loadTW() {
     const alertPrice = parseFloat(urlParams.get('price') || '0');
     console.log('數量門檻：' + alertSize);
     console.log('價格門檻：' + alertPrice);
-    console.log('目前價格：' + tsmc.asks[0].price);
+    console.log('目前價格：' + tsmc.bid[0].price);
     // 價格門檻通知
-    if (tsmc.bids[0].size <= alertSize && tsmc.asks[0].price == alertPrice) {
+    if (tsmc.bids[0].size <= alertSize && tsmc.bid[0].price == alertPrice) {
       sendNotification(
         '台積電股票警示',
         `目前價格 ${tsmc.asks[0].price.toFixed(2)} 元`,
