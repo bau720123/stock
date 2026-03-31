@@ -668,6 +668,18 @@ async function loadTW() {
         </div>`;
     }
     html += `</div>`;
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const alertSize  = parseInt(urlParams.get('size')  || '0');  // 預設 0 表示不啟用
+    const alertPrice = parseFloat(urlParams.get('price') || '0');
+    // 價格門檻通知
+    if (tsmc.bids[0].size <= alertSize && tsmc.asks[0].price <= alertPrice) {
+      sendNotification(
+        '台積電股票警示',
+        `目前價格 ${tsmc.asks[0].price.toFixed(2)} 元`,
+        'https://tw.stock.yahoo.com/quote/2330.TW'
+      );
+    }
   } else {
     html += `<div class="error-text">無法取得資料</div>`;
   }
