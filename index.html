@@ -738,7 +738,7 @@ async function loadCommodity() {
     html += row('更新時間', sinaBrent.time);
 
     // 價格門檻通知
-    if (sinaBrent.price >= 100) {
+    if (sinaBrent.price >= 110) {
       sendNotification(
         '布蘭特原油價格警示',
         `目前價格 ${sinaBrent.price.toFixed(2)} 元`,
@@ -831,7 +831,7 @@ async function loadSentiment() {
     html += row('更新時間', sinaVix.time);
 
     // 數值門檻通知
-    if (sinaVix.price >= 25) {
+    if (sinaVix.price >= 27) {
       sendNotification(
         'VIX 恐慌指數警示',
         `目前數值 ${sinaVix.price.toFixed(2)}`,
