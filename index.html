@@ -676,7 +676,7 @@ async function loadTW() {
     console.log('價格門檻：' + alertPrice);
     console.log('上檔價格：' + tsmc.bids[0].price);
     // 價格門檻通知
-    if (tsmc.bids[0].size <= alertSize && tsmc.bid[0].price == alertPrice) {
+    if (tsmc.bids[0].size <= alertSize && tsmc.bids[0].price == alertPrice) {
       sendNotification(
         '台積電股票警示',
         `目前價格 ${tsmc.asks[0].price.toFixed(2)} 元`,
