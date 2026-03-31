@@ -674,7 +674,7 @@ async function loadTW() {
     const alertPrice = parseFloat(urlParams.get('price') || '0');
     console.log('數量門檻：' + alertSize);
     console.log('價格門檻：' + alertPrice);
-    console.log('目前價格：' + smc.asks[0].price);
+    console.log('目前價格：' + tsmc.asks[0].price);
     // 價格門檻通知
     if (tsmc.bids[0].size <= alertSize && tsmc.asks[0].price <= alertPrice) {
       sendNotification(
