@@ -313,7 +313,12 @@ async function handlePushTest(env) {
       list.map(sub => sendWebPush(sub, {
         title: '測試推播',
         body: '這是來自 Cloudflare Worker 的真實推播！',
-        url: '/stock/index.html'
+        url: '/stock/index.html',
+      // image: '/stock/banner.png',
+      actions: (isAndroidPlatform(sub.platform) || isApplePlatform(sub.platform)) ? [] : [
+        { action: 'view',    title: '查看詳情', icon: '/stock/icon-192.png' },
+        { action: 'dismiss', title: '忽略',     icon: '/stock/icon-192.png' },
+      ]
       }, env))
     );
 
