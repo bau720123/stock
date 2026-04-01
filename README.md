@@ -105,7 +105,7 @@ fetch("https://histock.tw/stock/module/function.aspx", {
 | `hf_OIL` | 布蘭特原油 |
 | `hf_GC` | 黃金期貨 |
 | `hf_SI` | 白銀期貨 |
-| `hf_VX` | VIX 恐慌指數 |
+| `znb_VIX` | VIX 恐慌指數 |
 | `DINIW` | 美元指數（欄位格式與其他不同，需特殊處理） |
 
 ---

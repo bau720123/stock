@@ -490,7 +490,7 @@ function formatChange(val) {
   return val;
 }
 
-function row(label, value, cls = '') {
+function row(label, value = '', cls = '') {
   return `<div class="row"><span class="row-label">${label}</span><span class="row-value ${cls}">${value}</span></div>`;
 }
 

@@ -30,8 +30,10 @@ export default {
     if (path === "/sina_silver") return await fetchSina("hf_SI");
     if (path === "/sina_usdollar") return await fetchSina("DINIW");
 
-    // https://quotes.sina.cn/index/global/vix
+    // VIX 恐慌指數：https://quotes.sina.cn/index/global/vix
     if (path === "/sina_vix") return await fetchSina("znb_VIX"); // hf_VX 是期貨
+
+    if (path === "/debug-sina") return await debugSina();
 
     if (path === "/taifex")  return await fetchTaifex();
     if (path === "/cnbc")    return await fetchCnbc();
@@ -51,6 +53,14 @@ export default {
     ctx.waitUntil(handleCron(env));
   }
 };
+
+async function debugSina() {
+  const res = await fetch("https://hq.sinajs.cn/list=hf_OIL,hf_GC,hf_SI,DINIW,znb_VIX", {
+    headers: { "User-Agent": UA, "Referer": "https://finance.sina.com.cn/" }
+  });
+  const text = await res.text();
+  return new Response(text, { headers: { ...CORS, "Content-Type": "text/plain; charset=utf-8" } });
+}
 
 // ── HiStock（台指期 / 富台指）──────────────────────────────
 async function fetchHiStock(m, no, current_title, volume_title) {
@@ -648,7 +658,7 @@ async function handleCron(env) {
     fetchHiStock("stocktop2017", "FITX", "指數", "成交量(口)"),
     fetchHiStock("stocktop2017", "TWN", "指數", "成交量(口)"),
     fetchSina("hf_OIL"),
-    fetchSina("hf_VX"),
+    fetchSina("znb_VIX"),
     fetchFugleQuote("2330", env),
   ]);
 
