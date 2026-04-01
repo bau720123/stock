@@ -365,9 +365,22 @@ function alertEnabled(key) {
 
 // group-header HTML 產生器（含偵測設定按鈕）
 // settingsKey：若傳入則顯示齒輪按鈕，點擊呼叫 openAlertSettings(settingsKey)
-function groupHeader(label, settingsKey = null) {
+function groupHeader(label, settingsKey = null, wording = '') {
   const isActive = settingsKey && (alertEnabled(settingsKey + '_high') || alertEnabled(settingsKey + '_low') || alertEnabled(settingsKey));
-  const btnHtml = settingsKey ? `
+  var descButton = wording ? `
+    <button onclick="showInfo('${wording}')" title="內容說明" class="alert-settings-btn active">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+      </svg>
+    </button>` : '';
+  
+  var space = '';
+  if (settingsKey != '') {
+    space = '&nbsp;';
+  }
+
+  var settingsButton = settingsKey ? `
     <button class="alert-settings-btn ${isActive ? 'active' : ''}"
       title="偵測設定"
       onclick="openAlertSettings('${settingsKey}')">
@@ -375,7 +388,7 @@ function groupHeader(label, settingsKey = null) {
         <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
       </svg>
     </button>` : '';
-  return `<span class="group-header"><span class="group-header-title">${label}</span>${btnHtml}</span>`;
+  return `<span class="group-header"><span class="group-header-title">${label}</span>${descButton}${space}${settingsButton}</span>`;
 }
 
 // 偵測設定彈窗
@@ -410,6 +423,23 @@ const ALERT_CONFIGS = {
     ]
   }
 };
+
+async function showInfo(wording = '') {
+    Swal.fire({
+    icon: 'info',
+    title: '內容說明',
+    html: `<div style="text-align: left;">${wording.replace(/\n/g, '<br>')}</div>`,
+    showCancelButton: true,
+    background: '#111620',
+    color: '#c8d8e8',
+    confirmButtonText: '確定',
+    cancelButtonText: '取消'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      // 內容說明
+    }
+  });
+}
 
 async function openAlertSettings(configKey) {
   const config = ALERT_CONFIGS[configKey];
@@ -756,13 +786,13 @@ async function loadCnbc() {
 
   let html = `<div class="card-title">美股市場概況</div>`;
   
-  html += `<span class="group-header">【美股盤前電子盤】</span>`;
+  html += groupHeader('【美股盤前電子盤】', '', '美股盤前電子盤（Pre-Market Session）指在正常開盤時間（美東時間 9:30 AM）前，透過電子通訊網路（ECN）進行的股票交易時段，通常為美東時間凌晨 4:00 至 9:30，對應台灣時間晚上 16:00/17:00 後至 21:30。此時段成交量較小但波動大，適合作為盤前財報發布後的策略布局與風險控管。');
   html += row('道瓊期貨', formatChange(fv.dow), changeClass(fv.dow));
   html += row('標普500期貨', formatChange(fv.sp), changeClass(fv.sp));
   html += row('納斯達克100期貨', formatChange(fv.nasdaq), changeClass(fv.nasdaq));
   html += row('羅素2000期貨', formatChange(fv.russell), changeClass(fv.russell));
 
-  html += `<span class="group-header">【美股四大指數】</span>`;
+  html += groupHeader('【美股四大指數】', '', '美股四大指數（道瓊、標普500、納斯達克、費城半導體）是反映美國股市與經濟動能的核心指標。道瓊代表藍籌龍頭，標普500涵蓋大盤整體，納斯達克側重科技成長，費半則專注半導體產業。這些指數為投資人提供了評估市場漲跌、產業趨勢及全球資金流向的關鍵基準。');
   html += row('道瓊工業指數', m.dji, changeClass(m.dji));
   html += row('標普500指數', m.spx, changeClass(m.spx));
   html += row('納斯達克指數', m.ixic, changeClass(m.ixic));
@@ -784,7 +814,7 @@ async function loadTW() {
   let html = `<div class="card-title">台股市場概況</div>`;
 
   // 【台積電期貨】
-  html += `<span class="group-header">【台積電期貨】</span>`;
+  html += groupHeader('【台積電期貨】', '', '台積電期貨（股票期貨）是由台灣期貨交易所推出的金融衍生品，標的為台積電（2330）股票。具備低保證金（高槓桿）、多空雙向操作、交易稅低等特性，一口標準期貨代表2張台積電股票（2,000股）。此外，還有小台積電期貨（100股）供資金較小投資人選擇，且具備夜盤交易功能，可靈活應對ADR漲跌。');
   if (taifex.success && taifex.price > 0) {
     const sign = taifex.updown > 0 ? '▲' : taifex.updown < 0 ? '▼' : '';
     var cls = 'up';
@@ -796,7 +826,7 @@ async function loadTW() {
   }
 
   // 【台股期貨】
-  html += `<span class="group-header">【台股期貨】</span>`;
+  html += groupHeader('【台股期貨】', '', '台股期貨（簡稱「台指期」）是以「台灣加權股價指數」為標的物的期貨契約，讓投資人透過保證金制度，以小博大操作台股漲跌。具高槓桿、多空靈活、交易成本低等特性，熱門商品包括大台指、小台指、微台指，結算日為每月第三個星期三。');
   if (fitx.success) {
     const cls = changeClass(fitx.changeText, 1);
     const formattedTime = fitx.updateTime.replace(/\./g, '-');
@@ -811,7 +841,7 @@ async function loadTW() {
   }
 
   // 【富台指】
-  html += `<span class="group-header">【富台指】</span>`;
+  html += groupHeader('【富台指】', '', '「富台指」全名為「富時台灣指數期貨」（FTSE Taiwan Index Futures），是新加坡交易所（SGX）與富時羅素（FTSE Russell）合作推出的金融衍生工具。它以美元計價，因 MSCI 摩台指移出新加坡而誕生，成為國際投資人衡量台股表現、避險及在台股休市時預估開盤方向的核心工具。');
   if (twn.success) {
     const cls = changeClass(twn.changeText, 1);
     const formattedTime = twn.updateTime.replace(/\./g, '-');
@@ -826,7 +856,7 @@ async function loadTW() {
   }
 
   // 【台積電現貨】
-  html += groupHeader(`${tsmc.name || '未定義'}現貨`, 'tsmc');
+  html += groupHeader(`${tsmc.name || '未定義'}現貨`, 'tsmc', '台積電（TSMC）是全球最大的專業積體電路（IC）製造服務公司，總部位於臺灣新竹科學園區，1987年由張忠謀創立。台積電首創「純晶圓代工」模式，不設計自有品牌產品，專注為Apple、NVIDIA等科技大廠代工生產領先技術的晶片，在先進製程（如3奈米、2奈米）上具統治性地位，被譽為「護國神山」。');
   if (tsmc.success) {
     const cls = changeClass(tsmc.change, 1);
     const sign = tsmc.change > 0 ? '▲' : tsmc.change < 0 ? '▼' : '';
@@ -922,7 +952,7 @@ async function loadCommodity() {
   // }
 
   // 【布蘭特原油】
-  html += groupHeader('【布蘭特原油】', 'brent');
+  html += groupHeader('【布蘭特原油】', 'brent', '布蘭特原油（Brent Crude）是產自歐洲北海的輕質低硫原油，為全球最重要的國際原油定價基準之一，通常用於衡量歐洲、非洲與中東地區輸往西方的石油價格。其特色為含硫量低、品質適中，適合提煉汽油、柴油與航空煤油，全球約有三分之二的實體原油貿易以此為參考基準。');
   if (sinaBrent.success) {
     const changeNum = sinaBrent.price - sinaBrent.prev;
     const cls = changeNum < 0 ? 'down' : 'up';
@@ -959,7 +989,7 @@ async function loadCommodity() {
   }
 
   // 【黃金】
-  html += `<span class="group-header">【黃金】</span>`;
+  html += groupHeader('【黃金】', 'gold', '黃金是指全球範圍內進行黃金實物買賣、衍生品交易的場所與管道總稱，主要包含倫敦（場外交易 OTC）、紐約（期貨交易所）等實體與虛擬市場。它是金融體系的重要組成，具備避險與投資價值，交易形式包含現貨黃金、金條、金幣、黃金ETF及期貨合約等。');
   if (sinaGold.success) {
     const changeNum = sinaGold.price - sinaGold.prev;
     const cls = changeNum < 0 ? 'down' : 'up';
@@ -977,7 +1007,7 @@ async function loadCommodity() {
   }
 
   // 【白銀】
-  html += `<span class="group-header">【白銀】</span>`;
+  html += groupHeader('【白銀】', 'silver', '白銀是一個全球性的貴金屬交易網絡，主要買賣具有投資和工業雙重屬性的實體白銀。市場核心在於倫敦現貨市場與美國 COMEX 期貨市場，具高波動性，價格受工業需求（如光伏、電子）與金融投資需求（避險、抗通膨）共同驅動，常以美元計價。');
   if (sinaSilver.success) {
     const changeNum = sinaSilver.price - sinaSilver.prev;
     const cls = changeNum < 0 ? 'down' : 'up';
@@ -1007,7 +1037,7 @@ async function loadSentiment() {
   let html = `<div class="card-title">市場情緒</div>`;
 
   // 【美元指數】
-  html += groupHeader('【美元指數】', 'usdollar');
+  html += groupHeader('【美元指數】', 'usdollar', '美元指數（DXY）是顯示美元相對於主要貨幣強弱的指數。此指數由洲際交易所（ICE）計算並公布，由歐元、日圓、英鎊、加拿大元、瑞典克朗、瑞士法郎這6種貨幣構成。當DXY上升時，一般判斷為美元相對於主要貨幣走強（被買入）；相反地，當下跌時則被視為走弱（被賣出）。');
   if (sinaUsdollar.success) {
     const changeNum = sinaUsdollar.price - sinaUsdollar.prev;
     const cls = changeNum < 0 ? 'down' : 'up';
@@ -1043,7 +1073,7 @@ async function loadSentiment() {
   }
 
   // 【VIX 恐慌指數】
-  html += groupHeader('【VIX 恐慌指數】', 'vix');
+  html += groupHeader('【VIX 恐慌指數】', 'vix', 'VIX 恐慌指數（全稱：CBOE Volatility Index，簡稱 VIX）是衡量標準普爾 500 指數（S&P 500）期權隱含波動率的指標，反映市場對未來 30 天美股波動幅度的預期。數值越高代表投資者越恐慌、預期波動越大；通常在股市急跌或市場震盪時飆升。');
   if (sinaVix.success) {
     const changeNum = sinaVix.price - sinaVix.prev;
     const cls = changeNum < 0 ? 'down' : 'up';
