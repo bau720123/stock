@@ -157,7 +157,37 @@
     /* color: var(--text); */
     color: tan;
     margin: 14px 0 6px;
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .group-header-title {
+    flex: 1;
+  }
+  .alert-settings-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: 1px solid var(--muted);
+    border-radius: 4px;
+    /* color: var(--muted); */
+    color: ghostwhite;
+    cursor: pointer;
+    padding: 2px 5px;
+    transition: border-color .2s, color .2s;
+    line-height: 1;
+    cursor: pointer;
+  }
+  .alert-settings-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .alert-settings-btn.active {
+    /* border-color: var(--up); */
+    /* color: var(--up); */
+    border-color: darkgray;
+    color: ghostwhite;
   }
 
   /* ── Section label ── */
@@ -312,6 +342,173 @@
 </div>
 
 <script>
+
+// 警示閾值 localStorage 工具
+const ALERT_PREFIX = 'alert_';
+
+function alertGet(key) {
+  const val = localStorage.getItem(ALERT_PREFIX + key);
+  return val !== null ? parseFloat(val) : null;
+}
+
+function alertSet(key, value) {
+  if (value === '' || value === null || isNaN(value)) {
+    localStorage.removeItem(ALERT_PREFIX + key);
+  } else {
+    localStorage.setItem(ALERT_PREFIX + key, String(value));
+  }
+}
+
+function alertEnabled(key) {
+  return alertGet(key) !== null;
+}
+
+// group-header HTML 產生器（含偵測設定按鈕）
+// settingsKey：若傳入則顯示齒輪按鈕，點擊呼叫 openAlertSettings(settingsKey)
+function groupHeader(label, settingsKey = null) {
+  const isActive = settingsKey && (alertEnabled(settingsKey + '_high') || alertEnabled(settingsKey + '_low') || alertEnabled(settingsKey));
+  const btnHtml = settingsKey ? `
+    <button class="alert-settings-btn ${isActive ? 'active' : ''}"
+      title="偵測設定"
+      onclick="openAlertSettings('${settingsKey}')">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+        <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+      </svg>
+    </button>` : '';
+  return `<span class="group-header"><span class="group-header-title">${label}</span>${btnHtml}</span>`;
+}
+
+// 偵測設定彈窗
+// config 格式：{ title, fields: [{ key, label, placeholder, unit }] }
+const ALERT_CONFIGS = {
+  tsmc: {
+    title: '台積電 偵測設定',
+    fields: [
+      { key: 'tsmc_high', label: '價格高於此值時通知', placeholder: '例：2000', unit: 'TWD' },
+      { key: 'tsmc_low',  label: '價格低於此值時通知', placeholder: '例：1800',  unit: 'TWD' },
+    ]
+  },
+  brent: {
+    title: '布蘭特原油 偵測設定',
+    fields: [
+      { key: 'brent_high', label: '價格高於此值時通知', placeholder: '例：100', unit: 'USD' },
+      { key: 'brent_low',  label: '價格低於此值時通知', placeholder: '例：95',  unit: 'USD' },
+    ]
+  },
+  usdollar: {
+    title: '美元指數 偵測設定',
+    fields: [
+      { key: 'usdollar_high', label: '價格高於此值時通知', placeholder: '例：100', unit: '' },
+      { key: 'usdollar_low',  label: '價格低於此值時通知', placeholder: '例：99',  unit: '' },
+    ]
+  },
+  vix: {
+    title: 'VIX 恐慌指數 偵測設定',
+    fields: [
+      { key: 'vix_high', label: '指數高於此值時通知', placeholder: '例：30', unit: '' },
+      { key: 'vix_low',  label: '指數低於此值時通知', placeholder: '例：25', unit: '' },
+    ]
+  }
+};
+
+async function openAlertSettings(configKey) {
+  const config = ALERT_CONFIGS[configKey];
+  if (!config) return;
+
+  // 動態產生表單 HTML
+  const fieldsHtml = config.fields.map(f => {
+    const currentVal = alertGet(f.key);
+    return `
+      <div style="margin-bottom:14px; text-align:left;">
+        <label style="display:block; font-size:.8rem; color:#aaa; margin-bottom:5px;">${f.label}</label>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <input
+            id="swal-field-${f.key}"
+            type="number"
+            step="0.01"
+            placeholder="${f.placeholder}"
+            value="${currentVal !== null ? currentVal : ''}"
+            style="
+              flex:1;
+              background:#1a2130;
+              border:1px solid #2e3f52;
+              border-radius:4px;
+              color:#c8d8e8;
+              font-size:.9rem;
+              padding:7px 10px;
+              outline:none;
+            "
+          />
+          <span style="color:#5a7080; font-size:.8rem; min-width:30px;">${f.unit}</span>
+          <button
+            type="button"
+            onclick="document.getElementById('swal-field-${f.key}').value=''"
+            title="清除"
+            style="
+              background:none;
+              border:1px solid #3a4a5c;
+              border-radius:4px;
+              color:#5a7080;
+              cursor:pointer;
+              padding:5px 8px;
+              font-size:.75rem;
+              transition: border-color .2s, color .2s;
+            "
+            onmouseover="this.style.borderColor='#ff4d6a'; this.style.color='#ff4d6a';"
+            onmouseout="this.style.borderColor='#3a4a5c'; this.style.color='#5a7080';"
+          >清除</button>
+        </div>
+      </div>`;
+  }).join('');
+
+  const result = await Swal.fire({
+    title: config.title,
+    html: `
+      <div style="font-size:.75rem; color:#5a7080; margin-bottom:16px;">留空或清除表示停用該項偵測</div>
+      ${fieldsHtml}
+    `,
+    background: '#111620',
+    color: '#c8d8e8',
+    confirmButtonText: '儲存',
+    confirmButtonColor: '#0d6efd',
+    cancelButtonText: '取消',
+    showCancelButton: true,
+    cancelButtonColor: '#3a4a5c',
+    focusConfirm: false,
+    preConfirm: () => {
+      const values = {};
+      for (const f of config.fields) {
+        const el = document.getElementById('swal-field-' + f.key);
+        values[f.key] = el ? el.value.trim() : '';
+      }
+      return values;
+    }
+  });
+
+  if (!result.isConfirmed) return;
+
+  // 儲存至 localStorage
+  for (const f of config.fields) {
+    const val = result.value[f.key];
+    alertSet(f.key, val === '' ? null : parseFloat(val));
+  }
+
+  Swal.fire({
+    icon: 'success',
+    title: '已儲存',
+    text: "偵測設定已更新，點確定立刻載入最新資料",
+    showCancelButton: true,
+    background: '#111620',
+    color: '#c8d8e8',
+    confirmButtonText: '確定',
+    cancelButtonText: '取消'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      location.reload();
+    }
+  });
+}
+
 async function sendNotification(title, body, url = '/stock/index.html') {
   // 確認有通知權限
   if (Notification.permission !== 'granted') return;
@@ -595,7 +792,7 @@ async function loadTW() {
     html += row('現價', taifex.price.toFixed(1), 'accent');
     html += row('漲跌', sign + Math.abs(taifex.updown).toFixed(0), cls);
   } else {
-    html += `<div class="error-text">無法取得資料</div>`;
+    html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
   }
 
   // 【台股期貨】
@@ -610,7 +807,7 @@ async function loadTW() {
     html += row('成交價', fitx.current.toFixed(2), 'accent');
     html += row('更新時間', formattedTime);
   } else {
-    html += `<div class="error-text">無法取得資料</div>`;
+    html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
   }
 
   // 【富台指】
@@ -625,11 +822,11 @@ async function loadTW() {
     html += row('成交價', twn.current.toFixed(2), 'accent');
     html += row('更新時間', formattedTime);
   } else {
-    html += `<div class="error-text">無法取得資料</div>`;
+    html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
   }
 
   // 【台積電現貨】
-  html += `<span class="group-header">【${tsmc.name || '位定義'}現貨】</span>`;
+  html += groupHeader(`${tsmc.name || '未定義'}現貨`, 'tsmc');
   if (tsmc.success) {
     const cls = changeClass(tsmc.change, 1);
     const sign = tsmc.change > 0 ? '▲' : tsmc.change < 0 ? '▼' : '';
@@ -669,22 +866,25 @@ async function loadTW() {
     }
     html += `</div>`;
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const alertSize  = parseInt(urlParams.get('size')  || '0');  // 預設 0 表示不啟用
-    const alertPrice = parseFloat(urlParams.get('price') || '0');
-    console.log('數量門檻：' + alertSize);
-    console.log('價格門檻：' + alertPrice);
-    console.log('上檔價格：' + tsmc.bids[0].price);
-    // 價格門檻通知
-    if (tsmc.bids[0].size <= alertSize && tsmc.bids[0].price == alertPrice) {
+    // 價格門檻通知（從 localStorage 讀取，未設定則不觸發）
+    const tsmcHigh = alertGet('tsmc_high');
+    const tsmcLow  = alertGet('tsmc_low');
+    if (tsmcHigh !== null && tsmc.closePrice >= tsmcHigh) {
       sendNotification(
         '台積電股票警示',
-        `目前價格 ${tsmc.asks[0].price.toFixed(2)} 元`,
+        `價格 ${tsmc.closePrice.toFixed(2)} TWD，已高於設定門檻 ${tsmcHigh} TWD`,
+        'https://tw.stock.yahoo.com/quote/2330.TW'
+      );
+    }
+    if (tsmcLow !== null && tsmc.closePrice <= tsmcLow) {
+      sendNotification(
+        '台積電股票警示',
+        `價格 ${tsmc.closePrice.toFixed(2)} TWD，已低於設定門檻 ${tsmcLow} TWD`,
         'https://tw.stock.yahoo.com/quote/2330.TW'
       );
     }
   } else {
-    html += `<div class="error-text">無法取得資料</div>`;
+    html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
   }
 
   setCard('card-tw', 0, html);
@@ -718,11 +918,11 @@ async function loadCommodity() {
   //   html += row('更新時間', formattedTime);
   //   html += row('價格', brentStockq.success ? brentStockq.price.toFixed(2) : '--');
   // } else {
-  //   html += `<div class="error-text">無法取得資料</div>`;
+  //   html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
   // }
 
   // 【布蘭特原油】
-  html += `<span class="group-header">【布蘭特原油】</span>`;
+  html += groupHeader('【布蘭特原油】', 'brent');
   if (sinaBrent.success) {
     const changeNum = sinaBrent.price - sinaBrent.prev;
     const cls = changeNum < 0 ? 'down' : 'up';
@@ -737,16 +937,25 @@ async function loadCommodity() {
     html += row('價格', sinaBrent.price.toFixed(2), 'accent');
     html += row('更新時間', sinaBrent.time);
 
-    // 價格門檻通知
-    if (sinaBrent.price >= 110) {
+    // 價格門檻通知（從 localStorage 讀取，未設定則不觸發）
+    const brentHigh = alertGet('brent_high');
+    const brentLow  = alertGet('brent_low');
+    if (brentHigh !== null && sinaBrent.price >= brentHigh) {
       sendNotification(
         '布蘭特原油價格警示',
-        `目前價格 ${sinaBrent.price.toFixed(2)} 元`,
+        `價格 ${sinaBrent.price.toFixed(2)} USD，已高於設定門檻 ${brentHigh} USD`,
+        'https://hk.investing.com/commodities/brent-oil'
+      );
+    }
+    if (brentLow !== null && sinaBrent.price <= brentLow) {
+      sendNotification(
+        '布蘭特原油價格警示',
+        `價格 ${sinaBrent.price.toFixed(2)} USD，已低於設定門檻 ${brentLow} USD`,
         'https://hk.investing.com/commodities/brent-oil'
       );
     }
   } else {
-    html += `<div class="error-text">無法取得資料</div>`;
+    html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
   }
 
   // 【黃金】
@@ -764,7 +973,7 @@ async function loadCommodity() {
     html += row('價格', sinaGold.price.toFixed(2), 'accent');
     html += row('更新時間', sinaGold.time);
   } else {
-    html += `<div class="error-text">無法取得資料</div>`;
+    html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
   }
 
   // 【白銀】
@@ -782,7 +991,7 @@ async function loadCommodity() {
     html += row('價格', sinaSilver.price.toFixed(2), 'accent');
     html += row('更新時間', sinaSilver.time);
   } else {
-    html += `<div class="error-text">無法取得資料</div>`;
+    html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
   }
 
   setCard('card-commodity', 0, html);
@@ -798,7 +1007,7 @@ async function loadSentiment() {
   let html = `<div class="card-title">市場情緒</div>`;
 
   // 【美元指數】
-  html += `<span class="group-header">【美元指數】</span>`;
+  html += groupHeader('【美元指數】', 'usdollar');
   if (sinaUsdollar.success) {
     const changeNum = sinaUsdollar.price - sinaUsdollar.prev;
     const cls = changeNum < 0 ? 'down' : 'up';
@@ -811,12 +1020,30 @@ async function loadSentiment() {
     html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
     html += row('數值', sinaUsdollar.price.toFixed(2), 'accent');
     html += row('更新時間', sinaUsdollar.time);
+
+    // 價格門檻通知（從 localStorage 讀取，未設定則不觸發）
+    const usdollarHigh = alertGet('usdollar_high');
+    const usdollarLow  = alertGet('usdollar_low');
+    if (usdollarHigh !== null && sinaUsdollar.price >= usdollarHigh) {
+      sendNotification(
+        '美元指數警示',
+        `數值 ${sinaUsdollar.price.toFixed(2)}，已高於設定門檻 ${usdollarHigh}`,
+        'https://hk.investing.com/indices/usdollar'
+      );
+    }
+    if (usdollarLow !== null && sinaUsdollar.price <= usdollarLow) {
+      sendNotification(
+        '美元指數警示',
+        `數值 ${sinaUsdollar.price.toFixed(2)}，已低於設定門檻 ${usdollarLow}`,
+        'https://hk.investing.com/indices/usdollar'
+      );
+    }
   } else {
-    html += `<div class="error-text">無法取得資料</div>`;
+    html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
   }
 
   // 【VIX 恐慌指數】
-  html += `<span class="group-header">【VIX 恐慌指數】</span>`;
+  html += groupHeader('【VIX 恐慌指數】', 'vix');
   if (sinaVix.success) {
     const changeNum = sinaVix.price - sinaVix.prev;
     const cls = changeNum < 0 ? 'down' : 'up';
@@ -830,16 +1057,25 @@ async function loadSentiment() {
     html += row('數值', sinaVix.price.toFixed(2), 'accent');
     html += row('更新時間', sinaVix.time);
 
-    // 數值門檻通知
-    if (sinaVix.price >= 27) {
+    // 價格門檻通知（從 localStorage 讀取，未設定則不觸發）
+    const vixHigh = alertGet('vix_high');
+    const vixLow  = alertGet('vix_low');
+    if (vixHigh !== null && sinaVix.price >= vixHigh) {
       sendNotification(
         'VIX 恐慌指數警示',
-        `目前數值 ${sinaVix.price.toFixed(2)}`,
+        `數值 ${sinaVix.price.toFixed(2)}，已高於設定門檻 ${vixHigh}`,
+        'https://hk.investing.com/indices/volatility-s-p-500'
+      );
+    }
+    if (vixLow !== null && sinaVix.price <= vixLow) {
+      sendNotification(
+        'VIX 恐慌指數警示',
+        `數值 ${sinaVix.price.toFixed(2)}，已低於設定門檻 ${vixLow}`,
         'https://hk.investing.com/indices/volatility-s-p-500'
       );
     }
   } else {
-    html += `<div class="error-text">無法取得資料</div>`;
+    html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
   }
 
   setCard('card-sentiment', 0, html);
