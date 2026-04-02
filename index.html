@@ -1014,6 +1014,14 @@ async function loadAll() {
 
 window.onload = loadAll;
 
+// 進入頁面時，塞入一個防禦紀錄
+window.history.pushState({page: "guard"}, "");
+
+window.onpopstate = function(event) {
+  closeMenu();
+  window.history.pushState({page: "guard"}, "");
+};
+
 // 美股市場：合併盤前與四大指數
 async function loadCnbc() {
   const d = await fetch(WORKER + '/cnbc').then(r => r.json());
