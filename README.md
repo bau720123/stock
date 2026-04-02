@@ -71,11 +71,11 @@ fetch("https://histock.tw/stock/module/function.aspx", {
 | `/twn` | HiStock | 富台指即時報價 |
 | `/taifex` | TaiFex | 台積電期貨報價 |
 | `/tsmc` | Fugle | 台積電現貨即時報價（含委託簿） |
-| `/sina_brent` | 新浪財經 | 布蘭特原油 |
-| `/sina_gold` | 新浪財經 | 黃金期貨 |
-| `/sina_silver` | 新浪財經 | 白銀期貨 |
-| `/sina_usdollar` | 新浪財經 | 美元指數（DINIW） |
-| `/sina_vix` | 新浪財經 | VIX 恐慌指數 |
+| `/sina/hf_OIL` | 新浪財經 | 布蘭特原油 |
+| `/sina/hf_GC` | 新浪財經 | 黃金期貨 |
+| `/sina/hf_SI` | 新浪財經 | 白銀期貨 |
+| `/sina/DINIW` | 新浪財經 | 美元指數（DINIW） |
+| `/sina/znb_VIX` | 新浪財經 | VIX 恐慌指數 |
 | `/cnbc` | CNBC | 美股四大指數 + 盤前電子盤 + TSM ADR |
 | `/rh` | RobinHood | TSM ADR 即時變動 |
 | `/subscribe` | — | 接收並儲存裝置推播訂閱資料 |
