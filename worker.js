@@ -25,15 +25,10 @@ export default {
     if (path === "/twn")     return await fetchHiStock("stocktop2017", "TWN", "指數", "成交量(口)");
     // if (path === "/brent")    return await fetchHiStock("stocktop2017_Global", "BRENTOIL", "股價", "成交量");
     // if (path === "/brent_stockq")   return await fetchBrent();
-    if (path === "/sina_brent") return await fetchSina("hf_OIL");
-    if (path === "/sina_gold") return await fetchSina("hf_GC");
-    if (path === "/sina_silver") return await fetchSina("hf_SI");
-    if (path === "/sina_usdollar") return await fetchSina("DINIW");
-
-    // VIX 恐慌指數：https://quotes.sina.cn/index/global/vix
-    if (path === "/sina_vix") return await fetchSina("znb_VIX"); // hf_VX 是期貨
 
     if (path.startsWith("/sina/")) {
+      // VIX 恐慌指數：https://quotes.sina.cn/index/global/vix
+      // hf_VX 是期貨
       const symbol = path.split("/sina/")[1];
       if (symbol) return await fetchSina(symbol);
     }

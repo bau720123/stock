@@ -1105,9 +1105,9 @@ async function loadCommodity() {
   //   fetch(WORKER + '/brent_stockq').then(r => r.json()),
   // ]);
   const [sinaBrent, sinaGold, sinaSilver] = await Promise.all([
-    fetch(WORKER + '/sina_brent').then(r => r.json()).catch(() => ({ success: false })), // 布蘭特原油
-    fetch(WORKER + '/sina_gold').then(r => r.json()).catch(() => ({ success: false })), // 黃金
-    fetch(WORKER + '/sina_silver').then(r => r.json()).catch(() => ({ success: false })), // 白銀
+    fetch(WORKER + '/sina/hf_OIL').then(r => r.json()).catch(() => ({ success: false })), // 布蘭特原油
+    fetch(WORKER + '/sina/hf_GC').then(r => r.json()).catch(() => ({ success: false })), // 黃金
+    fetch(WORKER + '/sina/hf_SI').then(r => r.json()).catch(() => ({ success: false })), // 白銀
   ]);
 
   let html = `<div class="card-title">原物料市場</div>`;
@@ -1208,8 +1208,8 @@ async function loadCommodity() {
 // 市場情緒
 async function loadSentiment() {
   const [sinaUsdollar, sinaVix] = await Promise.all([
-    fetch(WORKER + '/sina_usdollar').then(r => r.json()).catch(() => ({ success: false })),
-    fetch(WORKER + '/sina_vix').then(r => r.json()).catch(() => ({ success: false })),
+    fetch(WORKER + '/sina/DINIW').then(r => r.json()).catch(() => ({ success: false })),
+    fetch(WORKER + '/sina/znb_VIX').then(r => r.json()).catch(() => ({ success: false })),
   ]);
 
   let html = `<div class="card-title">市場情緒</div>`;
