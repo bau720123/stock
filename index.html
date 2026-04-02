@@ -290,6 +290,14 @@
   background: var(--border);
   color: var(--accent);
 }
+/* 側邊欄選單的高亮樣式 */
+#menuList li a.active {
+    color: var(--accent) !important;
+    /* font-weight: 600; */
+    /* 選擇性：加上一點左邊的邊框線增加層次感 */
+    /* border-left: 3px solid var(--accent);
+    padding-left: 12px; */
+}
 </style>
 
 <link rel="manifest" href="/stock/manifest.json">
@@ -316,6 +324,7 @@
     <li><a href="?card_type=materials">🛢️ 原物料市場</a></li>
     <li><a href="?card_type=market-sentiment">🌡️ 市場情緒</a></li>
     <li><a href="?card_type=my-stock">⭐ 我的自選股票</a></li>
+    <li><a style="cursor:pointer;" onclick="javascript:showInfo('一個以純前端技術為核心，搭配 Cloudflare 無伺服器架構，實現即時金融市場報價、PWA 安裝與主動推播通知的個人投資輔助工具。');">ℹ️ 關於本軟體</a></li>
     <!-- <li><a href="#">⚙️ 設定</a></li> -->
   </ul>
 </nav>
@@ -589,12 +598,12 @@ async function openMyStockSettings() {
   Swal.fire({
     icon: 'success',
     title: '已儲存',
-    text: '股票清單已更新，點確定重新載入資料',
+    text: '股票清單已更新',
     background: '#111620',
     color: '#c8d8e8',
-    confirmButtonText: '確定',
+    confirmButtonText: '立即更新',
     showCancelButton: true,
-    cancelButtonText: '取消',
+    cancelButtonText: '稍後再說',
     cancelButtonColor: '#3a4a5c',
   }).then(r => { if (r.isConfirmed) location.reload(); });
 }
@@ -604,10 +613,10 @@ async function showInfo(wording = '') {
     icon: 'info',
     title: '內容說明',
     html: `<div style="text-align: left;">${wording.replace(/\n/g, '<br>')}</div>`,
-    showCancelButton: true,
+    showCancelButton: false,
     background: '#111620',
     color: '#c8d8e8',
-    confirmButtonText: '確定',
+    confirmButtonText: '知道了',
     cancelButtonText: '取消'
   }).then((result) => {
     if (result.isConfirmed) {
@@ -701,12 +710,12 @@ async function openAlertSettings(configKey) {
   Swal.fire({
     icon: 'success',
     title: '已儲存',
-    text: "偵測設定已更新，點確定立刻載入最新資料",
+    text: "偵測設定已更新",
     showCancelButton: true,
     background: '#111620',
     color: '#c8d8e8',
-    confirmButtonText: '確定',
-    cancelButtonText: '取消'
+    confirmButtonText: '立即更新',
+    cancelButtonText: '稍後再說'
   }).then((result) => {
     if (result.isConfirmed) {
       location.reload();
@@ -944,6 +953,18 @@ async function loadAll() {
 
   const urlParams = new URLSearchParams(window.location.search);
   const card_type = urlParams.get('card_type') || 'taiwan-market';
+
+  // 先移除所有選單的 active 狀態（避免切換時殘留）
+  document.querySelectorAll('#menuList a').forEach(link => {
+    link.classList.remove('active');
+  });
+
+  // 尋找 href 包含當前 card_type 的連結並加上 active
+  // 利用屬性選擇器 [href*="..."] 非常精準
+  const activeLink = document.querySelector(`#menuList a[href*="card_type=${card_type}"]`);
+  if (activeLink) {
+    activeLink.classList.add('active');
+  }
 
   // 1. 定義對照表：[參數值]: { 元素ID, 執行函式 }
   const config = {
