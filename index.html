@@ -1110,7 +1110,7 @@ async function loadTW() {
   }
 
   // 【台積電現貨】
-  html += groupHeader(`${tsmc.name || '未定義'}現貨`, 'tsmc', '台積電（TSMC）是全球最大的專業積體電路（IC）製造服務公司，總部位於臺灣新竹科學園區，1987年由張忠謀創立。台積電首創「純晶圓代工」模式，不設計自有品牌產品，專注為Apple、NVIDIA等科技大廠代工生產領先技術的晶片，在先進製程（如3奈米、2奈米）上具統治性地位，被譽為「護國神山」。');
+  html += groupHeader(`【${tsmc.name || '未定義'}現貨】`, 'tsmc', '台積電（TSMC）是全球最大的專業積體電路（IC）製造服務公司，總部位於臺灣新竹科學園區，1987年由張忠謀創立。台積電首創「純晶圓代工」模式，不設計自有品牌產品，專注為Apple、NVIDIA等科技大廠代工生產領先技術的晶片，在先進製程（如3奈米、2奈米）上具統治性地位，被譽為「護國神山」。');
   if (tsmc.success) {
     const cls = changeClass(tsmc.change, 1);
     const sign = tsmc.change > 0 ? '▲' : tsmc.change < 0 ? '▼' : '';
@@ -1384,7 +1384,7 @@ async function loadMyStock() {
     const data  = results[i];
     const settingsKey = `mystock_${stock.symbol}`;
 
-    html += groupHeader(`【${data.name || stock.name}】現貨`, settingsKey, ``);
+    html += groupHeader(`【${data.name || stock.name}】`, settingsKey, ``);
 
     if (data.success) {
       const cls = changeClass(data.change, 1);
