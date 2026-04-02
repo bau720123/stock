@@ -127,7 +127,11 @@
     text-transform: uppercase;
     /* color: var(--dim); */
     margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
   }
+  .card-title-text { flex: 1; }
 
   /* ── Rows inside card ── */
   .row {
@@ -394,12 +398,29 @@ function groupHeader(label, settingsKey = null, wording = '') {
 
 // 偵測設定彈窗
 // config 格式：{ title, fields: [{ key, label, placeholder, unit }] }
-// 自選股票清單（要新增股票只需在這裡加）
-const MY_STOCKS = [
+// 自選股票清單：從 localStorage 讀取，fallback 到預設值
+const MY_STOCKS_DEFAULT = [
   { symbol: '2330', name: '台積電' },
   { symbol: '2308', name: '台達電' },
-  { symbol: '2383', name: '台光電' },
+  { symbol: '2317', name: '鴻海' },
 ];
+
+function loadMyStocksList() {
+  try {
+    const saved = localStorage.getItem('my_stocks_list');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch (e) { console.error('讀取自選股票清單失敗，使用預設值', e); }
+  return MY_STOCKS_DEFAULT;
+}
+
+function saveMyStocksList(list) {
+  localStorage.setItem('my_stocks_list', JSON.stringify(list));
+}
+
+let MY_STOCKS = loadMyStocksList();
 
 const ALERT_CONFIGS = {
   tsmc: {
@@ -441,6 +462,112 @@ for (const stock of MY_STOCKS) {
       { key: `mystock_${stock.symbol}_low`,  label: '價格低於此值時通知', placeholder: '例：800',  unit: 'TWD' },
     ]
   };
+}
+
+// 自選股票清單管理介面
+async function openMyStockSettings() {
+  // 每次開啟都讀取最新的清單
+  let editList = loadMyStocksList().map(s => ({ ...s }));
+
+  function renderRows() {
+    return editList.map((s, i) => `
+      <div id="mystock-row-${i}" style="display:flex; align-items:center; gap:6px; margin-bottom:8px;">
+        <input
+          id="mystock-symbol-${i}"
+          type="text"
+          maxlength="10"
+          placeholder="股票代號 例：2330"
+          value="${s.symbol}"
+          style="background:#1a2130; border:1px solid #2e3f52; border-radius:4px; color:#c8d8e8; font-size:.85rem; padding:6px 8px; outline:none; font-family:var(--mono);"
+        />
+        <input
+          id="mystock-name-${i}"
+          type="text"
+          maxlength="20"
+          placeholder="股票名稱 例：台積電"
+          value="${s.name}"
+          style="flex:1; background:#1a2130; border:1px solid #2e3f52; border-radius:4px; color:#c8d8e8; font-size:.85rem; padding:6px 8px; outline:none;"
+        />
+        <button
+          type="button"
+          onclick="mystockRemoveRow(${i})"
+          style="background:none; border:1px solid #3a4a5c; border-radius:4px; color:#5a7080; cursor:pointer; padding:5px 9px; font-size:.85rem; flex-shrink:0;"
+          onmouseover="this.style.borderColor='#ff4d6a'; this.style.color='#ff4d6a';"
+          onmouseout="this.style.borderColor='#3a4a5c'; this.style.color='#5a7080';"
+        >－</button>
+      </div>`).join('');
+  }
+
+  function getHtml() {
+    return `
+      <div style="font-size:.75rem; color:#5a7080; margin-bottom:12px;">
+        股票代號與名稱可自行輸入，儲存後立即生效
+      </div>
+      <div id="mystock-rows">${renderRows()}</div>
+      <button
+        type="button"
+        id="mystock-add-btn"
+        onclick="mystockAddRow()"
+        style="margin-top:4px; background:none; border:1px solid #3a4a5c; border-radius:4px; color:#5a7080; cursor:pointer; padding:6px 16px; font-size:.8rem; width:100%;"
+        onmouseover="this.style.borderColor='#00c98a'; this.style.color='#00c98a';"
+        onmouseout="this.style.borderColor='#3a4a5c'; this.style.color='#5a7080';"
+      >＋ 新增</button>`;
+  }
+
+  // 掛到 window 讓 inline onclick 可以呼叫
+  window.mystockAddRow = function() {
+    editList.push({ symbol: '', name: '' });
+    document.getElementById('mystock-rows').innerHTML = renderRows();
+  };
+
+  window.mystockRemoveRow = function(idx) {
+    editList.splice(idx, 1);
+    document.getElementById('mystock-rows').innerHTML = renderRows();
+  };
+
+  const result = await Swal.fire({
+    title: '自選股票清單管理',
+    html: getHtml(),
+    background: '#111620',
+    color: '#c8d8e8',
+    confirmButtonText: '儲存',
+    confirmButtonColor: '#0d6efd',
+    cancelButtonText: '取消',
+    showCancelButton: true,
+    cancelButtonColor: '#3a4a5c',
+    focusConfirm: false,
+    preConfirm: () => {
+      // 從 DOM 讀取最新輸入值
+      const rows = document.querySelectorAll('[id^="mystock-row-"]');
+      const list = [];
+      rows.forEach((_, i) => {
+        const symbol = (document.getElementById(`mystock-symbol-${i}`)?.value || '').trim().toUpperCase();
+        const name   = (document.getElementById(`mystock-name-${i}`)?.value  || '').trim();
+        if (symbol) list.push({ symbol, name: name || symbol });
+      });
+      if (list.length === 0) {
+        Swal.showValidationMessage('請至少保留一檔股票');
+        return false;
+      }
+      return list;
+    }
+  });
+
+  if (!result.isConfirmed) return;
+
+  saveMyStocksList(result.value);
+
+  Swal.fire({
+    icon: 'success',
+    title: '已儲存',
+    text: '股票清單已更新，點確定重新載入資料',
+    background: '#111620',
+    color: '#c8d8e8',
+    confirmButtonText: '確定',
+    showCancelButton: true,
+    cancelButtonText: '取消',
+    cancelButtonColor: '#3a4a5c',
+  }).then(r => { if (r.isConfirmed) location.reload(); });
 }
 
 async function showInfo(wording = '') {
@@ -1174,7 +1301,14 @@ async function loadMyStock() {
     MY_STOCKS.map(s => fetch(WORKER + '/stock/' + s.symbol).then(r => r.json()).catch(() => ({ success: false })))
   );
 
-  let html = `<div class="card-title">我的自選股票</div>`;
+  let html = `<div class="card-title">
+    <span class="card-title-text">我的自選股票</span>
+    <button class="alert-settings-btn" title="管理股票清單" onclick="openMyStockSettings()">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+        <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+      </svg>
+    </button>
+  </div>`;
 
   for (let i = 0; i < MY_STOCKS.length; i++) {
     const stock = MY_STOCKS[i];
