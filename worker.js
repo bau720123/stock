@@ -33,6 +33,11 @@ export default {
     // VIX 恐慌指數：https://quotes.sina.cn/index/global/vix
     if (path === "/sina_vix") return await fetchSina("znb_VIX"); // hf_VX 是期貨
 
+    if (path.startsWith("/sina/")) {
+      const symbol = path.split("/sina/")[1];
+      if (symbol) return await fetchSina(symbol);
+    }
+
     if (path === "/debug-sina") return await debugSina();
 
     if (path === "/taifex")  return await fetchTaifex();
