@@ -154,7 +154,7 @@ async function fetchSina(list) {
     if (list === "DINIW") {
       return json({
         success: true,
-        time:   parts[11] + " " + parts[0] || "",
+        time:   parts[10] + " " + parts[0] || "",
         price:  toFloat(parts[1]),
         open:   toFloat(parts[3]),
         low:    toFloat(parts[5]),
