@@ -324,7 +324,7 @@
     <li><a href="?card_type=materials">🛢️ 原物料市場</a></li>
     <li><a href="?card_type=market-sentiment">🌡️ 市場情緒</a></li>
     <li><a href="?card_type=my-stock">⭐ 我的自選股票</a></li>
-    <li><a style="cursor:pointer;" onclick="navigate('world-indices')">🏛️ 美股市場概況</a></li>
+    <li><a style="cursor:pointer;" onclick="javascript:window.location.replace('?card_type=world-indices');">🏛️ 美股市場概況_1</a></li>
     <li><a style="cursor:pointer;" onclick="javascript:showInfo('一個以純前端技術為核心，搭配 Cloudflare 無伺服器架構，實現即時金融市場報價、PWA 安裝與主動推播通知的個人投資輔助工具。');">ℹ️ 關於本軟體</a></li>
     <!-- <li><a href="#">⚙️ 設定</a></li> -->
   </ul>
@@ -871,18 +871,6 @@ function urlBase64ToUint8Array(base64String) {
 
 const WORKER = "https://billowing-queen-4a58.bau720123.workers.dev";
 let tsmCnbcData = null; // 用於跨卡片共享資料
-
-function navigate(type) {
-    const newUrl = `${window.location.origin}${window.location.pathname}?card_type=${type}`;
-    // 使用 replaceState，它不會增加歷史紀錄長度
-    window.history.replaceState({path: newUrl}, '', newUrl);
-    
-    // 呼叫你原本的 loadAll 或邏輯來切換卡片
-    loadAll(); 
-    
-    // 如果選單是開啟的，順便關掉
-    if (typeof closeMenu === "function") closeMenu();
-}
 
 // 系統即時時間顯示
 function updateClock() {
