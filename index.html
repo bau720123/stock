@@ -850,7 +850,7 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/stock/sw.js')
       .then(async reg => {
         const replyMessage = '註冊成功：' + reg.scope;
-        showSweetAlert('info', '註冊狀態', replyMessage);
+        // showSweetAlert('info', '註冊狀態', replyMessage);
         await writeLogs('SW', replyMessage);
 
         // 先檢查 Notification 是否存在
