@@ -339,6 +339,7 @@
   <div class="card" id="card-commodity"><div class="card-title">原物料市場</div><div class="skeleton"></div></div>
   <div class="card" id="card-sentiment"><div class="card-title">市場情緒</div><div class="skeleton"></div></div>
   <div class="card" id="card-rh"><div class="card-title">台積電 ADR</div><div class="skeleton"></div></div>
+  <div class="card" id="card-mystock"><div class="card-title">我的自選股票</div><div class="skeleton"></div><div class="skeleton"></div></div>
 </div>
 
 <script>
@@ -768,6 +769,7 @@ async function loadAll() {
     loadCommodity(),
     loadSentiment(),
     loadRH(),
+    loadMyStock(),
   ]);
 
   btn.classList.remove('spinning');
@@ -808,7 +810,7 @@ async function loadTW() {
     fetch(WORKER + '/taifex').then(r => r.json()),
     fetch(WORKER + '/fitx').then(r => r.json()),
     fetch(WORKER + '/twn').then(r => r.json()),
-    fetch(WORKER + '/tsmc').then(r => r.json()),
+    fetch(WORKER + '/stock/2330').then(r => r.json()),
   ]);
 
   let html = `<div class="card-title">台股市場概況</div>`;
@@ -1119,7 +1121,7 @@ async function loadRH() {
   // A. CNBC 來源 (包含開盤價、最高價、最低價)
   if (tsmCnbcData) {
     const m = tsmCnbcData;
-    html += `<span class="group-header">CNBC</span>`;
+    html += groupHeader('CNBC', '', 'CNBC（消費者新聞與商業頻道）是美國 NBC 環球集團（NBCUniversal）旗下的全球性財經新聞電視台，總部位於紐澤西州。它是全球最具影響力的財經媒體之一，提供即時美股、國際股市交易資訊及商業新聞，是投資者獲取市場動態的首選媒體之一。 OTC）、紐約（期貨交易所）等實體與虛擬市場。它是金融體系的重要組成，具備避險與投資價值，交易形式包含現貨黃金、金條、金幣、黃金ETF及期貨合約等。');
     // const preLabel = (m.tsmType === 'PRE_MKT' || m.tsmType === 'POST_MKT_PREV') ? '盤前變動' : '盤後變動';
 
     if (m.tsmType === 'PRE_MKT' || m.tsmType === 'POST_MKT_PREV') {
@@ -1137,7 +1139,7 @@ async function loadRH() {
   // B. RobinHood 來源
   // 20260327 官方似乎開啟了 CloudFront WAF + TLS fingerprinting，導致無法直接從前端取得資料了，暫時先註解掉這部分
   if (d.success) {
-    html += `<span class="group-header">RobinHood</span>`;
+    html += groupHeader('RobinHood', '', 'Robinhood（羅賓漢）是一家美國知名的金融科技公司，以提供免佣金（零手續費）的股票、ETF、期權及加密貨幣交易 App 著稱。它致力於「金融民主化」，讓新手投資者能輕鬆進行交易，是美國年輕人最常使用的券商之一。');
     html += row('即時變動', d.changeText, changeClass(d.changeText));
     html += row('額外資訊', d.tertiaryText, changeClass(d.tertiaryText));
   }
@@ -1145,6 +1147,79 @@ async function loadRH() {
   const cls = d.success ? changeClass(d.changeText) : '';
   setCard('card-rh', cls === 'up' ? 1 : cls === 'down' ? -1 : 0, html);
   // setCard('card-rh', 0, html);
+}
+
+// 我的股票自選
+async function loadMyStock() {
+  const [tsmc] = await Promise.all([
+    fetch(WORKER + '/stock/2308').then(r => r.json()),
+  ]);
+
+  let html = `<div class="card-title">我的自選股票</div>`;
+
+  // 【股票自選】
+  html += groupHeader(`${tsmc.name || '未定義'}現貨`, 'mystock', '可以根據股票代號自行選擇要偵測的股票，並設定價格門檻來接收通知。');
+  if (tsmc.success) {
+    const cls = changeClass(tsmc.change, 1);
+    const sign = tsmc.change > 0 ? '▲' : tsmc.change < 0 ? '▼' : '';
+    const lowMinusOpen = (tsmc.lowPrice - tsmc.openPrice).toFixed(0);
+    const lowMinusOpenCls = lowMinusOpen > 0 ? 'up' : lowMinusOpen < 0 ? 'down' : '';
+
+    html += row('上個收盤價', tsmc.previousClose.toFixed(0));
+    html += row('開盤價', tsmc.openPrice.toFixed(0));
+    html += row('最高價', tsmc.highPrice.toFixed(0));
+    html += row('最低價', tsmc.lowPrice.toFixed(0));
+    html += row('現價', tsmc.closePrice.toFixed(0), 'accent');
+    html += row('均價', tsmc.avgPrice.toFixed(2));
+    html += row('漲跌', sign + tsmc.change, cls);
+    html += row('低減開', lowMinusOpen, lowMinusOpenCls);
+
+    // 委託簿（並排顯示）
+    html += `
+      <div style="margin-top:10px;">
+        <div style="display:grid;grid-template-columns:1fr auto auto 1fr;gap:4px;font-family:var(--mono);font-size:.75rem;text-align:center;">
+          <span style="color:var(--dim)">張數</span>
+          <span style="color:var(--up)">委買</span>
+          <span style="color:var(--down)">委賣</span>
+          <span style="color:var(--dim)">張數</span>
+        </div>`;
+
+    const maxRows = Math.max(tsmc.bids.length, tsmc.asks.length);
+    for (let i = 0; i < maxRows; i++) {
+      const bid = tsmc.bids[i];
+      const ask = tsmc.asks[i];
+      html += `
+        <div style="display:grid;grid-template-columns:1fr auto auto 1fr;gap:4px;font-family:var(--mono);font-size:.75rem;text-align:center;padding:2px 0;border-bottom:1px solid var(--border);">
+          <span style="color:var(--up)">${bid ? bid.size : ''}</span>
+          <span style="color:var(--up)">${bid ? bid.price : ''}</span>
+          <span style="color:var(--down)">${ask ? ask.price : ''}</span>
+          <span style="color:var(--down)">${ask ? ask.size : ''}</span>
+        </div>`;
+    }
+    html += `</div>`;
+
+    // 價格門檻通知（從 localStorage 讀取，未設定則不觸發）
+    const tsmcHigh = alertGet('tsmc_high');
+    const tsmcLow  = alertGet('tsmc_low');
+    if (tsmcHigh !== null && tsmc.closePrice >= tsmcHigh) {
+      sendNotification(
+        '台積電股票警示',
+        `價格 ${tsmc.closePrice.toFixed(2)} TWD，已高於設定門檻 ${tsmcHigh} TWD`,
+        'https://tw.stock.yahoo.com/quote/2330.TW'
+      );
+    }
+    if (tsmcLow !== null && tsmc.closePrice <= tsmcLow) {
+      sendNotification(
+        '台積電股票警示',
+        `價格 ${tsmc.closePrice.toFixed(2)} TWD，已低於設定門檻 ${tsmcLow} TWD`,
+        'https://tw.stock.yahoo.com/quote/2330.TW'
+      );
+    }
+  } else {
+    html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
+  }
+
+  setCard('card-mystock', 0, html);
 }
 
 const REFRESH_INTERVAL = 300; // 秒，改這個就通吃

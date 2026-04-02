@@ -45,7 +45,11 @@ export default {
     if (path === "/read-logs") return await readLogs(env);
     if (path === "/write-logs") return await handleWriteLogs(request, env);
     if (path === "/clear-logs") return await clearLogs(env);
-    if (path === "/tsmc") return await fetchFugleQuote("2330", env);
+
+    if (path.startsWith("/stock/")) {
+      const symbol = path.split("/stock/")[1];
+      if (symbol) return await fetchFugleQuote(symbol, env);
+    }
 
     return json({ error: "unknown path" }, 404);
   },
