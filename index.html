@@ -871,34 +871,6 @@ function urlBase64ToUint8Array(base64String) {
 const WORKER = "https://billowing-queen-4a58.bau720123.workers.dev";
 let tsmCnbcData = null; // 用於跨卡片共享資料
 
-// 1. 進入頁面時，塞入一個防禦紀錄
-window.history.pushState({page: "guard"}, "");
-
-window.onpopstate = function(event) {
-    // 2. 當使用者按返回，會觸發這裡
-    Swal.fire({
-        title: '確定要離開嗎？',
-        text: "這將會結束即時報價系統",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: '退出',
-        cancelButtonText: '取消',
-        background: '#111620',
-        color: '#c8d8e8'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            // 3. 嘗試關閉應用
-            // 雖然 window.close() 限制多，但在「已安裝」的 PWA 模式下有機會成功
-            window.close();
-            // 如果失敗，則引導到空白頁
-            window.location.href = "about:blank";
-        } else {
-            // 4. 使用者取消，再塞回去一個紀錄，保持攔截狀態
-            window.history.pushState({page: "guard"}, "");
-        }
-    });
-};
-
 // 系統即時時間顯示
 function updateClock() {
   const now = new Date();
