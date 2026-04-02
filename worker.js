@@ -154,7 +154,7 @@ async function fetchSina(list) {
     if (list === "DINIW") {
       return json({
         success: true,
-        time:   parts[0] || "",
+        time:   parts[11] + " " + parts[0] || "",
         price:  toFloat(parts[1]),
         open:   toFloat(parts[3]),
         low:    toFloat(parts[5]),
@@ -164,7 +164,7 @@ async function fetchSina(list) {
     } else if (list === "znb_VIX") {
       return json({
         success: true,
-        time:   parts[7] || "",
+        time:   parts[6] + " " + parts[7] || "",
         price:  toFloat(parts[1]),
         open:   toFloat(parts[8]),
         low:    toFloat(parts[11]),
@@ -179,7 +179,7 @@ async function fetchSina(list) {
         open:   toFloat(parts[3]),
         high:   toFloat(parts[4]),
         low:    toFloat(parts[5]),
-        time:   parts[6] || "",
+        time:   parts[12] + " " + parts[6] || "",
         prev:   toFloat(parts[7]),
       });
     }
