@@ -489,17 +489,17 @@ async function openMyStockSettings() {
           id="mystock-symbol-${i}"
           type="text"
           maxlength="10"
-          placeholder="股票代號 例：2330"
+          placeholder="股票代號"
           value="${s.symbol}"
-          style="background:#1a2130; border:1px solid #2e3f52; border-radius:4px; color:#c8d8e8; font-size:.85rem; padding:6px 8px; outline:none; font-family:var(--mono);"
+          style="width:6em; background:#1a2130; border:1px solid #2e3f52; border-radius:4px; color:#c8d8e8; font-size:.85rem; padding:6px 8px; outline:none; font-family:var(--mono);"
         />
         <input
           id="mystock-name-${i}"
           type="text"
           maxlength="20"
-          placeholder="股票名稱 例：台積電"
+          placeholder="股票名稱"
           value="${s.name}"
-          style="flex:1; background:#1a2130; border:1px solid #2e3f52; border-radius:4px; color:#c8d8e8; font-size:.85rem; padding:6px 8px; outline:none;"
+          style="width:6em; flex:1; background:#1a2130; border:1px solid #2e3f52; border-radius:4px; color:#c8d8e8; font-size:.85rem; padding:6px 8px; outline:none;"
         />
         <button type="button" onclick="mystockMoveRow(${i},-1)"
           ${i === 0 ? 'disabled style="' + btnBase + ' opacity:.25; cursor:default;"' : 'style="' + btnBase + '"'}
@@ -521,8 +521,8 @@ async function openMyStockSettings() {
 
   function getHtml() {
     return `
-      <div style="font-size:.75rem; color:#5a7080; margin-bottom:12px;">
-        股票代號與名稱可自行輸入，儲存後立即生效
+      <div style="font-size:.75rem; color:#5a7080; margin-bottom:12px; text-align:left;">
+        股票代號（2330）與股票名稱（台積電）可自行輸入，儲存後立即生效
       </div>
       <div id="mystock-rows">${renderRows()}</div>
       <button
@@ -1053,11 +1053,11 @@ async function loadTW() {
     // 委託簿（並排顯示）
     html += `
       <div style="margin-top:10px;">
-        <div style="display:grid;grid-template-columns:1fr auto auto 1fr;gap:4px;font-family:var(--mono);font-size:.75rem;text-align:center;">
-          <span style="color:var(--dim)">張數</span>
-          <span style="color:var(--up)">委買</span>
-          <span style="color:var(--down)">委賣</span>
-          <span style="color:var(--dim)">張數</span>
+        <div style="display:grid;grid-template-columns:1fr 58px 58px 1fr;gap:2px;font-family:var(--mono);font-size:.75rem;">
+          <span style="color:var(--dim);text-align:center;">張數</span>
+          <span style="color:var(--up);text-align:right;padding-right:6px;">委買</span>
+          <span style="color:var(--down);text-align:left;padding-left:6px;">委賣</span>
+          <span style="color:var(--dim);text-align:center;">張數</span>
         </div>`;
 
     const maxRows = Math.max(tsmc.bids.length, tsmc.asks.length);
@@ -1065,11 +1065,11 @@ async function loadTW() {
       const bid = tsmc.bids[i];
       const ask = tsmc.asks[i];
       html += `
-        <div style="display:grid;grid-template-columns:1fr auto auto 1fr;gap:4px;font-family:var(--mono);font-size:.75rem;text-align:center;padding:2px 0;border-bottom:1px solid var(--border);">
-          <span style="color:var(--up)">${bid ? bid.size : ''}</span>
-          <span style="color:var(--up)">${bid ? bid.price : ''}</span>
-          <span style="color:var(--down)">${ask ? ask.price : ''}</span>
-          <span style="color:var(--down)">${ask ? ask.size : ''}</span>
+        <div style="display:grid;grid-template-columns:1fr 58px 58px 1fr;gap:2px;font-family:var(--mono);font-size:.75rem;padding:2px 0;border-bottom:1px solid var(--border);">
+          <span style="color:var(--up);text-align:center;">${bid ? bid.size : ''}</span>
+          <span style="color:var(--up);text-align:right;padding-right:6px;">${bid ? bid.price : ''}</span>
+          <span style="color:var(--down);text-align:left;padding-left:6px;">${ask ? ask.price : ''}</span>
+          <span style="color:var(--down);text-align:center;">${ask ? ask.size : ''}</span>
         </div>`;
     }
     html += `</div>`;
@@ -1366,11 +1366,11 @@ async function loadMyStock() {
       // 委託簿
       html += `
         <div style="margin-top:10px;">
-          <div style="display:grid;grid-template-columns:1fr auto auto 1fr;gap:4px;font-family:var(--mono);font-size:.75rem;text-align:center;">
-            <span style="color:var(--dim)">張數</span>
-            <span style="color:var(--up)">委買</span>
-            <span style="color:var(--down)">委賣</span>
-            <span style="color:var(--dim)">張數</span>
+          <div style="display:grid;grid-template-columns:1fr 58px 58px 1fr;gap:2px;font-family:var(--mono);font-size:.75rem;">
+            <span style="color:var(--dim);text-align:center;">張數</span>
+            <span style="color:var(--up);text-align:right;padding-right:6px;">委買</span>
+            <span style="color:var(--down);text-align:left;padding-left:6px;">委賣</span>
+            <span style="color:var(--dim);text-align:center;">張數</span>
           </div>`;
 
       const maxRows = Math.max(data.bids.length, data.asks.length);
@@ -1378,11 +1378,11 @@ async function loadMyStock() {
         const bid = data.bids[j];
         const ask = data.asks[j];
         html += `
-          <div style="display:grid;grid-template-columns:1fr auto auto 1fr;gap:4px;font-family:var(--mono);font-size:.75rem;text-align:center;padding:2px 0;border-bottom:1px solid var(--border);">
-            <span style="color:var(--up)">${bid ? bid.size : ''}</span>
-            <span style="color:var(--up)">${bid ? bid.price : ''}</span>
-            <span style="color:var(--down)">${ask ? ask.price : ''}</span>
-            <span style="color:var(--down)">${ask ? ask.size : ''}</span>
+          <div style="display:grid;grid-template-columns:1fr 58px 58px 1fr;gap:2px;font-family:var(--mono);font-size:.75rem;padding:2px 0;border-bottom:1px solid var(--border);">
+            <span style="color:var(--up);text-align:center;">${bid ? bid.size : ''}</span>
+            <span style="color:var(--up);text-align:right;padding-right:6px;">${bid ? bid.price : ''}</span>
+            <span style="color:var(--down);text-align:left;padding-left:6px;">${ask ? ask.price : ''}</span>
+            <span style="color:var(--down);text-align:center;">${ask ? ask.size : ''}</span>
           </div>`;
       }
       html += `</div>`;
