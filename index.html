@@ -394,6 +394,13 @@ function groupHeader(label, settingsKey = null, wording = '') {
 
 // 偵測設定彈窗
 // config 格式：{ title, fields: [{ key, label, placeholder, unit }] }
+// 自選股票清單（要新增股票只需在這裡加）
+const MY_STOCKS = [
+  { symbol: '2330', name: '台積電' },
+  { symbol: '2308', name: '台達電' },
+  { symbol: '2383', name: '台光電' },
+];
+
 const ALERT_CONFIGS = {
   tsmc: {
     title: '台積電 偵測設定',
@@ -424,6 +431,17 @@ const ALERT_CONFIGS = {
     ]
   }
 };
+
+// 動態注入自選股票的警示設定
+for (const stock of MY_STOCKS) {
+  ALERT_CONFIGS[`mystock_${stock.symbol}`] = {
+    title: `${stock.name}（${stock.symbol}）偵測設定`,
+    fields: [
+      { key: `mystock_${stock.symbol}_high`, label: '價格高於此值時通知', placeholder: '例：1000', unit: 'TWD' },
+      { key: `mystock_${stock.symbol}_low`,  label: '價格低於此值時通知', placeholder: '例：800',  unit: 'TWD' },
+    ]
+  };
+}
 
 async function showInfo(wording = '') {
     Swal.fire({
@@ -1151,72 +1169,79 @@ async function loadRH() {
 
 // 我的股票自選
 async function loadMyStock() {
-  const [tsmc] = await Promise.all([
-    fetch(WORKER + '/stock/2308').then(r => r.json()),
-  ]);
+  // 平行抓取所有自選股票
+  const results = await Promise.all(
+    MY_STOCKS.map(s => fetch(WORKER + '/stock/' + s.symbol).then(r => r.json()).catch(() => ({ success: false })))
+  );
 
   let html = `<div class="card-title">我的自選股票</div>`;
 
-  // 【股票自選】
-  html += groupHeader(`${tsmc.name || '未定義'}現貨`, 'mystock', '可以根據股票代號自行選擇要偵測的股票，並設定價格門檻來接收通知。');
-  if (tsmc.success) {
-    const cls = changeClass(tsmc.change, 1);
-    const sign = tsmc.change > 0 ? '▲' : tsmc.change < 0 ? '▼' : '';
-    const lowMinusOpen = (tsmc.lowPrice - tsmc.openPrice).toFixed(0);
-    const lowMinusOpenCls = lowMinusOpen > 0 ? 'up' : lowMinusOpen < 0 ? 'down' : '';
+  for (let i = 0; i < MY_STOCKS.length; i++) {
+    const stock = MY_STOCKS[i];
+    const data  = results[i];
+    const settingsKey = `mystock_${stock.symbol}`;
 
-    html += row('上個收盤價', tsmc.previousClose.toFixed(0));
-    html += row('開盤價', tsmc.openPrice.toFixed(0));
-    html += row('最高價', tsmc.highPrice.toFixed(0));
-    html += row('最低價', tsmc.lowPrice.toFixed(0));
-    html += row('現價', tsmc.closePrice.toFixed(0), 'accent');
-    html += row('均價', tsmc.avgPrice.toFixed(2));
-    html += row('漲跌', sign + tsmc.change, cls);
-    html += row('低減開', lowMinusOpen, lowMinusOpenCls);
+    html += groupHeader(`【${data.name || stock.name}】現貨`, settingsKey, `股票代號：${stock.symbol}`);
 
-    // 委託簿（並排顯示）
-    html += `
-      <div style="margin-top:10px;">
-        <div style="display:grid;grid-template-columns:1fr auto auto 1fr;gap:4px;font-family:var(--mono);font-size:.75rem;text-align:center;">
-          <span style="color:var(--dim)">張數</span>
-          <span style="color:var(--up)">委買</span>
-          <span style="color:var(--down)">委賣</span>
-          <span style="color:var(--dim)">張數</span>
-        </div>`;
+    if (data.success) {
+      const cls = changeClass(data.change, 1);
+      const sign = data.change > 0 ? '▲' : data.change < 0 ? '▼' : '';
+      const lowMinusOpen = (data.lowPrice - data.openPrice).toFixed(0);
+      const lowMinusOpenCls = lowMinusOpen > 0 ? 'up' : lowMinusOpen < 0 ? 'down' : '';
 
-    const maxRows = Math.max(tsmc.bids.length, tsmc.asks.length);
-    for (let i = 0; i < maxRows; i++) {
-      const bid = tsmc.bids[i];
-      const ask = tsmc.asks[i];
+      html += row('上個收盤價', data.previousClose.toFixed(0));
+      html += row('開盤價',     data.openPrice.toFixed(0));
+      html += row('最高價',     data.highPrice.toFixed(0));
+      html += row('最低價',     data.lowPrice.toFixed(0));
+      html += row('現價',       data.closePrice.toFixed(0), 'accent');
+      html += row('均價',       data.avgPrice.toFixed(2));
+      html += row('漲跌',       sign + data.change, cls);
+      html += row('低減開',     lowMinusOpen, lowMinusOpenCls);
+
+      // 委託簿
       html += `
-        <div style="display:grid;grid-template-columns:1fr auto auto 1fr;gap:4px;font-family:var(--mono);font-size:.75rem;text-align:center;padding:2px 0;border-bottom:1px solid var(--border);">
-          <span style="color:var(--up)">${bid ? bid.size : ''}</span>
-          <span style="color:var(--up)">${bid ? bid.price : ''}</span>
-          <span style="color:var(--down)">${ask ? ask.price : ''}</span>
-          <span style="color:var(--down)">${ask ? ask.size : ''}</span>
-        </div>`;
-    }
-    html += `</div>`;
+        <div style="margin-top:10px;">
+          <div style="display:grid;grid-template-columns:1fr auto auto 1fr;gap:4px;font-family:var(--mono);font-size:.75rem;text-align:center;">
+            <span style="color:var(--dim)">張數</span>
+            <span style="color:var(--up)">委買</span>
+            <span style="color:var(--down)">委賣</span>
+            <span style="color:var(--dim)">張數</span>
+          </div>`;
 
-    // 價格門檻通知（從 localStorage 讀取，未設定則不觸發）
-    const tsmcHigh = alertGet('tsmc_high');
-    const tsmcLow  = alertGet('tsmc_low');
-    if (tsmcHigh !== null && tsmc.closePrice >= tsmcHigh) {
-      sendNotification(
-        '台積電股票警示',
-        `價格 ${tsmc.closePrice.toFixed(2)} TWD，已高於設定門檻 ${tsmcHigh} TWD`,
-        'https://tw.stock.yahoo.com/quote/2330.TW'
-      );
+      const maxRows = Math.max(data.bids.length, data.asks.length);
+      for (let j = 0; j < maxRows; j++) {
+        const bid = data.bids[j];
+        const ask = data.asks[j];
+        html += `
+          <div style="display:grid;grid-template-columns:1fr auto auto 1fr;gap:4px;font-family:var(--mono);font-size:.75rem;text-align:center;padding:2px 0;border-bottom:1px solid var(--border);">
+            <span style="color:var(--up)">${bid ? bid.size : ''}</span>
+            <span style="color:var(--up)">${bid ? bid.price : ''}</span>
+            <span style="color:var(--down)">${ask ? ask.price : ''}</span>
+            <span style="color:var(--down)">${ask ? ask.size : ''}</span>
+          </div>`;
+      }
+      html += `</div>`;
+
+      // 價格門檻通知（從 localStorage 讀取）
+      const stockHigh = alertGet(`mystock_${stock.symbol}_high`);
+      const stockLow  = alertGet(`mystock_${stock.symbol}_low`);
+      if (stockHigh !== null && data.closePrice >= stockHigh) {
+        sendNotification(
+          `${data.name} 股票警示`,
+          `價格 ${data.closePrice.toFixed(0)} TWD，已高於設定門檻 ${stockHigh} TWD`,
+          `https://tw.stock.yahoo.com/quote/${stock.symbol}.TW`
+        );
+      }
+      if (stockLow !== null && data.closePrice <= stockLow) {
+        sendNotification(
+          `${data.name} 股票警示`,
+          `價格 ${data.closePrice.toFixed(0)} TWD，已低於設定門檻 ${stockLow} TWD`,
+          `https://tw.stock.yahoo.com/quote/${stock.symbol}.TW`
+        );
+      }
+    } else {
+      html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
     }
-    if (tsmcLow !== null && tsmc.closePrice <= tsmcLow) {
-      sendNotification(
-        '台積電股票警示',
-        `價格 ${tsmc.closePrice.toFixed(2)} TWD，已低於設定門檻 ${tsmcLow} TWD`,
-        'https://tw.stock.yahoo.com/quote/2330.TW'
-      );
-    }
-  } else {
-    html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
   }
 
   setCard('card-mystock', 0, html);
