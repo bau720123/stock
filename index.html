@@ -311,11 +311,12 @@
 <nav id="slideMenu">
   <div id="menuHeader">&#9632; 即時報價</div>
   <ul id="menuList">
+    <li><a href="?card_type=taiwan-market">📊 台股市場概況</a></li>
+    <li><a href="?card_type=world-indices">📊 美股市場概況</a></li>
+    <li><a href="?card_type=materials">📊 原物料市場</a></li>
+    <li><a href="?card_type=market-sentiment">📊 市場情緒</a></li>
+    <li><a href="?card_type=my-stock">📊 我的自選股票</a></li>
     <li><a href="/stock/index.html?type=taiwan-market">📊 台股市場概況</a></li>
-    <li><a href="/stock/index.html?type=world-indices">📊 美股市場概況</a></li>
-    <li><a href="/stock/index.html?type=materials">📊 原物料市場</a></li>
-    <li><a href="/stock/index.html?type=market-sentiment">📊 市場情緒</a></li>
-    <li><a href="/stock/index.html?type=my-stock">📊 我的自選股票</a></li>
     <li><a href="#" onclick="closeMenu()">⚙️ 設定</a></li>
   </ul>
 </nav>
@@ -342,12 +343,11 @@
 </header>
 
 <div class="grid" id="grid">
-  <div class="card" id="card-tw"><div class="card-title">台股市場概況</div><div class="skeleton"></div><div class="skeleton"></div></div>
-  <div class="card" id="card-cnbc"><div class="card-title">美股市場概況</div><div class="skeleton"></div><div class="skeleton"></div></div>
-  <div class="card" id="card-commodity"><div class="card-title">原物料市場</div><div class="skeleton"></div></div>
-  <div class="card" id="card-sentiment"><div class="card-title">市場情緒</div><div class="skeleton"></div></div>
-  <div class="card" id="card-rh"><div class="card-title">台積電 ADR</div><div class="skeleton"></div></div>
-  <div class="card" id="card-mystock"><div class="card-title">我的自選股票</div><div class="skeleton"></div><div class="skeleton"></div></div>
+  <div class="card" id="card-tw" style="display: none;"><div class="card-title">台股市場概況</div><div class="skeleton"></div><div class="skeleton"></div></div>
+  <div class="card" id="card-cnbc" style="display: none;"><div class="card-title">美股市場概況</div><div class="skeleton"></div><div class="skeleton"></div></div>
+  <div class="card" id="card-commodity" style="display: none;"><div class="card-title">原物料市場</div><div class="skeleton"></div></div>
+  <div class="card" id="card-sentiment" style="display: none;"><div class="card-title">市場情緒</div><div class="skeleton"></div></div>
+  <div class="card" id="card-mystock" style="display: none;"><div class="card-title">我的自選股票</div><div class="skeleton"></div><div class="skeleton"></div></div>
 </div>
 
 <script>
@@ -940,17 +940,44 @@ async function loadAll() {
     // c.appendChild(sk);
   });
 
-  // 1. 先跑 CNBC 以取得 TSM 資料
-  await loadCnbc();
+  // await Promise.allSettled([
+  //   loadTW(),
+  //   loadCnbc(),
+  //   loadCommodity(),
+  //   loadSentiment(),
+  //   loadMyStock(),
+  // ]);
 
-  // 2. 跑其餘 API
-  await Promise.allSettled([
-    loadTW(),
-    loadCommodity(),
-    loadSentiment(),
-    loadRH(),
-    loadMyStock(),
-  ]);
+  const urlParams = new URLSearchParams(window.location.search);
+  const card_type = urlParams.get('card_type') || 'taiwan-market';
+
+  // 1. 定義對照表：[參數值]: { 元素ID, 執行函式 }
+  const config = {
+    'taiwan-market':    { id: 'card-tw',        fn: loadTW },
+    'world-indices':    { id: 'card-cnbc',      fn: loadCnbc },
+    'materials':        { id: 'card-commodity', fn: loadCommodity },
+    'market-sentiment': { id: 'card-sentiment', fn: loadSentiment },
+    'my-stock':         { id: 'card-mystock',   fn: loadMyStock }
+  };
+
+  // 2. 取得目標設定
+  const target = config[card_type];
+
+  if (target) {
+    // 3. 顯示對應的卡片
+    const el = document.getElementById(target.id);
+    if (el) el.style.display = 'block';
+
+    // 4. 只執行對應的函式
+    try {
+      await target.fn();
+    } catch (e) {
+      console.error(`載入 ${card_type} 資料失敗:`, e);
+    }
+  } else {
+    console.warn(`未知的 card_type: ${card_type}`);
+    // 選項：如果參數亂傳，可以導向預設值或顯示錯誤
+  }
 
   btn.classList.remove('spinning');
   startCountdown();
@@ -962,9 +989,9 @@ window.onload = loadAll;
 async function loadCnbc() {
   const d = await fetch(WORKER + '/cnbc').then(r => r.json());
   if (!d.success) return;
+  const r = await fetch(WORKER + '/rh').then(r => r.json());
 
-  const { market: m, fairValue: fv } = d;
-  tsmCnbcData = m; // 存下台積電的部分給 loadRH
+  const { fairValue: fv, market: m, stock: stock} = d;
 
   let html = `<div class="card-title">美股市場概況</div>`;
   
@@ -979,6 +1006,22 @@ async function loadCnbc() {
   html += row('標普500指數', m.spx, changeClass(m.spx));
   html += row('納斯達克指數', m.ixic, changeClass(m.ixic));
   html += row('費城半導體指數', m.sox, changeClass(m.sox));
+
+  html += groupHeader('【台積電 ADR】', '', '台積電 ADR（American Depositary Receipts，美國存託憑證）是台積電在美國發行的股票憑證（代號：TSM），掛牌於紐約證券交易所（NYSE）。它讓美國投資人能用美元直接買賣台積電，代表國際資金對台積電的看法，且 1 單位 ADR 等於 5 股台積電台股（2330）普通股。');
+  if (stock.TSM.type === 'PRE_MKT' || stock.TSM.type === 'POST_MKT_PREV') {
+      html += row('盤前變動', stock.TSM.market || '--', changeClass(stock.TSM.market));
+  }
+
+  html += row('盤中或收盤變動', stock.TSM.regular || '--', changeClass(stock.TSM.regular));
+
+  if (stock.TSM.type === 'POST_MKT') {
+      html += row('盤後變動', stock.TSM.market || '--', changeClass(stock.TSM.market));
+  }
+
+  if (r.success) {
+    html += row('即時變動', r.changeText, changeClass(r.changeText));
+    html += row('額外資訊', r.tertiaryText, changeClass(r.tertiaryText));
+  }
 
   // html += `<div class="update-time">${fv.updateTime}</div>`;
   setCard('card-cnbc', 0, html);
@@ -1291,42 +1334,6 @@ async function loadSentiment() {
   }
 
   setCard('card-sentiment', 0, html);
-}
-
-// 台積電 ADR：合併 CNBC 與 RobinHood
-async function loadRH() {
-  const d = await fetch(WORKER + '/rh').then(r => r.json());
-  let html = `<div class="card-title">台積電 ADR</div>`;
-  
-  // A. CNBC 來源 (包含開盤價、最高價、最低價)
-  if (tsmCnbcData) {
-    const m = tsmCnbcData;
-    html += groupHeader('CNBC', '', 'CNBC（消費者新聞與商業頻道）是美國 NBC 環球集團（NBCUniversal）旗下的全球性財經新聞電視台，總部位於紐澤西州。它是全球最具影響力的財經媒體之一，提供即時美股、國際股市交易資訊及商業新聞，是投資者獲取市場動態的首選媒體之一。 OTC）、紐約（期貨交易所）等實體與虛擬市場。它是金融體系的重要組成，具備避險與投資價值，交易形式包含現貨黃金、金條、金幣、黃金ETF及期貨合約等。');
-    // const preLabel = (m.tsmType === 'PRE_MKT' || m.tsmType === 'POST_MKT_PREV') ? '盤前變動' : '盤後變動';
-
-    if (m.tsmType === 'PRE_MKT' || m.tsmType === 'POST_MKT_PREV') {
-        html += row('盤前變動', m.tsmMarket || '--', changeClass(m.tsmMarket));
-    }
-
-    // html += row(preLabel, m.tsmMarket || '--', changeClass(m.tsmMarket));
-    html += row('盤中或收盤變動', m.tsmRegular || '--', changeClass(m.tsmRegular));
-
-    if (m.tsmType === 'POST_MKT') {
-        html += row('盤後變動', m.tsmMarket || '--', changeClass(m.tsmMarket));
-    }
-  }
-
-  // B. RobinHood 來源
-  // 20260327 官方似乎開啟了 CloudFront WAF + TLS fingerprinting，導致無法直接從前端取得資料了，暫時先註解掉這部分
-  if (d.success) {
-    html += groupHeader('RobinHood', '', 'Robinhood（羅賓漢）是一家美國知名的金融科技公司，以提供免佣金（零手續費）的股票、ETF、期權及加密貨幣交易 App 著稱。它致力於「金融民主化」，讓新手投資者能輕鬆進行交易，是美國年輕人最常使用的券商之一。');
-    html += row('即時變動', d.changeText, changeClass(d.changeText));
-    html += row('額外資訊', d.tertiaryText, changeClass(d.tertiaryText));
-  }
-
-  const cls = d.success ? changeClass(d.changeText) : '';
-  setCard('card-rh', cls === 'up' ? 1 : cls === 'down' ? -1 : 0, html);
-  // setCard('card-rh', 0, html);
 }
 
 // 我的股票自選

@@ -227,7 +227,9 @@ async function fetchTaifex() {
 // ── CNBC（美股四大指數 + TSM ADR + 盤前電子盤）─────────────
 async function fetchCnbc() {
   try {
-    // 盤前 Fair Value
+    const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
+
+    // 1. 盤前 Fair Value (邏輯保持不變)
     const fvRes = await fetch(
       "https://quote.cnbc.com/quote-html-webservice/fvquote.htm?requestMethod=quick&noform=0&realtime=0&client=fairValue&output=json&symbols=DJ%7CSP%7CND%7CTF",
       { headers: { "User-Agent": UA } }
@@ -241,7 +243,7 @@ async function fetchCnbc() {
       if (fv.updateTime === "未知" && q.last_timedate) fv.updateTime = q.last_timedate;
     }
 
-    // 四大指數 + TSM ADR
+    // 2. 四大指數 + 個股 (未來可在 symbols 繼續累加，如 %7CNVDA%7CAAPL)
     const qRes = await fetch(
       "https://quote.cnbc.com/quote-html-webservice/restQuote/symbolType/symbol?symbols=.DJI%7C.SPX%7C.IXIC%7C.SOX%7CTSM&requestMethod=itv&noform=1&partnerId=2&fund=1&exthrs=1&output=json&events=1",
       { headers: { "User-Agent": UA } }
@@ -249,16 +251,38 @@ async function fetchCnbc() {
     const qData = await qRes.json();
     const quotes = qData?.FormattedQuoteResult?.FormattedQuote || [];
 
-    const market = { dji: "N/A", spx: "N/A", ixic: "N/A", sox: "N/A", tsmRegular: "N/A", tsmType: "", tsmMarket: "N/A" };
+    // 初始化回應容器
+    const market = { dji: "N/A", spx: "N/A", ixic: "N/A", sox: "N/A" };
+    const stock = {}; 
+
+    // 指數與代碼的映射表
+    const indexMap = {
+      ".DJI": "dji",
+      ".SPX": "spx",
+      ".IXIC": "ixic",
+      ".SOX": "sox"
+    };
+
     for (const q of quotes) {
-      if (q.symbol === ".DJI")   market.dji    = q.change || "N/A";
-      if (q.symbol === ".SPX")   market.spx    = q.change || "N/A";
-      if (q.symbol === ".IXIC")  market.ixic   = q.change || "N/A";
-      if (q.symbol === ".SOX")   market.sox    = q.change || "N/A";
-      if (q.symbol === "TSM") {
-        market.tsmRegular = q.change || "N/A";
-        market.tsmType    = q.ExtendedMktQuote?.type || "";
-        market.tsmMarket  = q.ExtendedMktQuote?.change || "N/A";
+      const sym = q.symbol;
+
+      // 如果是四大指數
+      if (indexMap[sym]) {
+        market[indexMap[sym]] = q.change || "N/A";
+      } else {
+        // 如果不是指數 (代表是個股)，則放入分門別類的 stock 物件中
+        stock[sym] = {
+          regular: q.change || "N/A",
+          type:    q.ExtendedMktQuote?.type || "",
+          market:  q.ExtendedMktQuote?.change || "N/A"
+        };
+        
+        // 為了相容你原本 market 區塊可能有用到 tsmRegular，這段可保留或移除
+        // if (sym === "TSM") {
+        //   market.tsmRegular = stock[sym].regular;
+        //   market.tsmType    = stock[sym].type;
+        //   market.tsmMarket  = stock[sym].market;
+        // }
       }
     }
 
@@ -272,6 +296,7 @@ async function fetchCnbc() {
         updateTime: fv.updateTime,
       },
       market,
+      stock, // 這裡現在會是 { TSM: { regular: "...", type: "...", market: "..." } }
     });
   } catch (e) {
     return json({ success: false, error: e.message }, 500);
