@@ -339,7 +339,7 @@
   </ul>
 </nav>
 
-<header>
+<header id="header">
   <h1 onclick="openMenu()" style="cursor:pointer;">☰ 即時報價</h1>
   <div style="display:flex;align-items:center;gap:16px;">
     <!-- <span id="clock">--:--:--</span> -->
@@ -1539,13 +1539,19 @@ function showSweetAlert(icon = 'info', title = '', text = '') {
 function openMenu() {
   document.getElementById('slideMenu').classList.add('active');
   document.getElementById('menuOverlay').classList.add('active');
-  document.body.style.overflow = 'hidden'; // ← 禁止 body 滾動
+  document.body.style.overflow = 'hidden'; // 禁止 body 滾動
+  // document.getElementById("slideMenu").style.width = "250px";
+  // document.getElementById("header").style.marginLeft = "250px";
+  // document.getElementById("grid").style.marginLeft = "250px";
 }
 
 function closeMenu() {
   document.getElementById('slideMenu').classList.remove('active');
   document.getElementById('menuOverlay').classList.remove('active');
   document.body.style.overflow = ''; // 恢復 body 滾動
+  // document.getElementById("slideMenu").style.width = "0px";
+  // document.getElementById("header").style.marginLeft = "0px";
+  // document.getElementById("grid").style.marginLeft = "0px";
 }
 </script>
 </body>
