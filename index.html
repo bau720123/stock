@@ -333,6 +333,7 @@
     <li><a onclick="closeMenu()" href="?card_type=materials">🛢️ 原物料市場</a></li>
     <li><a onclick="closeMenu()" href="?card_type=market-sentiment">🌡️ 市場情緒</a></li>
     <li><a onclick="closeMenu()" href="?card_type=my-stock">⭐ 我的自選股票</a></li>
+    <li><a onclick="closeMenu()" href="?card_type=all">🌐 全類別顯示</a></li>
     <li><a style="cursor:pointer;" onclick="showInfo('一個以純前端技術為核心，搭配 Cloudflare 無伺服器架構，實現即時金融市場報價、PWA 安裝與主動推播通知的個人投資輔助工具。');">ℹ️ 關於本軟體</a></li>
     <!-- <li><a href="#">⚙️ 設定</a></li> -->
   </ul>
@@ -999,7 +1000,7 @@ async function loadAll() {
     activeLink.classList.add('active');
   }
 
-  // 1. 定義對照表：[參數值]: { 元素ID, 執行函式 }
+  // 定義對照表：[參數值]: { 元素ID, 執行函式 }
   const config = {
     'taiwan-market':    { id: 'card-tw',        fn: loadTW },
     'world-indices':    { id: 'card-cnbc',      fn: loadCnbc },
@@ -1008,23 +1009,49 @@ async function loadAll() {
     'my-stock':         { id: 'card-mystock',   fn: loadMyStock }
   };
 
-  // 2. 取得目標設定
-  const target = config[card_type];
+  // 先隱藏所有卡片並重置樣式
+  document.querySelectorAll('.card').forEach(c => {
+    c.style.display = 'none';
+    c.className = 'card';
+  });
 
-  if (target) {
-    // 3. 顯示對應的卡片
-    const el = document.getElementById(target.id);
-    if (el) el.style.display = 'block';
-
-    // 4. 只執行對應的函式
-    try {
-      await target.fn();
-    } catch (e) {
-      console.error(`載入 ${card_type} 資料失敗:`, e);
+  // 判斷模式並執行 ---
+  if (card_type === 'all') {
+    // 全顯示
+    const promises = [];
+    
+    for (const key in config) {
+      const target = config[key];
+      const el = document.getElementById(target.id);
+      if (el) {
+        el.style.display = 'block'; // 顯示所有卡片
+      }
+      promises.push(target.fn()); // 加入執行隊列
     }
+    
+    // 並行執行所有抓取函式
+    await Promise.allSettled(promises);
+
   } else {
-    console.warn(`未知的 card_type: ${card_type}`);
-    // 選項：如果參數亂傳，可以導向預設值或顯示錯誤
+    // 單一顯示
+    // 取得目標設定
+    const target = config[card_type];
+
+    if (target) {
+      // 顯示對應的卡片
+      const el = document.getElementById(target.id);
+      if (el) el.style.display = 'block';
+
+      // 只執行對應的函式
+      try {
+        await target.fn();
+      } catch (e) {
+        console.error(`載入 ${card_type} 資料失敗:`, e);
+      }
+    } else {
+      console.warn(`未知的 card_type: ${card_type}`);
+      // 選項：如果參數亂傳，可以導向預設值或顯示錯誤
+    }
   }
 
   btn.classList.remove('spinning');
