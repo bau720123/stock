@@ -598,7 +598,15 @@ async function openMyStockSettings() {
     cancelButtonText: '取消',
     showCancelButton: true,
     cancelButtonColor: '#3a4a5c',
+    focusDeny: false,
     focusConfirm: false,
+    didOpen: () => {
+      const firstInput = document.querySelector('.swal2-popup input');
+      if (firstInput) firstInput.blur();
+      setTimeout(() => {
+        document.querySelector('.swal2-container').scrollIntoView({ behavior: 'smooth' });
+      }, 300);
+    },
     preConfirm: () => {
       // 從 DOM 讀取最新輸入值
       const rows = document.querySelectorAll('[id^="mystock-row-"]');
@@ -713,10 +721,14 @@ async function openAlertSettings(configKey) {
     cancelButtonText: '取消',
     showCancelButton: true,
     cancelButtonColor: '#3a4a5c',
+    focusDeny: false,
     focusConfirm: false,
     didOpen: () => {
       const firstInput = document.querySelector('.swal2-popup input');
       if (firstInput) firstInput.blur();
+      setTimeout(() => {
+        document.querySelector('.swal2-container').scrollIntoView({ behavior: 'smooth' });
+      }, 300);
     },
     preConfirm: () => {
       const values = {};
