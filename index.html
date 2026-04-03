@@ -601,8 +601,6 @@ async function openMyStockSettings() {
     focusDeny: false,
     focusConfirm: false,
     didOpen: () => {
-      const firstInput = document.querySelector('.swal2-popup input');
-      if (firstInput) firstInput.blur();
       setTimeout(() => {
         document.querySelector('.swal2-container').scrollIntoView({ behavior: 'smooth' });
       }, 300);
@@ -724,8 +722,6 @@ async function openAlertSettings(configKey) {
     focusDeny: false,
     focusConfirm: false,
     didOpen: () => {
-      const firstInput = document.querySelector('.swal2-popup input');
-      if (firstInput) firstInput.blur();
       setTimeout(() => {
         document.querySelector('.swal2-container').scrollIntoView({ behavior: 'smooth' });
       }, 300);
