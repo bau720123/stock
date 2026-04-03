@@ -601,9 +601,8 @@ async function openMyStockSettings() {
     focusDeny: false,
     focusConfirm: false,
     didOpen: () => {
-      setTimeout(() => {
-        document.querySelector('.swal2-container').scrollIntoView({ behavior: 'smooth' });
-      }, 300);
+      const firstInput = document.querySelector('.swal2-popup input');
+      if (firstInput) firstInput.blur();
     },
     preConfirm: () => {
       // 從 DOM 讀取最新輸入值
@@ -722,9 +721,8 @@ async function openAlertSettings(configKey) {
     focusDeny: false,
     focusConfirm: false,
     didOpen: () => {
-      setTimeout(() => {
-        document.querySelector('.swal2-container').scrollIntoView({ behavior: 'smooth' });
-      }, 300);
+      const firstInput = document.querySelector('.swal2-popup input');
+      if (firstInput) firstInput.blur();
     },
     preConfirm: () => {
       const values = {};
