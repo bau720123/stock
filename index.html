@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content">
 <title>即時報價</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -335,7 +335,7 @@
     <li><a onclick="closeMenu()" href="?card_type=materials">🛢️ 原物料市場</a></li>
     <li><a onclick="closeMenu()" href="?card_type=market-sentiment">🌡️ 市場情緒</a></li>
     <li><a onclick="closeMenu()" href="?card_type=my-stock">⭐ 我的自選股票</a></li>
-    <li><a style="cursor:pointer;" onclick="javascript:showInfo('一個以純前端技術為核心，搭配 Cloudflare 無伺服器架構，實現即時金融市場報價、PWA 安裝與主動推播通知的個人投資輔助工具。');">ℹ️ 關於本軟體</a></li>
+    <li><a style="cursor:pointer;" onclick="showInfo('一個以純前端技術為核心，搭配 Cloudflare 無伺服器架構，實現即時金融市場報價、PWA 安裝與主動推播通知的個人投資輔助工具。');">ℹ️ 關於本軟體</a></li>
     <!-- <li><a href="#">⚙️ 設定</a></li> -->
   </ul>
 </nav>
@@ -1520,7 +1520,7 @@ function openMenu() {
 function closeMenu() {
   document.getElementById('slideMenu').classList.remove('active');
   document.getElementById('menuOverlay').classList.remove('active');
-  document.body.style.overflow = ''; // ← 恢復 body 滾動
+  document.body.style.overflow = ''; // 恢復 body 滾動
 }
 </script>
 </body>
