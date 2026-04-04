@@ -60,11 +60,27 @@ export default {
 };
 
 async function debugSina() {
-  const res = await fetch("https://hq.sinajs.cn/list=hf_OIL,hf_GC,hf_SI,DINIW,znb_VIX,gb_dji,gb_inx,gb_ixic,gb_sox", {
-    headers: { "User-Agent": UA, "Referer": "https://finance.sina.com.cn/" }
+  const res = await fetch("https://hq.sinajs.cn/list=hf_YM,hf_ES,hf_NQ,gb_dji,gb_inx,gb_ixic,gb_sox,gb_tsm,hf_OIL,hf_GC,hf_SI,DINIW,znb_VIX", {
+    headers: {
+      "User-Agent": UA,
+      "Referer": "https://finance.sina.com.cn/"
+    }
   });
-  const text = await res.text();
-  return new Response(text, { headers: { ...CORS, "Content-Type": "text/plain; charset=utf-8" } });
+
+  // 1. 先取得原始的 ArrayBuffer (二進位資料)
+  const buffer = await res.arrayBuffer();
+
+  // 2. 使用 TextDecoder 並指定 'gbk' 編碼
+  const decoder = new TextDecoder("gbk");
+  const text = decoder.decode(buffer);
+
+  // 3. 回傳時強制指定 charset=utf-8，讓你的瀏覽器/App 能正確顯示
+  return new Response(text, { 
+    headers: { 
+      ...CORS, 
+      "Content-Type": "text/plain; charset=utf-8" 
+    } 
+  });
 }
 
 // ── HiStock（台指期 / 富台指）──────────────────────────────
@@ -153,6 +169,7 @@ async function fetchSina(list) {
     const parts = match[1].split(",");
 
     if (list === "DINIW") {
+      // 美元指數
       return json({
         success: true,
         time:   parts[10] + " " + parts[0] || "",
@@ -162,7 +179,8 @@ async function fetchSina(list) {
         high:   toFloat(parts[6]),
         prev:   toFloat(parts[7]),
       });
-    } else if (list === "znb_VIX") {
+    } else if (list.startsWith('znb_')) {
+      // znb_VIX 恐慌指數
       return json({
         success: true,
         time:   parts[6] + " " + parts[7] || "",
@@ -172,7 +190,28 @@ async function fetchSina(list) {
         high:   toFloat(parts[10]),
         prev:   toFloat(parts[9]),
       });
-    } else {
+    } else if (list.startsWith('gb_')) {
+      // gb_dji 道瓊工業指數
+      // gb_inx 標普500指數
+      // gb_ixic 那斯達克指數
+      // gb_sox 費城半導體指數
+      // gb_tsm 台積電 ADR
+      return json({
+        success: true,
+        time:   parts[3] || "",
+        price:  toFloat(parts[1]),
+        open:   toFloat(parts[5]),
+        low:    toFloat(parts[7]),
+        high:   toFloat(parts[6]),
+        prev:   toFloat(parts[26]),
+      });
+    } else if (list.startsWith('hf_')) {
+      // hf_YM	道瓊期貨
+      // hf_ES	標普 500 期貨
+      // hf_NQ	納斯達克 100 期貨
+      // hf_OIL 布蘭特原油
+      // hf_GC 黃金
+      // hf_SI 白銀
       return json({
         success: true,
         price:  toFloat(parts[0]),
@@ -182,6 +221,17 @@ async function fetchSina(list) {
         low:    toFloat(parts[5]),
         time:   parts[12] + " " + parts[6] || "",
         prev:   toFloat(parts[7]),
+      });
+    } else {
+      return json({
+        success: true,
+        price:  0,
+        change: 0,
+        open:   0,
+        high:   0,
+        low:    0,
+        time:   0,
+        prev:   0,
       });
     }
 
@@ -278,13 +328,6 @@ async function fetchCnbc() {
           type:    q.ExtendedMktQuote?.type || "",
           market:  q.ExtendedMktQuote?.change || "N/A"
         };
-        
-        // 為了相容你原本 market 區塊可能有用到 tsmRegular，這段可保留或移除
-        // if (sym === "TSM") {
-        //   market.tsmRegular = stock[sym].regular;
-        //   market.tsmType    = stock[sym].type;
-        //   market.tsmMarket  = stock[sym].market;
-        // }
       }
     }
 

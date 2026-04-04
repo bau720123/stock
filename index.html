@@ -329,7 +329,7 @@
   <div id="menuHeader" onclick="closeMenu()" style="cursor:pointer;">☰ 即時報價</div>
   <ul id="menuList">
     <li><a onclick="closeMenu()" href="?card_type=taiwan-market">📈 台股市場概況</a></li>
-    <li><a onclick="closeMenu()" href="?card_type=world-indices">🏛️ 美股市場概況</a></li>
+    <li><a onclick="closeMenu()" href="?card_type=america-market">🏛️ 美股市場概況</a></li>
     <li><a onclick="closeMenu()" href="?card_type=materials">🛢️ 原物料市場</a></li>
     <li><a onclick="closeMenu()" href="?card_type=market-sentiment">🌡️ 市場情緒</a></li>
     <li><a onclick="closeMenu()" href="?card_type=my-stock">⭐ 我的自選股票</a></li>
@@ -361,11 +361,29 @@
 </header>
 
 <div class="grid" id="grid">
-  <div class="card" id="card-tw" style="display: none;"><div class="card-title">台股市場概況</div><div class="skeleton"></div><div class="skeleton"></div></div>
-  <div class="card" id="card-cnbc" style="display: none;"><div class="card-title">美股市場概況</div><div class="skeleton"></div><div class="skeleton"></div></div>
-  <div class="card" id="card-commodity" style="display: none;"><div class="card-title">原物料市場</div><div class="skeleton"></div></div>
-  <div class="card" id="card-sentiment" style="display: none;"><div class="card-title">市場情緒</div><div class="skeleton"></div></div>
-  <div class="card" id="card-mystock" style="display: none;"><div class="card-title">我的自選股票</div><div class="skeleton"></div><div class="skeleton"></div></div>
+  <div class="card" id="card-tw" style="display: none;">
+      <div class="card-title">台股市場概況</div>
+      <div class="skeleton"></div>
+      <div class="skeleton"></div>
+  </div>
+  <div class="card" id="card-america" style="display: none;">
+      <div class="card-title">美股市場概況</div>
+      <div class="skeleton"></div>
+      <div class="skeleton"></div>
+  </div>
+  <div class="card" id="card-materials" style="display: none;">
+      <div class="card-title">原物料市場</div>
+      <div class="skeleton"></div>
+  </div>
+  <div class="card" id="card-sentiment" style="display: none;">
+      <div class="card-title">市場情緒</div>
+      <div class="skeleton"></div>
+  </div>
+  <div class="card" id="card-mystock" style="display: none;">
+      <div class="card-title">我的自選股票</div>
+      <div class="skeleton"></div>
+      <div class="skeleton"></div>
+  </div>
 </div>
 
 <script>
@@ -445,6 +463,34 @@ const ALERT_CONFIGS = {
     fields: [
       { key: 'tsmc_high', label: '價格高於此值時通知', placeholder: '例：2000', unit: 'TWD' },
       { key: 'tsmc_low',  label: '價格低於此值時通知', placeholder: '例：1800',  unit: 'TWD' },
+    ]
+  },
+  dji: {
+    title: '道瓊工業 偵測設定',
+    fields: [
+      { key: 'dji_high', label: '價格高於此值時通知', placeholder: '例：100', unit: 'USD' },
+      { key: 'dji_low',  label: '價格低於此值時通知', placeholder: '例：95',  unit: 'USD' },
+    ]
+  },
+  inx: {
+    title: '標普500 偵測設定',
+    fields: [
+      { key: 'inx_high', label: '價格高於此值時通知', placeholder: '例：100', unit: 'USD' },
+      { key: 'inx_low',  label: '價格低於此值時通知', placeholder: '例：95',  unit: 'USD' },
+    ]
+  },
+  ixic: {
+    title: '那斯達克 偵測設定',
+    fields: [
+      { key: 'ixic_high', label: '價格高於此值時通知', placeholder: '例：100', unit: 'USD' },
+      { key: 'ixic_low',  label: '價格低於此值時通知', placeholder: '例：95',  unit: 'USD' },
+    ]
+  },
+  sox: {
+    title: '費城半導體 偵測設定',
+    fields: [
+      { key: 'sox_high', label: '價格高於此值時通知', placeholder: '例：100', unit: 'USD' },
+      { key: 'sox_low',  label: '價格低於此值時通知', placeholder: '例：95',  unit: 'USD' },
     ]
   },
   brent: {
@@ -888,7 +934,7 @@ if ('serviceWorker' in navigator) {
       })
       .catch(async err => {
         const replyMessage = '註冊失敗：' + err;
-        showSweetAlert('error', '發生錯誤', replyMessage);
+        // showSweetAlert('error', '發生錯誤', replyMessage);
         await writeLogs('ERROR', replyMessage);
       });
   });
@@ -978,9 +1024,9 @@ async function loadAll() {
   });
 
   // await Promise.allSettled([
-  //   loadTW(),
-  //   loadCnbc(),
-  //   loadCommodity(),
+  //   loadTw(),
+  //   loadAmerica(),
+  //   loadMaterials(),
   //   loadSentiment(),
   //   loadMyStock(),
   // ]);
@@ -1002,9 +1048,9 @@ async function loadAll() {
 
   // 定義對照表：[參數值]: { 元素ID, 執行函式 }
   const config = {
-    'taiwan-market':    { id: 'card-tw',        fn: loadTW },
-    'world-indices':    { id: 'card-cnbc',      fn: loadCnbc },
-    'materials':        { id: 'card-commodity', fn: loadCommodity },
+    'taiwan-market':    { id: 'card-tw',        fn: loadTw },
+    'america-market':   { id: 'card-america',   fn: loadAmerica },
+    'materials':        { id: 'card-materials', fn: loadMaterials },
     'market-sentiment': { id: 'card-sentiment', fn: loadSentiment },
     'my-stock':         { id: 'card-mystock',   fn: loadMyStock }
   };
@@ -1060,50 +1106,8 @@ async function loadAll() {
 
 window.onload = loadAll;
 
-// 美股市場：合併盤前與四大指數
-async function loadCnbc() {
-  const d = await fetch(WORKER + '/cnbc').then(r => r.json());
-  if (!d.success) return;
-  const r = await fetch(WORKER + '/rh').then(r => r.json());
-
-  const { fairValue: fv, market: m, stock: stock} = d;
-
-  let html = `<div class="card-title">美股市場概況</div>`;
-  
-  html += groupHeader('【美股盤前電子盤】', '', '美股盤前電子盤（Pre-Market Session）指在正常開盤時間（美東時間 9:30 AM）前，透過電子通訊網路（ECN）進行的股票交易時段，通常為美東時間凌晨 4:00 至 9:30，對應台灣時間晚上 16:00/17:00 後至 21:30。此時段成交量較小但波動大，適合作為盤前財報發布後的策略布局與風險控管。');
-  html += row('道瓊期貨', formatChange(fv.dow), changeClass(fv.dow));
-  html += row('標普500期貨', formatChange(fv.sp), changeClass(fv.sp));
-  html += row('納斯達克100期貨', formatChange(fv.nasdaq), changeClass(fv.nasdaq));
-  html += row('羅素2000期貨', formatChange(fv.russell), changeClass(fv.russell));
-
-  html += groupHeader('【美股四大指數】', '', '美股四大指數（道瓊、標普500、納斯達克、費城半導體）是反映美國股市與經濟動能的核心指標。道瓊代表藍籌龍頭，標普500涵蓋大盤整體，納斯達克側重科技成長，費半則專注半導體產業。這些指數為投資人提供了評估市場漲跌、產業趨勢及全球資金流向的關鍵基準。');
-  html += row('道瓊工業指數', m.dji, changeClass(m.dji));
-  html += row('標普500指數', m.spx, changeClass(m.spx));
-  html += row('納斯達克指數', m.ixic, changeClass(m.ixic));
-  html += row('費城半導體指數', m.sox, changeClass(m.sox));
-
-  html += groupHeader('【台積電 ADR】', '', '台積電 ADR（American Depositary Receipts，美國存託憑證）是台積電在美國發行的股票憑證（代號：TSM），掛牌於紐約證券交易所（NYSE）。它讓美國投資人能用美元直接買賣台積電，代表國際資金對台積電的看法，且 1 單位 ADR 等於 5 股台積電台股（2330）普通股。');
-  if (stock.TSM.type === 'PRE_MKT' || stock.TSM.type === 'POST_MKT_PREV') {
-      html += row('盤前變動', stock.TSM.market || '--', changeClass(stock.TSM.market));
-  }
-
-  html += row('盤中或收盤變動', stock.TSM.regular || '--', changeClass(stock.TSM.regular));
-
-  if (stock.TSM.type === 'POST_MKT') {
-      html += row('盤後變動', stock.TSM.market || '--', changeClass(stock.TSM.market));
-  }
-
-  if (r.success) {
-    html += row('即時變動', r.changeText, changeClass(r.changeText));
-    html += row('額外資訊', r.tertiaryText, changeClass(r.tertiaryText));
-  }
-
-  // html += `<div class="update-time">${fv.updateTime}</div>`;
-  setCard('card-cnbc', 0, html);
-}
-
 // 台股市場概況
-async function loadTW() {
+async function loadTw() {
   const [taifex, fitx, twn, tsmc] = await Promise.all([
     fetch(WORKER + '/taifex').then(r => r.json()),
     fetch(WORKER + '/fitx').then(r => r.json()),
@@ -1220,12 +1224,237 @@ async function loadTW() {
   setCard('card-tw', 0, html);
 }
 
+// 美股市場概況
+async function loadAmerica() {
+  const [cnbcPreMarkets, robinHood, sinaDji, sinaInx, sinaIxic, sinaSox, sinaTsm] = await Promise.all([
+    fetch(WORKER + '/cnbc').then(r => r.json()).catch(() => ({ success: false })), // 美股盤前盤中
+    fetch(WORKER + '/rh').then(r => r.json()).catch(() => ({ success: false })), // Robinhood
+    fetch(WORKER + '/sina/gb_dji').then(r => r.json()).catch(() => ({ success: false })), // 道瓊工業指數
+    fetch(WORKER + '/sina/gb_inx').then(r => r.json()).catch(() => ({ success: false })), // 標普500指數
+    fetch(WORKER + '/sina/gb_ixic').then(r => r.json()).catch(() => ({ success: false })), // 那斯達克指數
+    fetch(WORKER + '/sina/gb_sox').then(r => r.json()).catch(() => ({ success: false })), // 費城半導體指數
+    fetch(WORKER + '/sina/gb_tsm').then(r => r.json()).catch(() => ({ success: false })), // 台積電 ADR
+  ]);
+
+  let html = `<div class="card-title">美股市場概況</div>`;
+
+  // 美股盤前盤中
+  html += groupHeader('【美股盤前電子盤】', '', '美股盤前電子盤（Pre-Market Session）指在正常開盤時間（美東時間 9:30 AM）前，透過電子通訊網路（ECN）進行的股票交易時段，通常為美東時間凌晨 4:00 至 9:30，對應台灣時間晚上 16:00/17:00 後至 21:30。此時段成交量較小但波動大，適合作為盤前財報發布後的策略布局與風險控管。');
+  if (cnbcPreMarkets.success) {
+    html += row('道瓊期貨', formatChange(cnbcPreMarkets.fairValue.dow), changeClass(cnbcPreMarkets.fairValue.dow));
+    html += row('標普500期貨', formatChange(cnbcPreMarkets.fairValue.sp), changeClass(cnbcPreMarkets.fairValue.sp));
+    html += row('納斯達克100期貨', formatChange(cnbcPreMarkets.fairValue.nasdaq), changeClass(cnbcPreMarkets.fairValue.nasdaq));
+    html += row('羅素2000期貨', formatChange(cnbcPreMarkets.fairValue.russell), changeClass(cnbcPreMarkets.fairValue.russell));
+  }
+
+  // 道瓊工業指數
+  html += groupHeader('【道瓊工業指數】', 'dji', '道瓊工業指數（Dow Jones Industrial Average，DJI）是反映美國大型工業公司表現的核心指標，涵蓋了多個行業的領先企業。此指數為投資人提供了評估美國經濟健康狀況的重要參考。');
+  if (sinaDji.success) {
+    const changeNum = sinaDji.price - sinaDji.prev;
+    const cls = changeNum < 0 ? 'down' : 'up';
+    const changePercent = changeNum / sinaDji.prev * 100;
+
+    html += row('前次', sinaDji.prev.toFixed(2));
+    html += row('開盤價', sinaDji.open.toFixed(2));
+    html += row('最高價', sinaDji.high.toFixed(2));
+    html += row('最低價', sinaDji.low.toFixed(2));
+    html += row('漲跌', changeNum.toFixed(2), cls);
+    html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
+    html += row('價格', sinaDji.price.toFixed(2), 'accent');
+    html += row('更新時間', sinaDji.time);
+
+    // 價格門檻通知（從 localStorage 讀取，未設定則不觸發）
+    const djiHigh = alertGet('dji_high');
+    const djiLow  = alertGet('dji_low');
+    if (djiHigh !== null && sinaDji.price >= djiHigh) {
+      sendNotification(
+        '道瓊工業指數價格警示',
+        `價格 ${sinaDji.price.toFixed(2)} USD，已高於設定門檻 ${djiHigh} USD`,
+        'https://hk.investing.com/indices/us-30'
+      );
+    }
+    if (djiLow !== null && sinaDji.price <= djiLow) {
+      sendNotification(
+        '道瓊工業指數價格警示',
+        `價格 ${sinaDji.price.toFixed(2)} USD，已低於設定門檻 ${djiLow} USD`,
+        'https://hk.investing.com/indices/us-30'
+      );
+    }
+  } else {
+    html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
+  }
+
+  // 標普500指數
+  html += groupHeader('【標普500指數】', 'inx', '標普500指數（S&P 500 Index）是反映美國大型上市公司表現的核心指標，涵蓋了500家領先企業，代表了美國股市的整體表現。此指數為投資人提供了評估美國經濟健康狀況的重要參考。');
+  if (sinaInx.success) {
+    const changeNum = sinaInx.price - sinaInx.prev;
+    const cls = changeNum < 0 ? 'down' : 'up';
+    const changePercent = changeNum / sinaInx.prev * 100;
+
+    html += row('前次', sinaInx.prev.toFixed(2));
+    html += row('開盤價', sinaInx.open.toFixed(2));
+    html += row('最高價', sinaInx.high.toFixed(2));
+    html += row('最低價', sinaInx.low.toFixed(2));
+    html += row('漲跌', changeNum.toFixed(2), cls);
+    html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
+    html += row('價格', sinaInx.price.toFixed(2), 'accent');
+    html += row('更新時間', sinaInx.time);
+
+    // 價格門檻通知（從 localStorage 讀取，未設定則不觸發）
+    const inxHigh = alertGet('inx_high');
+    const inxLow  = alertGet('inx_low');
+    if (inxHigh !== null && sinaInx.price >= inxHigh) {
+      sendNotification(
+        '標普500指數價格警示',
+        `價格 ${sinaInx.price.toFixed(2)} USD，已高於設定門檻 ${inxHigh} USD`,
+        'https://hk.investing.com/indices/us-spx-500'
+      );
+    }
+    if (inxLow !== null && sinaInx.price <= inxLow) {
+      sendNotification(
+        '標普500指數價格警示',
+        `價格 ${sinaInx.price.toFixed(2)} USD，已低於設定門檻 ${inxLow} USD`,
+        'https://hk.investing.com/indices/us-spx-500'
+      );
+    }
+  } else {
+    html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
+  }
+
+  // 那斯達克指數
+  html += groupHeader('【那斯達克指數】', 'ixic', '那斯達克指數（NASDAQ Composite Index）是反映美國科技股表現的核心指標，涵蓋了納斯達克交易所上市的多種股票，代表了美國科技產業的整體表現。此指數為投資人提供了評估美國科技產業景氣與技術發展的重要參考。');
+  if (sinaIxic.success) {
+    const changeNum = sinaIxic.price - sinaIxic.prev;
+    const cls = changeNum < 0 ? 'down' : 'up';
+    const changePercent = changeNum / sinaIxic.prev * 100;
+
+    html += row('前次', sinaIxic.prev.toFixed(2));
+    html += row('開盤價', sinaIxic.open.toFixed(2));
+    html += row('最高價', sinaIxic.high.toFixed(2));
+    html += row('最低價', sinaIxic.low.toFixed(2));
+    html += row('漲跌', changeNum.toFixed(2), cls);
+    html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
+    html += row('價格', sinaIxic.price.toFixed(2), 'accent');
+    html += row('更新時間', sinaIxic.time);
+
+    // 價格門檻通知（從 localStorage 讀取，未設定則不觸發）
+    const ixicHigh = alertGet('ixic_high');
+    const ixicLow  = alertGet('ixic_low');
+    if (ixicHigh !== null && sinaIxic.price >= ixicHigh) {
+      sendNotification(
+        '那斯達克指數價格警示',
+        `價格 ${sinaIxic.price.toFixed(2)} USD，已高於設定門檻 ${ixicHigh} USD`,
+        'https://hk.investing.com/indices/nasdaq-composite'
+      );
+    }
+    if (ixicLow !== null && sinaIxic.price <= ixicLow) {
+      sendNotification(
+        '那斯達克指數價格警示',
+        `價格 ${sinaIxic.price.toFixed(2)} USD，已低於設定門檻 ${ixicLow} USD`,
+        'https://hk.investing.com/indices/nasdaq-composite'
+      );
+    }
+  } else {
+    html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
+  }
+
+  // 費城半導體指數
+  html += groupHeader('【費城半導體指數】', 'sox', '費城半導體指數（Philadelphia Semiconductor Index，SOX）是反映美國半導體產業表現的核心指標，涵蓋了全球知名的半導體公司，包括設計、製造與封裝等各個環節。此指數為投資人提供了評估半導體產業景氣與技術發展的重要參考。');
+  if (sinaSox.success) {
+    const changeNum = sinaSox.price - sinaSox.prev;
+    const cls = changeNum < 0 ? 'down' : 'up';
+    const changePercent = changeNum / sinaSox.prev * 100;
+
+    html += row('前次', sinaSox.prev.toFixed(2));
+    html += row('開盤價', sinaSox.open.toFixed(2));
+    html += row('最高價', sinaSox.high.toFixed(2));
+    html += row('最低價', sinaSox.low.toFixed(2));
+    html += row('漲跌', changeNum.toFixed(2), cls);
+    html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
+    html += row('價格', sinaSox.price.toFixed(2), 'accent');
+    html += row('更新時間', sinaSox.time);
+
+    // 價格門檻通知（從 localStorage 讀取，未設定則不觸發）
+    const soxHigh = alertGet('sox_high');
+    const soxLow  = alertGet('sox_low');
+    if (soxHigh !== null && sinaSox.price >= soxHigh) {
+      sendNotification(
+        '費城半導體價格警示',
+        `價格 ${sinaSox.price.toFixed(2)} USD，已高於設定門檻 ${soxHigh} USD`,
+        'https://hk.investing.com/indices/sox'
+      );
+    }
+    if (soxLow !== null && sinaSox.price <= soxLow) {
+      sendNotification(
+        '費城半導體價格警示',
+        `價格 ${sinaSox.price.toFixed(2)} USD，已低於設定門檻 ${soxLow} USD`,
+        'https://hk.investing.com/indices/sox'
+      );
+    }
+  } else {
+    html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
+  }
+
+  // 台積電ADR
+  html += groupHeader('【台積電 ADR】', 'tsm', '台積電 ADR（American Depositary Receipts，美國存託憑證）是台積電在美國發行的股票憑證（代號：TSM），掛牌於紐約證券交易所（NYSE）。它讓美國投資人能用美元直接買賣台積電，代表國際資金對台積電的看法，且 1 單位 ADR 等於 5 股台積電台股（2330）普通股。');
+  if (sinaTsm.success) {
+    const changeNum = sinaTsm.price - sinaTsm.prev;
+    const cls = changeNum < 0 ? 'down' : 'up';
+    const changePercent = changeNum / sinaTsm.prev * 100;
+
+    html += row('前次', sinaTsm.prev.toFixed(2));
+    html += row('開盤價', sinaTsm.open.toFixed(2));
+    html += row('最高價', sinaTsm.high.toFixed(2));
+    html += row('最低價', sinaTsm.low.toFixed(2));
+    html += row('漲跌', changeNum.toFixed(2), cls);
+    html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
+    html += row('價格', sinaTsm.price.toFixed(2), 'accent');
+    html += row('更新時間', sinaTsm.time);
+
+    // 價格門檻通知（從 localStorage 讀取，未設定則不觸發）
+    const tsmHigh = alertGet('tsm_high');
+    const tsmLow  = alertGet('tsm_low');
+    if (tsmHigh !== null && sinaTsm.price >= tsmHigh) {
+      sendNotification(
+        '台積電 ADR 價格警示',
+        `價格 ${sinaTsm.price.toFixed(2)} USD，已高於設定門檻 ${tsmHigh} USD`,
+        'https://hk.investing.com/equities/taiwan-semicond.manufacturing-co'
+      );
+    }
+    if (tsmLow !== null && sinaTsm.price <= tsmLow) {
+      sendNotification(
+        '台積電 ADR 價格警示',
+        `價格 ${sinaTsm.price.toFixed(2)} USD，已低於設定門檻 ${tsmLow} USD`,
+        'https://hk.investing.com/equities/taiwan-semicond.manufacturing-co'
+      );
+    }
+  } else {
+    html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
+  }
+
+  // CNBC 的數據更即時，且包含盤前、盤中和盤後的變動情況。
+  if (cnbcPreMarkets.success) {
+    if (cnbcPreMarkets.stock.TSM.type === 'PRE_MKT' || cnbcPreMarkets.stock.TSM.type === 'POST_MKT_PREV') {
+        html += row('盤前變動', cnbcPreMarkets.stock.TSM.market || '--', changeClass(cnbcPreMarkets.stock.TSM.market));
+    }
+
+    html += row('CNBC_盤中或收盤變動', cnbcPreMarkets.stock.TSM.regular || '--', changeClass(cnbcPreMarkets.stock.TSM.regular));
+
+    if (cnbcPreMarkets.stock.TSM.type === 'POST_MKT') {
+        html += row('CNBC_盤後變動', cnbcPreMarkets.stock.TSM.market || '--', changeClass(cnbcPreMarkets.stock.TSM.market));
+    }
+
+    if (robinHood.success) {
+      html += row('robinHood_即時變動', robinHood.changeText, changeClass(robinHood.changeText));
+      html += row('robinHood_額外資訊', robinHood.tertiaryText, changeClass(robinHood.tertiaryText));
+    }
+  }
+
+  setCard('card-america', 0, html);
+}
+
 // 原物料市場
-async function loadCommodity() {
-  // const [brent, brentStockq] = await Promise.all([
-  //   fetch(WORKER + '/brent').then(r => r.json()),
-  //   fetch(WORKER + '/brent_stockq').then(r => r.json()),
-  // ]);
+async function loadMaterials() {
   const [sinaBrent, sinaGold, sinaSilver] = await Promise.all([
     fetch(WORKER + '/sina/hf_OIL').then(r => r.json()).catch(() => ({ success: false })), // 布蘭特原油
     fetch(WORKER + '/sina/hf_GC').then(r => r.json()).catch(() => ({ success: false })), // 黃金
@@ -1233,23 +1462,6 @@ async function loadCommodity() {
   ]);
 
   let html = `<div class="card-title">原物料市場</div>`;
-
-  // 【布蘭特原油】
-  // html += `<span class="group-header">【布蘭特原油】</span>`;
-  // if (brent.success) {
-  //   const changeNum = parseFloat(brent.changeText.replace(/[▲▼]/g, '').trim());
-  //   const cls = changeNum < 0 ? 'down' : 'up';
-  //   const formattedTime = brent.updateTime.replace(/\./g, '-');
-  //   html += row('開盤價', brent.open.toFixed(0));
-  //   html += row('最高價', brent.high.toFixed(0));
-  //   html += row('最低價', brent.low.toFixed(0));
-  //   html += row('漲跌', brent.changeText, cls);
-  //   html += row('成交價', brent.current.toFixed(2), 'accent');
-  //   html += row('更新時間', formattedTime);
-  //   html += row('價格', brentStockq.success ? brentStockq.price.toFixed(2) : '--');
-  // } else {
-  //   html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
-  // }
 
   // 【布蘭特原油】
   html += groupHeader('【布蘭特原油】', 'brent', '布蘭特原油（Brent Crude）是產自歐洲北海的輕質低硫原油，為全球最重要的國際原油定價基準之一，通常用於衡量歐洲、非洲與中東地區輸往西方的石油價格。其特色為含硫量低、品質適中，適合提煉汽油、柴油與航空煤油，全球約有三分之二的實體原油貿易以此為參考基準。');
@@ -1324,7 +1536,7 @@ async function loadCommodity() {
     html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
   }
 
-  setCard('card-commodity', 0, html);
+  setCard('card-materials', 0, html);
 }
 
 // 市場情緒
