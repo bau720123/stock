@@ -26,6 +26,7 @@ export default {
     // if (path === "/brent")    return await fetchHiStock("stocktop2017_Global", "BRENTOIL", "股價", "成交量");
     // if (path === "/brent_stockq")   return await fetchBrent();
 
+    // 新浪網
     if (path.startsWith("/sina/")) {
       // VIX 恐慌指數：https://quotes.sina.cn/index/global/vix
       // hf_VX 是期貨
@@ -59,7 +60,7 @@ export default {
 };
 
 async function debugSina() {
-  const res = await fetch("https://hq.sinajs.cn/list=hf_OIL,hf_GC,hf_SI,DINIW,znb_VIX", {
+  const res = await fetch("https://hq.sinajs.cn/list=hf_OIL,hf_GC,hf_SI,DINIW,znb_VIX,gb_dji,gb_inx,gb_ixic,gb_sox", {
     headers: { "User-Agent": UA, "Referer": "https://finance.sina.com.cn/" }
   });
   const text = await res.text();
@@ -230,8 +231,9 @@ async function fetchCnbc() {
     const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
 
     // 1. 盤前 Fair Value (邏輯保持不變)
+    // https://www.cnbc.com/pre-markets/
     const fvRes = await fetch(
-      "https://quote.cnbc.com/quote-html-webservice/fvquote.htm?requestMethod=quick&noform=0&realtime=0&client=fairValue&output=json&symbols=DJ%7CSP%7CND%7CTF",
+      "https://quote.cnbc.com/quote-html-webservice/fvquote.htm?requestMethod=quick&noform=0&realtime=0&client=fairValue&output=json&symbols=DJ|SP|ND|TF",
       { headers: { "User-Agent": UA } }
     );
     const fvData = await fvRes.json();
@@ -243,9 +245,9 @@ async function fetchCnbc() {
       if (fv.updateTime === "未知" && q.last_timedate) fv.updateTime = q.last_timedate;
     }
 
-    // 2. 四大指數 + 個股 (未來可在 symbols 繼續累加，如 %7CNVDA%7CAAPL)
+    // 2. 四大指數 + 個股 (未來可在 symbols 繼續累加，如 |NVDA|AAPL)
     const qRes = await fetch(
-      "https://quote.cnbc.com/quote-html-webservice/restQuote/symbolType/symbol?symbols=.DJI%7C.SPX%7C.IXIC%7C.SOX%7CTSM&requestMethod=itv&noform=1&partnerId=2&fund=1&exthrs=1&output=json&events=1",
+      "https://quote.cnbc.com/quote-html-webservice/restQuote/symbolType/symbol?symbols=.DJI|.SPX|.IXIC|.SOX|TSM&requestMethod=itv&noform=1&partnerId=2&fund=1&exthrs=1&output=json&events=1",
       { headers: { "User-Agent": UA } }
     );
     const qData = await qRes.json();
