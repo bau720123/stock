@@ -161,7 +161,14 @@ async function fetchSina(list) {
         "Referer": "https://finance.sina.com.cn/"
       }
     });
-    const text = await res.text();
+    // const text = await res.text();
+
+  // 1. 先取得原始的 ArrayBuffer (二進位資料)
+  const buffer = await res.arrayBuffer();
+
+  // 2. 使用 TextDecoder 並指定 'gbk' 編碼
+  const decoder = new TextDecoder("gbk");
+  const text = decoder.decode(buffer);
 
     const match = text.match(/"([^"]+)"/);
     if (!match) return json({ success: false, error: "解析失敗" });
@@ -172,6 +179,7 @@ async function fetchSina(list) {
       // 美元指數
       return json({
         success: true,
+        title:  parts[9],
         time:   parts[10] + " " + parts[0] || "",
         price:  toFloat(parts[1]),
         open:   toFloat(parts[3]),
@@ -183,6 +191,7 @@ async function fetchSina(list) {
       // znb_VIX 恐慌指數
       return json({
         success: true,
+        title:  parts[0],
         time:   parts[6] + " " + parts[7] || "",
         price:  toFloat(parts[1]),
         open:   toFloat(parts[8]),
@@ -198,6 +207,7 @@ async function fetchSina(list) {
       // gb_tsm 台積電 ADR
       return json({
         success: true,
+        title:  parts[0],
         time:   parts[3] || "",
         price:  toFloat(parts[1]),
         open:   toFloat(parts[5]),
@@ -214,9 +224,10 @@ async function fetchSina(list) {
       // hf_SI 白銀
       return json({
         success: true,
+        title:  parts[13],
         price:  toFloat(parts[0]),
         change: toFloat(parts[2]),
-        open:   toFloat(parts[3]),
+        open:   toFloat(parts[8]),
         high:   toFloat(parts[4]),
         low:    toFloat(parts[5]),
         time:   parts[12] + " " + parts[6] || "",
@@ -225,6 +236,7 @@ async function fetchSina(list) {
     } else {
       return json({
         success: true,
+        title: '',
         price:  0,
         change: 0,
         open:   0,

@@ -465,6 +465,27 @@ const ALERT_CONFIGS = {
       { key: 'tsmc_low',  label: '價格低於此值時通知', placeholder: '例：1800',  unit: 'TWD' },
     ]
   },
+  ym: {
+    title: '道瓊工業期貨 偵測設定',
+    fields: [
+      { key: 'ym_high', label: '價格高於此值時通知', placeholder: '例：100', unit: 'USD' },
+      { key: 'ym_low',  label: '價格低於此值時通知', placeholder: '例：95',  unit: 'USD' },
+    ]
+  },
+  es: {
+    title: '標普 500 期貨 偵測設定',
+    fields: [
+      { key: 'es_high', label: '價格高於此值時通知', placeholder: '例：100', unit: 'USD' },
+      { key: 'es_low',  label: '價格低於此值時通知', placeholder: '例：95',  unit: 'USD' },
+    ]
+  },
+  nq: {
+    title: '那斯達克 100 期貨 偵測設定',
+    fields: [
+      { key: 'nq_high', label: '價格高於此值時通知', placeholder: '例：100', unit: 'USD' },
+      { key: 'nq_low',  label: '價格低於此值時通知', placeholder: '例：95',  unit: 'USD' },
+    ]
+  },
   dji: {
     title: '道瓊工業 偵測設定',
     fields: [
@@ -1226,9 +1247,12 @@ async function loadTw() {
 
 // 美股市場概況
 async function loadAmerica() {
-  const [cnbcPreMarkets, robinHood, sinaDji, sinaInx, sinaIxic, sinaSox, sinaTsm] = await Promise.all([
+  const [cnbcPreMarkets, robinHood, sinaYm, sinaEs, sinaNq, sinaDji, sinaInx, sinaIxic, sinaSox, sinaTsm] = await Promise.all([
     fetch(WORKER + '/cnbc').then(r => r.json()).catch(() => ({ success: false })), // 美股盤前盤中
     fetch(WORKER + '/rh').then(r => r.json()).catch(() => ({ success: false })), // Robinhood
+    fetch(WORKER + '/sina/hf_YM').then(r => r.json()).catch(() => ({ success: false })), // 道瓊期貨
+    fetch(WORKER + '/sina/hf_ES').then(r => r.json()).catch(() => ({ success: false })), // 標普 500 期貨
+    fetch(WORKER + '/sina/hf_NQ').then(r => r.json()).catch(() => ({ success: false })), // 那斯達克 100 期貨
     fetch(WORKER + '/sina/gb_dji').then(r => r.json()).catch(() => ({ success: false })), // 道瓊工業指數
     fetch(WORKER + '/sina/gb_inx').then(r => r.json()).catch(() => ({ success: false })), // 標普500指數
     fetch(WORKER + '/sina/gb_ixic').then(r => r.json()).catch(() => ({ success: false })), // 那斯達克指數
@@ -1245,6 +1269,117 @@ async function loadAmerica() {
     html += row('標普500期貨', formatChange(cnbcPreMarkets.fairValue.sp), changeClass(cnbcPreMarkets.fairValue.sp));
     html += row('納斯達克100期貨', formatChange(cnbcPreMarkets.fairValue.nasdaq), changeClass(cnbcPreMarkets.fairValue.nasdaq));
     html += row('羅素2000期貨', formatChange(cnbcPreMarkets.fairValue.russell), changeClass(cnbcPreMarkets.fairValue.russell));
+  }
+
+  // 道瓊期貨
+  html += groupHeader('【道瓊期貨】', 'ym', '道瓊期貨（Dow Jones Futures）是以道瓊工業指數為標的的期貨合約，讓投資人透過保證金制度，以小博大操作美股漲跌。具高槓桿、多空靈活、交易成本低等特性，熱門商品包括迷你道瓊期貨（YM）和微型道瓊期貨（MYM），結算日為每月第三個星期五。');
+  if (sinaYm.success) {
+    const changeNum = sinaYm.price - sinaYm.prev;
+    const cls = changeNum < 0 ? 'down' : 'up';
+    const changePercent = changeNum / sinaYm.prev * 100;
+
+    html += row('前次', sinaYm.prev.toFixed(2));
+    html += row('開盤價', sinaYm.open.toFixed(2));
+    html += row('最高價', sinaYm.high.toFixed(2));
+    html += row('最低價', sinaYm.low.toFixed(2));
+    html += row('漲跌', changeNum.toFixed(2), cls);
+    html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
+    html += row('價格', sinaYm.price.toFixed(2), 'accent');
+    html += row('更新時間', sinaYm.time);
+
+    // 價格門檻通知（從 localStorage 讀取，未設定則不觸發）
+    const ymHigh = alertGet('ym_high');
+    const ymLow  = alertGet('ym_low');
+    if (ymHigh !== null && sinaYm.price >= ymHigh) {
+      sendNotification(
+        '道瓊期貨價格警示',
+        `價格 ${sinaYm.price.toFixed(2)} USD，已高於設定門檻 ${ymHigh} USD`,
+        'https://hk.investing.com/indices/us-30-futures'
+      );
+    }
+    if (ymLow !== null && sinaYm.price <= ymLow) {
+      sendNotification(
+        '道瓊期貨價格警示',
+        `價格 ${sinaYm.price.toFixed(2)} USD，已低於設定門檻 ${ymLow} USD`,
+        'https://hk.investing.com/indices/us-30-futures'
+      );
+    }
+  } else {
+    html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
+  }
+
+  // 標普 500 期貨
+  html += groupHeader('【標普 500 期貨】', 'es', '標普 500 指數（S&P 500 Index）是反映美國大型上市公司表現的核心指標，涵蓋了500家領先企業，代表了美國股市的整體表現。此指數為投資人提供了評估美國經濟健康狀況的重要參考。');
+  if (sinaEs.success) {
+    const changeNum = sinaEs.price - sinaEs.prev;
+    const cls = changeNum < 0 ? 'down' : 'up';
+    const changePercent = changeNum / sinaEs.prev * 100;
+
+    html += row('前次', sinaEs.prev.toFixed(2));
+    html += row('開盤價', sinaEs.open.toFixed(2));
+    html += row('最高價', sinaEs.high.toFixed(2));
+    html += row('最低價', sinaEs.low.toFixed(2));
+    html += row('漲跌', changeNum.toFixed(2), cls);
+    html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
+    html += row('價格', sinaEs.price.toFixed(2), 'accent');
+    html += row('更新時間', sinaEs.time);
+
+    // 價格門檻通知（從 localStorage 讀取，未設定則不觸發）
+    const esHigh = alertGet('es_high');
+    const esLow  = alertGet('es_low');
+    if (esHigh !== null && sinaEs.price >= esHigh) {
+      sendNotification(
+        '標普 500 期貨價格警示',
+        `價格 ${sinaEs.price.toFixed(2)} USD，已高於設定門檻 ${esHigh} USD`,
+        'https://hk.investing.com/indices/us-spx-500-futures'
+      );
+    }
+    if (esLow !== null && sinaEs.price <= esLow) {
+      sendNotification(
+        '標普 500 期貨價格警示',
+        `價格 ${sinaEs.price.toFixed(2)} USD，已低於設定門檻 ${esLow} USD`,
+        'https://hk.investing.com/indices/us-spx-500-futures'
+      );
+    }
+  } else {
+    html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
+  }
+
+  // 那斯達克 100 期貨
+  html += groupHeader('【那斯達克 100 期貨】', 'nq', '那斯達克 100 指數（NASDAQ-100 Index）是反映美國科技股表現的核心指標，涵蓋了100家領先的科技公司。此指數為投資人提供了評估美國科技產業健康狀況的重要參考。');
+  if (sinaNq.success) {
+    const changeNum = sinaNq.price - sinaNq.prev;
+    const cls = changeNum < 0 ? 'down' : 'up';
+    const changePercent = changeNum / sinaNq.prev * 100;
+
+    html += row('前次', sinaNq.prev.toFixed(2));
+    html += row('開盤價', sinaNq.open.toFixed(2));
+    html += row('最高價', sinaNq.high.toFixed(2));
+    html += row('最低價', sinaNq.low.toFixed(2));
+    html += row('漲跌', changeNum.toFixed(2), cls);
+    html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
+    html += row('價格', sinaNq.price.toFixed(2), 'accent');
+    html += row('更新時間', sinaNq.time);
+
+    // 價格門檻通知（從 localStorage 讀取，未設定則不觸發）
+    const nqHigh = alertGet('nq_high');
+    const nqLow  = alertGet('nq_low');
+    if (nqHigh !== null && sinaNq.price >= nqHigh) {
+      sendNotification(
+        '那斯達克 100 期貨價格警示',
+        `價格 ${sinaNq.price.toFixed(2)} USD，已高於設定門檻 ${nqHigh} USD`,
+        'https://hk.investing.com/indices/nq-100-futures'
+      );
+    }
+    if (nqLow !== null && sinaNq.price <= nqLow) {
+      sendNotification(
+        '那斯達克 100 期貨價格警示',
+        `價格 ${sinaNq.price.toFixed(2)} USD，已低於設定門檻 ${nqLow} USD`,
+        'https://hk.investing.com/indices/nq-100-futures'
+      );
+    }
+  } else {
+    html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
   }
 
   // 道瓊工業指數
