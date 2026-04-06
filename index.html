@@ -465,62 +465,6 @@ const ALERT_CONFIGS = {
       { key: 'tsmc_low',  label: '價格低於此值時通知', placeholder: '例：1800',  unit: 'TWD' },
     ]
   },
-  ym: {
-    title: '道瓊工業期貨 偵測設定',
-    fields: [
-      { key: 'ym_high', label: '價格高於此值時通知', placeholder: '例：100', unit: 'USD' },
-      { key: 'ym_low',  label: '價格低於此值時通知', placeholder: '例：95',  unit: 'USD' },
-    ]
-  },
-  es: {
-    title: '標普 500 期貨 偵測設定',
-    fields: [
-      { key: 'es_high', label: '價格高於此值時通知', placeholder: '例：100', unit: 'USD' },
-      { key: 'es_low',  label: '價格低於此值時通知', placeholder: '例：95',  unit: 'USD' },
-    ]
-  },
-  nq: {
-    title: '那斯達克 100 期貨 偵測設定',
-    fields: [
-      { key: 'nq_high', label: '價格高於此值時通知', placeholder: '例：100', unit: 'USD' },
-      { key: 'nq_low',  label: '價格低於此值時通知', placeholder: '例：95',  unit: 'USD' },
-    ]
-  },
-  dji: {
-    title: '道瓊工業 偵測設定',
-    fields: [
-      { key: 'dji_high', label: '價格高於此值時通知', placeholder: '例：100', unit: 'USD' },
-      { key: 'dji_low',  label: '價格低於此值時通知', placeholder: '例：95',  unit: 'USD' },
-    ]
-  },
-  inx: {
-    title: '標普500 偵測設定',
-    fields: [
-      { key: 'inx_high', label: '價格高於此值時通知', placeholder: '例：100', unit: 'USD' },
-      { key: 'inx_low',  label: '價格低於此值時通知', placeholder: '例：95',  unit: 'USD' },
-    ]
-  },
-  ixic: {
-    title: '那斯達克 偵測設定',
-    fields: [
-      { key: 'ixic_high', label: '價格高於此值時通知', placeholder: '例：100', unit: 'USD' },
-      { key: 'ixic_low',  label: '價格低於此值時通知', placeholder: '例：95',  unit: 'USD' },
-    ]
-  },
-  sox: {
-    title: '費城半導體 偵測設定',
-    fields: [
-      { key: 'sox_high', label: '價格高於此值時通知', placeholder: '例：100', unit: 'USD' },
-      { key: 'sox_low',  label: '價格低於此值時通知', placeholder: '例：95',  unit: 'USD' },
-    ]
-  },
-  tsm: {
-    title: '台積電 ADR 偵測設定',
-    fields: [
-      { key: 'tsm_high', label: '價格高於此值時通知', placeholder: '例：2000', unit: 'TWD' },
-      { key: 'tsm_low',  label: '價格低於此值時通知', placeholder: '例：1800',  unit: 'TWD' },
-    ]
-  },
   brent: {
     title: '布蘭特原油 偵測設定',
     fields: [
@@ -1254,342 +1198,97 @@ async function loadTw() {
 
 // 美股市場概況
 async function loadAmerica() {
-  const [cnbcPreMarkets, robinHood, sinaYm, sinaEs, sinaNq, sinaDji, sinaInx, sinaIxic, sinaSox, sinaTsm] = await Promise.all([
-    fetch(WORKER + '/cnbc').then(r => r.json()).catch(() => ({ success: false })), // 美股盤前盤中
+  const [yahooEsf, yahooIxic, yahooSox, yahooTsm, robinHood] = await Promise.all([
+    fetch(WORKER + '/yahoo-finance/ES=F').then(r => r.json()).catch(() => ({ success: false })), // 那斯達克 100 期貨期貨
+    fetch(WORKER + '/yahoo-finance/^IXIC').then(r => r.json()).catch(() => ({ success: false })), // 那斯達克指數
+    fetch(WORKER + '/yahoo-finance/^SOX').then(r => r.json()).catch(() => ({ success: false })), // 那斯達克指數
+    fetch(WORKER + '/yahoo-finance/TSM').then(r => r.json()).catch(() => ({ success: false })), // 台積電 ADR
     fetch(WORKER + '/rh').then(r => r.json()).catch(() => ({ success: false })), // Robinhood
-    fetch(WORKER + '/sina/hf_YM').then(r => r.json()).catch(() => ({ success: false })), // 道瓊期貨
-    fetch(WORKER + '/sina/hf_ES').then(r => r.json()).catch(() => ({ success: false })), // 標普 500 期貨
-    fetch(WORKER + '/sina/hf_NQ').then(r => r.json()).catch(() => ({ success: false })), // 那斯達克 100 期貨
-    fetch(WORKER + '/sina/gb_dji').then(r => r.json()).catch(() => ({ success: false })), // 道瓊工業指數
-    fetch(WORKER + '/sina/gb_inx').then(r => r.json()).catch(() => ({ success: false })), // 標普500指數
-    fetch(WORKER + '/sina/gb_ixic').then(r => r.json()).catch(() => ({ success: false })), // 那斯達克指數
-    fetch(WORKER + '/sina/gb_sox').then(r => r.json()).catch(() => ({ success: false })), // 費城半導體指數
-    fetch(WORKER + '/sina/gb_tsm').then(r => r.json()).catch(() => ({ success: false })), // 台積電 ADR
   ]);
 
   let html = `<div class="card-title">美股市場概況</div>`;
-
-  // 美股盤前盤中
-  html += groupHeader('【美股盤前電子盤】', '', '美股盤前電子盤（Pre-Market Session）指在正常開盤時間（美東時間 9:30 AM）前，透過電子通訊網路（ECN）進行的股票交易時段，通常為美東時間凌晨 4:00 至 9:30，對應台灣時間晚上 16:00/17:00 後至 21:30。此時段成交量較小但波動大，適合作為盤前財報發布後的策略布局與風險控管。');
-  if (cnbcPreMarkets.success) {
-    html += row('道瓊期貨', formatChange(cnbcPreMarkets.fairValue.dow), changeClass(cnbcPreMarkets.fairValue.dow));
-    html += row('標普500期貨', formatChange(cnbcPreMarkets.fairValue.sp), changeClass(cnbcPreMarkets.fairValue.sp));
-    html += row('納斯達克100期貨', formatChange(cnbcPreMarkets.fairValue.nasdaq), changeClass(cnbcPreMarkets.fairValue.nasdaq));
-    html += row('羅素2000期貨', formatChange(cnbcPreMarkets.fairValue.russell), changeClass(cnbcPreMarkets.fairValue.russell));
-  }
-
-  // 道瓊期貨
-  html += groupHeader('【道瓊期貨】', 'ym', '道瓊期貨（Dow Jones Futures）是以道瓊工業指數為標的的期貨合約，讓投資人透過保證金制度，以小博大操作美股漲跌。具高槓桿、多空靈活、交易成本低等特性，熱門商品包括迷你道瓊期貨（YM）和微型道瓊期貨（MYM），結算日為每月第三個星期五。');
-  if (sinaYm.success) {
-    const changeNum = sinaYm.price - sinaYm.prev;
-    const cls = changeNum < 0 ? 'down' : 'up';
-    const changePercent = changeNum / sinaYm.prev * 100;
-
-    html += row('前次', sinaYm.prev.toFixed(2));
-    html += row('開盤價', sinaYm.open.toFixed(2));
-    html += row('最高價', sinaYm.high.toFixed(2));
-    html += row('最低價', sinaYm.low.toFixed(2));
-    html += row('漲跌', changeNum.toFixed(2), cls);
-    html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
-    html += row('價格', sinaYm.price.toFixed(2), 'accent');
-    html += row('更新時間', sinaYm.time);
-
-    // 價格門檻通知（從 localStorage 讀取，未設定則不觸發）
-    const ymHigh = alertGet('ym_high');
-    const ymLow  = alertGet('ym_low');
-    if (ymHigh !== null && sinaYm.price >= ymHigh) {
-      sendNotification(
-        '道瓊期貨價格警示',
-        `價格 ${sinaYm.price.toFixed(2)} USD，已高於設定門檻 ${ymHigh} USD`,
-        'https://hk.investing.com/indices/us-30-futures'
-      );
-    }
-    if (ymLow !== null && sinaYm.price <= ymLow) {
-      sendNotification(
-        '道瓊期貨價格警示',
-        `價格 ${sinaYm.price.toFixed(2)} USD，已低於設定門檻 ${ymLow} USD`,
-        'https://hk.investing.com/indices/us-30-futures'
-      );
-    }
-  } else {
-    html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
-  }
-
-  // 標普 500 期貨
-  html += groupHeader('【標普 500 期貨】', 'es', '標普 500 指數（S&P 500 Index）是反映美國大型上市公司表現的核心指標，涵蓋了500家領先企業，代表了美國股市的整體表現。此指數為投資人提供了評估美國經濟健康狀況的重要參考。');
-  if (sinaEs.success) {
-    const changeNum = sinaEs.price - sinaEs.prev;
-    const cls = changeNum < 0 ? 'down' : 'up';
-    const changePercent = changeNum / sinaEs.prev * 100;
-
-    html += row('前次', sinaEs.prev.toFixed(2));
-    html += row('開盤價', sinaEs.open.toFixed(2));
-    html += row('最高價', sinaEs.high.toFixed(2));
-    html += row('最低價', sinaEs.low.toFixed(2));
-    html += row('漲跌', changeNum.toFixed(2), cls);
-    html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
-    html += row('價格', sinaEs.price.toFixed(2), 'accent');
-    html += row('更新時間', sinaEs.time);
-
-    // 價格門檻通知（從 localStorage 讀取，未設定則不觸發）
-    const esHigh = alertGet('es_high');
-    const esLow  = alertGet('es_low');
-    if (esHigh !== null && sinaEs.price >= esHigh) {
-      sendNotification(
-        '標普 500 期貨價格警示',
-        `價格 ${sinaEs.price.toFixed(2)} USD，已高於設定門檻 ${esHigh} USD`,
-        'https://hk.investing.com/indices/us-spx-500-futures'
-      );
-    }
-    if (esLow !== null && sinaEs.price <= esLow) {
-      sendNotification(
-        '標普 500 期貨價格警示',
-        `價格 ${sinaEs.price.toFixed(2)} USD，已低於設定門檻 ${esLow} USD`,
-        'https://hk.investing.com/indices/us-spx-500-futures'
-      );
-    }
-  } else {
-    html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
-  }
+  console.log(yahooIxic);
 
   // 那斯達克 100 期貨
-  html += groupHeader('【那斯達克 100 期貨】', 'nq', '那斯達克 100 指數（NASDAQ-100 Index）是反映美國科技股表現的核心指標，涵蓋了100家領先的科技公司。此指數為投資人提供了評估美國科技產業健康狀況的重要參考。');
-  if (sinaNq.success) {
-    const changeNum = sinaNq.price - sinaNq.prev;
+  html += groupHeader('【那斯達克 100 期貨】', '', '那斯達克 100 指數（NASDAQ-100 Index）是反映美國科技股表現的核心指標，涵蓋了100家領先的科技公司。此指數為投資人提供了評估美國科技產業健康狀況的重要參考。');
+  if (yahooEsf.success) {
+    const changeNum = yahooEsf.close - yahooEsf.prev;
     const cls = changeNum < 0 ? 'down' : 'up';
-    const changePercent = changeNum / sinaNq.prev * 100;
+    const changePercent = changeNum / yahooEsf.prev * 100;
 
-    html += row('前次', sinaNq.prev.toFixed(2));
-    html += row('開盤價', sinaNq.open.toFixed(2));
-    html += row('最高價', sinaNq.high.toFixed(2));
-    html += row('最低價', sinaNq.low.toFixed(2));
+    html += row('前次', yahooEsf.prev.toFixed(2));
+    html += row('開盤價', yahooEsf.open.toFixed(2));
+    html += row('最高價', yahooEsf.high.toFixed(2));
+    html += row('最低價', yahooEsf.low.toFixed(2));
     html += row('漲跌', changeNum.toFixed(2), cls);
     html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
-    html += row('價格', sinaNq.price.toFixed(2), 'accent');
-    html += row('更新時間', sinaNq.time);
-
-    // 價格門檻通知（從 localStorage 讀取，未設定則不觸發）
-    const nqHigh = alertGet('nq_high');
-    const nqLow  = alertGet('nq_low');
-    if (nqHigh !== null && sinaNq.price >= nqHigh) {
-      sendNotification(
-        '那斯達克 100 期貨價格警示',
-        `價格 ${sinaNq.price.toFixed(2)} USD，已高於設定門檻 ${nqHigh} USD`,
-        'https://hk.investing.com/indices/nq-100-futures'
-      );
-    }
-    if (nqLow !== null && sinaNq.price <= nqLow) {
-      sendNotification(
-        '那斯達克 100 期貨價格警示',
-        `價格 ${sinaNq.price.toFixed(2)} USD，已低於設定門檻 ${nqLow} USD`,
-        'https://hk.investing.com/indices/nq-100-futures'
-      );
-    }
-  } else {
-    html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
-  }
-
-  // 道瓊工業指數
-  html += groupHeader('【道瓊工業指數】', 'dji', '道瓊工業指數（Dow Jones Industrial Average，DJI）是反映美國大型工業公司表現的核心指標，涵蓋了多個行業的領先企業。此指數為投資人提供了評估美國經濟健康狀況的重要參考。');
-  if (sinaDji.success) {
-    const changeNum = sinaDji.price - sinaDji.prev;
-    const cls = changeNum < 0 ? 'down' : 'up';
-    const changePercent = changeNum / sinaDji.prev * 100;
-
-    html += row('前次', sinaDji.prev.toFixed(2));
-    html += row('開盤價', sinaDji.open.toFixed(2));
-    html += row('最高價', sinaDji.high.toFixed(2));
-    html += row('最低價', sinaDji.low.toFixed(2));
-    html += row('漲跌', changeNum.toFixed(2), cls);
-    html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
-    html += row('價格', sinaDji.price.toFixed(2), 'accent');
-    html += row('更新時間', sinaDji.time);
-
-    // 價格門檻通知（從 localStorage 讀取，未設定則不觸發）
-    const djiHigh = alertGet('dji_high');
-    const djiLow  = alertGet('dji_low');
-    if (djiHigh !== null && sinaDji.price >= djiHigh) {
-      sendNotification(
-        '道瓊工業指數價格警示',
-        `價格 ${sinaDji.price.toFixed(2)} USD，已高於設定門檻 ${djiHigh} USD`,
-        'https://hk.investing.com/indices/us-30'
-      );
-    }
-    if (djiLow !== null && sinaDji.price <= djiLow) {
-      sendNotification(
-        '道瓊工業指數價格警示',
-        `價格 ${sinaDji.price.toFixed(2)} USD，已低於設定門檻 ${djiLow} USD`,
-        'https://hk.investing.com/indices/us-30'
-      );
-    }
-  } else {
-    html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
-  }
-
-  // 標普500指數
-  html += groupHeader('【標普500指數】', 'inx', '標普500指數（S&P 500 Index）是反映美國大型上市公司表現的核心指標，涵蓋了500家領先企業，代表了美國股市的整體表現。此指數為投資人提供了評估美國經濟健康狀況的重要參考。');
-  if (sinaInx.success) {
-    const changeNum = sinaInx.price - sinaInx.prev;
-    const cls = changeNum < 0 ? 'down' : 'up';
-    const changePercent = changeNum / sinaInx.prev * 100;
-
-    html += row('前次', sinaInx.prev.toFixed(2));
-    html += row('開盤價', sinaInx.open.toFixed(2));
-    html += row('最高價', sinaInx.high.toFixed(2));
-    html += row('最低價', sinaInx.low.toFixed(2));
-    html += row('漲跌', changeNum.toFixed(2), cls);
-    html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
-    html += row('價格', sinaInx.price.toFixed(2), 'accent');
-    html += row('更新時間', sinaInx.time);
-
-    // 價格門檻通知（從 localStorage 讀取，未設定則不觸發）
-    const inxHigh = alertGet('inx_high');
-    const inxLow  = alertGet('inx_low');
-    if (inxHigh !== null && sinaInx.price >= inxHigh) {
-      sendNotification(
-        '標普500指數價格警示',
-        `價格 ${sinaInx.price.toFixed(2)} USD，已高於設定門檻 ${inxHigh} USD`,
-        'https://hk.investing.com/indices/us-spx-500'
-      );
-    }
-    if (inxLow !== null && sinaInx.price <= inxLow) {
-      sendNotification(
-        '標普500指數價格警示',
-        `價格 ${sinaInx.price.toFixed(2)} USD，已低於設定門檻 ${inxLow} USD`,
-        'https://hk.investing.com/indices/us-spx-500'
-      );
-    }
+    html += row('價格', yahooEsf.close.toFixed(2), 'accent');
+    html += row('更新時間', yahooEsf.updateTime);
   } else {
     html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
   }
 
   // 那斯達克指數
-  html += groupHeader('【那斯達克指數】', 'ixic', '那斯達克指數（NASDAQ Composite Index）是反映美國科技股表現的核心指標，涵蓋了納斯達克交易所上市的多種股票，代表了美國科技產業的整體表現。此指數為投資人提供了評估美國科技產業景氣與技術發展的重要參考。');
-  if (sinaIxic.success) {
-    const changeNum = sinaIxic.price - sinaIxic.prev;
+  html += groupHeader('【那斯達克指數】', '', '那斯達克指數（NASDAQ Composite Index）是反映美國科技股表現的核心指標，涵蓋了納斯達克交易所上市的多種股票，代表了美國科技產業的整體表現。此指數為投資人提供了評估美國科技產業景氣與技術發展的重要參考。');
+  if (yahooIxic.success) {
+    const changeNum = yahooIxic.close - yahooIxic.prev;
     const cls = changeNum < 0 ? 'down' : 'up';
-    const changePercent = changeNum / sinaIxic.prev * 100;
+    const changePercent = changeNum / yahooIxic.prev * 100;
 
-    html += row('前次', sinaIxic.prev.toFixed(2));
-    html += row('開盤價', sinaIxic.open.toFixed(2));
-    html += row('最高價', sinaIxic.high.toFixed(2));
-    html += row('最低價', sinaIxic.low.toFixed(2));
+    html += row('前次', yahooIxic.prev.toFixed(2));
+    html += row('開盤價', yahooIxic.open.toFixed(2));
+    html += row('最高價', yahooIxic.high.toFixed(2));
+    html += row('最低價', yahooIxic.low.toFixed(2));
     html += row('漲跌', changeNum.toFixed(2), cls);
     html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
-    html += row('價格', sinaIxic.price.toFixed(2), 'accent');
-    html += row('更新時間', sinaIxic.time);
-
-    // 價格門檻通知（從 localStorage 讀取，未設定則不觸發）
-    const ixicHigh = alertGet('ixic_high');
-    const ixicLow  = alertGet('ixic_low');
-    if (ixicHigh !== null && sinaIxic.price >= ixicHigh) {
-      sendNotification(
-        '那斯達克指數價格警示',
-        `價格 ${sinaIxic.price.toFixed(2)} USD，已高於設定門檻 ${ixicHigh} USD`,
-        'https://hk.investing.com/indices/nasdaq-composite'
-      );
-    }
-    if (ixicLow !== null && sinaIxic.price <= ixicLow) {
-      sendNotification(
-        '那斯達克指數價格警示',
-        `價格 ${sinaIxic.price.toFixed(2)} USD，已低於設定門檻 ${ixicLow} USD`,
-        'https://hk.investing.com/indices/nasdaq-composite'
-      );
-    }
+    html += row('價格', yahooIxic.close.toFixed(2), 'accent');
+    html += row('更新時間', yahooIxic.updateTime);
   } else {
     html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
   }
 
   // 費城半導體指數
-  html += groupHeader('【費城半導體指數】', 'sox', '費城半導體指數（Philadelphia Semiconductor Index，SOX）是反映美國半導體產業表現的核心指標，涵蓋了全球知名的半導體公司，包括設計、製造與封裝等各個環節。此指數為投資人提供了評估半導體產業景氣與技術發展的重要參考。');
-  if (sinaSox.success) {
-    const changeNum = sinaSox.price - sinaSox.prev;
+  html += groupHeader('【費城半導體指數】', '', '費城半導體指數（Philadelphia Semiconductor Index，SOX）是反映美國半導體產業表現的核心指標，涵蓋了全球知名的半導體公司，包括設計、製造與封裝等各個環節。此指數為投資人提供了評估半導體產業景氣與技術發展的重要參考。');
+  if (yahooSox.success) {
+    const changeNum = yahooSox.close - yahooSox.prev;
     const cls = changeNum < 0 ? 'down' : 'up';
-    const changePercent = changeNum / sinaSox.prev * 100;
+    const changePercent = changeNum / yahooSox.prev * 100;
 
-    html += row('前次', sinaSox.prev.toFixed(2));
-    html += row('開盤價', sinaSox.open.toFixed(2));
-    html += row('最高價', sinaSox.high.toFixed(2));
-    html += row('最低價', sinaSox.low.toFixed(2));
+    html += row('前次', yahooSox.prev.toFixed(2));
+    html += row('開盤價', yahooSox.open.toFixed(2));
+    html += row('最高價', yahooSox.high.toFixed(2));
+    html += row('最低價', yahooSox.low.toFixed(2));
     html += row('漲跌', changeNum.toFixed(2), cls);
     html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
-    html += row('價格', sinaSox.price.toFixed(2), 'accent');
-    html += row('更新時間', sinaSox.time);
-
-    // 價格門檻通知（從 localStorage 讀取，未設定則不觸發）
-    const soxHigh = alertGet('sox_high');
-    const soxLow  = alertGet('sox_low');
-    if (soxHigh !== null && sinaSox.price >= soxHigh) {
-      sendNotification(
-        '費城半導體價格警示',
-        `價格 ${sinaSox.price.toFixed(2)} USD，已高於設定門檻 ${soxHigh} USD`,
-        'https://hk.investing.com/indices/sox'
-      );
-    }
-    if (soxLow !== null && sinaSox.price <= soxLow) {
-      sendNotification(
-        '費城半導體價格警示',
-        `價格 ${sinaSox.price.toFixed(2)} USD，已低於設定門檻 ${soxLow} USD`,
-        'https://hk.investing.com/indices/sox'
-      );
-    }
+    html += row('價格', yahooSox.close.toFixed(2), 'accent');
+    html += row('更新時間', yahooSox.updateTime);
   } else {
     html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
   }
 
   // 台積電ADR
-  html += groupHeader('【台積電 ADR】', 'tsm', '台積電 ADR（American Depositary Receipts，美國存託憑證）是台積電在美國發行的股票憑證（代號：TSM），掛牌於紐約證券交易所（NYSE）。它讓美國投資人能用美元直接買賣台積電，代表國際資金對台積電的看法，且 1 單位 ADR 等於 5 股台積電台股（2330）普通股。');
-  if (sinaTsm.success) {
-    const changeNum = sinaTsm.price - sinaTsm.prev;
+  html += groupHeader('【台積電 ADR】', '', '台積電 ADR（American Depositary Receipts，美國存託憑證）是台積電在美國發行的股票憑證（代號：TSM），掛牌於紐約證券交易所（NYSE）。它讓美國投資人能用美元直接買賣台積電，代表國際資金對台積電的看法，且 1 單位 ADR 等於 5 股台積電台股（2330）普通股。');
+  if (yahooTsm.success) {
+    const changeNum = yahooTsm.close - yahooTsm.prev;
     const cls = changeNum < 0 ? 'down' : 'up';
-    const changePercent = changeNum / sinaTsm.prev * 100;
+    const changePercent = changeNum / yahooTsm.prev * 100;
 
-    html += row('前次', sinaTsm.prev.toFixed(2));
-    html += row('開盤價', sinaTsm.open.toFixed(2));
-    html += row('最高價', sinaTsm.high.toFixed(2));
-    html += row('最低價', sinaTsm.low.toFixed(2));
+    html += row('前次', yahooTsm.prev.toFixed(2));
+    html += row('開盤價', yahooTsm.open.toFixed(2));
+    html += row('最高價', yahooTsm.high.toFixed(2));
+    html += row('最低價', yahooTsm.low.toFixed(2));
     html += row('漲跌', changeNum.toFixed(2), cls);
     html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
-    html += row('價格', sinaTsm.price.toFixed(2), 'accent');
-    html += row('更新時間', sinaTsm.time);
-
-    // 價格門檻通知（從 localStorage 讀取，未設定則不觸發）
-    const tsmHigh = alertGet('tsm_high');
-    const tsmLow  = alertGet('tsm_low');
-    if (tsmHigh !== null && sinaTsm.price >= tsmHigh) {
-      sendNotification(
-        '台積電 ADR 價格警示',
-        `價格 ${sinaTsm.price.toFixed(2)} USD，已高於設定門檻 ${tsmHigh} USD`,
-        'https://hk.investing.com/equities/taiwan-semicond.manufacturing-co'
-      );
-    }
-    if (tsmLow !== null && sinaTsm.price <= tsmLow) {
-      sendNotification(
-        '台積電 ADR 價格警示',
-        `價格 ${sinaTsm.price.toFixed(2)} USD，已低於設定門檻 ${tsmLow} USD`,
-        'https://hk.investing.com/equities/taiwan-semicond.manufacturing-co'
-      );
-    }
+    html += row('價格', yahooTsm.close.toFixed(2), 'accent');
+    html += row('更新時間', yahooTsm.updateTime);
   } else {
     html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
   }
 
-  // CNBC 的數據更即時，且包含盤前、盤中和盤後的變動情況。
-  if (cnbcPreMarkets.success) {
-    if (cnbcPreMarkets.stock.TSM.type === 'PRE_MKT' || cnbcPreMarkets.stock.TSM.type === 'POST_MKT_PREV') {
-        html += row('盤前變動', cnbcPreMarkets.stock.TSM.market || '--', changeClass(cnbcPreMarkets.stock.TSM.market));
-    }
-
-    html += row('CNBC_盤中或收盤變動', cnbcPreMarkets.stock.TSM.regular || '--', changeClass(cnbcPreMarkets.stock.TSM.regular));
-
-    if (cnbcPreMarkets.stock.TSM.type === 'POST_MKT') {
-        html += row('CNBC_盤後變動', cnbcPreMarkets.stock.TSM.market || '--', changeClass(cnbcPreMarkets.stock.TSM.market));
-    }
-
-    if (robinHood.success) {
-      html += row('robinHood_即時變動', robinHood.changeText, changeClass(robinHood.changeText));
-      html += row('robinHood_額外資訊', robinHood.tertiaryText, changeClass(robinHood.tertiaryText));
-    }
+  // Robinhood 的數據更新頻率非常高，幾乎是實時的，特別適合追蹤台積電 ADR 在美國市場的即時變動。
+  if (robinHood.success) {
+    html += row('robinHood_即時變動', robinHood.changeText, changeClass(robinHood.changeText));
+    html += row('robinHood_額外資訊', robinHood.tertiaryText, changeClass(robinHood.tertiaryText));
   }
 
   setCard('card-america', 0, html);
@@ -1680,11 +1379,133 @@ async function loadMaterials() {
 
   setCard('card-materials', 0, html);
 }
+// async function loadMaterials() {
+//   const [yahooBrent, yahooGold, yahooSilver] = await Promise.all([
+//     fetch(WORKER + '/yahoo-finance/BZ=F').then(r => r.json()).catch(() => ({ success: false })), // 布蘭特原油
+//     fetch(WORKER + '/yahoo-finance/GC=F').then(r => r.json()).catch(() => ({ success: false })), // 黃金
+//     fetch(WORKER + '/yahoo-finance/SI=F').then(r => r.json()).catch(() => ({ success: false })), // 白銀
+//   ]);
+
+//   let html = `<div class="card-title">原物料市場</div>`;
+
+//   // 【布蘭特原油】
+//   html += groupHeader('【布蘭特原油】', 'brent', '布蘭特原油（Brent Crude）是產自歐洲北海的輕質低硫原油，為全球最重要的國際原油定價基準之一，通常用於衡量歐洲、非洲與中東地區輸往西方的石油價格。其特色為含硫量低、品質適中，適合提煉汽油、柴油與航空煤油，全球約有三分之二的實體原油貿易以此為參考基準。');
+//   if (yahooBrent.success) {
+//     const changeNum = yahooBrent.close - yahooBrent.prev;
+//     const cls = changeNum < 0 ? 'down' : 'up';
+//     const changePercent = changeNum / yahooBrent.prev * 100;
+
+//     html += row('前次', yahooBrent.prev.toFixed(2));
+//     html += row('開盤價', yahooBrent.open.toFixed(2));
+//     html += row('最高價', yahooBrent.high.toFixed(2));
+//     html += row('最低價', yahooBrent.low.toFixed(2));
+//     html += row('漲跌', changeNum.toFixed(2), cls);
+//     html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
+//     html += row('價格', yahooBrent.close.toFixed(2), 'accent');
+//     html += row('更新時間', yahooBrent.updateTime);
+
+//     // 價格門檻通知（從 localStorage 讀取，未設定則不觸發）
+//     const brentHigh = alertGet('brent_high');
+//     const brentLow  = alertGet('brent_low');
+//     if (brentHigh !== null && sinaBrent.price >= brentHigh) {
+//       sendNotification(
+//         '布蘭特原油價格警示',
+//         `價格 ${sinaBrent.price.toFixed(2)} USD，已高於設定門檻 ${brentHigh} USD`,
+//         'https://hk.investing.com/commodities/brent-oil'
+//       );
+//     }
+//     if (brentLow !== null && sinaBrent.price <= brentLow) {
+//       sendNotification(
+//         '布蘭特原油價格警示',
+//         `價格 ${sinaBrent.price.toFixed(2)} USD，已低於設定門檻 ${brentLow} USD`,
+//         'https://hk.investing.com/commodities/brent-oil'
+//       );
+//     }
+//   } else {
+//     html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
+//   }
+
+//   // 【黃金】
+//   html += groupHeader('【黃金】', 'gold', '黃金是指全球範圍內進行黃金實物買賣、衍生品交易的場所與管道總稱，主要包含倫敦（場外交易 OTC）、紐約（期貨交易所）等實體與虛擬市場。它是金融體系的重要組成，具備避險與投資價值，交易形式包含現貨黃金、金條、金幣、黃金ETF及期貨合約等。');
+//   if (yahooGold.success) {
+//     const changeNum = yahooGold.close - yahooGold.prev;
+//     const cls = changeNum < 0 ? 'down' : 'up';
+//     const changePercent = changeNum / yahooGold.prev * 100;
+
+//     html += row('前次', yahooGold.prev.toFixed(2));
+//     html += row('開盤價', yahooGold.open.toFixed(2));
+//     html += row('最高價', yahooGold.high.toFixed(2));
+//     html += row('最低價', yahooGold.low.toFixed(2));
+//     html += row('漲跌', changeNum.toFixed(2), cls);
+//     html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
+//     html += row('價格', yahooGold.close.toFixed(2), 'accent');
+//     html += row('更新時間', yahooGold.updateTime);
+
+//     // 價格門檻通知（從 localStorage 讀取，未設定則不觸發）
+//     const goldHigh = alertGet('gold_high');
+//     const goldLow  = alertGet('gold_low');
+//     if (goldHigh !== null && sinaGold.price >= goldHigh) {
+//       sendNotification(
+//         '黃金價格警示',
+//         `價格 ${sinaGold.price.toFixed(2)} USD，已高於設定門檻 ${goldHigh} USD`,
+//         'https://hk.investing.com/commodities/gold'
+//       );
+//     }
+//     if (goldLow !== null && sinaGold.price <= goldLow) {
+//       sendNotification(
+//         '黃金價格警示',
+//         `價格 ${sinaGold.price.toFixed(2)} USD，已低於設定門檻 ${goldLow} USD`,
+//         'https://hk.investing.com/commodities/gold'
+//       );
+//     }
+//   } else {
+//     html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
+//   }
+
+//   // 【白銀】
+//   html += groupHeader('【白銀】', 'silver', '白銀是一個全球性的貴金屬交易網絡，主要買賣具有投資和工業雙重屬性的實體白銀。市場核心在於倫敦現貨市場與美國 COMEX 期貨市場，具高波動性，價格受工業需求（如光伏、電子）與金融投資需求（避險、抗通膨）共同驅動，常以美元計價。');
+//   if (yahooSilver.success) {
+//     const changeNum = yahooSilver.close - yahooSilver.prev;
+//     const cls = changeNum < 0 ? 'down' : 'up';
+//     const changePercent = changeNum / yahooSilver.prev * 100;
+
+//     html += row('前次', yahooSilver.prev.toFixed(2));
+//     html += row('開盤價', yahooSilver.open.toFixed(2));
+//     html += row('最高價', yahooSilver.high.toFixed(2));
+//     html += row('最低價', yahooSilver.low.toFixed(2));
+//     html += row('漲跌', changeNum.toFixed(2), cls);
+//     html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
+//     html += row('價格', yahooSilver.close.toFixed(2), 'accent');
+//     html += row('更新時間', yahooSilver.updateTime);
+
+//     // 價格門檻通知（從 localStorage 讀取，未設定則不觸發）
+//     const silverHigh = alertGet('silver_high');
+//     const silverLow  = alertGet('silver_low');
+//     if (silverHigh !== null && sinaSilver.price >= silverHigh) {
+//       sendNotification(
+//         '白銀價格警示',
+//         `價格 ${sinaSilver.price.toFixed(2)} USD，已高於設定門檻 ${silverHigh} USD`,
+//         'https://hk.investing.com/commodities/silver'
+//       );
+//     }
+//     if (silverLow !== null && sinaSilver.price <= silverLow) {
+//       sendNotification(
+//         '白銀價格警示',
+//         `價格 ${sinaSilver.price.toFixed(2)} USD，已低於設定門檻 ${silverLow} USD`,
+//         'https://hk.investing.com/commodities/silver'
+//       );
+//     }
+//   } else {
+//     html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
+//   }
+
+//   setCard('card-materials', 0, html);
+// }
 
 // 市場情緒
 async function loadSentiment() {
-  const [sinaUsdollar, sinaVix] = await Promise.all([
-    fetch(WORKER + '/sina/DINIW').then(r => r.json()).catch(() => ({ success: false })), // 美元指數
+  const [yahooUsdollar, sinaVix] = await Promise.all([
+    fetch(WORKER + '/yahoo-finance/DX-Y.NYB').then(r => r.json()).catch(() => ({ success: false })), // 美元指數
     fetch(WORKER + '/sina/znb_VIX').then(r => r.json()).catch(() => ({ success: false })), // VIX 恐慌指數
   ]);
 
@@ -1692,18 +1513,19 @@ async function loadSentiment() {
 
   // 【美元指數】
   html += groupHeader('【美元指數】', 'usdollar', '美元指數（DXY）是顯示美元相對於主要貨幣強弱的指數。此指數由洲際交易所（ICE）計算並公布，由歐元、日圓、英鎊、加拿大元、瑞典克朗、瑞士法郎這6種貨幣構成。當DXY上升時，一般判斷為美元相對於主要貨幣走強（被買入）；相反地，當下跌時則被視為走弱（被賣出）。');
-  if (sinaUsdollar.success) {
-    const changeNum = sinaUsdollar.price - sinaUsdollar.prev;
+  if (yahooUsdollar.success) {
+    const changeNum = yahooUsdollar.close - yahooUsdollar.prev;
     const cls = changeNum < 0 ? 'down' : 'up';
-    const changePercent = changeNum / sinaUsdollar.prev * 100;
-    html += row('前次', sinaUsdollar.prev.toFixed(2));
-    html += row('開盤價', sinaUsdollar.open.toFixed(2));
-    html += row('最高價', sinaUsdollar.high.toFixed(2));
-    html += row('最低價', sinaUsdollar.low.toFixed(2));
+    const changePercent = changeNum / yahooUsdollar.prev * 100;
+
+    html += row('前次', yahooUsdollar.prev.toFixed(2));
+    html += row('開盤價', yahooUsdollar.open.toFixed(2));
+    html += row('最高價', yahooUsdollar.high.toFixed(2));
+    html += row('最低價', yahooUsdollar.low.toFixed(2));
     html += row('漲跌', changeNum.toFixed(2), cls);
     html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
-    html += row('數值', sinaUsdollar.price.toFixed(2), 'accent');
-    html += row('更新時間', sinaUsdollar.time);
+    html += row('價格', yahooUsdollar.close.toFixed(2), 'accent');
+    html += row('更新時間', yahooUsdollar.updateTime);
 
     // 價格門檻通知（從 localStorage 讀取，未設定則不觸發）
     const usdollarHigh = alertGet('usdollar_high');

@@ -52,6 +52,11 @@ export default {
       if (symbol) return await fetchFugleQuote(symbol, env);
     }
 
+    if (path.startsWith("/yahoo-finance/")) {
+      const symbol = decodeURIComponent(path.split("/yahoo-finance/")[1]);
+      if (symbol) return await fetchYahooFinance(symbol, 1, 1);
+    }
+
     return json({ error: "unknown path" }, 404);
   },
   async scheduled(event, env, ctx) {
@@ -226,7 +231,6 @@ async function fetchSina(list) {
         success: true,
         title:  parts[13],
         price:  toFloat(parts[0]),
-        change: toFloat(parts[2]),
         open:   toFloat(parts[8]),
         high:   toFloat(parts[4]),
         low:    toFloat(parts[5]),
@@ -238,7 +242,6 @@ async function fetchSina(list) {
         success: true,
         title: '',
         price:  0,
-        change: 0,
         open:   0,
         high:   0,
         low:    0,
@@ -717,6 +720,58 @@ async function fetchFugleQuote(symbol, env) {
       tradeVolumeAtBid:  d.total?.tradeVolumeAtBid  || 0,
       tradeVolumeAtAsk:  d.total?.tradeVolumeAtAsk  || 0,
       transaction:       d.total?.transaction        || 0,
+    });
+  } catch (e) {
+    return json({ success: false, error: e.message }, 500);
+  }
+}
+
+async function fetchYahooFinance(symbol, interval = 1, range = 1) {
+  try {
+    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=${interval}d&range=${range}d`;
+    const res = await fetch(url, {
+      headers: {
+        "User-Agent": UA,
+        "Accept": "application/json",
+      }
+    });
+ 
+    if (!res.ok) {
+      return json({ success: false, error: `HTTP ${res.status}` }, res.status);
+    }
+ 
+    const data = await res.json();
+    const result = data?.chart?.result?.[0];
+    if (!result) {
+      return json({ success: false, error: "無資料" });
+    }
+ 
+    const timestamps = result.timestamp || [];
+    const quote = result.indicators?.quote?.[0] || {};
+    const closes = quote.close  || [];
+    const opens  = quote.open   || [];
+    const highs  = quote.high   || [];
+    const lows   = quote.low    || [];
+ 
+    // 取最後一筆（最新）
+    const lastIdx = timestamps.length - 1;
+    if (lastIdx < 0) {
+      return json({ success: false, error: "timestamp 為空" });
+    }
+ 
+    // timestamp 轉台北時間（UTC+8）
+    const ts = timestamps[lastIdx];
+    const twDate = new Date((ts + 8 * 3600) * 1000);
+    const updateTime = twDate.toISOString().replace('T', ' ').substring(0, 19);
+ 
+    return json({
+      success:    true,
+      updateTime,
+      prev:       toFloat(result.meta?.chartPreviousClose),
+      open:       toFloat(opens[lastIdx]),
+      high:       toFloat(highs[lastIdx]),
+      low:        toFloat(lows[lastIdx]),
+      close:      toFloat(closes[lastIdx]),
     });
   } catch (e) {
     return json({ success: false, error: e.message }, 500);
