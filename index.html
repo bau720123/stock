@@ -1504,8 +1504,8 @@ async function loadMaterials() {
 
 // 市場情緒
 async function loadSentiment() {
-  const [yahooUsdollar, sinaVix] = await Promise.all([
-    fetch(WORKER + '/yahoo-finance/DX-Y.NYB').then(r => r.json()).catch(() => ({ success: false })), // 美元指數
+  const [sinaUsdollar, sinaVix] = await Promise.all([
+    fetch(WORKER + '/sina/DINIW').then(r => r.json()).catch(() => ({ success: false })), // 美元指數
     fetch(WORKER + '/sina/znb_VIX').then(r => r.json()).catch(() => ({ success: false })), // VIX 恐慌指數
   ]);
 
@@ -1513,19 +1513,18 @@ async function loadSentiment() {
 
   // 【美元指數】
   html += groupHeader('【美元指數】', 'usdollar', '美元指數（DXY）是顯示美元相對於主要貨幣強弱的指數。此指數由洲際交易所（ICE）計算並公布，由歐元、日圓、英鎊、加拿大元、瑞典克朗、瑞士法郎這6種貨幣構成。當DXY上升時，一般判斷為美元相對於主要貨幣走強（被買入）；相反地，當下跌時則被視為走弱（被賣出）。');
-  if (yahooUsdollar.success) {
-    const changeNum = yahooUsdollar.close - yahooUsdollar.prev;
+  if (sinaUsdollar.success) {
+    const changeNum = sinaUsdollar.price - sinaUsdollar.prev;
     const cls = changeNum < 0 ? 'down' : 'up';
-    const changePercent = changeNum / yahooUsdollar.prev * 100;
-
-    html += row('前次', yahooUsdollar.prev.toFixed(2));
-    html += row('開盤價', yahooUsdollar.open.toFixed(2));
-    html += row('最高價', yahooUsdollar.high.toFixed(2));
-    html += row('最低價', yahooUsdollar.low.toFixed(2));
+    const changePercent = changeNum / sinaUsdollar.prev * 100;
+    html += row('前次', sinaUsdollar.prev.toFixed(2));
+    html += row('開盤價', sinaUsdollar.open.toFixed(2));
+    html += row('最高價', sinaUsdollar.high.toFixed(2));
+    html += row('最低價', sinaUsdollar.low.toFixed(2));
     html += row('漲跌', changeNum.toFixed(2), cls);
     html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
-    html += row('價格', yahooUsdollar.close.toFixed(2), 'accent');
-    html += row('更新時間', yahooUsdollar.updateTime);
+    html += row('數值', sinaUsdollar.price.toFixed(2), 'accent');
+    html += row('更新時間', sinaUsdollar.time);
 
     // 價格門檻通知（從 localStorage 讀取，未設定則不觸發）
     const usdollarHigh = alertGet('usdollar_high');
