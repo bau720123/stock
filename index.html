@@ -1199,7 +1199,7 @@ async function loadTw() {
 // 美股市場概況
 async function loadAmerica() {
   const [yahooEsf, yahooIxic, yahooSox, yahooTsm, robinHood] = await Promise.all([
-    fetch(WORKER + '/yahoo-finance/ES=F').then(r => r.json()).catch(() => ({ success: false })), // 那斯達克 100 期貨期貨
+    fetch(WORKER + '/yahoo-finance/NQ=F').then(r => r.json()).catch(() => ({ success: false })), // 那斯達克 100 期貨期貨
     fetch(WORKER + '/yahoo-finance/^IXIC').then(r => r.json()).catch(() => ({ success: false })), // 那斯達克指數
     fetch(WORKER + '/yahoo-finance/^SOX').then(r => r.json()).catch(() => ({ success: false })), // 那斯達克指數
     fetch(WORKER + '/yahoo-finance/TSM').then(r => r.json()).catch(() => ({ success: false })), // 台積電 ADR
