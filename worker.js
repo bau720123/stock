@@ -57,6 +57,8 @@ export default {
       if (symbol) return await fetchYahooFinance(symbol, 1, 1);
     }
 
+    if (path === "/news-rss")  return await fetchNewsRss();
+
     return json({ error: "unknown path" }, 404);
   },
   async scheduled(event, env, ctx) {
@@ -156,7 +158,7 @@ async function fetchBrent() {
   }
 }
 
-// ── 新浪網────────────────────────────────────
+// 新浪網
 async function fetchSina(list) {
   // https://gu.sina.cn/ft/hq/hf.php?symbol=OIL
   try {
@@ -772,6 +774,106 @@ async function fetchYahooFinance(symbol, interval = 1, range = 1) {
       high:       toFloat(highs[lastIdx]),
       low:        toFloat(lows[lastIdx]),
       close:      toFloat(closes[lastIdx]),
+    });
+  } catch (e) {
+    return json({ success: false, error: e.message }, 500);
+  }
+}
+
+// 新聞 RSS（美伊戰爭消息）
+async function fetchNewsRss() {
+  // 關鍵字：至少命中其中一個才納入
+  const KEYWORDS = ['伊朗', '油價', '荷姆茲', '荷莫茲', '原油', '戰爭', '中東', '美國', '川普', '軍事', '衝突', '制裁', '核子', '核武', '導彈', '攻擊', '防空', '航運', '油輪'];
+ 
+  // RSS 來源清單
+  const SOURCES = [
+    { url: 'https://tw.news.yahoo.com/rss/finance',                  name: 'Yahoo奇摩財經' },
+    { url: 'https://feeds.feedburner.com/rsscna/intworld',           name: '中央社國際' },
+    { url: 'https://feeds.feedburner.com/rsscna/finance',            name: '中央社產經' },
+    { url: 'https://feeds.feedburner.com/rsscna/politics',           name: '中央社政治' },
+    { url: 'https://news.ltn.com.tw/rss/world.xml',                  name: '自由時報國際' },
+    { url: 'https://news.ltn.com.tw/rss/business.xml',               name: '自由時報財經' },
+  ];
+ 
+  // 解析單一 RSS XML，回傳 items 陣列
+  function parseRss(xml, sourceName) {
+    const items = [];
+    const itemRegex = /<item>([\s\S]*?)<\/item>/g;
+    let m;
+    while ((m = itemRegex.exec(xml)) !== null) {
+      const block = m[1];
+ 
+      // title：支援 CDATA 與純文字
+      const titleMatch = block.match(/<title><!\[CDATA\[([\s\S]*?)\]\]><\/title>/)
+                      || block.match(/<title>([\s\S]*?)<\/title>/);
+      // link：
+      //   中央社：<link>https://...</link>（有內容，優先）
+      //   Yahoo ：<link/>（自閉合空標籤），URL 改放在 <guid>
+      const linkMatch  = block.match(/<link>(https?:\/\/[^\s<]+)<\/link>/)
+                      || block.match(/<link><!\[CDATA\[([\s\S]*?)\]\]><\/link>/)
+                      || block.match(/<guid[^>]*>(https?:\/\/[^\s<]+)<\/guid>/);
+      const pubMatch   = block.match(/<pubDate>([\s\S]*?)<\/pubDate>/);
+      const srcMatch   = block.match(/<source[^>]*>([\s\S]*?)<\/source>/);
+      // description：支援 CDATA 與純文字，去除 HTML tag 後截斷
+      const descMatch  = block.match(/<description><!\[CDATA\[([\s\S]*?)\]\]><\/description>/)
+                      || block.match(/<description>([\s\S]*?)<\/description>/);
+      const descRaw    = descMatch ? descMatch[1].replace(/<[^>]+>/g, '').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&nbsp;/g,' ').trim() : '';
+      // 截斷至 120 字，避免過長
+      const desc       = descRaw.length > 120 ? descRaw.slice(0, 120) + '…' : descRaw;
+ 
+      const title = titleMatch ? titleMatch[1].replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').trim() : '';
+      if (!title) continue;
+ 
+      items.push({
+        title,
+        link:    linkMatch  ? linkMatch[1].trim()  : '',
+        pubDate: pubMatch   ? pubMatch[1].trim()   : '',
+        source:  srcMatch   ? srcMatch[1].trim()   : sourceName,
+        desc,
+      });
+    }
+    return items;
+  }
+ 
+  try {
+    // 平行抓取所有 RSS 來源
+    const results = await Promise.allSettled(
+      SOURCES.map(s =>
+        fetch(s.url, { headers: { "User-Agent": UA } })
+          .then(r => r.text())
+          .then(xml => parseRss(xml, s.name))
+          .catch(() => [])
+      )
+    );
+ 
+    // 合併所有來源
+    let allItems = [];
+    results.forEach(r => {
+      if (r.status === 'fulfilled') allItems = allItems.concat(r.value);
+    });
+ 
+    // 關鍵字過濾
+    const filtered = allItems.filter(item =>
+      KEYWORDS.some(kw => item.title.includes(kw))
+    );
+ 
+    // 依 pubDate 降冪排序（最新在前）
+    filtered.sort((a, b) => {
+      const da = a.pubDate ? new Date(a.pubDate).getTime() : 0;
+      const db = b.pubDate ? new Date(b.pubDate).getTime() : 0;
+      return db - da;
+    });
+ 
+    // 去重（相同標題只保留第一筆）
+    const seen = new Set();
+    const unique = filtered.filter(item => {
+      if (seen.has(item.title)) return false;
+      seen.add(item.title);
+      return true;
+    });
+ 
+    return new Response(JSON.stringify({ success: true, items: unique.slice(0, 30) }), {
+      headers: { ...CORS, "Content-Type": "application/json; charset=utf-8" }
     });
   } catch (e) {
     return json({ success: false, error: e.message }, 500);

@@ -333,6 +333,7 @@
     <li><a onclick="closeMenu()" href="?card_type=materials">🛢️ 原物料市場</a></li>
     <li><a onclick="closeMenu()" href="?card_type=market-sentiment">🌡️ 市場情緒</a></li>
     <li><a onclick="closeMenu()" href="?card_type=my-stock">⭐ 我的自選股票</a></li>
+    <li><a onclick="closeMenu()" href="?card_type=war">🔥 美伊戰爭消息</a></li>
     <li><a onclick="closeMenu()" href="?card_type=all">🌐 全類別顯示</a></li>
     <li><a style="cursor:pointer;" onclick="showInfo('一個以純前端技術為核心，搭配 Cloudflare 無伺服器架構，實現即時金融市場報價、PWA 安裝與主動推播通知的個人投資輔助工具。');">ℹ️ 關於本軟體</a></li>
     <!-- <li><a href="#">⚙️ 設定</a></li> -->
@@ -377,6 +378,10 @@
   </div>
   <div class="card" id="card-sentiment" style="display: none;">
       <div class="card-title">市場情緒</div>
+      <div class="skeleton"></div>
+  </div>
+  <div class="card" id="card-war" style="display: none;">
+      <div class="card-title">美伊戰爭消息</div>
       <div class="skeleton"></div>
   </div>
   <div class="card" id="card-mystock" style="display: none;">
@@ -1024,7 +1029,8 @@ async function loadAll() {
     'america-market':   { id: 'card-america',   fn: loadAmerica },
     'materials':        { id: 'card-materials', fn: loadMaterials },
     'market-sentiment': { id: 'card-sentiment', fn: loadSentiment },
-    'my-stock':         { id: 'card-mystock',   fn: loadMyStock }
+    'my-stock':         { id: 'card-mystock',   fn: loadMyStock },
+    'war':              { id: 'card-war',       fn: loadWar }
   };
 
   // 先隱藏所有卡片並重置樣式
@@ -1198,73 +1204,91 @@ async function loadTw() {
 
 // 美股市場概況
 async function loadAmerica() {
-  const [yahooEsf, yahooIxic, yahooSox, yahooTsm, robinHood] = await Promise.all([
-    fetch(WORKER + '/yahoo-finance/NQ=F').then(r => r.json()).catch(() => ({ success: false })), // 那斯達克 100 期貨期貨
-    fetch(WORKER + '/yahoo-finance/^IXIC').then(r => r.json()).catch(() => ({ success: false })), // 那斯達克指數
-    fetch(WORKER + '/yahoo-finance/^SOX').then(r => r.json()).catch(() => ({ success: false })), // 那斯達克指數
+  const [cnbcPreMarkets, /*yahooNqf, yahooIxic, yahooSox, */yahooTsm, robinHood] = await Promise.all([
+    fetch(WORKER + '/cnbc').then(r => r.json()).catch(() => ({ success: false })), // 美股盤前電子盤
+    // fetch(WORKER + '/yahoo-finance/NQ=F').then(r => r.json()).catch(() => ({ success: false })), // 那斯達克 100 期貨期貨
+    // fetch(WORKER + '/yahoo-finance/^IXIC').then(r => r.json()).catch(() => ({ success: false })), // 那斯達克指數
+    // fetch(WORKER + '/yahoo-finance/^SOX').then(r => r.json()).catch(() => ({ success: false })), // 那斯達克指數
     fetch(WORKER + '/yahoo-finance/TSM').then(r => r.json()).catch(() => ({ success: false })), // 台積電 ADR
     fetch(WORKER + '/rh').then(r => r.json()).catch(() => ({ success: false })), // Robinhood
   ]);
 
   let html = `<div class="card-title">美股市場概況</div>`;
-  console.log(yahooIxic);
 
-  // 那斯達克 100 期貨
-  html += groupHeader('【那斯達克 100 期貨】', '', '那斯達克 100 指數（NASDAQ-100 Index）是反映美國科技股表現的核心指標，涵蓋了100家領先的科技公司。此指數為投資人提供了評估美國科技產業健康狀況的重要參考。');
-  if (yahooEsf.success) {
-    const changeNum = yahooEsf.close - yahooEsf.prev;
-    const cls = changeNum < 0 ? 'down' : 'up';
-    const changePercent = changeNum / yahooEsf.prev * 100;
-
-    html += row('前次', yahooEsf.prev.toFixed(2));
-    html += row('開盤價', yahooEsf.open.toFixed(2));
-    html += row('最高價', yahooEsf.high.toFixed(2));
-    html += row('最低價', yahooEsf.low.toFixed(2));
-    html += row('漲跌', changeNum.toFixed(2), cls);
-    html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
-    html += row('價格', yahooEsf.close.toFixed(2), 'accent');
-    html += row('更新時間', yahooEsf.updateTime);
-  } else {
-    html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
+  // 美股盤前電子盤
+  html += groupHeader('【美股盤前電子盤】', '', '美股盤前電子盤（Pre-Market Session）指在正常開盤時間（美東時間 9:30 AM）前，透過電子通訊網路（ECN）進行的股票交易時段，通常為美東時間凌晨 4:00 至 9:30，對應台灣時間晚上 16:00/17:00 後至 21:30。此時段成交量較小但波動大，適合作為盤前財報發布後的策略布局與風險控管。');
+  if (cnbcPreMarkets.success) {
+    html += row('道瓊期貨', formatChange(cnbcPreMarkets.fairValue.dow), changeClass(cnbcPreMarkets.fairValue.dow));
+    html += row('標普500期貨', formatChange(cnbcPreMarkets.fairValue.sp), changeClass(cnbcPreMarkets.fairValue.sp));
+    html += row('納斯達克100期貨', formatChange(cnbcPreMarkets.fairValue.nasdaq), changeClass(cnbcPreMarkets.fairValue.nasdaq));
+    html += row('羅素2000期貨', formatChange(cnbcPreMarkets.fairValue.russell), changeClass(cnbcPreMarkets.fairValue.russell));
   }
 
-  // 那斯達克指數
-  html += groupHeader('【那斯達克指數】', '', '那斯達克指數（NASDAQ Composite Index）是反映美國科技股表現的核心指標，涵蓋了納斯達克交易所上市的多種股票，代表了美國科技產業的整體表現。此指數為投資人提供了評估美國科技產業景氣與技術發展的重要參考。');
-  if (yahooIxic.success) {
-    const changeNum = yahooIxic.close - yahooIxic.prev;
-    const cls = changeNum < 0 ? 'down' : 'up';
-    const changePercent = changeNum / yahooIxic.prev * 100;
-
-    html += row('前次', yahooIxic.prev.toFixed(2));
-    html += row('開盤價', yahooIxic.open.toFixed(2));
-    html += row('最高價', yahooIxic.high.toFixed(2));
-    html += row('最低價', yahooIxic.low.toFixed(2));
-    html += row('漲跌', changeNum.toFixed(2), cls);
-    html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
-    html += row('價格', yahooIxic.close.toFixed(2), 'accent');
-    html += row('更新時間', yahooIxic.updateTime);
-  } else {
-    html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
+  // 美股四大指數
+  html += groupHeader('【美股四大指數】', '', '美股四大指數（道瓊、標普500、納斯達克、費城半導體）是反映美國股市與經濟動能的核心指標。道瓊代表藍籌龍頭，標普500涵蓋大盤整體，納斯達克側重科技成長，費半則專注半導體產業。這些指數為投資人提供了評估市場漲跌、產業趨勢及全球資金流向的關鍵基準。');
+  if (cnbcPreMarkets.success) {
+    html += row('道瓊工業指數', formatChange(cnbcPreMarkets.market.dji), changeClass(cnbcPreMarkets.market.dji));
+    html += row('標普500指數', formatChange(cnbcPreMarkets.market.spx), changeClass(cnbcPreMarkets.market.spx));
+    html += row('納斯達克指數', formatChange(cnbcPreMarkets.market.ixic), changeClass(cnbcPreMarkets.market.ixic));
+    html += row('費城半導體指數', formatChange(cnbcPreMarkets.market.sox), changeClass(cnbcPreMarkets.market.sox));
   }
 
-  // 費城半導體指數
-  html += groupHeader('【費城半導體指數】', '', '費城半導體指數（Philadelphia Semiconductor Index，SOX）是反映美國半導體產業表現的核心指標，涵蓋了全球知名的半導體公司，包括設計、製造與封裝等各個環節。此指數為投資人提供了評估半導體產業景氣與技術發展的重要參考。');
-  if (yahooSox.success) {
-    const changeNum = yahooSox.close - yahooSox.prev;
-    const cls = changeNum < 0 ? 'down' : 'up';
-    const changePercent = changeNum / yahooSox.prev * 100;
+  // // 那斯達克 100 期貨
+  // html += groupHeader('【那斯達克 100 期貨】', '', '那斯達克 100 指數（NASDAQ-100 Index）是反映美國科技股表現的核心指標，涵蓋了100家領先的科技公司。此指數為投資人提供了評估美國科技產業健康狀況的重要參考。');
+  // if (yahooNqf.success) {
+  //   const changeNum = yahooNqf.close - yahooNqf.prev;
+  //   const cls = changeNum < 0 ? 'down' : 'up';
+  //   const changePercent = changeNum / yahooNqf.prev * 100;
 
-    html += row('前次', yahooSox.prev.toFixed(2));
-    html += row('開盤價', yahooSox.open.toFixed(2));
-    html += row('最高價', yahooSox.high.toFixed(2));
-    html += row('最低價', yahooSox.low.toFixed(2));
-    html += row('漲跌', changeNum.toFixed(2), cls);
-    html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
-    html += row('價格', yahooSox.close.toFixed(2), 'accent');
-    html += row('更新時間', yahooSox.updateTime);
-  } else {
-    html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
-  }
+  //   html += row('前次', yahooNqf.prev.toFixed(2));
+  //   html += row('開盤價', yahooNqf.open.toFixed(2));
+  //   html += row('最高價', yahooNqf.high.toFixed(2));
+  //   html += row('最低價', yahooNqf.low.toFixed(2));
+  //   html += row('漲跌', changeNum.toFixed(2), cls);
+  //   html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
+  //   html += row('價格', yahooNqf.close.toFixed(2), 'accent');
+  //   html += row('更新時間', yahooNqf.updateTime);
+  // } else {
+  //   html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
+  // }
+
+  // // 那斯達克指數
+  // html += groupHeader('【那斯達克指數】', '', '那斯達克指數（NASDAQ Composite Index）是反映美國科技股表現的核心指標，涵蓋了納斯達克交易所上市的多種股票，代表了美國科技產業的整體表現。此指數為投資人提供了評估美國科技產業景氣與技術發展的重要參考。');
+  // if (yahooIxic.success) {
+  //   const changeNum = yahooIxic.close - yahooIxic.prev;
+  //   const cls = changeNum < 0 ? 'down' : 'up';
+  //   const changePercent = changeNum / yahooIxic.prev * 100;
+
+  //   html += row('前次', yahooIxic.prev.toFixed(2));
+  //   html += row('開盤價', yahooIxic.open.toFixed(2));
+  //   html += row('最高價', yahooIxic.high.toFixed(2));
+  //   html += row('最低價', yahooIxic.low.toFixed(2));
+  //   html += row('漲跌', changeNum.toFixed(2), cls);
+  //   html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
+  //   html += row('價格', yahooIxic.close.toFixed(2), 'accent');
+  //   html += row('更新時間', yahooIxic.updateTime);
+  // } else {
+  //   html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
+  // }
+
+  // // 費城半導體指數
+  // html += groupHeader('【費城半導體指數】', '', '費城半導體指數（Philadelphia Semiconductor Index，SOX）是反映美國半導體產業表現的核心指標，涵蓋了全球知名的半導體公司，包括設計、製造與封裝等各個環節。此指數為投資人提供了評估半導體產業景氣與技術發展的重要參考。');
+  // if (yahooSox.success) {
+  //   const changeNum = yahooSox.close - yahooSox.prev;
+  //   const cls = changeNum < 0 ? 'down' : 'up';
+  //   const changePercent = changeNum / yahooSox.prev * 100;
+
+  //   html += row('前次', yahooSox.prev.toFixed(2));
+  //   html += row('開盤價', yahooSox.open.toFixed(2));
+  //   html += row('最高價', yahooSox.high.toFixed(2));
+  //   html += row('最低價', yahooSox.low.toFixed(2));
+  //   html += row('漲跌', changeNum.toFixed(2), cls);
+  //   html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
+  //   html += row('價格', yahooSox.close.toFixed(2), 'accent');
+  //   html += row('更新時間', yahooSox.updateTime);
+  // } else {
+  //   html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
+  // }
 
   // 台積電ADR
   html += groupHeader('【台積電 ADR】', '', '台積電 ADR（American Depositary Receipts，美國存託憑證）是台積電在美國發行的股票憑證（代號：TSM），掛牌於紐約證券交易所（NYSE）。它讓美國投資人能用美元直接買賣台積電，代表國際資金對台積電的看法，且 1 單位 ADR 等於 5 股台積電台股（2330）普通股。');
@@ -1273,10 +1297,10 @@ async function loadAmerica() {
     const cls = changeNum < 0 ? 'down' : 'up';
     const changePercent = changeNum / yahooTsm.prev * 100;
 
-    html += row('前次', yahooTsm.prev.toFixed(2));
-    html += row('開盤價', yahooTsm.open.toFixed(2));
-    html += row('最高價', yahooTsm.high.toFixed(2));
-    html += row('最低價', yahooTsm.low.toFixed(2));
+    // html += row('前次', yahooTsm.prev.toFixed(2));
+    // html += row('開盤價', yahooTsm.open.toFixed(2));
+    // html += row('最高價', yahooTsm.high.toFixed(2));
+    // html += row('最低價', yahooTsm.low.toFixed(2));
     html += row('漲跌', changeNum.toFixed(2), cls);
     html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
     html += row('價格', yahooTsm.close.toFixed(2), 'accent');
@@ -1669,6 +1693,62 @@ async function loadMyStock() {
   }
 
   setCard('card-mystock', 0, html);
+}
+
+// 美伊戰爭消息
+async function loadWar() {
+  let html = `<div class="card-title">美伊戰爭消息</div>`;
+
+  try {
+    const data = await fetch(WORKER + '/news-rss').then(r => r.json()).catch(() => ({ success: false }));
+
+    if (data.success && data.items && data.items.length > 0) {
+      data.items.forEach(item => {
+        // pubDate 轉台北時間（UTC+8）
+        let pubDateTw = '';
+        if (item.pubDate) {
+          try {
+            const d = new Date(item.pubDate);
+            pubDateTw = d.toLocaleString('zh-TW', {
+              timeZone: 'Asia/Taipei',
+              year: 'numeric', month: '2-digit', day: '2-digit',
+              hour: '2-digit', minute: '2-digit',
+              hour12: false
+            });
+          } catch (e) {
+            pubDateTw = item.pubDate;
+          }
+        }
+
+        html += `
+          <div style="padding: 10px 0; border-bottom: 1px solid var(--border);">
+            <div style="font-size: .88rem; color: var(--text); margin-bottom: 6px; line-height: 1.5;">
+              ${item.title || '（無標題）'}
+            </div>
+            <div style="display:flex; flex-wrap:wrap; gap: 6px 16px; align-items:center;">
+              ${item.link ? `
+                <a href="${item.link}" target="_blank" rel="noopener noreferrer"
+                  style="font-family: var(--mono); font-size: .72rem; color: var(--neutral); text-decoration: none; border-bottom: 1px solid var(--neutral);">
+                  點我看詳細 ↗
+                </a>` : ''}
+              <span style="font-family: var(--mono); font-size: .68rem; color: var(--dim);">
+                🕐 ${pubDateTw || '—'}
+              </span>
+              ${item.source ? `
+                <span style="font-family: var(--mono); font-size: .68rem; color: var(--muted);">
+                  📰 ${item.source}
+                </span>` : ''}
+            </div>
+          </div>`;
+      });
+    } else {
+      html += `<div class="error-text">暫時無法取得新聞，請稍後再試</div>`;
+    }
+  } catch (e) {
+    html += `<div class="error-text">載入失敗：${e.message}</div>`;
+  }
+
+  setCard('card-war', 0, html);
 }
 
 const REFRESH_INTERVAL = 300; // 秒，改這個就通吃
