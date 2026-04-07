@@ -1711,12 +1711,12 @@ function warMarkRead(link) {
   const arr = [...set].slice(-500);
   localStorage.setItem(WAR_READ_KEY, JSON.stringify(arr));
 
-  Swal.fire({
-    grow: "fullscreen",
-    html: '<iframe src="' + link + '" frameborder="0" style="width:100%; height:80vh; display:block;"></iframe>',
-    showCloseButton: true,
-    showConfirmButton: false,
-  });
+  // Swal.fire({
+  //   grow: "fullscreen",
+  //   html: '<iframe src="' + link + '" frameborder="0" style="width:100%; height:80vh; display:block;"></iframe>',
+  //   showCloseButton: true,
+  //   showConfirmButton: false,
+  // });
 }
 
 // 美伊戰爭消息
@@ -1762,7 +1762,7 @@ async function loadWar() {
             </div>` : ''}
             <div style="display:flex; flex-wrap:wrap; gap: 6px 16px; align-items:center;">
               ${item.link ? `
-                <a rel="noopener noreferrer"
+                <a href="${item.link}" rel="noopener noreferrer"
                   onclick="warMarkRead('${item.link.replace(/'/g, "\\'")}')"
                   style="font-family: var(--mono); font-size: .72rem; color: var(--neutral); text-decoration: none;">
                   點我看詳細 ↗
