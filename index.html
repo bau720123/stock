@@ -1695,6 +1695,23 @@ async function loadMyStock() {
   setCard('card-mystock', 0, html);
 }
 
+// 已讀清單：用 localStorage 儲存已點擊過的新聞連結
+const WAR_READ_KEY = 'war_read_links';
+
+function warReadSet() {
+  try { return new Set(JSON.parse(localStorage.getItem(WAR_READ_KEY) || '[]')); }
+  catch (e) { return new Set(); }
+}
+
+function warMarkRead(link) {
+  if (!link) return;
+  const set = warReadSet();
+  set.add(link);
+  // 最多保留 500 筆，避免 localStorage 無限增長
+  const arr = [...set].slice(-500);
+  localStorage.setItem(WAR_READ_KEY, JSON.stringify(arr));
+}
+
 // 美伊戰爭消息
 async function loadWar() {
   let html = `<div class="card-title">美伊戰爭消息</div>`;
@@ -1703,7 +1720,11 @@ async function loadWar() {
     const data = await fetch(WORKER + '/news-rss').then(r => r.json()).catch(() => ({ success: false }));
 
     if (data.success && data.items && data.items.length > 0) {
+      const readSet = warReadSet();
+
       data.items.forEach(item => {
+        const isRead = item.link && readSet.has(item.link);
+
         // pubDate 轉台北時間（UTC+8）
         let pubDateTw = '';
         if (item.pubDate) {
@@ -1722,20 +1743,28 @@ async function loadWar() {
 
         html += `
           <div style="padding: 10px 0; border-bottom: 1px solid var(--border);">
-            <div style="font-size: .88rem; color: var(--text); margin-bottom: 6px; line-height: 1.5;">
-              ${item.title || '（無標題）'}
+            <div style="display:flex; align-items:baseline; gap:6px; margin-bottom:5px;">
+              <span style="font-family:var(--mono); font-size:.62rem; color:white; background:var(--muted); border-radius:3px; padding:1px 5px; flex-shrink:0;">${isRead ? '已讀' : '未讀'}</span>
+              <div style="font-size: .88rem; color: ${isRead ? 'var(--dim)' : 'var(--text)'}; line-height: 1.5;">
+                ${item.title || '（無標題）'}
+              </div>
             </div>
+            ${item.desc ? `
+            <div style="font-size: .78rem; color: var(--dim); line-height: 1.55; margin-bottom: 6px;">
+              ${item.desc}
+            </div>` : ''}
             <div style="display:flex; flex-wrap:wrap; gap: 6px 16px; align-items:center;">
               ${item.link ? `
                 <a href="${item.link}" target="_blank" rel="noopener noreferrer"
-                  style="font-family: var(--mono); font-size: .72rem; color: var(--neutral); text-decoration: none; border-bottom: 1px solid var(--neutral);">
+                  onclick="warMarkRead('${item.link.replace(/'/g, "\\'")}')"
+                  style="font-family: var(--mono); font-size: .72rem; color: var(--neutral); text-decoration: none;">
                   點我看詳細 ↗
                 </a>` : ''}
               <span style="font-family: var(--mono); font-size: .68rem; color: var(--dim);">
                 🕐 ${pubDateTw || '—'}
               </span>
               ${item.source ? `
-                <span style="font-family: var(--mono); font-size: .68rem; color: var(--muted);">
+                <span style="font-family: var(--mono); font-size: .68rem; color: yellowgreen;">
                   📰 ${item.source}
                 </span>` : ''}
             </div>

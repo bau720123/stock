@@ -814,12 +814,16 @@ async function fetchNewsRss() {
                       || block.match(/<guid[^>]*>(https?:\/\/[^\s<]+)<\/guid>/);
       const pubMatch   = block.match(/<pubDate>([\s\S]*?)<\/pubDate>/);
       const srcMatch   = block.match(/<source[^>]*>([\s\S]*?)<\/source>/);
+
       // description：支援 CDATA 與純文字，去除 HTML tag 後截斷
       const descMatch  = block.match(/<description><!\[CDATA\[([\s\S]*?)\]\]><\/description>/)
                       || block.match(/<description>([\s\S]*?)<\/description>/);
       const descRaw    = descMatch ? descMatch[1].replace(/<[^>]+>/g, '').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&nbsp;/g,' ').trim() : '';
-      // 截斷至 120 字，避免過長
-      const desc       = descRaw.length > 120 ? descRaw.slice(0, 120) + '…' : descRaw;
+
+      // 若原始資料已含 … 摘要符號，代表來源已自行截斷，直接清理使用；否則自行截斷至 120 字
+      const hasEllipsis = descRaw.includes('…');
+      const descClean   = descRaw.replace(/…/g, '').trimEnd();
+      const desc        = hasEllipsis ? descClean : (descRaw.length > 120 ? descRaw.slice(0, 120) + '…' : descRaw);
  
       const title = titleMatch ? titleMatch[1].replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').trim() : '';
       if (!title) continue;
