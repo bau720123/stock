@@ -335,6 +335,7 @@
     <li><a onclick="closeMenu()" href="?card_type=my-stock">⭐ 我的自選股票</a></li>
     <li><a onclick="closeMenu()" href="?card_type=war">🔥 美伊戰爭消息</a></li>
     <li><a onclick="closeMenu()" href="?card_type=all">🌐 全類別顯示</a></li>
+    <li><a onclick="closeMenu()" href="?card_type=america-calendar">📅 美股行事曆</a></li>
     <li><a style="cursor:pointer;" onclick="showInfo('一個以純前端技術為核心，搭配 Cloudflare 無伺服器架構，實現即時金融市場報價、PWA 安裝與主動推播通知的個人投資輔助工具。');">ℹ️ 關於本軟體</a></li>
     <!-- <li><a href="#">⚙️ 設定</a></li> -->
   </ul>
@@ -386,6 +387,11 @@
   </div>
   <div class="card" id="card-mystock" style="display: none;">
       <div class="card-title">我的自選股票</div>
+      <div class="skeleton"></div>
+      <div class="skeleton"></div>
+  </div>
+  <div class="card" id="card-america-calendar" style="display: none;">
+      <div class="card-title">美股行事曆</div>
       <div class="skeleton"></div>
       <div class="skeleton"></div>
   </div>
@@ -1036,7 +1042,8 @@ async function loadAll() {
     'materials':        { id: 'card-materials', fn: loadMaterials },
     'market-sentiment': { id: 'card-sentiment', fn: loadSentiment },
     'my-stock':         { id: 'card-mystock',   fn: loadMyStock },
-    'war':              { id: 'card-war',       fn: loadWar }
+    'war':              { id: 'card-war',       fn: loadWar },
+    'america-calendar': { id: 'card-america-calendar',   fn: loadAmericaCalendar },
   };
 
   // 先隱藏所有卡片並重置樣式
@@ -1824,6 +1831,13 @@ async function loadWar() {
   const card_type = urlParams.get('card_type') || 'taiwan-market';
 
   setCard('card-war', 0, html, card_type === 'war' ? 'card-wide' : '');
+}
+
+// 美股行事曆
+async function loadAmericaCalendar() {
+  let html = `<div class="card-title">美股行事曆</div>`;
+
+  setCard('card-america-calendar', 0, html);
 }
 
 const REFRESH_INTERVAL = 300; // 秒，改這個就通吃
