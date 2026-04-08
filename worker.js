@@ -15,13 +15,13 @@ function json(data, status = 200) {
 
 export default {
   async fetch(request, env) {
-    // https://billowing-queen-4a58.bau720123.workers.dev/path
+    // 呼叫網址：https://billowing-queen-4a58.bau720123.workers.dev/path
 
     if (request.method === "OPTIONS") return new Response(null, { headers: CORS });
 
     const path = new URL(request.url).pathname;
 
-    if (path === "/fitx")    return await fetchHiStock("stocktop2017", "FITX", "指數", "成交量(口)");
+    if (path === "/fitx")    return await fetchHiStock("stocktop2017", "FITX", "指數", "成交量(口)"); // 台指近
     if (path === "/twn")     return await fetchHiStock("stocktop2017", "TWN", "指數", "成交量(口)"); // 富台指
 
     // https://invest.cnyes.com/futures/GF/TWNCON
@@ -426,7 +426,7 @@ async function fetchCnbc() {
   }
 }
 
-// ── RobinHood（TSM ADR 即時）───────────────────────────────
+// RobinHood（TSM ADR 即時）
 async function fetchRobinHood() {
   try {
     const instrumentId = "ca4821f9-06c3-4c22-bbb8-efe569f23d2b";
@@ -477,7 +477,7 @@ async function handleSubscribe(request, env) {
   }
 }
 
-// ── Web Push 發送 ──────────────────────────────────────────
+// Web Push 發送
 async function handlePushTest(env) {
   try {
     const existing = await env.KV.get("subscriptions");
@@ -548,7 +548,7 @@ async function sendWebPush(subscription, payload, env) {
   }
 }
 
-// ── VAPID JWT 建立 ─────────────────────────────────────────
+// VAPID JWT 建立
 async function buildVapidJwt(endpoint, subject, publicKeyB64, privateKeyB64) {
   const now    = Math.floor(Date.now() / 1000);
   const origin = new URL(endpoint).origin;
@@ -593,7 +593,7 @@ function buildPkcs8(rawKey) {
   return concat(header, rawKey);
 }
 
-// ── aes128gcm 加密 ─────────────────────────────────────────
+// aes128gcm 加密
 async function encryptPayload(plaintext, p256dhB64, authB64) {
   const encoder       = new TextEncoder();
   const clientPublic  = base64UrlDecode(p256dhB64);
@@ -648,7 +648,7 @@ async function encryptPayload(plaintext, p256dhB64, authB64) {
   return concat(salt, rs, new Uint8Array([serverPubArray.length]), serverPubArray, new Uint8Array(encrypted));
 }
 
-// ── HKDF ──────────────────────────────────────────────────
+// HKDF
 async function hkdf(ikm, salt, info, length) {
   const key = await crypto.subtle.importKey('raw', ikm, 'HKDF', false, ['deriveBits']);
   const bits = await crypto.subtle.deriveBits(
@@ -658,7 +658,7 @@ async function hkdf(ikm, salt, info, length) {
   return new Uint8Array(bits);
 }
 
-// ── 工具函數（Base64）─────────────────────────────────────
+// 工具函數（Base64）
 function b64url(str) {
   return btoa(str).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
 }
@@ -1046,7 +1046,7 @@ function isApplePlatform(platform) {
   return platform && /iPhone|iPad|iPod|Mac/i.test(platform);
 }
 
-// ── 工具函數 ───────────────────────────────────────────────
+// 工具函數
 function toFloat(s) {
   if (s == null) return 0;
   const n = parseFloat(String(s).replace(/,/g, ""));

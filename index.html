@@ -1087,12 +1087,12 @@ window.onload = loadAll;
 // 台股市場概況
 async function loadTw() {
   const [taifexDay, taifexNight, taifexTsmc, /*twn, */twncon, tsmc] = await Promise.all([
-    fetch(WORKER + '/taifex/2/TX046').then(r => r.json()),
-    fetch(WORKER + '/taifex/12/TX046').then(r => r.json()),
-    fetch(WORKER + '/taifex/12/CDF046').then(r => r.json()),
-    // fetch(WORKER + '/twn').then(r => r.json()),
-    fetch(WORKER + '/twncon').then(r => r.json()),
-    fetch(WORKER + '/stock/2330').then(r => r.json()),
+    fetch(WORKER + '/taifex/2/TX046').then(r => r.json()), // 台股期貨日盤
+    fetch(WORKER + '/taifex/12/TX046').then(r => r.json()), // 台股期貨夜盤
+    fetch(WORKER + '/taifex/12/CDF046').then(r => r.json()), // 台積電期貨夜盤
+    // fetch(WORKER + '/twn').then(r => r.json()), // 富台指
+    fetch(WORKER + '/twncon').then(r => r.json()), // 富台指
+    fetch(WORKER + '/stock/2330').then(r => r.json()), // 台積電現貨日盤
   ]);
 
   let html = `<div class="card-title">台股市場概況</div>`;
@@ -1163,7 +1163,7 @@ async function loadTw() {
     html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
   }
 
-  // 【台積電現貨】
+  // 【台積電現貨日盤】
   html += groupHeader(`【${tsmc.name || '未定義'}現貨日盤】`, 'tsmc', '台積電（TSMC）是全球最大的專業積體電路（IC）製造服務公司，總部位於臺灣新竹科學園區，1987年由張忠謀創立。台積電首創「純晶圓代工」模式，不設計自有品牌產品，專注為Apple、NVIDIA等科技大廠代工生產領先技術的晶片，在先進製程（如3奈米、2奈米）上具統治性地位，被譽為「護國神山」。');
   if (tsmc.success) {
     const cls = changeClass(tsmc.change, 1);
