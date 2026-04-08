@@ -69,6 +69,8 @@ export default {
 
     if (path === "/news-rss")  return await fetchNewsRss();
 
+    if (path === "/america-calendar") return await fetchAmericaCalendar();
+
     return json({ error: "unknown path" }, 404);
   },
   async scheduled(event, env, ctx) {
@@ -945,11 +947,172 @@ async function fetchNewsRss() {
   }
 }
 
+// 美股行事曆
+async function fetchAmericaCalendar() {
+  try {
+    const now = new Date();
+    const twTime = new Date(now.getTime() + 8 * 3600 * 1000);
+    const currentYear = twTime.getFullYear();
+    
+    // 固定抓取當月 1 號開始到年底
+    const from = `${currentYear}-${String(twTime.getMonth() + 1).padStart(2, '0')}-01`;
+    const to = `${currentYear}-12-31`;
+    
+    // 1. 抓取 MoneyDJ 資料
+    const res = await fetch(`https://www.moneydj.com/us/rest/eventlist?from=${from}&to=${to}`, {
+      headers: { "User-Agent": UA, "Referer": "https://www.moneydj.com/us/home" }
+    });
+    const data = await res.json();
+
+    const keywords = ['美國核心CPI年增率', '美國生產者物價指數', 'EI020089', '美國零售額月增率', '申請失業救濟人數', '美國非農業就業人數變化', '美國消費者信心指數'];
+
+    // 2. 處理原本的 MoneyDJ 資料
+    let processed = data.reduce((acc, item) => {
+      const indicatorList = item.details.split(',').map(d => {
+        const parts = d.split(':');
+        return {
+          code: parts.length > 1 ? parts[0].trim() : '',
+          name: parts.length > 1 ? parts[1].trim() : parts[0].trim()
+        };
+      });
+
+      let shouldInclude = false;
+      let filteredIndicators = [];
+
+      if (item.type === 'market') {
+        shouldInclude = true;
+        filteredIndicators = indicatorList;
+      } else if (item.type === 'index') {
+        filteredIndicators = indicatorList.filter(ind => 
+          keywords.some(kw => ind.name.includes(kw) || ind.code.includes(kw))
+        );
+        if (filteredIndicators.length > 0) shouldInclude = true;
+      }
+
+      if (shouldInclude) {
+        acc.push({ ...item, indicators: filteredIndicators });
+      }
+      return acc;
+    }, []);
+
+    // 3. 注入「特定自訂事件」邏輯
+    const customEvents = generateCustomEvents(currentYear);
+    
+    // 合併並排序 (依日期 ID)
+    const finalData = [...processed, ...customEvents].sort((a, b) => a.id.localeCompare(b.id));
+
+    return json({ success: true, items: finalData });
+  } catch (e) {
+    return json({ success: false, error: e.message }, 500);
+  }
+}
+
+/**
+ * 自動計算特定金融事件日期
+ */
+function generateCustomEvents(year) {
+  const events = [];
+
+  for (let month = 0; month < 12; month++) { // 0 = 1月, 11 = 12月
+    const monthStr = String(month + 1).padStart(2, '0');
+
+    // A. 台指期／選擇權結算日 (每月第三個星期三)
+    const twSettleDate = getNthDay(year, month, 3, 3);
+    events.push(createEventObj(twSettleDate, "結算", "台指期/選擇權結算日", "#f39c12"));
+
+    // B. 美股四巫日 (3, 6, 9, 12 月的第三個星期五)
+    if ([2, 5, 8, 11].includes(month)) {
+      const witchingDate = getNthDay(year, month, 5, 3);
+      events.push(createEventObj(witchingDate, "四巫", "美股四巫日 (Triple Witching)", "#8e44ad"));
+    }
+
+    // C. 富時羅素指數重組生效日
+    // 6 月最後一個星期五
+    if (month === 5) {
+      const ftseJune = getNthDay(year, month, 5, -1);
+      events.push(createEventObj(ftseJune, "富時", "富時羅素指數重組生效日", "#e66767"));
+    }
+    // 11 月第二個星期五
+    if (month === 10) {
+      const ftseNov = getNthDay(year, month, 5, 2);
+      events.push(createEventObj(ftseNov, "富時", "富時羅素指數重組生效日", "#e66767"));
+    }
+
+    // D. MSCI 指數調整生效日 (2, 5, 8, 11 月最後一個交易日/平日) 
+    if ([1, 4, 7, 10].includes(month)) {
+      const msciDate = getLastWeekday(year, month);
+      events.push(createEventObj(msciDate, "MSCI", "MSCI 指數調整生效日", "#16a085"));
+    }
+  }
+  return events;
+}
+
+/**
+ * 輔助：建立符合結構的事件物件
+ */
+function createEventObj(dateObj, shortText, fullName, color) {
+  const y = dateObj.getFullYear();
+  const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+  const d = String(dateObj.getDate()).padStart(2, '0');
+  const dateStr = `${y}${m}${d}`;
+  const dateFmt = `${y}/${m}/${d}`;
+
+  return {
+    "id": dateStr + "999", // 加上 999 確保在當天排序靠後
+    "start_date": `${dateFmt} 1:00`,
+    "end_date": `${dateFmt} 2:00`,
+    "textColor": color,
+    "text": "特定事件",
+    "type": "index",
+    "details": `:${fullName}`,
+    "indicators": [{ "code": "", "name": fullName }]
+  };
+}
+
+/**
+ * 輔助：取得該月第 N 個星期幾 (n 為負數代表倒數)
+ * dayOfWeek: 0=日, 1=一, ..., 3=三, ..., 5=五, 6=六
+ */
+function getNthDay(year, month, dayOfWeek, n) {
+  if (n > 0) {
+    let date = new Date(year, month, 1);
+    let count = 0;
+    while (date.getMonth() === month) {
+      if (date.getDay() === dayOfWeek) {
+        count++;
+        if (count === n) return new Date(date);
+      }
+      date.setDate(date.getDate() + 1);
+    }
+  } else {
+    // 找倒數
+    let date = new Date(year, month + 1, 0); // 該月最後一天
+    while (date.getMonth() === month) {
+      if (date.getDay() === dayOfWeek) return new Date(date);
+      date.setDate(date.getDate() - 1);
+    }
+  }
+  return null;
+}
+
+/**
+ * 輔助：取得該月最後一個平日 (Mon-Fri)
+ */
+function getLastWeekday(year, month) {
+  let date = new Date(year, month + 1, 0);
+  while (date.getDay() === 0 || date.getDay() === 6) { // 0=日, 6=六
+    date.setDate(date.getDate() - 1);
+  }
+  return new Date(date);
+}
+
 async function handleCron(env) {
   // 判斷台灣時間是否在週一至週五 05:00～00:00
   const now = new Date();
-  const twHour = (now.getUTCHours() + 8) % 24;
-  const twDay  = new Date(now.getTime() + 8 * 3600 * 1000).getUTCDay(); // 0=週日
+  const twTime = new Date(now.getTime() + 8 * 3600 * 1000);
+  const twHour = twTime.getUTCHours();
+  const twDay = twTime.getUTCDay();
+  const currentYear = twTime.getFullYear();
 
   // 週一(1)至週五(5)，05:00～23:59
   if (twDay === 0 || twDay === 6) return; // 週六、週日不執行
@@ -961,22 +1124,22 @@ async function handleCron(env) {
   const list = JSON.parse(existing);
 
   // 平行抓取所有資料
-  const [taifexDay, taifexNight, taifexTsmc, /*twnRes, */twnConRes, brentRes, vixRes, tsmcStock] = await Promise.all([
+  const [taifexDay, taifexNight, taifexTsmc, twnRes, /*twnConRes, */brentRes, vixRes, tsmcStock] = await Promise.all([
     fetchTaifex(2, "TX046"), // 台股期貨日盤
     fetchTaifex(12, "TX046"), // 台股期貨夜盤
     fetchTaifex(12, "CDF046"), // 台積電期貨夜盤
-    // fetchHiStock("stocktop2017", "TWN", "指數", "成交量(口)"),
-    fetchCnyesTwn(), // 富台指
+    fetchHiStock("stocktop2017", "TWN", "指數", "成交量(口)"),
+    // fetchCnyesTwn(), // 富台指
     fetchSina("hf_OIL"),
     fetchSina("znb_VIX"),
     fetchFugleQuote("2330", env),
   ]);
 
-  const taifem_day = await taifexDay.json();
-  const taifem_night = await taifexNight.json();
-  const taifem_tsmc = await taifexTsmc.json();
-  // const twn    = await twnRes.json();
-  const twncon    = await twnConRes.json();
+  const taifex_day = await taifexDay.json();
+  const taifex_night = await taifexNight.json();
+  const taifex_tsmc = await taifexTsmc.json();
+  const twn    = await twnRes.json();
+  // const twncon    = await twnConRes.json();
   const brent  = await brentRes.json();
   const vix    = await vixRes.json();
   const tsmc   = await tsmcStock.json();
@@ -984,40 +1147,58 @@ async function handleCron(env) {
   // 組合摘要文案
   const lines = [];
 
-  if (taifem_day.success && taifem_day.price > 0) {
-    const sign = taifem_day.updown > 0 ? '▲' : taifem_day.updown < 0 ? '▼' : '';
-    lines.push(`台股期貨日盤 ${taifem_day.price.toFixed(0)} (${sign}${Math.abs(taifem_day.updown).toFixed(0)})`);
+  // 偵測今日是否有特殊事件
+  const todayKey = twTime.toISOString().split('T')[0].replace(/-/g, '');
+  const allEvents = generateCustomEvents(currentYear);
+  const todaysEvents = allEvents.filter(e => e.id.startsWith(todayKey));
+
+  // if (todaysEvents.length > 0) {
+  //   todaysEvents.forEach(ev => {
+  //     lines.push(`今日特殊事件：${ev.indicators[0].name}`);
+  //   }); 
+  // }
+  if (todaysEvents.length > 0) {
+    // 提取所有事件名稱
+    // 使用 "、" 串接
+    const eventNames = todaysEvents.map(ev => ev.indicators[0].name).join('、');
+    
+    lines.push(`🚨 今日特殊事件：${eventNames}`);
   }
 
-  if (taifem_night.success && taifem_night.price > 0) {
-    const sign = taifem_night.updown > 0 ? '▲' : taifem_night.updown < 0 ? '▼' : '';
-    lines.push(`台股期貨夜盤 ${taifem_night.price.toFixed(0)} (${sign}${Math.abs(taifem_night.updown).toFixed(0)})`);
+  if (taifex_day.success && taifex_day.price > 0) {
+    const sign = taifex_day.updown > 0 ? '▲' : taifex_day.updown < 0 ? '▼' : '';
+    lines.push(`台股期貨日盤：${taifex_day.price.toFixed(0)} (${sign}${Math.abs(taifex_day.updown).toFixed(0)})`);
   }
 
-  if (taifem_tsmc.success && taifem_tsmc.price > 0) {
-    const sign = taifem_tsmc.updown > 0 ? '▲' : taifem_tsmc.updown < 0 ? '▼' : '';
-    lines.push(`台積電期貨夜盤 ${taifem_tsmc.price.toFixed(0)} (${sign}${Math.abs(taifem_tsmc.updown).toFixed(0)})`);
+  if (taifex_night.success && taifex_night.price > 0) {
+    const sign = taifex_night.updown > 0 ? '▲' : taifex_night.updown < 0 ? '▼' : '';
+    lines.push(`台股期貨夜盤：${taifex_night.price.toFixed(0)} (${sign}${Math.abs(taifex_night.updown).toFixed(0)})`);
   }
 
-  // if (twn.success) {
-  //   lines.push(`富台指漲跌 ${twn.changeText}`);
+  if (taifex_tsmc.success && taifex_tsmc.price > 0) {
+    const sign = taifex_tsmc.updown > 0 ? '▲' : taifex_tsmc.updown < 0 ? '▼' : '';
+    lines.push(`台積電期貨夜盤：${taifex_tsmc.price.toFixed(0)} (${sign}${Math.abs(taifex_tsmc.updown).toFixed(0)})`);
+  }
+
+  if (twn.success) {
+    lines.push(`富台指漲跌：${twn.changeText}`);
+  }
+
+  // if (twncon.success) {
+  //   lines.push(`富台指漲跌：${twncon.updown}`);
   // }
 
-  if (twncon.success) {
-    lines.push(`富台指漲跌 ${twn.updown}`);
-  }
-
   if (brent.success) {
-    lines.push(`布蘭特原油 ${brent.price.toFixed(2)} 元`);
+    lines.push(`布蘭特原油：${brent.price.toFixed(2)} 元`);
   }
 
   if (vix.success) {
-    lines.push(`VIX 恐慌指數 ${vix.price.toFixed(2)}`);
+    lines.push(`VIX 恐慌指數：${vix.price.toFixed(2)}`);
   }
 
   if (tsmc.success) {
     const sign = tsmc.change > 0 ? '▲' : '▼';
-    lines.push(`台積電現貨 ${tsmc.closePrice.toFixed(0)} (${sign}${Math.abs(tsmc.change).toFixed(0)})`);
+    lines.push(`台積電現貨：${tsmc.closePrice.toFixed(0)} (${sign}${Math.abs(tsmc.change).toFixed(0)})`);
   }
 
   const body = lines.length > 0 ? lines.join('\n') : '點擊查看即時報價';
@@ -1028,10 +1209,10 @@ async function handleCron(env) {
       body,
       url: '/stock/index.html',
       // image: '/stock/banner.png',
-      actions: (isAndroidPlatform(sub.platform) || isApplePlatform(sub.platform)) ? [] : [
-        { action: 'view',    title: '查看詳情', icon: '/stock/icon-192.png' },
-        { action: 'dismiss', title: '忽略',     icon: '/stock/icon-192.png' },
-      ]
+      // actions: (isAndroidPlatform(sub.platform) || isApplePlatform(sub.platform)) ? [] : [
+      //   { action: 'view',    title: '查看詳情', icon: '/stock/icon-192.png' },
+      //   { action: 'dismiss', title: '忽略',     icon: '/stock/icon-192.png' },
+      // ]
     }, env))
   );
 }

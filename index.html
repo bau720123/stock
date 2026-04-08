@@ -13,309 +13,381 @@
 <link rel="apple-touch-icon" href="/stock/icon-192.png">
 <link rel="icon" href="/stock/favicon.ico" type="image/x-icon">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Noto+Sans+TC:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Noto+Sans+TC:wght@400;500;700&display=swap');
 
-  :root {
-    --bg:       #0a0e14;
-    --surface:  #111620;
-    --border:   #1e2736;
-    --muted:    #3a4a5c;
-    --text:     #c8d8e8;
-    --dim:      #5a7080;
-    --up:       #00c98a;
-    --down:     #ff4d6a;
-    --neutral:  #5a9eff;
-    --accent:   #f0b429;
-    --mono:     'IBM Plex Mono', monospace;
-    --sans:     'Noto Sans TC', sans-serif;
-  }
+:root {
+  --bg:       #0a0e14;
+  --surface:  #111620;
+  --border:   #1e2736;
+  --muted:    #3a4a5c;
+  --text:     #c8d8e8;
+  --dim:      #5a7080;
+  --up:       #00c98a;
+  --down:     #ff4d6a;
+  --neutral:  #5a9eff;
+  --accent:   #f0b429;
+  --mono:     'IBM Plex Mono', monospace;
+  --sans:     'Noto Sans TC', sans-serif;
+}
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--sans);
-    min-height: 100vh;
-    padding: 80px 16px 48px;
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  min-height: 100vh;
+  padding: 80px 16px 48px;
 
-    -webkit-touch-callout: none; /* 禁用iOS長按彈出菜單 */
-    -webkit-user-select: none;   /* Chrome/Safari/Android */
-    -ms-user-select: none;       /* IE10+/Edge */
-    user-select: none;           /* 標準語法 */
-  }
+  -webkit-touch-callout: none; /* 禁用iOS長按彈出菜單 */
+  -webkit-user-select: none;   /* Chrome/Safari/Android */
+  -ms-user-select: none;       /* IE10+/Edge */
+  user-select: none;           /* 標準語法 */
+}
 
-  /* 針對特定元素禁用，如圖片 */
-  img {
-    -webkit-touch-callout: none;
-  }
+/* 針對特定元素禁用，如圖片 */
+img {
+  -webkit-touch-callout: none;
+}
 
-  /* ── Header ── */
-  header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 100;
-    background: var(--bg);
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    padding: 16px 16px;
-    border-bottom: 1px solid var(--border);
-  }
-  header h1 {
-    font-family: var(--mono);
-    font-size: 1rem;
-    font-weight: 600;
-    letter-spacing: .12em;
-    text-transform: uppercase;
-    color: var(--accent);
-  }
-  #clock {
-    font-family: var(--mono);
-    font-size: .8rem;
-    color: var(--dim);
-    letter-spacing: .06em;
-  }
+/* ── Header ── */
+header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: var(--bg);
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 16px 16px;
+  border-bottom: 1px solid var(--border);
+}
+header h1 {
+  font-family: var(--mono);
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+#clock {
+  font-family: var(--mono);
+  font-size: .8rem;
+  color: var(--dim);
+  letter-spacing: .06em;
+}
 
-  /* ── Refresh button ── */
-  #refreshBtn, #subscribeUser {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: none;
-    border: 1px solid var(--muted);
-    /* color: var(--dim); */
-    color: aqua;
-    font-family: var(--mono);
-    font-size: .75rem;
-    letter-spacing: .08em;
-    padding: 6px 14px;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: border-color .2s, color .2s;
-    border-color: aqua;
-    background-color: black;
-  }
-  #refreshBtn:hover, #subscribeUser:hover { border-color: var(--accent); color: var(--accent); }
-  #refreshBtn.spinning svg { animation: spin .8s linear infinite; }
-  @keyframes spin { to { transform: rotate(360deg); } }
+/* ── Refresh button ── */
+#refreshBtn, #subscribeUser {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: 1px solid var(--muted);
+  /* color: var(--dim); */
+  color: aqua;
+  font-family: var(--mono);
+  font-size: .75rem;
+  letter-spacing: .08em;
+  padding: 6px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: border-color .2s, color .2s;
+  border-color: aqua;
+  background-color: black;
+}
+#refreshBtn:hover, #subscribeUser:hover { border-color: var(--accent); color: var(--accent); }
+#refreshBtn.spinning svg { animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
 
-  /* ── Grid layout ── */
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 16px;
-  }
+/* ── Grid layout ── */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+}
 
-  /* ── Card ── */
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 20px;
-    position: relative;
-    overflow: hidden;
-    opacity: 0;
-    transform: translateY(10px);
-    transition: opacity .4s ease, transform .4s ease, border-color .2s;
-  }
-  .card.loaded { opacity: 1; transform: translateY(0); }
-  .card:hover { border-color: var(--muted); }
+/* ── Card ── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity .4s ease, transform .4s ease, border-color .2s;
+}
+.card.loaded { opacity: 1; transform: translateY(0); }
+.card:hover { border-color: var(--muted); }
 
-  /* left accent bar */
-  .card::before {
-    content: '';
-    position: absolute;
-    left: 0; top: 16px; bottom: 16px;
-    width: 3px;
-    border-radius: 0 2px 2px 0;
-    background: var(--neutral);
-  }
-  /* .card.up::before   { background: var(--up); }
-  .card.down::before { background: var(--down); } */
-  .card.up::before   { background: var(--neutral); }
-  .card.down::before { background: var(--neutral); }
+/* left accent bar */
+.card::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 16px; bottom: 16px;
+  width: 3px;
+  border-radius: 0 2px 2px 0;
+  background: var(--neutral);
+}
+/* .card.up::before   { background: var(--up); }
+.card.down::before { background: var(--down); } */
+.card.up::before   { background: var(--neutral); }
+.card.down::before { background: var(--neutral); }
 
-  .card-title {
-    font-family: var(--mono);
-    font-size: .7rem;
-    letter-spacing: .14em;
-    text-transform: uppercase;
-    /* color: var(--dim); */
-    margin-bottom: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .card-title-text { flex: 1; }
+.card-title {
+  font-family: var(--mono);
+  font-size: .7rem;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  /* color: var(--dim); */
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.card-title-text { flex: 1; }
 
-  /* ── Rows inside card ── */
-  .row {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    padding: 5px 0;
-    border-bottom: 1px solid var(--border);
-  }
-  .row:last-child { border-bottom: none; }
-  .row-label {
-    font-size: .78rem;
-    color: var(--dim);
-  }
-  .row-value {
-    font-family: var(--mono);
-    font-size: .88rem;
-    color: var(--text);
-  }
-  .row-value.up   { color: var(--up); }
-  .row-value.down { color: var(--down); }
-  .row-value.accent { color: var(--accent); font-size: 1.1rem; font-weight: 600; }
-  
-  .group-header {
-    font-size: 0.82rem;
-    font-weight: 700;
-    /* color: var(--text); */
-    color: tan;
-    margin: 14px 0 6px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .group-header-title {
-    flex: 1;
-  }
-  .alert-settings-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: none;
-    border: 1px solid var(--muted);
-    border-radius: 4px;
-    /* color: var(--muted); */
-    color: ghostwhite;
-    cursor: pointer;
-    padding: 2px 5px;
-    transition: border-color .2s, color .2s;
-    line-height: 1;
-    cursor: pointer;
-  }
-  .alert-settings-btn:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-  }
-  .alert-settings-btn.active {
-    /* border-color: var(--up); */
-    /* color: var(--up); */
-    border-color: darkgray;
-    color: ghostwhite;
-  }
+/* ── Rows inside card ── */
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--border);
+}
+.row:last-child { border-bottom: none; }
+.row-label {
+  font-size: .78rem;
+  color: var(--dim);
+}
+.row-value {
+  font-family: var(--mono);
+  font-size: .88rem;
+  color: var(--text);
+}
+.row-value.up   { color: var(--up); }
+.row-value.down { color: var(--down); }
+.row-value.accent { color: var(--accent); font-size: 1.1rem; font-weight: 600; }
 
-  /* ── Section label ── */
-  .section-label {
-    font-family: var(--mono);
-    font-size: .65rem;
-    letter-spacing: .16em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin: 20px 0 10px;
-  }
+.group-header {
+  font-size: 0.82rem;
+  font-weight: 700;
+  /* color: var(--text); */
+  color: tan;
+  margin: 14px 0 6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.group-header-title {
+  flex: 1;
+}
+.alert-settings-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: 1px solid var(--muted);
+  border-radius: 4px;
+  /* color: var(--muted); */
+  color: ghostwhite;
+  cursor: pointer;
+  padding: 2px 5px;
+  transition: border-color .2s, color .2s;
+  line-height: 1;
+  cursor: pointer;
+}
+.alert-settings-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.alert-settings-btn.active {
+  /* border-color: var(--up); */
+  /* color: var(--up); */
+  border-color: darkgray;
+  color: ghostwhite;
+}
 
-  /* ── Loading skeleton ── */
-  .skeleton {
-    height: 14px;
-    background: linear-gradient(90deg, var(--border) 25%, var(--muted) 50%, var(--border) 75%);
-    background-size: 200% 100%;
-    animation: shimmer 1.2s infinite;
-    border-radius: 3px;
-    margin: 8px 0;
-  }
-  @keyframes shimmer { to { background-position: -200% 0; } }
+/* ── Section label ── */
+.section-label {
+  font-family: var(--mono);
+  font-size: .65rem;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 20px 0 10px;
+}
 
-  /* ── Error state ── */
-  .error-text {
-    font-family: var(--mono);
-    font-size: 1rem;
-    color: var(--down);
-    opacity: .7;
-  }
+/* ── Loading skeleton ── */
+.skeleton {
+  height: 14px;
+  background: linear-gradient(90deg, var(--border) 25%, var(--muted) 50%, var(--border) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.2s infinite;
+  border-radius: 3px;
+  margin: 8px 0;
+}
+@keyframes shimmer { to { background-position: -200% 0; } }
 
-  /* ── Update time ── */
-  .update-time {
-    font-family: var(--mono);
-    font-size: .68rem;
-    color: var(--muted);
-    margin-top: 12px;
-    text-align: right;
-  }
+/* ── Error state ── */
+.error-text {
+  font-family: var(--mono);
+  font-size: 1rem;
+  color: var(--down);
+  opacity: .7;
+}
 
-  /* ── CNBC card spans full width on wide screens ── */
-  .card-wide {
-    grid-column: 1 / -1;
-  }
-  @media (max-width: 680px) {
-    .card-wide { grid-column: auto; }
-  }
+/* ── Update time ── */
+.update-time {
+  font-family: var(--mono);
+  font-size: .68rem;
+  color: var(--muted);
+  margin-top: 12px;
+  text-align: right;
+}
 
-  /* ── Slide Menu ── */
-  #menuOverlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 200;
-  }
-  #menuOverlay.active { display: block; }
+/* ── CNBC card spans full width on wide screens ── */
+.card-wide {
+  grid-column: 1 / -1;
+}
+@media (max-width: 680px) {
+  .card-wide { grid-column: auto; }
+}
 
-  #slideMenu {
-    position: fixed;
-    top: 0;
-    left: -280px;
-    width: 280px;
-    height: 100vh;
-    background: var(--surface);
-    border-right: 1px solid var(--border);
-    z-index: 300;
-    transition: left .3s ease;
-    overflow-y: auto;
-  }
-  #slideMenu.active { left: 0; }
+/* ── Slide Menu ── */
+#menuOverlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 200;
+}
+#menuOverlay.active { display: block; }
 
-  #menuHeader {
-    font-family: var(--mono);
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--accent);
-    padding: 20px 20px 16px;
-    border-bottom: 1px solid var(--border);
-    letter-spacing: .12em;
-  }
+#slideMenu {
+  position: fixed;
+  top: 0;
+  left: -280px;
+  width: 280px;
+  height: 100vh;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  z-index: 300;
+  transition: left .3s ease;
+  overflow-y: auto;
+}
+#slideMenu.active { left: 0; }
 
-  #menuList {
-    list-style: none;
-    padding: 12px 0;
-  }
-  #menuList li a {
-    display: block;
-    padding: 12px 20px;
-    color: var(--text);
-    text-decoration: none;
-    font-size: .88rem;
-    transition: background .15s, color .15s;
-  }
-  #menuList li a:hover {
-    background: var(--border);
-    color: var(--accent);
-  }
-  /* 側邊欄選單的高亮樣式 */
-  #menuList li a.active {
-      color: var(--accent) !important;
-      /* font-weight: 600; */
-      /* 選擇性：加上一點左邊的邊框線增加層次感 */
-      /* border-left: 3px solid var(--accent);
-      padding-left: 12px; */
-  }
+#menuHeader {
+  font-family: var(--mono);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--accent);
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid var(--border);
+  letter-spacing: .12em;
+}
+
+#menuList {
+  list-style: none;
+  padding: 12px 0;
+}
+#menuList li a {
+  display: block;
+  padding: 12px 20px;
+  color: var(--text);
+  text-decoration: none;
+  font-size: .88rem;
+  transition: background .15s, color .15s;
+}
+#menuList li a:hover {
+  background: var(--border);
+  color: var(--accent);
+}
+/* 側邊欄選單的高亮樣式 */
+#menuList li a.active {
+    color: var(--accent) !important;
+    /* font-weight: 600; */
+    /* 選擇性：加上一點左邊的邊框線增加層次感 */
+    /* border-left: 3px solid var(--accent);
+    padding-left: 12px; */
+}
+
+/* 月曆容器 */
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  margin-top: 10px;
+}
+.calendar-day-head {
+  background: var(--surface);
+  color: var(--dim);
+  font-size: 0.65rem;
+  text-align: center;
+  padding: 8px 0;
+  font-family: var(--mono);
+}
+.calendar-cell {
+  background: var(--bg);
+  min-height: 80px;
+  padding: 4px;
+  position: relative;
+}
+.calendar-cell.today {
+  background: #1a2130;
+}
+.calendar-date-num {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--dim);
+  margin-bottom: 4px;
+}
+.calendar-cell.today .calendar-date-num {
+  color: var(--accent);
+  font-weight: bold;
+}
+/* 事件小標籤 */
+.calendar-event {
+  font-size: 0.6rem;
+  line-height: 1.2;
+  padding: 2px 4px;
+  border-radius: 2px;
+  margin-bottom: 2px;
+  word-break: break-all;
+  cursor: pointer;
+}
+.calendar-event:hover {
+  filter: brightness(1.2);
+}
+/* 手機版縮小高度 */
+@media (max-width: 600px) {
+  .calendar-cell { min-height: 60px; }
+  .calendar-event { font-size: 0.55rem; padding: 1px 2px; }
+}
+.calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  font-family: var(--mono);
+}
+.calendar-nav-btn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 4px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+.calendar-nav-btn:hover { border-color: var(--accent); color: var(--accent); }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
@@ -334,8 +406,8 @@
     <li><a onclick="closeMenu()" href="?card_type=market-sentiment">🌡️ 市場情緒</a></li>
     <li><a onclick="closeMenu()" href="?card_type=my-stock">⭐ 我的自選股票</a></li>
     <li><a onclick="closeMenu()" href="?card_type=war">🔥 美伊戰爭消息</a></li>
-    <li><a onclick="closeMenu()" href="?card_type=all">🌐 全類別顯示</a></li>
     <li><a onclick="closeMenu()" href="?card_type=america-calendar">📅 美股行事曆</a></li>
+    <li><a onclick="closeMenu()" href="?card_type=all">🌐 全類別顯示</a></li>
     <li><a style="cursor:pointer;" onclick="showInfo('一個以純前端技術為核心，搭配 Cloudflare 無伺服器架構，實現即時金融市場報價、PWA 安裝與主動推播通知的個人投資輔助工具。');">ℹ️ 關於本軟體</a></li>
     <!-- <li><a href="#">⚙️ 設定</a></li> -->
   </ul>
@@ -832,6 +904,7 @@ async function subscribeUser() {
     // iOS 偵測與提醒
     const isStandalone = window.navigator.standalone === true;
     if (!isStandalone && /iPhone|iPad|iPod/.test(navigator.userAgent)) {
+      console.log(navigator.userAgent);
       const replyMessage = 'iOS 必須先「加入主畫面」成為 PWA 才能開啟通知！';
       showSweetAlert('error', '發生錯誤', replyMessage);
       await writeLogs('ERROR', replyMessage);
@@ -1099,12 +1172,12 @@ window.onload = loadAll;
 
 // 台股市場概況
 async function loadTw() {
-  const [taifexDay, taifexNight, taifexTsmc, /*twn, */twncon, tsmc] = await Promise.all([
+  const [taifexDay, taifexNight, taifexTsmc, twn, /*twncon, */tsmc] = await Promise.all([
     fetch(WORKER + '/taifex/2/TX046').then(r => r.json()), // 台股期貨日盤
     fetch(WORKER + '/taifex/12/TX046').then(r => r.json()), // 台股期貨夜盤
     fetch(WORKER + '/taifex/12/CDF046').then(r => r.json()), // 台積電期貨夜盤
-    // fetch(WORKER + '/twn').then(r => r.json()), // 富台指
-    fetch(WORKER + '/twncon').then(r => r.json()), // 富台指
+    fetch(WORKER + '/twn').then(r => r.json()), // 富台指
+    // fetch(WORKER + '/twncon').then(r => r.json()), // 富台指
     fetch(WORKER + '/stock/2330').then(r => r.json()), // 台積電現貨日盤
   ]);
 
@@ -1147,34 +1220,34 @@ async function loadTw() {
   }
 
   // 【富台指】
-  // html += groupHeader('【富台指】', '', '「富台指」全名為「富時台灣指數期貨」（FTSE Taiwan Index Futures），是新加坡交易所（SGX）與富時羅素（FTSE Russell）合作推出的金融衍生工具。它以美元計價，因 MSCI 摩台指移出新加坡而誕生，成為國際投資人衡量台股表現、避險及在台股休市時預估開盤方向的核心工具。');
-  // if (twn.success) {
-  //   const cls = changeClass(twn.changeText, 1);
-  //   const formattedTime = twn.updateTime.replace(/\./g, '-');
-  //   html += row('開盤價', twn.open.toFixed(0));
-  //   html += row('最高價', twn.high.toFixed(0));
-  //   html += row('最低價', twn.low.toFixed(0));
-  //   html += row('漲跌', twn.changeText, cls);
-  //   html += row('成交價', twn.current.toFixed(2), 'accent');
-  //   html += row('更新時間', formattedTime);
-  // } else {
-  //   html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
-  // }
-
-  // 【富台指】
   html += groupHeader('【富台指】', '', '「富台指」全名為「富時台灣指數期貨」（FTSE Taiwan Index Futures），是新加坡交易所（SGX）與富時羅素（FTSE Russell）合作推出的金融衍生工具。它以美元計價，因 MSCI 摩台指移出新加坡而誕生，成為國際投資人衡量台股表現、避險及在台股休市時預估開盤方向的核心工具。');
-  if (twncon.success) {
-    const cls = changeClass(twncon.updown, 1);
-    const formattedTime = twncon.updateTime.replace(/\./g, '-');
-    html += row('開盤價', twncon.open.toFixed(0));
-    html += row('最高價', twncon.high.toFixed(0));
-    html += row('最低價', twncon.low.toFixed(0));
-    html += row('漲跌', twncon.updown, cls);
-    html += row('成交價', twncon.price.toFixed(2), 'accent');
+  if (twn.success) {
+    const cls = changeClass(twn.changeText, 1);
+    const formattedTime = twn.updateTime.replace(/\./g, '-');
+    html += row('開盤價', twn.open.toFixed(0));
+    html += row('最高價', twn.high.toFixed(0));
+    html += row('最低價', twn.low.toFixed(0));
+    html += row('漲跌', twn.changeText, cls);
+    html += row('成交價', twn.current.toFixed(2), 'accent');
     html += row('更新時間', formattedTime);
   } else {
     html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
   }
+
+  // 【富台指】
+  // html += groupHeader('【富台指】', '', '「富台指」全名為「富時台灣指數期貨」（FTSE Taiwan Index Futures），是新加坡交易所（SGX）與富時羅素（FTSE Russell）合作推出的金融衍生工具。它以美元計價，因 MSCI 摩台指移出新加坡而誕生，成為國際投資人衡量台股表現、避險及在台股休市時預估開盤方向的核心工具。');
+  // if (twncon.success) {
+  //   const cls = changeClass(twncon.updown, 1);
+  //   const formattedTime = twncon.updateTime.replace(/\./g, '-');
+  //   html += row('開盤價', twncon.open.toFixed(0));
+  //   html += row('最高價', twncon.high.toFixed(0));
+  //   html += row('最低價', twncon.low.toFixed(0));
+  //   html += row('漲跌', twncon.updown, cls);
+  //   html += row('成交價', twncon.price.toFixed(2), 'accent');
+  //   html += row('更新時間', formattedTime);
+  // } else {
+  //   html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
+  // }
 
   // 【台積電現貨日盤】
   html += groupHeader(`【${tsmc.name || '未定義'}現貨日盤】`, 'tsmc', '台積電（TSMC）是全球最大的專業積體電路（IC）製造服務公司，總部位於臺灣新竹科學園區，1987年由張忠謀創立。台積電首創「純晶圓代工」模式，不設計自有品牌產品，專注為Apple、NVIDIA等科技大廠代工生產領先技術的晶片，在先進製程（如3奈米、2奈米）上具統治性地位，被譽為「護國神山」。');
@@ -1834,11 +1907,111 @@ async function loadWar() {
 }
 
 // 美股行事曆
-async function loadAmericaCalendar() {
-  let html = `<div class="card-title">美股行事曆</div>`;
+// async function loadAmericaCalendar() {
+//   let html = `<div class="card-title">美股行事曆</div>`;
 
-  setCard('card-america-calendar', 0, html);
+//   setCard('card-america-calendar', 0, html);
+// }
+let calendarDataCache = null; // 儲存從 Worker 拿到的所有資料
+let currentCalView = { year: new Date().getFullYear(), month: new Date().getMonth() };
+
+async function loadAmericaCalendar() {
+  const cardId = 'card-america-calendar';
+  const container = document.getElementById(cardId);
+  
+  // 只有第一次加載或點擊重新整理時才 Fetch
+  if (!calendarDataCache) {
+    try {
+      const res = await fetch(WORKER + '/america-calendar');
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error);
+      calendarDataCache = data.items;
+    } catch (e) {
+      container.innerHTML = `<div class="card-title">美股行事曆</div><div class="error-text">載入失敗：${e.message}</div>`;
+      return;
+    }
+  }
+
+  renderCalendarView();
 }
+
+// 負責渲染特定月份的 HTML
+function renderCalendarView() {
+  const { year, month } = currentCalView;
+  const cardId = 'card-america-calendar';
+  
+  const eventMap = {};
+  calendarDataCache.forEach(item => {
+    const dateKey = item.id.substring(0, 8);
+    if (!eventMap[dateKey]) eventMap[dateKey] = [];
+    eventMap[dateKey].push(item);
+  });
+
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const monthName = new Intl.DateTimeFormat(navigator.language, { month: 'long' }).format(new Date(year, month));
+
+  let html = `
+    <div class="card-title">美股行事曆</div>
+    <div class="calendar-header">
+      <button class="calendar-nav-btn" onclick="changeMonth(-1)">◀</button>
+      <div style="color:var(--accent);">${year} / ${String(month + 1).padStart(2, '0')}（${monthName}）</div>
+      <button class="calendar-nav-btn" onclick="changeMonth(1)">▶</button>
+    </div>
+    <div class="calendar-grid">
+      ${['日', '一', '二', '三', '四', '五', '六'].map(d => `<div class="calendar-day-head">${d}</div>`).join('')}
+  `;
+
+  // 填充空白
+  for (let i = 0; i < firstDay; i++) html += `<div class="calendar-cell" style="opacity:0.1;"></div>`;
+
+  // 填充日期
+  const todayStr = new Date().toISOString().split('T')[0].replace(/-/g, '');
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dateKey = `${year}${String(month + 1).padStart(2, '0')}${String(day).padStart(2, '0')}`;
+    const isToday = dateKey === todayStr;
+    const dayEvents = eventMap[dateKey] || [];
+    
+    html += `
+      <div class="calendar-cell ${isToday ? 'today' : ''}">
+        <div class="calendar-date-num">${day}</div>
+        ${dayEvents.map(ev => {
+          // 💡 這裡已經可以使用 ev.indicators 陣列了
+          return ev.indicators.map(ind => `
+            <div class="calendar-event" 
+                 style="background: ${ev.textColor}15; color: ${ev.textColor}; border-left: 2px solid ${ev.textColor}"
+                 onclick="gotoMoneyDJ('${ind.code}')">
+              ${ev.type === 'market' ? '休' : ''}${ind.name.substring(0, 6)}
+            </div>
+          `).join('');
+        }).join('')}
+      </div>`;
+  }
+  
+  html += `</div>`;
+  setCard(cardId, 0, html, 'card-wide');
+}
+
+// 切換月份函式
+window.changeMonth = function(offset) {
+  let newMonth = currentCalView.month + offset;
+  let newYear = currentCalView.year;
+
+  if (newMonth < 0) { newMonth = 11; newYear--; }
+  else if (newMonth > 11) { newMonth = 0; newYear++; }
+
+  currentCalView = { year: newYear, month: newMonth };
+  renderCalendarView();
+};
+
+function gotoMoneyDJ(code = '') {
+  if (code != '') {
+    location.href = "https://www.moneydj.com/funddj/yl/BFRK01.djhtm?a=" + code;
+  } else {
+    // 
+  } 
+}
+
 
 const REFRESH_INTERVAL = 300; // 秒，改這個就通吃
 let _countdownTimer = null;
