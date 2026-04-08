@@ -904,7 +904,6 @@ async function subscribeUser() {
     // iOS 偵測與提醒
     const isStandalone = window.navigator.standalone === true;
     if (!isStandalone && /iPhone|iPad|iPod/.test(navigator.userAgent)) {
-      console.log(navigator.userAgent);
       const replyMessage = 'iOS 必須先「加入主畫面」成為 PWA 才能開啟通知！';
       showSweetAlert('error', '發生錯誤', replyMessage);
       await writeLogs('ERROR', replyMessage);
