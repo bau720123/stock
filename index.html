@@ -545,7 +545,7 @@ async function openMyStockSettings() {
           maxlength="10"
           placeholder="股票代號"
           value="${s.symbol}"
-          style="width:6em; background:#1a2130; border:1px solid #2e3f52; border-radius:4px; color:#c8d8e8; font-size:.85rem; padding:6px 8px; outline:none; font-family:var(--mono);"
+          style="width:7em; background:#1a2130; border:1px solid #2e3f52; border-radius:4px; color:#c8d8e8; font-size:.85rem; padding:6px 8px; outline:none; font-family:var(--mono);"
         />
         <input
           id="mystock-name-${i}"
@@ -657,7 +657,13 @@ async function openMyStockSettings() {
     showCancelButton: true,
     cancelButtonText: '稍後再說',
     cancelButtonColor: '#3a4a5c',
-  }).then(r => { if (r.isConfirmed) location.reload(); });
+  }).then(r => {
+    if (r.isConfirmed) {
+      // MY_STOCKS = loadMyStocksList(); // 更新全域變數
+      // loadMyStock();
+      location.reload();
+    }
+  });
 }
 
 async function showInfo(wording = '') {
@@ -1110,7 +1116,7 @@ async function loadTw() {
   }
 
   // 【台股期貨夜盤】
-  html += groupHeader('【台股期貨夜盤】', '', '台股期貨（簡稱「台指期」）是以「台灣加權股價指數」為標的物的期貨契約，讓投資人透過保證金制度，以小博大操作台股漲跌。具高槓桿、多空靈活、交易成本低等特性，熱門商品包括大台指、小台指、微台指，結算日為每月第三個星期三。<br><br>交易時間：每週一至週五的下午14:00至隔日凌晨05:00。');
+  html += groupHeader('【台股期貨夜盤】', '', '台股期貨（簡稱「台指期」）是以「台灣加權股價指數」為標的物的期貨契約，讓投資人透過保證金制度，以小博大操作台股漲跌。具高槓桿、多空靈活、交易成本低等特性，熱門商品包括大台指、小台指、微台指，結算日為每月第三個星期三。<br><br>交易時間：每週一至週五的下午15:00至隔日凌晨05:00。');
   if (taifexNight.success && taifexNight.price > 0) {
     const sign = taifexNight.updown > 0 ? '▲' : taifexNight.updown < 0 ? '▼' : '';
     var cls = 'up';
