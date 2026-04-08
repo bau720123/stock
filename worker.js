@@ -22,7 +22,11 @@ export default {
     const path = new URL(request.url).pathname;
 
     if (path === "/fitx")    return await fetchHiStock("stocktop2017", "FITX", "指數", "成交量(口)");
-    if (path === "/twn")     return await fetchHiStock("stocktop2017", "TWN", "指數", "成交量(口)");
+    if (path === "/twn")     return await fetchHiStock("stocktop2017", "TWN", "指數", "成交量(口)"); // 富台指
+
+    // https://invest.cnyes.com/futures/GF/TWNCON
+    if (path === "/twncon")     return await fetchCnyesTwn(); // 富台指
+
     // if (path === "/brent")    return await fetchHiStock("stocktop2017_Global", "BRENTOIL", "股價", "成交量");
     // if (path === "/brent_stockq")   return await fetchBrent();
 
@@ -36,7 +40,13 @@ export default {
 
     if (path === "/debug-sina") return await debugSina();
 
-    if (path === "/taifex")  return await fetchTaifex();
+    if (path.startsWith("/taifex/")) {
+      const parts = path.split("/"); // ["", "taifex", "12", "CDF046"]
+      const objId = parts[2];
+      const contract = parts[3];
+      if (objId && contract) return await fetchTaifex(objId, contract);
+    }
+
     if (path === "/cnbc")    return await fetchCnbc();
     if (path === "/rh")      return await fetchRobinHood();
     if (path === "/subscribe") return await handleSubscribe(request, env);
@@ -90,19 +100,26 @@ async function debugSina() {
   });
 }
 
-// ── HiStock（台指期 / 富台指）──────────────────────────────
+// HiStock（台指期 / 富台指）
 async function fetchHiStock(m, no, current_title, volume_title) {
   try {
-    const res = await fetch("https://histock.tw/stock/module/function.aspx", {
-      method: "POST",
-      headers: {
-        "User-Agent": UA,
-        "Origin": "https://histock.tw",
-        "Referer": "https://histock.tw/",
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: new URLSearchParams({ m, no })
-    });
+    const timeout = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error("Request timeout")), 3000)
+    );
+
+    const res = await Promise.race([
+      fetch("https://histock.tw/stock/module/function.aspx", {
+        method: "POST",
+        headers: {
+          "User-Agent": UA,
+          "Origin": "https://histock.tw",
+          "Referer": "https://histock.tw/",
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: new URLSearchParams({ m, no })
+      }),
+      timeout
+    ]);
     const html = await res.text();
 
     const data = {};
@@ -131,7 +148,51 @@ async function fetchHiStock(m, no, current_title, volume_title) {
   }
 }
 
-// ── StockQ（布蘭特原油）────────────────────────────────────
+// 鉅亨網（富台指）
+async function fetchCnyesTwn() {
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 5000);
+
+    const res = await fetch(
+      "https://ws.api.cnyes.com/ws/api/v1/quote/quotes/GF:TWNCON:FUTURES?column=G,QUOTES",
+      {
+        signal: controller.signal,
+        headers: {
+          "User-Agent": UA,
+          "Referer": "https://invest.cnyes.com/",
+          "Origin": "https://invest.cnyes.com",
+        }
+      }
+    );
+    clearTimeout(timer);
+
+    const json_data = await res.json();
+    const item = json_data?.data?.[0];
+    if (!item) return json({ success: false, error: "no data" });
+
+    const ts = item["200007"];
+    const updateTime = ts
+      ? new Date((ts + 8 * 3600) * 1000).toISOString().replace('T', ' ').substring(0, 19)
+      : "未知";
+
+    return json({
+      success: true,
+      name:       item["200009"] || "近月富台指",
+      price:      toFloat(item["6"]),
+      updown:     toFloat(item["11"]),
+      high:       toFloat(item["12"]),
+      low:        toFloat(item["13"]),
+      open:       toFloat(item["19"]),
+      volume:     toInt(item["800001"]),
+      updateTime,
+    });
+  } catch (e) {
+    return json({ success: false, error: e.message }, 500);
+  }
+}
+
+// StockQ（布蘭特原油）
 async function fetchBrent() {
   try {
     const res = await fetch("https://www.stockq.org/commodity/FUTRBOIL.php", {
@@ -257,15 +318,15 @@ async function fetchSina(list) {
   }
 }
 
-// ── TaiFex（台積電期貨）────────────────────────────────────
-async function fetchTaifex() {
+// 台灣期貨交易所
+async function fetchTaifex(objId, contract) {
   try {
-    const res = await fetch("https://www.taifex.com.tw/cht/quotesApi/getQuotes?objId=12", {
+    const res = await fetch("https://www.taifex.com.tw/cht/quotesApi/getQuotes?objId=" + objId, {
       headers: { "User-Agent": UA, "Accept": "application/json" }
     });
     const data = await res.json();
 
-    const item = data.find(d => d.contractName === "台積電期貨");
+    const item = data.find(d => d.contract === contract);
 
     // 找不到時回傳空資料（資料從缺時正常現象）
     if (!item) {
@@ -900,18 +961,22 @@ async function handleCron(env) {
   const list = JSON.parse(existing);
 
   // 平行抓取所有資料
-  const [taifexRes, fitxRes, twnRes, brentRes, vixRes, tsmcStock] = await Promise.all([
-    fetchTaifex(),
-    fetchHiStock("stocktop2017", "FITX", "指數", "成交量(口)"),
-    fetchHiStock("stocktop2017", "TWN", "指數", "成交量(口)"),
+  const [taifexDay, taifexNight, taifexTsmc, /*twnRes, */twnConRes, brentRes, vixRes, tsmcStock] = await Promise.all([
+    fetchTaifex(2, "TX046"), // 台股期貨日盤
+    fetchTaifex(12, "TX046"), // 台股期貨夜盤
+    fetchTaifex(12, "CDF046"), // 台積電期貨夜盤
+    // fetchHiStock("stocktop2017", "TWN", "指數", "成交量(口)"),
+    fetchCnyesTwn(), // 富台指
     fetchSina("hf_OIL"),
     fetchSina("znb_VIX"),
     fetchFugleQuote("2330", env),
   ]);
 
-  const taifex = await taifexRes.json();
-  const fitx   = await fitxRes.json();
-  const twn    = await twnRes.json();
+  const taifem_day = await taifexDay.json();
+  const taifem_night = await taifexNight.json();
+  const taifem_tsmc = await taifexTsmc.json();
+  // const twn    = await twnRes.json();
+  const twncon    = await twnConRes.json();
   const brent  = await brentRes.json();
   const vix    = await vixRes.json();
   const tsmc   = await tsmcStock.json();
@@ -919,17 +984,27 @@ async function handleCron(env) {
   // 組合摘要文案
   const lines = [];
 
-  if (taifex.success && taifex.price > 0) {
-    const sign = taifex.updown > 0 ? '▲' : taifex.updown < 0 ? '▼' : '';
-    lines.push(`台積電期貨 ${taifex.price.toFixed(0)} (${sign}${Math.abs(taifex.updown).toFixed(0)})`);
+  if (taifem_day.success && taifem_day.price > 0) {
+    const sign = taifem_day.updown > 0 ? '▲' : taifem_day.updown < 0 ? '▼' : '';
+    lines.push(`台股期貨日盤 ${taifem_day.price.toFixed(0)} (${sign}${Math.abs(taifem_day.updown).toFixed(0)})`);
   }
 
-  if (fitx.success) {
-    lines.push(`台股期貨漲跌 ${fitx.changeText}`);
+  if (taifem_night.success && taifem_night.price > 0) {
+    const sign = taifem_night.updown > 0 ? '▲' : taifem_night.updown < 0 ? '▼' : '';
+    lines.push(`台股期貨夜盤 ${taifem_night.price.toFixed(0)} (${sign}${Math.abs(taifem_night.updown).toFixed(0)})`);
   }
 
-  if (twn.success) {
-    lines.push(`富台指漲跌 ${twn.changeText}`);
+  if (taifem_tsmc.success && taifem_tsmc.price > 0) {
+    const sign = taifem_tsmc.updown > 0 ? '▲' : taifem_tsmc.updown < 0 ? '▼' : '';
+    lines.push(`台積電期貨夜盤 ${taifem_tsmc.price.toFixed(0)} (${sign}${Math.abs(taifem_tsmc.updown).toFixed(0)})`);
+  }
+
+  // if (twn.success) {
+  //   lines.push(`富台指漲跌 ${twn.changeText}`);
+  // }
+
+  if (twncon.success) {
+    lines.push(`富台指漲跌 ${twn.updown}`);
   }
 
   if (brent.success) {
