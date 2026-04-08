@@ -45,10 +45,10 @@ self.addEventListener('push', event => {
     renotify: true,
     silent:   false,
     vibrate:  [200, 100, 200],
-    // actions:  data.actions || [
-    //   { action: 'view',    title: '查看詳情', icon: '/stock/icon-192.png' },
-    //   { action: 'dismiss', title: '忽略', icon: '/stock/icon-192.png' },
-    // ],
+    actions:  data.actions || [
+      { action: 'view',    title: '查看詳情', icon: '/stock/icon-192.png' },
+      { action: 'dismiss', title: '忽略', icon: '/stock/icon-192.png' },
+    ],
     data: { url: data.url || '/stock/index.html' },
   };
 
