@@ -1128,7 +1128,7 @@ async function loadTw() {
   }
 
   // 【台積電期貨夜盤】
-  html += groupHeader('【台積電期貨夜盤】', '', '台積電期貨（股票期貨）是由台灣期貨交易所推出的金融衍生品，標的為台積電（2330）股票。具備低保證金（高槓桿）、多空雙向操作、交易稅低等特性，一口標準期貨代表2張台積電股票（2,000股）。此外，還有小台積電期貨（100股）供資金較小投資人選擇，且具備夜盤交易功能，可靈活應對ADR漲跌。');
+  html += groupHeader('【台積電期貨夜盤】', '', '台積電期貨（股票期貨）是由台灣期貨交易所推出的金融衍生品，標的為台積電（2330）股票。具備低保證金（高槓桿）、多空雙向操作、交易稅低等特性，一口標準期貨代表2張台積電股票（2,000股）。此外，還有小台積電期貨（100股）供資金較小投資人選擇，且具備夜盤交易功能，可靈活應對ADR漲跌。<br><br>交易時間：每週一至週五的下午17:25至隔日凌晨05:00。');
   if (taifexTsmc.success && taifexTsmc.price > 0) {
     const sign = taifexTsmc.updown > 0 ? '▲' : taifexTsmc.updown < 0 ? '▼' : '';
     var cls = 'up';
@@ -1136,7 +1136,7 @@ async function loadTw() {
     html += row('現價', taifexTsmc.price.toFixed(1), 'accent');
     html += row('漲跌', sign + Math.abs(taifexTsmc.updown).toFixed(0), cls);
   } else {
-    html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
+    html += `<div class="error-text">暫時無法取得資料，請於 17:25 之後再進行嘗試</div>`;
   }
 
   // 【富台指】
