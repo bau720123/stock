@@ -880,10 +880,10 @@ async function sendNotification(title, body, url = '/stock/index.html') {
     renotify: true,       // tag 相同時是否還要震動提醒
     silent: false,        // 是否靜音
     vibrate: [200, 100, 200], // 震動模式（Android）
-    actions: isAndroid ? [] : [ // 通知上的快捷按鈕
-      { action: 'view', title: '查看詳情' },
-      { action: 'dismiss', title: '忽略' },
-    ],
+    // actions: isAndroid ? [] : [ // 通知上的快捷按鈕
+    //   { action: 'view', title: '查看詳情' },
+    //   { action: 'dismiss', title: '忽略' },
+    // ],
     data: { url: url }, // 把目標網址存進去
   });
 }
