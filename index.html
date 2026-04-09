@@ -1822,6 +1822,15 @@ function warMarkRead(link, source) {
   const arr = [...set].slice(-500);
   localStorage.setItem(WAR_READ_KEY, JSON.stringify(arr));
 
+  // 即時更新對應的 DOM，將該新聞標記為已讀（文字改為「已讀」，標題變淡色）
+  const row = document.querySelector(`[data-war-link="${CSS.escape(link)}"]`);
+  if (row) {
+    const badge = row.querySelector('.war-badge');
+    const title = row.querySelector('.war-title');
+    if (badge) badge.textContent = '已讀';
+    if (title) title.style.color = 'var(--dim)';
+  }
+
   if (source && source.includes('自由時報')) {
     Swal.fire({
       grow: "fullscreen",
@@ -1831,7 +1840,7 @@ function warMarkRead(link, source) {
     });
   } else {
     location.href = link;
-  } 
+  }
 }
 
 // 美伊戰爭消息
@@ -1864,15 +1873,15 @@ async function loadWar() {
         }
 
         html += `
-          <div style="padding: 10px 0; border-bottom: 2px solid var(--border);">
+          <div data-war-link="${item.link ? item.link.replace(/"/g, '&quot;') : ''}" style="padding: 10px 0; border-bottom: 2px solid var(--border);">
             <div style="display:flex; align-items:baseline; gap:6px; margin-bottom:5px;">
-              <span style="font-family:var(--mono); font-size:.62rem; color:white; background:var(--muted); border-radius:3px; padding:1px 5px; flex-shrink:0;">${isRead ? '已讀' : '未讀'}</span>
-              <div style="font-size: .88rem; color: ${isRead ? 'var(--dim)' : 'var(--text)'}; line-height: 1.5;">
+              <span class="war-badge" style="font-family:var(--mono); font-size:1rem; color:white; background:var(--muted); border-radius:3px; padding:1px 5px; flex-shrink:0;">${isRead ? '已讀' : '未讀'}</span>
+              <div class="war-title" style="font-size: 1.2rem; color: ${isRead ? 'var(--dim)' : 'var(--text)'}; line-height: 1.5;">
                 ${item.title || '（無標題）'}
               </div>
             </div>
             ${item.desc ? `
-            <div style="font-size: .78rem; color: var(--dim); line-height: 1.55; margin-bottom: 6px;">
+            <div style="font-size: .88rem; color: var(--dim); line-height: 1.55; margin-bottom: 6px;">
               ${item.desc}
             </div>` : ''}
             <div style="display:flex; flex-wrap:wrap; gap: 6px 16px; align-items:center;">
