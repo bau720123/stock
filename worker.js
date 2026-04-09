@@ -69,7 +69,26 @@ export default {
 
     if (path === "/news-rss")  return await fetchNewsRss();
 
-    if (path === "/america-calendar") return await fetchAmericaCalendar();
+    if (path === "/america-calendar") return await fetchAmericaCalendar(env);
+
+    if (path.startsWith("/generateCustomEventsFinnhub")) {
+      try {
+        const parts = path.split("/").filter(Boolean);
+        const today = new Date().toISOString().split('T')[0];
+        const from = parts[1] || today;
+        const to   = parts[2] || today;
+
+        const result = await generateCustomEventsFinnhub(from, to, env);
+        return new Response(JSON.stringify({ success: true, from, to, count: result.length, data: result }), {
+          headers: { "Content-Type": "application/json" }
+        });
+      } catch (e) {
+        return new Response(JSON.stringify({ success: false, error: e.message, stack: e.stack }), {
+          status: 500,
+          headers: { "Content-Type": "application/json" }
+        });
+      }
+    }
 
     return json({ error: "unknown path" }, 404);
   },
@@ -948,7 +967,7 @@ async function fetchNewsRss() {
 }
 
 // 美股行事曆
-async function fetchAmericaCalendar() {
+async function fetchAmericaCalendar(env) {
   try {
     const now = new Date();
     const twTime = new Date(now.getTime() + 8 * 3600 * 1000);
@@ -997,9 +1016,15 @@ async function fetchAmericaCalendar() {
 
     // 3. 注入「特定自訂事件」邏輯
     const customEvents = generateCustomEvents(currentYear);
-    
-    // 合併並排序 (依日期 ID)
-    const finalData = [...processed, ...customEvents].sort((a, b) => a.id.localeCompare(b.id));
+
+    // 4. 取得 Finnhub 財報資料（只查近 14 天，避免超出免費方案限制）
+    const finnhubFrom = twTime.toISOString().split('T')[0]; // 今天
+    const finnhubTo = new Date(twTime.getTime() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]; // +14天
+    const earningsEvents = await generateCustomEventsFinnhub(finnhubFrom, finnhubTo, env);
+
+    // 5. 合併所有來源並排序 (依日期 ID)：MoneyDJ + 週期性事件 + 手動事件 + Finnhub
+    const finalData = [...processed, ...customEvents, ...earningsEvents]
+      .sort((a, b) => a.id.localeCompare(b.id));
 
     return json({ success: true, items: finalData });
   } catch (e) {
@@ -1044,13 +1069,30 @@ function generateCustomEvents(year) {
       events.push(createEventObj(msciDate, "MSCI", "MSCI 指數調整生效日", "#16a085"));
     }
   }
+
+  // 自定義事件
+  events.push(createEventObj(
+    new Date("2026-04-10"), 
+    "TSM",
+    "台積電下午1點半公布3月份業績（不知道是否會受到美伊戰爭影響）", 
+    "#3498db", 
+    "001"
+  ));
+  events.push(createEventObj(
+    new Date("2026-04-16"), 
+    "TSM",
+    "台積電下午2點財報發布（預估 EPS：不知道是否會受到美伊戰爭影響）", 
+    "#3498db", 
+    "001"
+  ));
+
   return events;
 }
 
 /**
  * 輔助：建立符合結構的事件物件
  */
-function createEventObj(dateObj, shortText, fullName, color) {
+function createEventObj(dateObj, shortText, fullName, color, id_series = '999') {
   const y = dateObj.getFullYear();
   const m = String(dateObj.getMonth() + 1).padStart(2, '0');
   const d = String(dateObj.getDate()).padStart(2, '0');
@@ -1058,11 +1100,11 @@ function createEventObj(dateObj, shortText, fullName, color) {
   const dateFmt = `${y}/${m}/${d}`;
 
   return {
-    "id": dateStr + "999", // 加上 999 確保在當天排序靠後
+    "id": dateStr + id_series, // 加上 999 確保在當天排序靠後
     "start_date": `${dateFmt} 1:00`,
     "end_date": `${dateFmt} 2:00`,
     "textColor": color,
-    "text": "特定事件",
+    "text": shortText,
     "type": "index",
     "details": `:${fullName}`,
     "indicators": [{ "code": "", "name": fullName }]
@@ -1104,6 +1146,76 @@ function getLastWeekday(year, month) {
     date.setDate(date.getDate() - 1);
   }
   return new Date(date);
+}
+
+async function Finnhub_test(from, to, finnhubKey) {
+  const cleanKey = finnhubKey.trim();
+  const cleanKey_compare = env.FINNHUB_KEY;
+}
+
+async function generateCustomEventsFinnhub(from, to, env) {
+  const cleanKey = env.FINNHUB_KEY;
+  // const cleanKey = "d7bjvbpr01qgc9t7m9o0d7bjvbpr01qgc9t7m9og";
+  if (!cleanKey) return []; // 如果沒有 Key，回傳空陣列
+
+  const url = `https://finnhub.io/api/v1/calendar/earnings?from=${from}&to=${to}&token=${cleanKey}`;
+  
+  try {
+    const res = await fetch(url, { headers: { "User-Agent": UA } });
+
+    // 如果 API 報錯 (如 401)，記錄錯誤並回傳空陣列，避免主程式壞掉
+    if (!res.ok) {
+      const errorDetail = await res.text();
+      console.error(`Finnhub API Error (${res.status}): ${errorDetail}`);
+      return []; 
+    }
+
+    const data = await res.json();
+    const earnings = data.earningsCalendar || [];
+
+     // 這裡是你原本預計要過濾的股票清單
+    const AI_TECH_SYMBOLS = new Set([
+      'NVDA', // NVIDIA - AI 晶片龍頭
+      'TSM',  // 台積電 - 半導體代工龍頭
+      'AAPL', // Apple - AI 手機與生態整合
+      'META', // Meta - 生成式 AI 廣告與模型
+      'MSFT', // Microsoft - Azure AI 與 OpenAI 合作
+      'GOOGL',// Alphabet - Google AI 搜尋與雲端
+      'AMZN', // Amazon - AWS AI 雲端服務
+      'TSLA', // Tesla - 自動駕駛與機器人 AI
+      'AMD',  // AMD - AI 替代方案與 CPU 大廠
+      'PLTR', // Palantir - AI 數據分析平台
+      'CRM',  // Salesforce - 企業級 AI CRM
+      'NOW',  // ServiceNow - 企業流程 AI
+      'SNOW', // Snowflake - 資料倉儲 AI
+      'ORCL', // Oracle - 雲端資料庫與 OCI
+      'AVGO', // Broadcom - AI 網通與客製化晶片 (ASIC)
+      'QCOM', // Qualcomm - 行動端邊緣 AI
+      'ASML', // ASML - EUV 光刻機 (AI 產能關鍵)
+      'MU',   // Micron - HBM 高頻寬記憶體 (AI 必備)
+      'INTC', // Intel - 晶片與晶圓代工競爭者
+      'NFLX', // Netflix - 串流領頭羊，AI 推薦演算法
+      'SMCI', // Supermicro - AI 伺服器基礎設施
+      'ARM'   // Arm - AI 晶片架構設計核心
+    ]);
+
+    // 直接回傳處理後的 events 陣列
+    return earnings
+      .filter(item => AI_TECH_SYMBOLS.has(item.symbol))
+      .map((item, index) => {
+        return createEventObj(
+          new Date(item.date),
+          item.symbol,
+          `${item.symbol} 財報發布（預估 EPS：${item.epsEstimate || 'N/A'}）`,
+          "#3498db",
+          `60${index}`
+        );
+      });
+
+  } catch (e) {
+    console.error("Finnhub 執行失敗：", e.message);
+    return []; // 發生例外時也回傳空陣列
+  }
 }
 
 async function handleCron(env) {
