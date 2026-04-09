@@ -1277,19 +1277,33 @@ async function handleCron(env) {
     lines.push(`🚨 今日特殊事件：${eventNames}`);
   }
 
-  if (taifex_day.success && taifex_day.price > 0) {
-    const sign = taifex_day.updown > 0 ? '▲' : taifex_day.updown < 0 ? '▼' : '';
-    lines.push(`台股期貨日盤：${taifex_day.price.toFixed(0)} (${sign}${Math.abs(taifex_day.updown).toFixed(0)})`);
+  // 台股日盤時間是從早上9點到下午1點半，不過我們的 cron 是每小時整點，所以實際上是從早上9點到下午2點會有日盤資料
+  if (twHour > 9 && twHour <= 14) {
+    if (taifex_day.success && taifex_day.price > 0) {
+      const sign = taifex_day.updown > 0 ? '▲' : taifex_day.updown < 0 ? '▼' : '';
+      lines.push(`台股期貨日盤：${taifex_day.price.toFixed(0)} (${sign}${Math.abs(taifex_day.updown).toFixed(0)})`);
+    }
+
+    if (tsmc.success) {
+      const sign = tsmc.change > 0 ? '▲' : '▼';
+      lines.push(`台積電現貨日盤：${tsmc.closePrice.toFixed(0)} (${sign}${Math.abs(tsmc.change).toFixed(0)})`);
+    }
   }
 
-  if (taifex_night.success && taifex_night.price > 0) {
-    const sign = taifex_night.updown > 0 ? '▲' : taifex_night.updown < 0 ? '▼' : '';
-    lines.push(`台股期貨夜盤：${taifex_night.price.toFixed(0)} (${sign}${Math.abs(taifex_night.updown).toFixed(0)})`);
+  // 台股夜盤是從下午3點開始，直到隔天凌晨（不過我們的 cron 是每小時整點，所以實際上是從下午3點到晚上11點會有夜盤資料）
+  if (twHour >= 15) {
+    if (taifex_night.success && taifex_night.price > 0) {
+      const sign = taifex_night.updown > 0 ? '▲' : taifex_night.updown < 0 ? '▼' : '';
+      lines.push(`台股期貨夜盤：${taifex_night.price.toFixed(0)} (${sign}${Math.abs(taifex_night.updown).toFixed(0)})`);
+    }
   }
 
-  if (taifex_tsmc.success && taifex_tsmc.price > 0) {
-    const sign = taifex_tsmc.updown > 0 ? '▲' : taifex_tsmc.updown < 0 ? '▼' : '';
-    lines.push(`台積電期貨夜盤：${taifex_tsmc.price.toFixed(0)} (${sign}${Math.abs(taifex_tsmc.updown).toFixed(0)})`);
+  if (twHour >= 17) {
+    // 台積電期貨夜盤是從下午5點開始，直到隔天凌晨（不過我們的 cron 是每小時整點，所以實際上是從下午5點到晚上11點會有夜盤資料）
+    if (taifex_tsmc.success && taifex_tsmc.price > 0) {
+      const sign = taifex_tsmc.updown > 0 ? '▲' : taifex_tsmc.updown < 0 ? '▼' : '';
+      lines.push(`台積電期貨夜盤：${taifex_tsmc.price.toFixed(0)} (${sign}${Math.abs(taifex_tsmc.updown).toFixed(0)})`);
+    }
   }
 
   if (twn.success) {
@@ -1306,11 +1320,6 @@ async function handleCron(env) {
 
   if (vix.success) {
     lines.push(`VIX 恐慌指數：${vix.price.toFixed(2)}`);
-  }
-
-  if (tsmc.success) {
-    const sign = tsmc.change > 0 ? '▲' : '▼';
-    lines.push(`台積電現貨：${tsmc.closePrice.toFixed(0)} (${sign}${Math.abs(tsmc.change).toFixed(0)})`);
   }
 
   const body = lines.length > 0 ? lines.join('\n') : '點擊查看即時報價';
