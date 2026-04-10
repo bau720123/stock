@@ -461,8 +461,24 @@ async function fetchRobinHood() {
     const changeText   = display?.secondary_value?.main?.value || "";
     const tertiaryText = display?.tertiary_value?.main?.value  || "";
 
-    const success = changeText !== "" || tertiaryText !== "";
-    return json({ success, changeText, tertiaryText });
+    const quote = data?.chart_section?.quote;
+    const previousClose = parseFloat(quote?.previous_close || "").toString();
+    const previousCloseDate = quote?.previous_close_date || "";
+    const updated_at = quote?.updated_at
+      ? new Date(quote.updated_at).toLocaleString("zh-TW", {
+          timeZone: "Asia/Taipei",
+          hour12: false,
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit"
+        }).replace(/\//g, '-')
+      : '-';
+
+    const success = changeText !== "" || tertiaryText !== "" || previousClose !== "" || previousCloseDate !== "" || updated_at !== "";
+    return json({ success, changeText, tertiaryText, previousClose, previousCloseDate, updated_at });
   } catch (e) {
     return json({ success: false, error: e.message }, 500);
   }
@@ -843,19 +859,27 @@ async function fetchYahooFinance(symbol, interval = 1, range = 1) {
       return json({ success: false, error: "timestamp 為空" });
     }
  
-    // timestamp 轉台北時間（UTC+8）
-    const ts = timestamps[lastIdx];
-    const twDate = new Date((ts + 8 * 3600) * 1000);
-    const updateTime = twDate.toISOString().replace('T', ' ').substring(0, 19);
+    const regularMarketTime = result.meta?.regularMarketTime;
+    const updateTime = new Date(regularMarketTime * 1000).toLocaleString("zh-TW", {
+      timeZone: "Asia/Taipei",
+      hour12: false,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit"
+    }).replace(/\//g, '-');
  
     return json({
       success:    true,
-      updateTime,
       prev:       toFloat(result.meta?.chartPreviousClose),
       open:       toFloat(opens[lastIdx]),
       high:       toFloat(highs[lastIdx]),
       low:        toFloat(lows[lastIdx]),
       close:      toFloat(closes[lastIdx]),
+      regularMarketTime,
+      updateTime
     });
   } catch (e) {
     return json({ success: false, error: e.message }, 500);
@@ -1291,14 +1315,14 @@ async function handleCron(env) {
   }
 
   // 台股夜盤是從下午3點開始，直到隔天凌晨（不過我們的 cron 是每小時整點，所以實際上是從下午3點到晚上11點會有夜盤資料）
-  if (twHour >= 15) {
+  if (twHour >= 15 || twHour <= 8) {
     if (taifex_night.success && taifex_night.price > 0) {
       const sign = taifex_night.updown > 0 ? '▲' : taifex_night.updown < 0 ? '▼' : '';
       lines.push(`台股期貨夜盤：${taifex_night.price.toFixed(0)} (${sign}${Math.abs(taifex_night.updown).toFixed(0)})`);
     }
   }
 
-  if (twHour >= 17) {
+  if (twHour >= 17 || twHour <= 8) {
     // 台積電期貨夜盤是從下午5點開始，直到隔天凌晨（不過我們的 cron 是每小時整點，所以實際上是從下午5點到晚上11點會有夜盤資料）
     if (taifex_tsmc.success && taifex_tsmc.price > 0) {
       const sign = taifex_tsmc.updown > 0 ? '▲' : taifex_tsmc.updown < 0 ? '▼' : '';
@@ -1315,11 +1339,25 @@ async function handleCron(env) {
   // }
 
   if (brent.success) {
-    lines.push(`布蘭特原油：${brent.price.toFixed(2)} 元`);
+    const getBrentStatus = (price) => {
+      if (price < 100) return '平靜';
+      if (price < 110) return '留意';
+      if (price < 120) return '波動加劇';
+      return '恐慌';
+    };
+
+    lines.push(`布蘭特原油：${brent.price.toFixed(2)} 元（${getBrentStatus(brent.price)}）`);
   }
 
   if (vix.success) {
-    lines.push(`VIX 恐慌指數：${vix.price.toFixed(2)}`);
+    const getVixStatus = (vix) => {
+      if (vix < 20) return '平靜';
+      if (vix < 25) return '留意';
+      if (vix < 30) return '波動加劇';
+      return '恐慌';
+    };
+
+    lines.push(`VIX 恐慌指數：${vix.price.toFixed(2)}（${getVixStatus(vix.price)}）`);
   }
 
   const body = lines.length > 0 ? lines.join('\n') : '點擊查看即時報價';
