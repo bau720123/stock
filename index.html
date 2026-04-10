@@ -1224,11 +1224,11 @@ async function loadTw() {
   if (twn.success) {
     const cls = changeClass(twn.changeText, 1);
     const formattedTime = twn.updateTime.replace(/\./g, '-');
-    html += row('開盤價', twn.open.toFixed(0));
-    html += row('最高價', twn.high.toFixed(0));
-    html += row('最低價', twn.low.toFixed(0));
+    // html += row('開盤價', twn.open.toFixed(0));
+    // html += row('最高價', twn.high.toFixed(0));
+    // html += row('最低價', twn.low.toFixed(0));
+    html += row('現價', twn.current.toFixed(2), 'accent');
     html += row('漲跌', twn.changeText, cls);
-    html += row('成交價', twn.current.toFixed(2), 'accent');
     html += row('更新時間', formattedTime);
   } else {
     html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
@@ -1242,8 +1242,8 @@ async function loadTw() {
   //   html += row('開盤價', twncon.open.toFixed(0));
   //   html += row('最高價', twncon.high.toFixed(0));
   //   html += row('最低價', twncon.low.toFixed(0));
+  //   html += row('現價', twncon.price.toFixed(2), 'accent');
   //   html += row('漲跌', twncon.updown, cls);
-  //   html += row('成交價', twncon.price.toFixed(2), 'accent');
   //   html += row('更新時間', formattedTime);
   // } else {
   //   html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
