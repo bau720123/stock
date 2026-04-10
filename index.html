@@ -1832,6 +1832,7 @@ function warMarkRead(link, source) {
     const badge = row.querySelector('.war-badge');
     const title = row.querySelector('.war-title');
     if (badge) badge.textContent = '已讀';
+    if (title) badge.style.color = 'gray';
     if (title) title.style.color = 'var(--dim)';
   }
 
@@ -1879,7 +1880,7 @@ async function loadWar() {
         html += `
           <div data-war-link="${item.link ? item.link.replace(/"/g, '&quot;') : ''}" style="padding: 10px 0; border-bottom: 2px solid var(--border);">
             <div style="display:flex; align-items:baseline; gap:6px; margin-bottom:5px;">
-              <span class="war-badge" style="font-family:var(--mono); font-size:1rem; color:white; background:var(--muted); border-radius:3px; padding:1px 5px; flex-shrink:0;">${isRead ? '已讀' : '未讀'}</span>
+              <span class="war-badge" style="font-family:var(--mono); font-size:1rem; color:${isRead ? 'red' : 'white'}; background:var(--muted); border-radius:3px; padding:1px 5px; flex-shrink:0;">${isRead ? '已讀' : '未讀'}</span>
               <div class="war-title" style="font-size: 1.2rem; color: ${isRead ? 'var(--dim)' : 'var(--text)'}; line-height: 1.5;">
                 ${item.title || '（無標題）'}
               </div>

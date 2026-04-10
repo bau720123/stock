@@ -1095,17 +1095,17 @@ function generateCustomEvents(year) {
   }
 
   // 自定義事件
-  events.push(createEventObj(
-    new Date("2026-04-10"), 
-    "TSM",
-    "台積電下午1點半公布3月份業績（不知道是否會受到美伊戰爭影響）", 
-    "#3498db", 
-    "001"
-  ));
+  // events.push(createEventObj(
+  //   new Date("2026-04-10"), 
+  //   "TSM",
+  //   "台積電下午1點半公布3月份業績", 
+  //   "#3498db", 
+  //   "001"
+  // ));
   events.push(createEventObj(
     new Date("2026-04-16"), 
     "TSM",
-    "台積電下午2點財報發布（預估 EPS：不知道是否會受到美伊戰爭影響）", 
+    "台積電下午2點財報發布", 
     "#3498db", 
     "001"
   ));
