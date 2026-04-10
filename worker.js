@@ -90,6 +90,8 @@ export default {
       }
     }
 
+    if (path === "/fear-greed") return await fetchFearAndGreed();
+
     return json({ error: "unknown path" }, 404);
   },
   async scheduled(event, env, ctx) {
@@ -277,17 +279,25 @@ async function fetchSina(list) {
         prev:   toFloat(parts[7]),
       });
     } else if (list.startsWith('znb_')) {
-      // znb_VIX 恐慌指數
-      return json({
+      const price = toFloat(parts[1]);
+
+      const result = {
         success: true,
         title:  parts[0],
         time:   parts[6] + " " + parts[7] || "",
-        price:  toFloat(parts[1]),
+        price:  price,
         open:   toFloat(parts[8]),
         low:    toFloat(parts[11]),
         high:   toFloat(parts[10]),
         prev:   toFloat(parts[9]),
-      });
+      };
+
+      // znb_VIX 恐慌指數
+      if (list === 'znb_VIX') {
+        result.rating = getVixStatus(price);
+      }
+
+      return json(result);
     } else if (list.startsWith('gb_')) {
       // gb_dji 道瓊工業指數
       // gb_inx 標普500指數
@@ -311,16 +321,25 @@ async function fetchSina(list) {
       // hf_OIL 布蘭特原油
       // hf_GC 黃金
       // hf_SI 白銀
-      return json({
+
+      const price = toFloat(parts[0]);
+
+      const result = {
         success: true,
         title:  parts[13],
-        price:  toFloat(parts[0]),
+        price:  price,
         open:   toFloat(parts[8]),
         high:   toFloat(parts[4]),
         low:    toFloat(parts[5]),
         time:   parts[12] + " " + parts[6] || "",
         prev:   toFloat(parts[7]),
-      });
+      };
+
+      if (list === 'hf_OIL') {
+        result.rating = getBrentStatus(price);
+      }
+
+      return json(result);
     } else {
       return json({
         success: true,
@@ -1242,6 +1261,58 @@ async function generateCustomEventsFinnhub(from, to, env) {
   }
 }
 
+// CNN Fear & Greed Index
+async function fetchFearAndGreed() {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 8000);
+
+  try {
+    const res = await fetch("https://production.dataviz.cnn.io/index/fearandgreed/graphdata", {
+      headers: {
+        "User-Agent": UA,
+        "Accept": "application/json",
+        "Referer": "https://edition.cnn.com/markets/fear-and-greed",
+      },
+      signal: controller.signal,
+    });
+
+    clearTimeout(timer);
+    if (!res.ok) return json({ success: false, error: `HTTP ${res.status}` });
+
+    const data = await res.json();
+    const fg = data?.fear_and_greed;
+    if (!fg) return json({ success: false, error: "無資料" });
+
+    const ratingMap = {
+      "extreme fear": "極度恐慌",
+      "fear":         "恐慌",
+      "neutral":      "中性",
+      "greed":        "貪婪",
+      "extreme greed":"極度貪婪",
+    };
+
+    return json({
+      success:        true,
+      score:          fg.score,
+      rating:         fg.rating,
+      ratingZh:       ratingMap[fg.rating] ?? fg.rating,
+      updateTime:     new Date(fg.timestamp).toLocaleString("zh-TW", {
+                        timeZone: "Asia/Taipei", hour12: false,
+                        year: "numeric", month: "2-digit", day: "2-digit",
+                        hour: "2-digit", minute: "2-digit", second: "2-digit"
+                      }).replace(/\//g, '-'),
+      prevClose:      fg.previous_close,
+      prev1Week:      fg.previous_1_week,
+      prev1Month:     fg.previous_1_month,
+      prev1Year:      fg.previous_1_year,
+    });
+
+  } catch (e) {
+    clearTimeout(timer);
+    return json({ success: false, error: e.message });
+  }
+}
+
 async function handleCron(env) {
   // 判斷台灣時間是否在週一至週五 05:00～00:00
   const now = new Date();
@@ -1339,25 +1410,11 @@ async function handleCron(env) {
   // }
 
   if (brent.success) {
-    const getBrentStatus = (price) => {
-      if (price < 100) return '平靜';
-      if (price < 110) return '留意';
-      if (price < 120) return '波動加劇';
-      return '恐慌';
-    };
-
-    lines.push(`布蘭特原油：${brent.price.toFixed(2)} 元（${getBrentStatus(brent.price)}）`);
+    lines.push(`布蘭特原油：${brent.price.toFixed(2)} 元（` + getBrentStatus(brent.price) + `）`);
   }
 
   if (vix.success) {
-    const getVixStatus = (vix) => {
-      if (vix < 20) return '平靜';
-      if (vix < 25) return '留意';
-      if (vix < 30) return '波動加劇';
-      return '恐慌';
-    };
-
-    lines.push(`VIX 恐慌指數：${vix.price.toFixed(2)}（${getVixStatus(vix.price)}）`);
+    lines.push(`VIX 恐慌指數：${vix.price.toFixed(2)}（` + getVixStatus(vix.price) + `）`);
   }
 
   const body = lines.length > 0 ? lines.join('\n') : '點擊查看即時報價';
@@ -1374,6 +1431,20 @@ async function handleCron(env) {
       ]
     }, env))
   );
+}
+
+function getBrentStatus(p) {
+  if (p < 100) return '平靜';
+  if (p < 110) return '留意';
+  if (p < 120) return '波動加劇';
+  return '恐慌';
+}
+
+function getVixStatus(v) {
+  if (v < 20) return '平靜';
+  if (v < 25) return '留意';
+  if (v < 30) return '波動加劇';
+  return '恐慌';
 }
 
 // 是否是Android裝置（用於決定是否顯示行動按鈕，因為 Android 的 Web Push 行動按鈕支援不佳）

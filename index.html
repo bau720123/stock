@@ -1457,6 +1457,7 @@ async function loadMaterials() {
     html += row('漲跌', changeNum.toFixed(2), cls);
     html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
     html += row('價格', sinaBrent.price.toFixed(2), 'accent');
+    html += row('情緒評級', sinaBrent.rating);
     html += row('更新時間', sinaBrent.time);
 
     // 價格門檻通知（從 localStorage 讀取，未設定則不觸發）
@@ -1643,9 +1644,10 @@ async function loadMaterials() {
 
 // 市場情緒
 async function loadSentiment() {
-  const [sinaUsdollar, sinaVix] = await Promise.all([
+  const [sinaUsdollar, sinaVix, fearGreed] = await Promise.all([
     fetch(WORKER + '/sina/DINIW').then(r => r.json()).catch(() => ({ success: false })), // 美元指數
     fetch(WORKER + '/sina/znb_VIX').then(r => r.json()).catch(() => ({ success: false })), // VIX 恐慌指數
+    fetch(WORKER + '/fear-greed').then(r => r.json()).catch(() => ({ success: false })), // CNN Fear & Greed Index
   ]);
 
   let html = `<div class="card-title">市場情緒</div>`;
@@ -1656,6 +1658,7 @@ async function loadSentiment() {
     const changeNum = sinaUsdollar.price - sinaUsdollar.prev;
     const cls = changeNum < 0 ? 'down' : 'up';
     const changePercent = changeNum / sinaUsdollar.prev * 100;
+
     html += row('前次', sinaUsdollar.prev.toFixed(2));
     html += row('開盤價', sinaUsdollar.open.toFixed(2));
     html += row('最高價', sinaUsdollar.high.toFixed(2));
@@ -1692,6 +1695,7 @@ async function loadSentiment() {
     const changeNum = sinaVix.price - sinaVix.prev;
     const cls = changeNum < 0 ? 'down' : 'up';
     const changePercent = changeNum / sinaVix.prev * 100;
+
     html += row('前次', sinaVix.prev.toFixed(2));
     html += row('開盤價', sinaVix.open.toFixed(2));
     html += row('最高價', sinaVix.high.toFixed(2));
@@ -1699,6 +1703,7 @@ async function loadSentiment() {
     html += row('漲跌', changeNum.toFixed(2), cls);
     html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
     html += row('數值', sinaVix.price.toFixed(2), 'accent');
+    html += row('情緒評級', sinaVix.rating);
     html += row('更新時間', sinaVix.time);
 
     // 價格門檻通知（從 localStorage 讀取，未設定則不觸發）
@@ -1718,6 +1723,23 @@ async function loadSentiment() {
         'https://hk.investing.com/indices/volatility-s-p-500'
       );
     }
+  } else {
+    html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
+  }
+
+  // 【CNN Fear & Greed Index】
+  html += groupHeader('【CNN Fear & Greed Index】', '', 'CNN Fear & Greed Index 是由 CNN Business 編製的綜合市場情緒指數，數值介於 0–100，整合了七項子指標：股價動能、漲跌強弱、漲跌廣度、Put/Call 比率、垃圾債券需求、市場波動率（VIX）及避險資產需求。數值越低代表市場越恐慌，越高則越貪婪。與 VIX 單一衡量波動率不同，此指數反映的是市場整體情緒的多面向變化。');
+  if (fearGreed.success) {
+    const scoreColor = fearGreed.score >= 50 ? 'up' : 'down';
+    const trendIcon = (curr, prev) => curr > prev ? '▲' : curr < prev ? '▼' : '－';
+
+    html += row('前次收盤', `${fearGreed.prevClose.toFixed(1)} ${trendIcon(fearGreed.score, fearGreed.prevClose)}`);
+    html += row('一週前', `${fearGreed.prev1Week.toFixed(1)} ${trendIcon(fearGreed.score, fearGreed.prev1Week)}`);
+    html += row('一個月前', `${fearGreed.prev1Month.toFixed(1)} ${trendIcon(fearGreed.score, fearGreed.prev1Month)}`);
+    html += row('一年前', `${fearGreed.prev1Year.toFixed(1)} ${trendIcon(fearGreed.score, fearGreed.prev1Year)}`);
+    html += row('當前指數', fearGreed.score.toFixed(1), scoreColor);
+    html += row('情緒評級', fearGreed.ratingZh, scoreColor);
+    html += row('更新時間', fearGreed.updateTime);
   } else {
     html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
   }
