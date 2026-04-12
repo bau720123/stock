@@ -1316,11 +1316,12 @@ async function loadTw() {
 
 // 美股市場概況
 async function loadAmerica() {
-  const [cnbcPreMarkets, /*yahooNqf, yahooIxic, yahooSox, */yahooTsm, robinHood] = await Promise.all([
+  const [cnbcPreMarkets, /*yahooNqf, yahooIxic, yahooSox, */yahooBtc, yahooTsm, robinHood] = await Promise.all([
     fetch(WORKER + '/cnbc').then(r => r.json()).catch(() => ({ success: false })), // 美股盤前電子盤
     // fetch(WORKER + '/yahoo-finance/NQ=F').then(r => r.json()).catch(() => ({ success: false })), // 那斯達克 100 期貨期貨
     // fetch(WORKER + '/yahoo-finance/^IXIC').then(r => r.json()).catch(() => ({ success: false })), // 那斯達克指數
     // fetch(WORKER + '/yahoo-finance/^SOX').then(r => r.json()).catch(() => ({ success: false })), // 那斯達克指數
+    fetch(WORKER + '/yahoo-finance/BTC-USD').then(r => r.json()).catch(() => ({ success: false })), // 比特幣
     fetch(WORKER + '/yahoo-finance/TSM').then(r => r.json()).catch(() => ({ success: false })), // 台積電 ADR
     fetch(WORKER + '/rh').then(r => r.json()).catch(() => ({ success: false })), // Robinhood
   ]);
@@ -1401,6 +1402,25 @@ async function loadAmerica() {
   // } else {
   //   html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
   // }
+
+  // 比特幣
+  html += groupHeader('【比特幣】', '', '比特幣（Bitcoin, BTC）是一種去中心化的數位加密貨幣，由中本聰（Satoshi Nakamoto）於2008年提出，2009年正式問世。它基於區塊鏈技術，透過點對點（P2P）網絡運行，無需任何中央銀行或第三方機構發行與管理，具有安全、透明、總量限制（上限 2100 萬枚）等特性，通常被視為一種虛擬資產或投資工具。');
+  if (yahooBtc.success) {
+    const changeNum = yahooBtc.close - yahooBtc.prev;
+    const cls = changeNum < 0 ? 'down' : 'up';
+    const changePercent = changeNum / yahooBtc.prev * 100;
+
+    // html += row('前次', yahooBtc.prev.toFixed(2));
+    // html += row('開盤價', yahooBtc.open.toFixed(2));
+    // html += row('最高價', yahooBtc.high.toFixed(2));
+    // html += row('最低價', yahooBtc.low.toFixed(2));
+    html += row('漲跌', changeNum.toFixed(2), cls);
+    html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
+    html += row('價格', yahooBtc.close.toFixed(2), 'accent');
+    html += row('更新時間', yahooBtc.updateTime);
+  } else {
+    html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
+  }
 
   // 台積電ADR
   html += groupHeader('【台積電 ADR】', '', '台積電 ADR（American Depositary Receipts，美國存託憑證）是台積電在美國發行的股票憑證（代號：TSM），掛牌於紐約證券交易所（NYSE）。它讓美國投資人能用美元直接買賣台積電，代表國際資金對台積電的看法，且 1 單位 ADR 等於 5 股台積電台股（2330）普通股。');

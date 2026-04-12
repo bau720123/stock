@@ -908,7 +908,13 @@ async function fetchYahooFinance(symbol, interval = 1, range = 1) {
 // 新聞 RSS（美伊戰爭消息）
 async function fetchNewsRss() {
   // 關鍵字：至少命中其中一個才納入
-  const KEYWORDS = ['伊朗', '油價', '荷姆茲', '荷莫茲', '原油', '戰爭', '中東', '美國', '川普', '軍事', '衝突', '制裁', '核子', '核武', '導彈', '攻擊', '防空', '航運', '油輪'];
+  // const KEYWORDS = ['伊朗', '油價', '荷姆茲', '荷莫茲', '原油', '戰爭', '中東', '美國', '川普', '軍事', '衝突', '制裁', '核子', '核武', '導彈', '攻擊', '防空', '航運', '油輪'];
+  const KEYWORDS = [
+    // 中文（原有）
+    '伊朗', '油價', '荷姆茲', '荷莫茲', '原油', '戰爭', '中東', '美國', '川普', '軍事', '衝突', '制裁', '核子', '核武', '導彈', '攻擊', '防空', '航運', '油輪',
+    // 英文（新增）
+    'Trump', 'Iran', 'Hormuz', 'crude', 'sanction', 'missile', 'ceasefire', 'tariff',
+  ];
  
   // RSS 來源清單
   const SOURCES = [
@@ -918,6 +924,8 @@ async function fetchNewsRss() {
     { url: 'https://feeds.feedburner.com/rsscna/politics',           name: '中央社政治' },
     { url: 'https://news.ltn.com.tw/rss/world.xml',                  name: '自由時報國際' },
     { url: 'https://news.ltn.com.tw/rss/business.xml',               name: '自由時報財經' },
+    { url: 'https://news.google.com/rss/search?q=when:24h+allinurl:reuters.com+Trump&hl=en-US&gl=US&ceid=US:en', name: 'Reuters-Trump' },
+    { url: 'https://news.google.com/rss/search?q=when:24h+allinurl:reuters.com+Iran+oil&hl=en-US&gl=US&ceid=US:en', name: 'Reuters-Iran' },
   ];
  
   // 解析單一 RSS XML，回傳 items 陣列
