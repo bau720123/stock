@@ -1441,8 +1441,8 @@ async function loadAmerica() {
     html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
   }
 
-  // Robinhood 的數據更新頻率非常高，幾乎是實時的，特別適合追蹤台積電 ADR 在美國市場的即時變動。
-  if (robinHood.success) {
+  // Robinhood 的數據更新頻率非常高，幾乎是即時的，特別適合追蹤台積電 ADR 在美國市場的即時變動。
+  if (robinHood.success && robinHood.changeText != '') {
     html += row('即時變動', robinHood.changeText, changeClass(robinHood.changeText));
     if (robinHood.tertiaryText) {
       html += row('額外資訊', robinHood.tertiaryText, changeClass(robinHood.tertiaryText));
