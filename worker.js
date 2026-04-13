@@ -58,8 +58,11 @@ export default {
     if (path === "/clear-logs") return await clearLogs(env);
 
     if (path.startsWith("/stock/")) {
-      const symbol = path.split("/stock/")[1];
-      if (symbol) return await fetchFugleQuote(symbol, env);
+      const parts = path.split("/"); // ["", "stock", "quote", "2330"]
+      const method = parts[2];
+      const symbol = parts[3];
+
+      if (method === "quote" && symbol)   return await fetchFugleQuote(symbol, env);
     }
 
     if (path.startsWith("/yahoo-finance/")) {

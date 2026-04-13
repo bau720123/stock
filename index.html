@@ -1172,28 +1172,16 @@ window.onload = loadAll;
 
 // 台股市場概況
 async function loadTw() {
-  const [taifexDay, taifexNight, taifexTsmc, twn, /*twncon, */tsmc] = await Promise.all([
-    fetch(WORKER + '/taifex/2/TX046').then(r => r.json()), // 台股期貨日盤
+  const [taifexNight, taifexDay, twn, /*twncon, */taifexTsmc, tsmc] = await Promise.all([
     fetch(WORKER + '/taifex/12/TX046').then(r => r.json()), // 台股期貨夜盤
-    fetch(WORKER + '/taifex/12/CDF046').then(r => r.json()), // 台積電期貨夜盤
+    fetch(WORKER + '/taifex/2/TX046').then(r => r.json()), // 台股期貨日盤
     fetch(WORKER + '/twn').then(r => r.json()), // 富台指
     // fetch(WORKER + '/twncon').then(r => r.json()), // 富台指
-    fetch(WORKER + '/stock/2330').then(r => r.json()), // 台積電現貨日盤
+    fetch(WORKER + '/taifex/12/CDF046').then(r => r.json()), // 台積電期貨夜盤
+    fetch(WORKER + '/stock/quote/2330').then(r => r.json()), // 台積電現貨日盤
   ]);
 
-  let html = `<div class="card-title">台股市場概況</div>`;
-
-  // 【台股期貨日盤】
-  html += groupHeader('【台股期貨日盤】', '', '台股期貨（簡稱「台指期」）是以「台灣加權股價指數」為標的物的期貨契約，讓投資人透過保證金制度，以小博大操作台股漲跌。具高槓桿、多空靈活、交易成本低等特性，熱門商品包括大台指、小台指、微台指，結算日為每月第三個星期三。<br><br>交易時間：每週一至週五的上午8:45至下午1:45');
-  if (taifexDay.success && taifexDay.price > 0) {
-    const sign = taifexDay.updown > 0 ? '▲' : taifexDay.updown < 0 ? '▼' : '';
-    var cls = 'up';
-    if (taifexDay.updown > 0) cls = 'down';
-    html += row('現價', taifexDay.price.toFixed(1), 'accent');
-    html += row('漲跌', sign + Math.abs(taifexDay.updown).toFixed(0), cls);
-  } else {
-    html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
-  }
+  let html = `<div class="card-title">大盤指數</div>`;
 
   // 【台股期貨夜盤】
   html += groupHeader('【台股期貨夜盤】', '', '台股期貨（簡稱「台指期」）是以「台灣加權股價指數」為標的物的期貨契約，讓投資人透過保證金制度，以小博大操作台股漲跌。具高槓桿、多空靈活、交易成本低等特性，熱門商品包括大台指、小台指、微台指，結算日為每月第三個星期三。<br><br>交易時間：每週一至週五的下午15:00至隔日凌晨05:00。');
@@ -1207,16 +1195,16 @@ async function loadTw() {
     html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
   }
 
-  // 【台積電期貨夜盤】
-  html += groupHeader('【台積電期貨夜盤】', '', '台積電期貨（股票期貨）是由台灣期貨交易所推出的金融衍生品，標的為台積電（2330）股票。具備低保證金（高槓桿）、多空雙向操作、交易稅低等特性，一口標準期貨代表2張台積電股票（2,000股）。此外，還有小台積電期貨（100股）供資金較小投資人選擇，且具備夜盤交易功能，可靈活應對ADR漲跌。<br><br>交易時間：每週一至週五的下午17:25至隔日凌晨05:00。');
-  if (taifexTsmc.success && taifexTsmc.price > 0) {
-    const sign = taifexTsmc.updown > 0 ? '▲' : taifexTsmc.updown < 0 ? '▼' : '';
+  // 【台股期貨日盤】
+  html += groupHeader('【台股期貨日盤】', '', '台股期貨（簡稱「台指期」）是以「台灣加權股價指數」為標的物的期貨契約，讓投資人透過保證金制度，以小博大操作台股漲跌。具高槓桿、多空靈活、交易成本低等特性，熱門商品包括大台指、小台指、微台指，結算日為每月第三個星期三。<br><br>交易時間：每週一至週五的上午8:45至下午1:45');
+  if (taifexDay.success && taifexDay.price > 0) {
+    const sign = taifexDay.updown > 0 ? '▲' : taifexDay.updown < 0 ? '▼' : '';
     var cls = 'up';
-    if (taifexTsmc.updown > 0) cls = 'down';
-    html += row('現價', taifexTsmc.price.toFixed(1), 'accent');
-    html += row('漲跌', sign + Math.abs(taifexTsmc.updown).toFixed(0), cls);
+    if (taifexDay.updown > 0) cls = 'down';
+    html += row('現價', taifexDay.price.toFixed(1), 'accent');
+    html += row('漲跌', sign + Math.abs(taifexDay.updown).toFixed(0), cls);
   } else {
-    html += `<div class="error-text">暫時無法取得資料，請於 17:25 之後再進行嘗試</div>`;
+    html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
   }
 
   // 【富台指】
@@ -1248,6 +1236,20 @@ async function loadTw() {
   // } else {
   //   html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
   // }
+
+  html += `<div class="card-title" style="margin-top: 20px;">台積電</div>`;
+  
+  // 【台積電期貨夜盤】
+  html += groupHeader('【台積電期貨夜盤】', '', '台積電期貨（股票期貨）是由台灣期貨交易所推出的金融衍生品，標的為台積電（2330）股票。具備低保證金（高槓桿）、多空雙向操作、交易稅低等特性，一口標準期貨代表2張台積電股票（2,000股）。此外，還有小台積電期貨（100股）供資金較小投資人選擇，且具備夜盤交易功能，可靈活應對ADR漲跌。<br><br>交易時間：每週一至週五的下午17:25至隔日凌晨05:00。');
+  if (taifexTsmc.success && taifexTsmc.price > 0) {
+    const sign = taifexTsmc.updown > 0 ? '▲' : taifexTsmc.updown < 0 ? '▼' : '';
+    var cls = 'up';
+    if (taifexTsmc.updown > 0) cls = 'down';
+    html += row('現價', taifexTsmc.price.toFixed(1), 'accent');
+    html += row('漲跌', sign + Math.abs(taifexTsmc.updown).toFixed(0), cls);
+  } else {
+    html += `<div class="error-text">暫時無法取得資料，請於 17:25 之後再進行嘗試</div>`;
+  }
 
   // 【台積電現貨日盤】
   html += groupHeader(`【${tsmc.name || '未定義'}現貨日盤】`, 'tsmc', '台積電（TSMC）是全球最大的專業積體電路（IC）製造服務公司，總部位於臺灣新竹科學園區，1987年由張忠謀創立。台積電首創「純晶圓代工」模式，不設計自有品牌產品，專注為Apple、NVIDIA等科技大廠代工生產領先技術的晶片，在先進製程（如3奈米、2奈米）上具統治性地位，被譽為「護國神山」。');
@@ -1771,7 +1773,7 @@ async function loadSentiment() {
 async function loadMyStock() {
   // 平行抓取所有自選股票
   const results = await Promise.all(
-    MY_STOCKS.map(s => fetch(WORKER + '/stock/' + s.symbol).then(r => r.json()).catch(() => ({ success: false })))
+    MY_STOCKS.map(s => fetch(WORKER + '/stock/quote/' + s.symbol).then(r => r.json()).catch(() => ({ success: false })))
   );
 
   let html = `<div class="card-title">
