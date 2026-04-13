@@ -1897,6 +1897,21 @@ async function loadWar() {
   try {
     const data = await fetch(WORKER + '/news-rss').then(r => r.json()).catch(() => ({ success: false }));
 
+    // if (data.ai_suggest && !data.ai_suggest.error) {
+    //   const s = data.ai_suggest;
+    //   const signalCls = s.signal === '看多' ? 'up' : s.signal === '看空' ? 'down' : '';
+    //   html += `
+    //     <div class="ai-suggest-block">
+    //       <div class="ai-suggest-title">🤖 AI 市場訊號分析</div>
+    //       <div class="ai-suggest-row">訊號：<span class="${signalCls}">${s.signal}</span></div>
+    //       <div class="ai-suggest-row">風險：${s.risk}</div>
+    //       <div class="ai-suggest-row">原因：${s.reason}</div>
+    //     </div>
+    //   `;
+    // } else {
+    //   html += `<div class="error-text">AI 分析暫時無法使用：${data.ai_suggest.error}</div>`;
+    // }
+
     if (data.success && data.items && data.items.length > 0) {
       const readSet = warReadSet();
 

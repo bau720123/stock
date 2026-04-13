@@ -67,7 +67,7 @@ export default {
       if (symbol) return await fetchYahooFinance(symbol, 1, 1);
     }
 
-    if (path === "/news-rss")  return await fetchNewsRss();
+    if (path === "/news-rss")  return await fetchNewsRss(env);
 
     if (path === "/america-calendar") return await fetchAmericaCalendar(env);
 
@@ -905,8 +905,21 @@ async function fetchYahooFinance(symbol, interval = 1, range = 1) {
   }
 }
 
+// 語言偵測（簡單判斷是否含中文字元，有中文就不翻）
+function isNeedTranslate(str) {
+  return !/[\u4e00-\u9fff]/.test(str);
+}
+
+// 呼叫 MyMemory 翻譯單一字串
+async function translateToZh(text) {
+  const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|zh-TW`;
+  const res = await fetch(url, { headers: { "User-Agent": UA } });
+  const data = await res.json();
+  return data?.responseData?.translatedText || text; // 失敗就回傳原文
+}
+
 // 新聞 RSS（美伊戰爭消息）
-async function fetchNewsRss() {
+async function fetchNewsRss(env) {
   // 關鍵字：至少命中其中一個才納入
   // const KEYWORDS = ['伊朗', '油價', '荷姆茲', '荷莫茲', '原油', '戰爭', '中東', '美國', '川普', '軍事', '衝突', '制裁', '核子', '核武', '導彈', '攻擊', '防空', '航運', '油輪'];
   const KEYWORDS = [
@@ -956,7 +969,8 @@ async function fetchNewsRss() {
       // 若原始資料已含 … 摘要符號，代表來源已自行截斷，直接清理使用；否則自行截斷至 120 字
       const hasEllipsis = descRaw.includes('…');
       const descClean   = descRaw.replace(/…/g, '').trimEnd();
-      const desc        = hasEllipsis ? descClean : (descRaw.length > 120 ? descRaw.slice(0, 120) + '…' : descRaw);
+      const isGoogleNews = sourceName.startsWith('Reuters');
+      const desc = isGoogleNews ? '' : (hasEllipsis ? descClean : (descRaw.length > 120 ? descRaw.slice(0, 120) + '…' : descRaw));
  
       const title = titleMatch ? titleMatch[1].replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').trim() : '';
       if (!title) continue;
@@ -1008,8 +1022,49 @@ async function fetchNewsRss() {
       seen.add(item.title);
       return true;
     });
+
+    let ai_suggest = null;
+//     const top10Titles = unique.slice(0, 10).map((item, i) => `${i + 1}. ${item.title}`).join('\n'); // 抓取前十則標題的資料
+//     try {
+//       const geminiRes = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent', {
+//         method: 'POST',
+//         headers: {
+//           'Content-Type': 'application/json',
+//           'X-goog-api-key': env.GEMINI_KEY,
+//         },
+//         body: JSON.stringify({
+//           system_instruction: { parts: { text: '你是一位專業的金融市場分析師，專注於地緣政治對能源與股票市場的影響。' } },
+//           contents: [{ parts: [{ text: `以下是最新新聞標題，請站在「台灣散戶投資人」的角度，分析這些新聞對美股與台股的整體影響。
+
+// ${top10Titles}
+
+// 判斷標準：
+// - 看多：對股市有正面影響，適合進場或持股
+// - 看空：對股市有負面影響，建議減碼或觀望
+// - 中性：影響不明確，建議持觀望態度
+
+// 請用以下 JSON 格式回答，不要有任何其他文字或 markdown：
+// {"signal":"看多/看空/中性","reason":"50字以內原因，以股市角度說明","risk":"高/中/低"}` }] }],
+//         }),
+//       });
+//       const geminiData = await geminiRes.json();
+//       const text = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+//       ai_suggest = JSON.parse(text.replace(/```json|```/g, '').trim());
+//     } catch (e) {
+//       ai_suggest = { error: e.message };
+//     }
+
+    // 去重後，統一翻譯英文標題
+    const translated = await Promise.all(
+      unique.map(async (item) => {
+        if (isNeedTranslate(item.title)) {
+          item.title = await translateToZh(item.title);
+        }
+        return item;
+      })
+    );
  
-    return new Response(JSON.stringify({ success: true, items: unique.slice(0, 30) }), {
+    return new Response(JSON.stringify({ success: true, items: translated.slice(0, 30), ai_suggest }), {
       headers: { ...CORS, "Content-Type": "application/json; charset=utf-8" }
     });
   } catch (e) {
