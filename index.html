@@ -510,7 +510,7 @@ function groupHeader(label, settingsKey = null, wording = '') {
     <button class="alert-settings-btn ${isActive ? 'active' : ''}"
       title="偵測設定"
       onclick="openAlertSettings('${settingsKey}')">
-      ⚙️
+      設定價格提醒
     </button>` : '';
   return `<span class="group-header"><span class="group-header-title">${label}</span>${descButton}${space}${settingsButton}</span>`;
 }
@@ -655,7 +655,7 @@ async function openMyStockSettings() {
   function getHtml() {
     return `
       <div style="font-size:.75rem; color:#5a7080; margin-bottom:12px; text-align:left;">
-        股票代號（2330）與股票名稱（台積電）可自行輸入，儲存後立即生效
+        請設定股票代號與股票名稱，儲存後立即生效
       </div>
       <div id="mystock-rows">${renderRows()}</div>
       <button
@@ -1172,13 +1172,14 @@ window.onload = loadAll;
 
 // 台股市場概況
 async function loadTw() {
-  const [taifexNight, taifexDay, twn, /*twncon, */taifexTsmc, tsmc] = await Promise.all([
+  const [taifexNight, taifexDay, twn, /*twncon, */taifexTsmc, fugleQuote, fugleVolume] = await Promise.all([
     fetch(WORKER + '/taifex/12/TX046').then(r => r.json()), // 台股期貨夜盤
     fetch(WORKER + '/taifex/2/TX046').then(r => r.json()), // 台股期貨日盤
     fetch(WORKER + '/twn').then(r => r.json()), // 富台指
     // fetch(WORKER + '/twncon').then(r => r.json()), // 富台指
     fetch(WORKER + '/taifex/12/CDF046').then(r => r.json()), // 台積電期貨夜盤
-    fetch(WORKER + '/stock/quote/2330').then(r => r.json()), // 台積電現貨日盤
+    fetch(WORKER + '/stock/quote/2330').then(r => r.json()), // 台積電現貨日盤股價資訊
+    fetch(WORKER + '/stock/volume/2330').then(r => r.json()), // 台積電現貨日盤分價量表
   ]);
 
   let html = `<div class="card-title">大盤指數</div>`;
@@ -1252,23 +1253,24 @@ async function loadTw() {
   }
 
   // 【台積電現貨日盤】
-  html += groupHeader(`【${tsmc.name || '未定義'}現貨日盤】`, 'tsmc', '台積電（TSMC）是全球最大的專業積體電路（IC）製造服務公司，總部位於臺灣新竹科學園區，1987年由張忠謀創立。台積電首創「純晶圓代工」模式，不設計自有品牌產品，專注為Apple、NVIDIA等科技大廠代工生產領先技術的晶片，在先進製程（如3奈米、2奈米）上具統治性地位，被譽為「護國神山」。');
-  if (tsmc.success) {
-    const cls = changeClass(tsmc.change, 1);
-    const sign = tsmc.change > 0 ? '▲' : tsmc.change < 0 ? '▼' : '';
-    const lowMinusOpen = (tsmc.lowPrice - tsmc.openPrice).toFixed(0);
+  html += groupHeader(`【${fugleQuote.name || '未定義'}現貨日盤】`, 'tsmc', '台積電（TSMC）是全球最大的專業積體電路（IC）製造服務公司，總部位於臺灣新竹科學園區，1987年由張忠謀創立。台積電首創「純晶圓代工」模式，不設計自有品牌產品，專注為Apple、NVIDIA等科技大廠代工生產領先技術的晶片，在先進製程（如3奈米、2奈米）上具統治性地位，被譽為「護國神山」。');
+  if (fugleQuote.success) {
+    const cls = changeClass(fugleQuote.change, 1);
+    const sign = fugleQuote.change > 0 ? '▲' : fugleQuote.change < 0 ? '▼' : '';
+    const lowMinusOpen = (fugleQuote.lowPrice - fugleQuote.openPrice).toFixed(0);
     const lowMinusOpenCls = lowMinusOpen > 0 ? 'up' : lowMinusOpen < 0 ? 'down' : '';
 
-    html += row('上個收盤價', tsmc.previousClose.toFixed(0));
-    html += row('開盤價', tsmc.openPrice.toFixed(0));
-    html += row('最高價', tsmc.highPrice.toFixed(0));
-    html += row('最低價', tsmc.lowPrice.toFixed(0));
-    html += row('現價', tsmc.closePrice.toFixed(0), 'accent');
-    html += row('均價', tsmc.avgPrice.toFixed(2));
-    html += row('漲跌', sign + tsmc.change, cls);
+    html += row('上個收盤價', fugleQuote.previousClose.toFixed(0));
+    html += row('開盤價', fugleQuote.openPrice.toFixed(0));
+    html += row('最高價', fugleQuote.highPrice.toFixed(0));
+    html += row('最低價', fugleQuote.lowPrice.toFixed(0));
+    html += row('現價', fugleQuote.closePrice.toFixed(0), 'accent');
+    html += row('均價', fugleQuote.avgPrice.toFixed(2));
+    html += row('漲跌', sign + fugleQuote.change, cls);
     html += row('低減開', lowMinusOpen, lowMinusOpenCls);
 
     // 委託簿（並排顯示）
+    html += `<div class="row" style="border-bottom: none;"><span class="row-label">委託簿</span></div>`;
     html += `
       <div style="margin-top:10px;">
         <div style="display:grid;grid-template-columns:1fr 58px 58px 1fr;gap:2px;font-family:var(--mono);font-size:.75rem;">
@@ -1278,10 +1280,10 @@ async function loadTw() {
           <span style="color:var(--dim);text-align:center;">張數</span>
         </div>`;
 
-    const maxRows = Math.max(tsmc.bids.length, tsmc.asks.length);
+    const maxRows = Math.max(fugleQuote.bids.length, fugleQuote.asks.length);
     for (let i = 0; i < maxRows; i++) {
-      const bid = tsmc.bids[i];
-      const ask = tsmc.asks[i];
+      const bid = fugleQuote.bids[i];
+      const ask = fugleQuote.asks[i];
       html += `
         <div style="display:grid;grid-template-columns:1fr 58px 58px 1fr;gap:2px;font-family:var(--mono);font-size:.75rem;padding:2px 0;border-bottom:1px solid var(--border);">
           <span style="color:var(--up);text-align:center;">${bid ? bid.size : ''}</span>
@@ -1295,17 +1297,17 @@ async function loadTw() {
     // 價格門檻通知（從 localStorage 讀取，未設定則不觸發）
     const tsmcHigh = alertGet('tsmc_high');
     const tsmcLow  = alertGet('tsmc_low');
-    if (tsmcHigh !== null && tsmc.closePrice >= tsmcHigh) {
+    if (tsmcHigh !== null && fugleQuote.closePrice >= tsmcHigh) {
       sendNotification(
         '台積電股票警示',
-        `價格 ${tsmc.closePrice.toFixed(2)} TWD，已高於設定門檻 ${tsmcHigh} TWD`,
+        `價格 ${fugleQuote.closePrice.toFixed(2)} TWD，已高於設定門檻 ${tsmcHigh} TWD`,
         'https://tw.stock.yahoo.com/quote/2330.TW'
       );
     }
-    if (tsmcLow !== null && tsmc.closePrice <= tsmcLow) {
+    if (tsmcLow !== null && fugleQuote.closePrice <= tsmcLow) {
       sendNotification(
         '台積電股票警示',
-        `價格 ${tsmc.closePrice.toFixed(2)} TWD，已低於設定門檻 ${tsmcLow} TWD`,
+        `價格 ${fugleQuote.closePrice.toFixed(2)} TWD，已低於設定門檻 ${tsmcLow} TWD`,
         'https://tw.stock.yahoo.com/quote/2330.TW'
       );
     }
@@ -1313,7 +1315,67 @@ async function loadTw() {
     html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
   }
 
+  // 分價量表
+  const volumeHtml = renderVolumeProfile(fugleVolume);
+  html += volumeHtml;
+
   setCard('card-tw', 0, html);
+}
+
+function renderVolumeProfile(data) {
+  if (!data || !data.success || !data.data.length) return '<p>無分價量表資料</p>';
+
+  const maxVolume = Math.max(...data.data.map(d => d.volume));
+  const maxPrice = Math.max(...data.data.map(d => d.price));
+  const minPrice = Math.min(...data.data.map(d => d.price));
+
+  const rows = data.data.map(d => {
+    const bidPct  = (d.volumeAtBid / maxVolume * 100).toFixed(1);
+    const askPct  = (d.volumeAtAsk / maxVolume * 100).toFixed(1);
+    const totalPct = (d.volume / maxVolume * 100).toFixed(1);
+
+    // 價格顏色：最高紅、最低藍、其餘預設
+    let priceColor = '';
+    if (d.price === maxPrice) priceColor = 'color:#e05c5c;font-weight:bold;';
+    else if (d.price === minPrice) priceColor = 'color:#5b9bd5;font-weight:bold;';
+
+    // 外盤強買壓：外盤佔比 > 80% 時 yellow 高亮（優先級最低，不覆蓋最高/最低價）
+    const askRatio = d.volume > 0 ? d.volumeAtAsk / d.volume : 0;
+    if (!priceColor && askRatio > 0.8) priceColor = 'color:#ffd600;font-weight:bold;';
+
+    return `
+      <div style="display:flex;align-items:center;margin-bottom:0px;border-bottom: 1px solid var(--border);padding: 13px;">
+        <!-- 左側文字 -->
+        <div style="width:160px;font-size:12px;line-height:1.6;flex-shrink:0;">
+          <div style="${priceColor}">成交價：${d.price.toFixed(2)}</div>
+          <div>累計成交量：${d.volume}</div>
+          <div style="color:#4caf50;">內盤成交量：${d.volumeAtBid}</div>
+          <div style="color:#2196f3;">外盤成交量：${d.volumeAtAsk}</div>
+        </div>
+        <!-- 右側 bar -->
+        <div style="flex:1;position:relative;height:40px;">
+          <!-- 灰色背景（滿格，代表最大量參考） -->
+          <div style="position:absolute;top:8px;left:0;width:100%;height:24px;background:#333;border-radius:3px;"></div>
+          <!-- 整體總量的範圍（內盤綠 + 外盤藍，並排） -->
+          <div style="position:absolute;top:8px;left:0;width:${totalPct}%;height:24px;display:flex;border-radius:3px;overflow:hidden;">
+            <!-- 內盤（綠） -->
+            <div style="width:${d.volume > 0 ? (d.volumeAtBid / d.volume * 100).toFixed(1) : 0}%;background:#4caf50;"></div>
+            <!-- 外盤（藍） -->
+            <div style="flex:1;background:#2196f3;"></div>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  return `
+    <div style="padding:8px 0;">
+      <div class="row" style="border-bottom: none; padding:0px;">
+        <span class="row-label">分價量表</span>
+      </div>
+      ${rows}
+    </div>
+  `;
 }
 
 // 美股市場概況
@@ -1771,10 +1833,15 @@ async function loadSentiment() {
 
 // 我的股票自選
 async function loadMyStock() {
-  // 平行抓取所有自選股票
-  const results = await Promise.all(
-    MY_STOCKS.map(s => fetch(WORKER + '/stock/quote/' + s.symbol).then(r => r.json()).catch(() => ({ success: false })))
-  );
+  // 平行抓取所有自選股票的 quote 和 volume
+  const [quoteResults, volumeResults] = await Promise.all([
+    Promise.all(
+      MY_STOCKS.map(s => fetch(WORKER + '/stock/quote/' + s.symbol).then(r => r.json()).catch(() => ({ success: false })))
+    ),
+    Promise.all(
+      MY_STOCKS.map(s => fetch(WORKER + '/stock/volume/' + s.symbol).then(r => r.json()).catch(() => ({ success: false })))
+    )
+  ]);
 
   let html = `<div class="card-title">
     <span class="card-title-text">我的自選股票</span>
@@ -1785,7 +1852,7 @@ async function loadMyStock() {
 
   for (let i = 0; i < MY_STOCKS.length; i++) {
     const stock = MY_STOCKS[i];
-    const data  = results[i];
+    const data  = quoteResults[i];
     const settingsKey = `mystock_${stock.symbol}`;
 
     html += groupHeader(`【${data.name || stock.name}】`, settingsKey, ``);
@@ -1806,6 +1873,7 @@ async function loadMyStock() {
       html += row('低減開',     lowMinusOpen, lowMinusOpenCls);
 
       // 委託簿
+      html += `<div class="row" style="border-bottom: none;"><span class="row-label">委託簿</span></div>`;
       html += `
         <div style="margin-top:10px;">
           <div style="display:grid;grid-template-columns:1fr 58px 58px 1fr;gap:2px;font-family:var(--mono);font-size:.75rem;">
@@ -1849,9 +1917,16 @@ async function loadMyStock() {
     } else {
       html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
     }
+
+    // 分價量表
+    const volumeData = volumeResults[i];
+    html += renderVolumeProfile(volumeData);
   }
 
-  setCard('card-mystock', 0, html);
+  const urlParams = new URLSearchParams(window.location.search);
+  const card_type = urlParams.get('card_type') || 'my-stock';
+
+  setCard('card-mystock', 0, html, card_type === 'my-stock' ? 'card-wide' : '');
 }
 
 // 已讀清單：用 localStorage 儲存已點擊過的新聞連結

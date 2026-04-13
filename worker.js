@@ -63,6 +63,7 @@ export default {
       const symbol = parts[3];
 
       if (method === "quote" && symbol)   return await fetchFugleQuote(symbol, env);
+      if (method === "volume" && symbol)   return await fetchFugleVolume(symbol, env);
     }
 
     if (path.startsWith("/yahoo-finance/")) {
@@ -842,6 +843,36 @@ async function fetchFugleQuote(symbol, env) {
       tradeVolumeAtBid:  d.total?.tradeVolumeAtBid  || 0,
       tradeVolumeAtAsk:  d.total?.tradeVolumeAtAsk  || 0,
       transaction:       d.total?.transaction        || 0,
+    });
+  } catch (e) {
+    return json({ success: false, error: e.message }, 500);
+  }
+}
+
+async function fetchFugleVolume(symbol, env) {
+  try {
+    const res = await fetch(
+      `https://api.fugle.tw/marketdata/v1.0/stock/intraday/volumes/${symbol}`,
+      {
+        headers: {
+          "X-API-KEY": env.FUGLE_KEY,
+          "Accept": "application/json"
+        }
+      }
+    );
+
+    if (!res.ok) {
+      return json({ success: false, error: `HTTP ${res.status}` });
+    }
+
+    const d = await res.json();
+
+    // 解析分價量表
+    const data = (d.data || []).map(b => ({ price: b.price, volume: b.volume, volumeAtBid: b.volumeAtBid, volumeAtAsk: b.volumeAtAsk }));
+
+    return json({
+      success: true,
+      data,
     });
   } catch (e) {
     return json({ success: false, error: e.message }, 500);
