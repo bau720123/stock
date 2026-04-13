@@ -140,7 +140,7 @@ header h1 {
 
 .card-title {
   font-family: var(--mono);
-  font-size: .7rem;
+  /* font-size: .7rem; */
   letter-spacing: .14em;
   text-transform: uppercase;
   /* color: var(--dim); */
@@ -1922,8 +1922,8 @@ async function loadWar() {
         html += `
           <div data-war-link="${item.link ? item.link.replace(/"/g, '&quot;') : ''}" style="padding: 10px 0; border-bottom: 2px solid var(--border);">
             <div style="display:flex; align-items:baseline; gap:6px; margin-bottom:5px;">
-              <span class="war-badge" style="font-family:var(--mono); font-size:1rem; color:${isRead ? 'red' : 'white'}; background:var(--muted); border-radius:3px; padding:1px 5px; flex-shrink:0;">${isRead ? '已讀' : '未讀'}</span>
-              <div class="war-title" style="font-size: 1.2rem; color: ${isRead ? 'var(--dim)' : 'var(--text)'}; line-height: 1.5;">
+              <span class="war-badge" style="font-family:var(--mono); font-size:1rem; color:${isRead ? 'gray' : 'white'}; background:var(--muted); border-radius:3px; padding:1px 5px; flex-shrink:0;">${isRead ? '已讀' : '未讀'}</span>
+              <div class="war-title" style="font-size: 1.2rem; color: ${isRead ? 'var(--dim)' : 'bisque'}; line-height: 1.5;">
                 ${item.title || '（無標題）'}
               </div>
             </div>
