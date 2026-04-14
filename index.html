@@ -600,6 +600,18 @@ function syncAlertConfigs() {
   }
 }
 
+function syncAddBtnState() {
+  const rowCount = document.querySelectorAll('.mystock-row').length;
+  const addBtn = document.getElementById('mystock-add-btn');
+  const sotckLimit = document.getElementById('stock-limit');
+  if (addBtn) {
+    addBtn.disabled = rowCount >= 5;
+    addBtn.style.opacity = rowCount >= 5 ? '0.4' : '1';
+    addBtn.style.cursor  = rowCount >= 5 ? 'not-allowed' : 'pointer';
+    sotckLimit.style.display  = rowCount >= 5 ? 'block' : 'none';
+  }
+}
+
 // 自選股票清單管理介面
 async function openMyStockSettings() {
   // 每次開啟都讀取最新的清單
@@ -620,7 +632,7 @@ async function openMyStockSettings() {
   function renderRows() {
     const last = editList.length - 1;
     return editList.map((s, i) => `
-      <div id="mystock-row-${i}" style="display:flex; align-items:center; gap:6px; margin-bottom:8px;">
+      <div id="mystock-row-${i}" style="display:flex; align-items:center; gap:6px; margin-bottom:8px;" class="mystock-row">
         <input
           id="mystock-symbol-${i}"
           type="number"
@@ -659,6 +671,11 @@ async function openMyStockSettings() {
     return `
       <div style="font-size:.75rem; color:#5a7080; margin-bottom:12px; text-align:left;">
         請設定股票代號與股票名稱，儲存後立即生效
+        <br>
+        股票名稱若不填，會自動抓取並對應
+      </div>
+      <div id="stock-limit" style="display:none; font-size:.75rem; color:red; margin-bottom:12px; text-align:left;">
+        已達到最大能新增的數量
       </div>
       <div id="mystock-rows">${renderRows()}</div>
       <button
@@ -676,12 +693,14 @@ async function openMyStockSettings() {
     syncFromDom();
     editList.push({ symbol: '', name: '' });
     document.getElementById('mystock-rows').innerHTML = renderRows();
+    syncAddBtnState();
   };
 
   window.mystockRemoveRow = function(idx) {
     syncFromDom();
     editList.splice(idx, 1);
     document.getElementById('mystock-rows').innerHTML = renderRows();
+    syncAddBtnState();
   };
 
   window.mystockMoveRow = function(idx, dir) {
@@ -707,6 +726,7 @@ async function openMyStockSettings() {
     didOpen: () => {
       const firstInput = document.querySelector('.swal2-popup input');
       if (firstInput) firstInput.blur();
+      syncAddBtnState();
     },
     preConfirm: () => {
       // 從 DOM 讀取最新輸入值
@@ -727,6 +747,22 @@ async function openMyStockSettings() {
 
   if (!result.isConfirmed) return;
 
+  // 挑選出 symbol 等於 name 的資料
+  const needFetch = result.value.filter(s => s.symbol === s.name);
+
+  // 平行抓取缺少 name 的股票資料
+  if (needFetch.length > 0) {
+    await Promise.all(
+      needFetch.map(async s => {
+        const data = await fetch(WORKER + '/stock/quote/' + s.symbol).then(r => r.json()).catch(() => null);
+        if (data && data.success && data.name) {
+          // 補回 result.value 對應的那筆
+          const target = result.value.find(r => r.symbol === s.symbol);
+          if (target) target.name = data.name;
+        }
+      })
+    );
+  }
   saveMyStocksList(result.value);
 
   Swal.fire({
