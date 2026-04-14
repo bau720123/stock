@@ -587,14 +587,17 @@ const ALERT_CONFIGS = {
 };
 
 // 動態注入自選股票的警示設定
-for (const stock of MY_STOCKS) {
-  ALERT_CONFIGS[`mystock_${stock.symbol}`] = {
-    title: `${stock.name}（${stock.symbol}）偵測設定`,
-    fields: [
-      { key: `mystock_${stock.symbol}_high`, label: '價格高於此值時通知', placeholder: '例：1000', unit: 'TWD' },
-      { key: `mystock_${stock.symbol}_low`,  label: '價格低於此值時通知', placeholder: '例：800',  unit: 'TWD' },
-    ]
-  };
+syncAlertConfigs();
+function syncAlertConfigs() {
+  for (const stock of MY_STOCKS) {
+    ALERT_CONFIGS[`mystock_${stock.symbol}`] = {
+      title: `${stock.name}（${stock.symbol}）偵測設定`,
+      fields: [
+        { key: `mystock_${stock.symbol}_high`, label: '價格高於此值時通知', placeholder: '例：1000', unit: 'TWD' },
+        { key: `mystock_${stock.symbol}_low`,  label: '價格低於此值時通知', placeholder: '例：800',  unit: 'TWD' },
+      ]
+    };
+  }
 }
 
 // 自選股票清單管理介面
@@ -738,9 +741,10 @@ async function openMyStockSettings() {
     cancelButtonColor: '#3a4a5c',
   }).then(r => {
     if (r.isConfirmed) {
-      // MY_STOCKS = loadMyStocksList(); // 更新全域變數
-      // loadMyStock();
-      location.reload();
+      MY_STOCKS = loadMyStocksList(); // 更新全域變數
+      syncAlertConfigs(); // 重新注入新股票的警示設定
+      loadMyStock();
+      // location.reload();
     }
   });
 }
@@ -1270,9 +1274,23 @@ async function loadTw() {
     html += row('低減開', lowMinusOpen, lowMinusOpenCls);
 
     // 委託簿（並排顯示）
-    html += `<div class="row" style="border-bottom: none;"><span class="row-label">委託簿</span></div>`;
     html += `
-      <div style="margin-top:10px;">
+      <div class="row">
+        <span class="row-label">委託簿</span>
+        <span style="cursor:pointer;user-select:none;" onclick="
+          const ob = document.getElementById('orderbook');
+          const btn = this;
+          if (ob.style.display === 'none') {
+            ob.style.display = 'block';
+            btn.textContent = '－';
+          } else {
+            ob.style.display = 'none';
+            btn.textContent = '＋';
+          }
+        ">＋</span>
+      </div>`;
+    html += `
+      <div id="orderbook" style="display: none">
         <div style="display:grid;grid-template-columns:1fr 58px 58px 1fr;gap:2px;font-family:var(--mono);font-size:.75rem;">
           <span style="color:var(--dim);text-align:center;">張數</span>
           <span style="color:var(--up);text-align:right;padding-right:6px;">委買</span>
@@ -1316,23 +1334,25 @@ async function loadTw() {
   }
 
   // 分價量表
-  const volumeHtml = renderVolumeProfile(fugleVolume);
+  const volumeHtml = renderVolumeProfile(fugleVolume, 'tw');
   html += volumeHtml;
 
   setCard('card-tw', 0, html);
 }
 
-function renderVolumeProfile(data) {
+function renderVolumeProfile(data, id) {
   if (!data || !data.success || !data.data.length) return '<p>無分價量表資料</p>';
 
   const maxVolume = Math.max(...data.data.map(d => d.volume));
   const maxPrice = Math.max(...data.data.map(d => d.price));
   const minPrice = Math.min(...data.data.map(d => d.price));
 
+  // const filteredData = data.data.filter(d => d.price !== maxPrice && d.price !== minPrice);
+  // const rows = filteredData.map(d => {
   const rows = data.data.map(d => {
     const bidPct  = (d.volumeAtBid / maxVolume * 100).toFixed(1);
     const askPct  = (d.volumeAtAsk / maxVolume * 100).toFixed(1);
-    const totalPct = (d.volume / maxVolume * 100).toFixed(1);
+    const totalPct = (d.volume / d.volume * 100).toFixed(1);
 
     // 價格顏色：最高紅、最低藍、其餘預設
     let priceColor = '';
@@ -1344,7 +1364,7 @@ function renderVolumeProfile(data) {
     if (!priceColor && askRatio > 0.8) priceColor = 'color:#ffd600;font-weight:bold;';
 
     return `
-      <div style="display:flex;align-items:center;margin-bottom:0px;border-bottom: 1px solid var(--border);padding: 13px;">
+      <div style="display:none;align-items:center;margin-bottom:0px;border-bottom: 1px solid var(--border);padding: 10px 0px 10px 12px" class="ordervolume_${id}">
         <!-- 左側文字 -->
         <div style="width:160px;font-size:12px;line-height:1.6;flex-shrink:0;">
           <div style="${priceColor}">成交價：${d.price.toFixed(2)}</div>
@@ -1361,7 +1381,7 @@ function renderVolumeProfile(data) {
             <!-- 內盤（綠） -->
             <div style="width:${d.volume > 0 ? (d.volumeAtBid / d.volume * 100).toFixed(1) : 0}%;background:#4caf50;"></div>
             <!-- 外盤（藍） -->
-            <div style="flex:1;background:#2196f3;"></div>
+            <div style="width:${d.volume > 0 ? (d.volumeAtAsk / d.volume * 100).toFixed(1) : 0}%;background:#2196f3;"></div>
           </div>
         </div>
       </div>
@@ -1369,9 +1389,16 @@ function renderVolumeProfile(data) {
   }).join('');
 
   return `
-    <div style="padding:8px 0;">
-      <div class="row" style="border-bottom: none; padding:0px;">
+    <div>
+      <div class="row">
         <span class="row-label">分價量表</span>
+        <span style="cursor:pointer;user-select:none;" onclick="
+          const items = document.querySelectorAll('.ordervolume_${id}');
+          const btn = this;
+          const isHidden = items[0].style.display === 'none';
+          items.forEach(el => el.style.display = isHidden ? 'flex' : 'none');
+          btn.textContent = isHidden ? '－' : '＋';
+        ">＋</span>
       </div>
       ${rows}
     </div>
@@ -1873,9 +1900,23 @@ async function loadMyStock() {
       html += row('低減開',     lowMinusOpen, lowMinusOpenCls);
 
       // 委託簿
-      html += `<div class="row" style="border-bottom: none;"><span class="row-label">委託簿</span></div>`;
       html += `
-        <div style="margin-top:10px;">
+        <div class="row">
+          <span class="row-label">委託簿</span>
+          <span style="cursor:pointer;user-select:none;" onclick="
+            const ob = document.getElementById('orderbook_${i}');
+            const btn = this;
+            if (ob.style.display === 'none') {
+              ob.style.display = 'block';
+              btn.textContent = '－';
+            } else {
+              ob.style.display = 'none';
+              btn.textContent = '＋';
+            }
+          ">＋</span>
+        </div>`;
+      html += `
+        <div id="orderbook_${i}" style="display: none">
           <div style="display:grid;grid-template-columns:1fr 58px 58px 1fr;gap:2px;font-family:var(--mono);font-size:.75rem;">
             <span style="color:var(--dim);text-align:center;">張數</span>
             <span style="color:var(--up);text-align:right;padding-right:6px;">委買</span>
@@ -1919,8 +1960,7 @@ async function loadMyStock() {
     }
 
     // 分價量表
-    const volumeData = volumeResults[i];
-    html += renderVolumeProfile(volumeData);
+    html += renderVolumeProfile(volumeResults[i], stock.symbol);
   }
 
   const urlParams = new URLSearchParams(window.location.search);
