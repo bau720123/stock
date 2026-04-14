@@ -405,7 +405,7 @@ header h1 {
     <li><a onclick="closeMenu()" href="?card_type=america-market">🏛️ 美股市場概況</a></li>
     <li><a onclick="closeMenu()" href="?card_type=materials">🛢️ 原物料市場</a></li>
     <li><a onclick="closeMenu()" href="?card_type=market-sentiment">🌡️ 市場情緒</a></li>
-    <li><a onclick="closeMenu()" href="?card_type=my-stock">⭐ 我的自選股票</a></li>
+    <li><a onclick="closeMenu()" href="?card_type=my-stock">⭐ 我的自選股</a></li>
     <li><a onclick="closeMenu()" href="?card_type=war">🔥 美伊戰爭消息</a></li>
     <li><a onclick="closeMenu()" href="?card_type=america-calendar">📅 美股行事曆</a></li>
     <li><a onclick="closeMenu()" href="?card_type=all">🌐 全類別顯示</a></li>
@@ -459,7 +459,7 @@ header h1 {
       <div class="skeleton"></div>
   </div>
   <div class="card" id="card-mystock" style="display: none;">
-      <div class="card-title">我的自選股票</div>
+      <div class="card-title">我的自選股</div>
       <div class="skeleton"></div>
       <div class="skeleton"></div>
   </div>
@@ -1176,14 +1176,15 @@ window.onload = loadAll;
 
 // 台股市場概況
 async function loadTw() {
-  const [taifexNight, taifexDay, twn, /*twncon, */taifexTsmc, fugleQuote, fugleVolume] = await Promise.all([
+  const [taifexNight, taifexDay, twn, /*twncon, */taifexTsmc, fugleQuote/*, fugleVolume, fugleHistory*/] = await Promise.all([
     fetch(WORKER + '/taifex/12/TX046').then(r => r.json()), // 台股期貨夜盤
     fetch(WORKER + '/taifex/2/TX046').then(r => r.json()), // 台股期貨日盤
     fetch(WORKER + '/twn').then(r => r.json()), // 富台指
     // fetch(WORKER + '/twncon').then(r => r.json()), // 富台指
     fetch(WORKER + '/taifex/12/CDF046').then(r => r.json()), // 台積電期貨夜盤
     fetch(WORKER + '/stock/quote/2330').then(r => r.json()), // 台積電現貨日盤股價資訊
-    fetch(WORKER + '/stock/volume/2330').then(r => r.json()), // 台積電現貨日盤分價量表
+    // fetch(WORKER + '/stock/volume/2330').then(r => r.json()), // 台積電現貨日盤分價量表
+    // fetch(WORKER + '/stock/history/2330').then(r => r.json()), // 台積電現股歷史股價資料
   ]);
 
   let html = `<div class="card-title">大盤指數</div>`;
@@ -1257,7 +1258,7 @@ async function loadTw() {
   }
 
   // 【台積電現貨日盤】
-  html += groupHeader(`【現貨日盤】`, 'tsmc', '台積電（TSMC）是全球最大的專業積體電路（IC）製造服務公司，總部位於臺灣新竹科學園區，1987年由張忠謀創立。台積電首創「純晶圓代工」模式，不設計自有品牌產品，專注為Apple、NVIDIA等科技大廠代工生產領先技術的晶片，在先進製程（如3奈米、2奈米）上具統治性地位，被譽為「護國神山」。');
+  html += groupHeader(`【現貨日盤】`, '', '台積電（TSMC）是全球最大的專業積體電路（IC）製造服務公司，總部位於臺灣新竹科學園區，1987年由張忠謀創立。台積電首創「純晶圓代工」模式，不設計自有品牌產品，專注為Apple、NVIDIA等科技大廠代工生產領先技術的晶片，在先進製程（如3奈米、2奈米）上具統治性地位，被譽為「護國神山」。');
   if (fugleQuote.success) {
     const cls = changeClass(fugleQuote.change, 1);
     const sign = fugleQuote.change > 0 ? '▲' : fugleQuote.change < 0 ? '▼' : '';
@@ -1333,76 +1334,31 @@ async function loadTw() {
     html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
   }
 
-  // 分價量表
-  const volumeHtml = renderVolumeProfile(fugleVolume, 'tw');
-  html += volumeHtml;
+  // // 分價量表
+  // const volumeHtml = renderVolumeProfile(fugleVolume, 'tw');
+  // html += volumeHtml;
+
+  // // 歷史股價
+  // html += `
+  //   <div class="row">
+  //     <span class="row-label">歷史股價</span>
+  //     <span style="cursor:pointer;user-select:none;" onclick="
+  //       const ob = document.getElementById('stockhistory');
+  //       const btn = this;
+  //       if (ob.style.display === 'none') {
+  //         ob.style.display = 'block';
+  //         btn.textContent = '－';
+  //       } else {
+  //         ob.style.display = 'none';
+  //         btn.textContent = '＋';
+  //       }
+  //     ">＋</span>
+  //   </div>`;
+  // html += `<div id="stockhistory" style="display:none;">
+  //   ${renderStockHistory(fugleHistory)}
+  // </div>`;
 
   setCard('card-tw', 0, html);
-}
-
-function renderVolumeProfile(data, id) {
-  if (!data || !data.success || !data.data.length) return '<p>無分價量表資料</p>';
-
-  const maxVolume = Math.max(...data.data.map(d => d.volume));
-  const maxPrice = Math.max(...data.data.map(d => d.price));
-  const minPrice = Math.min(...data.data.map(d => d.price));
-
-  // const filteredData = data.data.filter(d => d.price !== maxPrice && d.price !== minPrice);
-  // const rows = filteredData.map(d => {
-  const rows = data.data.map(d => {
-    const bidPct  = (d.volumeAtBid / maxVolume * 100).toFixed(1);
-    const askPct  = (d.volumeAtAsk / maxVolume * 100).toFixed(1);
-    const totalPct = (d.volume / d.volume * 100).toFixed(1);
-
-    // 價格顏色：最高紅、最低藍、其餘預設
-    let priceColor = '';
-    if (d.price === maxPrice) priceColor = 'color:#e05c5c;font-weight:bold;';
-    else if (d.price === minPrice) priceColor = 'color:#5b9bd5;font-weight:bold;';
-
-    // 外盤強買壓：外盤佔比 > 80% 時 yellow 高亮（優先級最低，不覆蓋最高/最低價）
-    const askRatio = d.volume > 0 ? d.volumeAtAsk / d.volume : 0;
-    if (!priceColor && askRatio > 0.8) priceColor = 'color:#ffd600;font-weight:bold;';
-
-    return `
-      <div style="display:none;align-items:center;margin-bottom:0px;border-bottom: 1px solid var(--border);padding: 10px 0px 10px 12px" class="ordervolume_${id}">
-        <!-- 左側文字 -->
-        <div style="width:160px;font-size:12px;line-height:1.6;flex-shrink:0;">
-          <div style="${priceColor}">成交價：${d.price.toFixed(2)}</div>
-          <div>累計成交量：${d.volume}</div>
-          <div style="color:#4caf50;">內盤成交量：${d.volumeAtBid}</div>
-          <div style="color:#2196f3;">外盤成交量：${d.volumeAtAsk}</div>
-        </div>
-        <!-- 右側 bar -->
-        <div style="flex:1;position:relative;height:40px;">
-          <!-- 灰色背景（滿格，代表最大量參考） -->
-          <div style="position:absolute;top:8px;left:0;width:100%;height:24px;background:#333;border-radius:3px;"></div>
-          <!-- 整體總量的範圍（內盤綠 + 外盤藍，並排） -->
-          <div style="position:absolute;top:8px;left:0;width:${totalPct}%;height:24px;display:flex;border-radius:3px;overflow:hidden;">
-            <!-- 內盤（綠） -->
-            <div style="width:${d.volume > 0 ? (d.volumeAtBid / d.volume * 100).toFixed(1) : 0}%;background:#4caf50;"></div>
-            <!-- 外盤（藍） -->
-            <div style="width:${d.volume > 0 ? (d.volumeAtAsk / d.volume * 100).toFixed(1) : 0}%;background:#2196f3;"></div>
-          </div>
-        </div>
-      </div>
-    `;
-  }).join('');
-
-  return `
-    <div>
-      <div class="row">
-        <span class="row-label">分價量表</span>
-        <span style="cursor:pointer;user-select:none;" onclick="
-          const items = document.querySelectorAll('.ordervolume_${id}');
-          const btn = this;
-          const isHidden = items[0].style.display === 'none';
-          items.forEach(el => el.style.display = isHidden ? 'flex' : 'none');
-          btn.textContent = isHidden ? '－' : '＋';
-        ">＋</span>
-      </div>
-      ${rows}
-    </div>
-  `;
 }
 
 // 美股市場概況
@@ -1860,18 +1816,21 @@ async function loadSentiment() {
 
 // 我的股票自選
 async function loadMyStock() {
-  // 平行抓取所有自選股票的 quote 和 volume
-  const [quoteResults, volumeResults] = await Promise.all([
+  // 平行抓取所有自選股票的相關屬性資訊
+  const [quoteResults, volumeResults, historyResults] = await Promise.all([
     Promise.all(
       MY_STOCKS.map(s => fetch(WORKER + '/stock/quote/' + s.symbol).then(r => r.json()).catch(() => ({ success: false })))
     ),
     Promise.all(
       MY_STOCKS.map(s => fetch(WORKER + '/stock/volume/' + s.symbol).then(r => r.json()).catch(() => ({ success: false })))
+    ),
+    Promise.all(
+      MY_STOCKS.map(s => fetch(WORKER + '/stock/history/' + s.symbol).then(r => r.json()).catch(() => ({ success: false })))
     )
   ]);
 
   let html = `<div class="card-title">
-    <span class="card-title-text">我的自選股票</span>
+    <span class="card-title-text">我的自選股</span>
     <button class="alert-settings-btn" title="管理股票清單" onclick="openMyStockSettings()">
       ⚙️
     </button>
@@ -1961,12 +1920,139 @@ async function loadMyStock() {
 
     // 分價量表
     html += renderVolumeProfile(volumeResults[i], stock.symbol);
+
+    // 歷史股價
+    html += `
+      <div class="row">
+        <span class="row-label">歷史股價</span>
+        <span style="cursor:pointer;user-select:none;" onclick="
+          const ob = document.getElementById('stockhistory_${i}');
+          const btn = this;
+          if (ob.style.display === 'none') {
+            ob.style.display = 'block';
+            btn.textContent = '－';
+          } else {
+            ob.style.display = 'none';
+            btn.textContent = '＋';
+          }
+        ">＋</span>
+      </div>`;
+    html += `<div id="stockhistory_${i}" style="display:none;">
+      ${renderStockHistory(historyResults[i])}
+    </div>`;
   }
 
-  const urlParams = new URLSearchParams(window.location.search);
-  const card_type = urlParams.get('card_type') || 'my-stock';
+  // const urlParams = new URLSearchParams(window.location.search);
+  // const card_type = urlParams.get('card_type') || 'my-stock';
 
-  setCard('card-mystock', 0, html, card_type === 'my-stock' ? 'card-wide' : '');
+  // setCard('card-mystock', 0, html, card_type === 'my-stock' ? 'card-wide' : '');
+  setCard('card-mystock', 0, html, '');
+}
+
+function renderVolumeProfile(data, id) {
+  if (!data || !data.success || !data.data.length) return '<p>無分價量表資料</p>';
+
+  const maxVolume = Math.max(...data.data.map(d => d.volume));
+  const maxPrice = Math.max(...data.data.map(d => d.price));
+  const minPrice = Math.min(...data.data.map(d => d.price));
+
+  // const filteredData = data.data.filter(d => d.price !== maxPrice && d.price !== minPrice);
+  // const rows = filteredData.map(d => {
+  const rows = data.data.map(d => {
+    const bidPct  = (d.volumeAtBid / maxVolume * 100).toFixed(1);
+    const askPct  = (d.volumeAtAsk / maxVolume * 100).toFixed(1);
+    const totalPct = (d.volume / d.volume * 100).toFixed(1);
+
+    // 價格顏色：最高紅、最低藍、其餘預設
+    let priceColor = '';
+    if (d.price === maxPrice) priceColor = 'color:#e05c5c;font-weight:bold;';
+    else if (d.price === minPrice) priceColor = 'color:#5b9bd5;font-weight:bold;';
+
+    // 外盤強買壓：外盤佔比 > 80% 時 yellow 高亮（優先級最低，不覆蓋最高/最低價）
+    const askRatio = d.volume > 0 ? d.volumeAtAsk / d.volume : 0;
+    if (!priceColor && askRatio > 0.8) priceColor = 'color:#ffd600;font-weight:bold;';
+
+    return `
+      <div style="display:none;align-items:center;margin-bottom:0px;border-bottom: 1px solid var(--border);padding: 10px 0px 10px 12px" class="ordervolume_${id}">
+        <!-- 左側文字 -->
+        <div style="width:160px;font-size:12px;line-height:1.6;flex-shrink:0;">
+          <div style="${priceColor}">成交價：${d.price.toFixed(2)}</div>
+          <div>累計成交量：${d.volume}</div>
+          <div style="color:#4caf50;">內盤成交量：${d.volumeAtBid}</div>
+          <div style="color:#2196f3;">外盤成交量：${d.volumeAtAsk}</div>
+        </div>
+        <!-- 右側 bar -->
+        <div style="flex:1;position:relative;height:40px;">
+          <!-- 灰色背景（滿格，代表最大量參考） -->
+          <div style="position:absolute;top:8px;left:0;width:100%;height:24px;background:#333;border-radius:3px;"></div>
+          <!-- 整體總量的範圍（內盤綠 + 外盤藍，並排） -->
+          <div style="position:absolute;top:8px;left:0;width:${totalPct}%;height:24px;display:flex;border-radius:3px;overflow:hidden;">
+            <!-- 內盤（綠） -->
+            <div style="width:${d.volume > 0 ? (d.volumeAtBid / d.volume * 100).toFixed(1) : 0}%;background:#4caf50;"></div>
+            <!-- 外盤（藍） -->
+            <div style="width:${d.volume > 0 ? (d.volumeAtAsk / d.volume * 100).toFixed(1) : 0}%;background:#2196f3;"></div>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  return `
+    <div>
+      <div class="row">
+        <span class="row-label">分價量表</span>
+        <span style="cursor:pointer;user-select:none;" onclick="
+          const items = document.querySelectorAll('.ordervolume_${id}');
+          const btn = this;
+          const isHidden = items[0].style.display === 'none';
+          items.forEach(el => el.style.display = isHidden ? 'flex' : 'none');
+          btn.textContent = isHidden ? '－' : '＋';
+        ">＋</span>
+      </div>
+      ${rows}
+    </div>
+  `;
+}
+
+function renderStockHistory(data) {
+  if (!data || !data.success || !data.data.length) return '<p>無歷史資料</p>';
+
+  const headers = ['日期', '開盤', '最高', '最低', '收盤', '漲跌', '成交量', '成交金額'];
+
+  const headerRow = `
+    <tr>
+      <th style="position:sticky;left:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);">日期</th>
+      ${['開盤', '最高', '最低', '收盤', '漲跌', '成交量', '成交金額'].map(h =>
+        `<th style="padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:right;">${h}</th>`
+      ).join('')}
+    </tr>`;
+
+  const bodyRows = data.data.map(d => {
+    const changeCls = d.change > 0 ? 'color:#e05c5c;' : d.change < 0 ? 'color:#4caf50;' : '';
+    const sign = d.change > 0 ? '▲' : d.change < 0 ? '▼' : '';
+    const volume   = (d.volume / 1000).toFixed(0);         // 張（股÷1000）
+    const turnover = (d.turnover / 100000000).toFixed(2);  // 億元
+
+    return `
+      <tr style="border-bottom:1px solid var(--border);">
+        <td style="position:sticky;left:0;z-index:1;background:#1a2332;padding:6px 10px;white-space:nowrap;font-size:12px;">${d.date}</td>
+        <td style="padding:6px 10px;text-align:right;font-size:12px;">${d.open}</td>
+        <td style="padding:6px 10px;text-align:right;font-size:12px;">${d.high}</td>
+        <td style="padding:6px 10px;text-align:right;font-size:12px;">${d.low}</td>
+        <td style="padding:6px 10px;text-align:right;font-size:12px;">${d.close}</td>
+        <td style="padding:6px 10px;text-align:right;font-size:12px;${changeCls}">${sign}${d.change}</td>
+        <td style="padding:6px 10px;text-align:right;font-size:12px;">${volume}</td>
+        <td style="padding:6px 10px;text-align:right;font-size:12px;">${turnover}億</td>
+      </tr>`;
+  }).join('');
+
+  return `
+    <div style="overflow-x:auto;">
+      <table style="border-collapse:collapse;font-family:var(--mono);min-width:500px;">
+        <thead>${headerRow}</thead>
+        <tbody>${bodyRows}</tbody>
+      </table>
+    </div>`;
 }
 
 // 已讀清單：用 localStorage 儲存已點擊過的新聞連結

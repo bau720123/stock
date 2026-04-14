@@ -64,6 +64,7 @@ export default {
 
       if (method === "quote" && symbol)   return await fetchFugleQuote(symbol, env);
       if (method === "volume" && symbol)   return await fetchFugleVolume(symbol, env);
+      if (method === "history" && symbol)   return await fetchFugleHistory(symbol, env);
     }
 
     if (path.startsWith("/yahoo-finance/")) {
@@ -869,6 +870,36 @@ async function fetchFugleVolume(symbol, env) {
 
     // 解析分價量表
     const data = (d.data || []).map(b => ({ price: b.price, volume: b.volume, volumeAtBid: b.volumeAtBid, volumeAtAsk: b.volumeAtAsk }));
+
+    return json({
+      success: true,
+      data,
+    });
+  } catch (e) {
+    return json({ success: false, error: e.message }, 500);
+  }
+}
+
+async function fetchFugleHistory(symbol, env) {
+  try {
+    const to   = new Date().toISOString().slice(0, 10);
+    const from = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+    const res = await fetch(
+      `https://api.fugle.tw/marketdata/v1.0/stock/historical/candles/${symbol}?from=${from}&to=${to}&timeframe=D&fields=open,high,low,close,volume,turnover,change&sort=desc`,
+      {
+        headers: {
+          "X-API-KEY": env.FUGLE_KEY,
+          "Accept": "application/json"
+        }
+      }
+    );
+
+    if (!res.ok) {
+      return json({ success: false, error: `HTTP ${res.status}` });
+    }
+
+    const d = await res.json();
+    const data = d.data;
 
     return json({
       success: true,
