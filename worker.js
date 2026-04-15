@@ -1615,7 +1615,7 @@ async function handleCron(env) {
   const [taifexDay, taifexNight, taifexTsmc, twnRes, /*twnConRes, */brentRes, vixRes, tsmcStock] = await Promise.all([
     fetchTaifex(2, "TX046"), // 台股期貨日盤
     fetchTaifex(12, "TX056"), // 台股期貨夜盤
-    fetchTaifex(12, "CDF046"), // 台積電期貨夜盤
+    fetchTaifex(12, "CDF056"), // 台積電期貨夜盤
     fetchHiStock("stocktop2017", "TWN", "指數", "成交量(口)"),
     // fetchCnyesTwn(), // 富台指
     fetchSina("hf_OIL"),
