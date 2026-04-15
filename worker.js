@@ -65,6 +65,9 @@ export default {
       if (method === "quote" && symbol)   return await fetchFugleQuote(symbol, env);
       if (method === "volume" && symbol)   return await fetchFugleVolume(symbol, env);
       if (method === "history" && symbol)   return await fetchFugleHistory(symbol, env);
+      if (method === "sma" && symbol)   return await fetchFugleSma(symbol, env);
+      if (method === "rsi" && symbol)   return await fetchFugleRsi(symbol, env);
+      if (method === "kdj" && symbol)   return await fetchFugleKdj(symbol, env);
     }
 
     if (path.startsWith("/yahoo-finance/")) {
@@ -900,6 +903,113 @@ async function fetchFugleHistory(symbol, env) {
 
     const d = await res.json();
     const data = d.data;
+
+    return json({
+      success: true,
+      data,
+    });
+  } catch (e) {
+    return json({ success: false, error: e.message }, 500);
+  }
+}
+
+async function fetchFugleSma(symbol, env) {
+  try {
+    const to   = new Date().toISOString().slice(0, 10);
+    const from = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10); // 60MA需要更長區間
+    const periods = [5, 10, 20, 60];
+
+    // 平行打四支API
+    const results = await Promise.all(
+      periods.map(period =>
+        fetch(
+          `https://api.fugle.tw/marketdata/v1.0/stock/technical/sma/${symbol}?from=${from}&to=${to}&timeframe=D&period=${period}`,
+          { headers: { "X-API-KEY": env.FUGLE_KEY, "Accept": "application/json" } }
+        ).then(r => r.json())
+      )
+    );
+
+    // 以 date 為 key 合併資料
+    const merged = {};
+    periods.forEach((period, i) => {
+      const rows = results[i]?.data || [];
+      rows.forEach(row => {
+        if (!merged[row.date]) merged[row.date] = { date: row.date };
+        merged[row.date][`sma_${period}`] = parseFloat(row.sma.toFixed(2));
+      });
+    });
+
+    // 轉回陣列並依日期遞減排序
+    const data = Object.values(merged).sort((b, a) => a.date.localeCompare(b.date));
+
+    return json({ success: true, data });
+  } catch (e) {
+    return json({ success: false, error: e.message }, 500);
+  }
+}
+
+async function fetchFugleRsi(symbol, env) {
+  try {
+    const to   = new Date().toISOString().slice(0, 10);
+    const from = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+    const periods = [6, 9, 14, 20];
+
+    // 平行打四支API
+    const results = await Promise.all(
+      periods.map(period =>
+        fetch(
+          `https://api.fugle.tw/marketdata/v1.0/stock/technical/rsi/${symbol}?from=${from}&to=${to}&timeframe=D&period=${period}`,
+          { headers: { "X-API-KEY": env.FUGLE_KEY, "Accept": "application/json" } }
+        ).then(r => r.json())
+      )
+    );
+
+    // 以 date 為 key 合併資料
+    const merged = {};
+    periods.forEach((period, i) => {
+      const rows = results[i]?.data || [];
+      rows.forEach(row => {
+        if (!merged[row.date]) merged[row.date] = { date: row.date };
+        merged[row.date][`rsi_${period}`] = parseFloat(row.rsi.toFixed(2));
+      });
+    });
+
+    // 轉回陣列並依日期遞減排序
+    const data = Object.values(merged).sort((b, a) => a.date.localeCompare(b.date));
+
+    return json({ success: true, data });
+  } catch (e) {
+    return json({ success: false, error: e.message }, 500);
+  }
+}
+
+async function fetchFugleKdj(symbol, env) {
+  try {
+    const to   = new Date().toISOString().slice(0, 10);
+    const from = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+    const res = await fetch(
+      `https://api.fugle.tw/marketdata/v1.0/stock/technical/kdj/${symbol}?from=${from}&to=${to}&timeframe=D&rPeriod=9&kPeriod=3&dPeriod=3`,
+      {
+        headers: {
+          "X-API-KEY": env.FUGLE_KEY,
+          "Accept": "application/json"
+        }
+      }
+    );
+
+    if (!res.ok) {
+      return json({ success: false, error: `HTTP ${res.status}` });
+    }
+
+    const d = await res.json();
+    const data = d.data
+      .sort((a, b) => b.date.localeCompare(a.date))
+      .map(row => ({
+        date: row.date,
+        k: parseFloat(row.k.toFixed(2)),
+        d: parseFloat(row.d.toFixed(2)),
+        j: parseFloat(row.j.toFixed(2)),
+      }));
 
     return json({
       success: true,

@@ -1210,6 +1210,21 @@ async function loadAll() {
 
 window.onload = loadAll;
 
+function getMarketEmoji() {
+  const now = new Date();
+  // 轉成台北時間
+  const tpe = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Taipei' }));
+  const h = tpe.getHours();
+  const m = tpe.getMinutes();
+  const hm = h * 100 + m; // 例如 09:37 → 937
+
+  const isDaySession    = hm >= 900  && hm <= 1330; // 09:00 ~ 13:30
+  const isNightSession  = hm >= 1500 || hm <= 859;  // 15:00 ~ 隔日08:59
+  const isTsmcNight     = hm >= 1725 || hm <= 859;  // 17:25 ~ 隔日08:59
+
+  return { isDaySession, isNightSession, isTsmcNight };
+}
+
 // 台股市場概況
 async function loadTw() {
   const [taifexNight, taifexDay, twn, /*twncon, */taifexTsmc, fugleQuote/*, fugleVolume, fugleHistory*/] = await Promise.all([
@@ -1223,10 +1238,18 @@ async function loadTw() {
     // fetch(WORKER + '/stock/history/2330').then(r => r.json()), // 台積電現股歷史股價資料
   ]);
 
+  const { isDaySession, isNightSession, isTsmcNight } = getMarketEmoji();
+
+  // 各種時間區段標籤
+  const dayLabel   = `【期貨日盤】${isDaySession   ? '🟢' : ''}`;
+  const nightLabel = `【期貨夜盤】${isNightSession  ? '🟢' : ''}`;
+  const tsmcNight  = `【期貨夜盤】${isTsmcNight   ? '🟢' : ''}`;
+  const spotDay    = `【現貨日盤】${isDaySession    ? '🟢' : ''}`;
+
   let html = `<div class="card-title">大盤指數</div>`;
 
   // 【台股期貨夜盤】
-  html += groupHeader('【期貨夜盤】', '', '台股期貨（簡稱「台指期」）是以「台灣加權股價指數」為標的物的期貨契約，讓投資人透過保證金制度，以小博大操作台股漲跌。具高槓桿、多空靈活、交易成本低等特性，熱門商品包括大台指、小台指、微台指，結算日為每月第三個星期三。<br><br>交易時間：每週一至週五的下午15:00至隔日凌晨05:00。');
+  html += groupHeader(nightLabel, '', '台股期貨（簡稱「台指期」）是以「台灣加權股價指數」為標的物的期貨契約，讓投資人透過保證金制度，以小博大操作台股漲跌。具高槓桿、多空靈活、交易成本低等特性，熱門商品包括大台指、小台指、微台指，結算日為每月第三個星期三。<br><br>交易時間：每週一至週五的下午15:00至隔日凌晨05:00。');
   if (taifexNight.success && taifexNight.price > 0) {
     const sign = taifexNight.updown > 0 ? '▲' : taifexNight.updown < 0 ? '▼' : '';
     var cls = 'up';
@@ -1238,7 +1261,7 @@ async function loadTw() {
   }
 
   // 【台股期貨日盤】
-  html += groupHeader('【期貨日盤】', '', '台股期貨（簡稱「台指期」）是以「台灣加權股價指數」為標的物的期貨契約，讓投資人透過保證金制度，以小博大操作台股漲跌。具高槓桿、多空靈活、交易成本低等特性，熱門商品包括大台指、小台指、微台指，結算日為每月第三個星期三。<br><br>交易時間：每週一至週五的上午8:45至下午1:45');
+  html += groupHeader(dayLabel, '', '台股期貨（簡稱「台指期」）是以「台灣加權股價指數」為標的物的期貨契約，讓投資人透過保證金制度，以小博大操作台股漲跌。具高槓桿、多空靈活、交易成本低等特性，熱門商品包括大台指、小台指、微台指，結算日為每月第三個星期三。<br><br>交易時間：每週一至週五的上午8:45至下午1:45');
   if (taifexDay.success && taifexDay.price > 0) {
     const sign = taifexDay.updown > 0 ? '▲' : taifexDay.updown < 0 ? '▼' : '';
     var cls = 'up';
@@ -1282,7 +1305,7 @@ async function loadTw() {
   html += `<div class="card-title" style="margin-top: 20px;">台積電</div>`;
   
   // 【台積電期貨夜盤】
-  html += groupHeader('【期貨夜盤】', '', '台積電期貨（股票期貨）是由台灣期貨交易所推出的金融衍生品，標的為台積電（2330）股票。具備低保證金（高槓桿）、多空雙向操作、交易稅低等特性，一口標準期貨代表2張台積電股票（2,000股）。此外，還有小台積電期貨（100股）供資金較小投資人選擇，且具備夜盤交易功能，可靈活應對ADR漲跌。<br><br>交易時間：每週一至週五的下午17:25至隔日凌晨05:00。');
+  html += groupHeader(tsmcNight, '', '台積電期貨（股票期貨）是由台灣期貨交易所推出的金融衍生品，標的為台積電（2330）股票。具備低保證金（高槓桿）、多空雙向操作、交易稅低等特性，一口標準期貨代表2張台積電股票（2,000股）。此外，還有小台積電期貨（100股）供資金較小投資人選擇，且具備夜盤交易功能，可靈活應對ADR漲跌。<br><br>交易時間：每週一至週五的下午17:25至隔日凌晨05:00。');
   if (taifexTsmc.success && taifexTsmc.price > 0) {
     const sign = taifexTsmc.updown > 0 ? '▲' : taifexTsmc.updown < 0 ? '▼' : '';
     var cls = 'up';
@@ -1294,7 +1317,7 @@ async function loadTw() {
   }
 
   // 【台積電現貨日盤】
-  html += groupHeader(`【現貨日盤】`, '', '台積電（TSMC）是全球最大的專業積體電路（IC）製造服務公司，總部位於臺灣新竹科學園區，1987年由張忠謀創立。台積電首創「純晶圓代工」模式，不設計自有品牌產品，專注為Apple、NVIDIA等科技大廠代工生產領先技術的晶片，在先進製程（如3奈米、2奈米）上具統治性地位，被譽為「護國神山」。');
+  html += groupHeader(spotDay, '', '台積電（TSMC）是全球最大的專業積體電路（IC）製造服務公司，總部位於臺灣新竹科學園區，1987年由張忠謀創立。台積電首創「純晶圓代工」模式，不設計自有品牌產品，專注為Apple、NVIDIA等科技大廠代工生產領先技術的晶片，在先進製程（如3奈米、2奈米）上具統治性地位，被譽為「護國神山」。');
   if (fugleQuote.success) {
     const cls = changeClass(fugleQuote.change, 1);
     const sign = fugleQuote.change > 0 ? '▲' : fugleQuote.change < 0 ? '▼' : '';
@@ -1850,10 +1873,10 @@ async function loadSentiment() {
   setCard('card-sentiment', 0, html);
 }
 
-// 我的股票自選
+// 我的自選股
 async function loadMyStock() {
   // 平行抓取所有自選股票的相關屬性資訊
-  const [quoteResults, volumeResults, historyResults] = await Promise.all([
+  const [quoteResults, volumeResults, historyResults, smaResults, rsiResults] = await Promise.all([
     Promise.all(
       MY_STOCKS.map(s => fetch(WORKER + '/stock/quote/' + s.symbol).then(r => r.json()).catch(() => ({ success: false })))
     ),
@@ -1862,6 +1885,12 @@ async function loadMyStock() {
     ),
     Promise.all(
       MY_STOCKS.map(s => fetch(WORKER + '/stock/history/' + s.symbol).then(r => r.json()).catch(() => ({ success: false })))
+    ),
+    Promise.all(
+      MY_STOCKS.map(s => fetch(WORKER + '/stock/sma/' + s.symbol).then(r => r.json()).catch(() => ({ success: false })))
+    ),
+    Promise.all(
+      MY_STOCKS.map(s => fetch(WORKER + '/stock/rsi/' + s.symbol).then(r => r.json()).catch(() => ({ success: false })))
     )
   ]);
 
@@ -1976,6 +2005,46 @@ async function loadMyStock() {
     html += `<div id="stockhistory_${i}" style="display:none;">
       ${renderStockHistory(historyResults[i])}
     </div>`;
+
+    // 簡單移動平均線
+    html += `
+      <div class="row">
+        <span class="row-label">簡單移動平均線<br>比較股價是否站上均線</span>
+        <span style="cursor:pointer;user-select:none;" onclick="
+          const ob = document.getElementById('stocksma_${i}');
+          const btn = this;
+          if (ob.style.display === 'none') {
+            ob.style.display = 'block';
+            btn.textContent = '－';
+          } else {
+            ob.style.display = 'none';
+            btn.textContent = '＋';
+          }
+        ">＋</span>
+      </div>`;
+    html += `<div id="stocksma_${i}" style="display:none;">
+      ${renderStockSma(smaResults[i])}
+    </div>`;
+
+    // 相對強弱指數
+    html += `
+      <div class="row">
+        <span class="row-label">相對強弱指數<br>大於70可能超買，小於30可能超賣</span>
+        <span style="cursor:pointer;user-select:none;" onclick="
+          const ob = document.getElementById('stockrsi_${i}');
+          const btn = this;
+          if (ob.style.display === 'none') {
+            ob.style.display = 'block';
+            btn.textContent = '－';
+          } else {
+            ob.style.display = 'none';
+            btn.textContent = '＋';
+          }
+        ">＋</span>
+      </div>`;
+    html += `<div id="stockrsi_${i}" style="display:none;">
+      ${renderStockRsi(rsiResults[i])}
+    </div>`;
   }
 
   // const urlParams = new URLSearchParams(window.location.search);
@@ -2085,6 +2154,68 @@ function renderStockHistory(data) {
   return `
     <div style="overflow-x:auto;">
       <table style="border-collapse:collapse;font-family:var(--mono);min-width:500px;">
+        <thead>${headerRow}</thead>
+        <tbody>${bodyRows}</tbody>
+      </table>
+    </div>`;
+}
+
+function renderStockSma(data) {
+  if (!data || !data.success || !data.data.length) return '<p>無SMA資料</p>';
+
+  const headerRow = `
+    <tr>
+      <th style="position:sticky;left:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);">日期</th>
+      <th style="padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:right;">SMA5</th>
+      <th style="padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:right;">SMA10</th>
+      <th style="padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:right;">SMA20</th>
+      <th style="padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:right;">SMA60</th>
+    </tr>`;
+
+  const bodyRows = data.data.map(d => `
+    <tr style="border-bottom:1px solid var(--border);">
+      <td style="position:sticky;left:0;z-index:1;background:#1a2332;padding:6px 10px;white-space:nowrap;font-size:12px;">${d.date}</td>
+      <td style="padding:6px 10px;text-align:right;font-size:12px;">${d.sma_5  ?? '-'}</td>
+      <td style="padding:6px 10px;text-align:right;font-size:12px;">${d.sma_10 ?? '-'}</td>
+      <td style="padding:6px 10px;text-align:right;font-size:12px;">${d.sma_20 ?? '-'}</td>
+      <td style="padding:6px 10px;text-align:right;font-size:12px;">${d.sma_60 ?? '-'}</td>
+    </tr>`
+  ).join('');
+
+  return `
+    <div style="overflow-x:auto;">
+      <table style="border-collapse:collapse;font-family:var(--mono);min-width:400px;">
+        <thead>${headerRow}</thead>
+        <tbody>${bodyRows}</tbody>
+      </table>
+    </div>`;
+}
+
+function renderStockRsi(data) {
+  if (!data || !data.success || !data.data.length) return '<p>無RSI資料</p>';
+
+  const headerRow = `
+    <tr>
+      <th style="position:sticky;left:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);">日期</th>
+      <th style="padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:right;">RS6</th>
+      <th style="padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:right;">RSI9</th>
+      <th style="padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:right;">RSI14</th>
+      <th style="padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:right;">RSI20</th>
+    </tr>`;
+
+  const bodyRows = data.data.map(d => `
+    <tr style="border-bottom:1px solid var(--border);">
+      <td style="position:sticky;left:0;z-index:1;background:#1a2332;padding:6px 10px;white-space:nowrap;font-size:12px;">${d.date}</td>
+      <td style="padding:6px 10px;text-align:right;font-size:12px;">${d.rsi_6  ?? '-'}</td>
+      <td style="padding:6px 10px;text-align:right;font-size:12px;">${d.rsi_9 ?? '-'}</td>
+      <td style="padding:6px 10px;text-align:right;font-size:12px;">${d.rsi_14 ?? '-'}</td>
+      <td style="padding:6px 10px;text-align:right;font-size:12px;">${d.rsi_20 ?? '-'}</td>
+    </tr>`
+  ).join('');
+
+  return `
+    <div style="overflow-x:auto;">
+      <table style="border-collapse:collapse;font-family:var(--mono);min-width:400px;">
         <thead>${headerRow}</thead>
         <tbody>${bodyRows}</tbody>
       </table>
