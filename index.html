@@ -1228,7 +1228,7 @@ function getMarketEmoji() {
 // 台股市場概況
 async function loadTw() {
   const [taifexNight, taifexDay, twn, /*twncon, */taifexTsmc, fugleQuote/*, fugleVolume, fugleHistory*/] = await Promise.all([
-    fetch(WORKER + '/taifex/12/TX046').then(r => r.json()), // 台股期貨夜盤
+    fetch(WORKER + '/taifex/12/TX056').then(r => r.json()), // 台股期貨夜盤
     fetch(WORKER + '/taifex/2/TX046').then(r => r.json()), // 台股期貨日盤
     fetch(WORKER + '/twn').then(r => r.json()), // 富台指
     // fetch(WORKER + '/twncon').then(r => r.json()), // 富台指
@@ -1876,7 +1876,7 @@ async function loadSentiment() {
 // 我的自選股
 async function loadMyStock() {
   // 平行抓取所有自選股票的相關屬性資訊
-  const [quoteResults, volumeResults, historyResults, smaResults, rsiResults] = await Promise.all([
+  const [quoteResults, volumeResults, historyResults, smaResults, rsiResults, kdjResults, macdResults] = await Promise.all([
     Promise.all(
       MY_STOCKS.map(s => fetch(WORKER + '/stock/quote/' + s.symbol).then(r => r.json()).catch(() => ({ success: false })))
     ),
@@ -1891,6 +1891,12 @@ async function loadMyStock() {
     ),
     Promise.all(
       MY_STOCKS.map(s => fetch(WORKER + '/stock/rsi/' + s.symbol).then(r => r.json()).catch(() => ({ success: false })))
+    ),
+    Promise.all(
+      MY_STOCKS.map(s => fetch(WORKER + '/stock/kdj/' + s.symbol).then(r => r.json()).catch(() => ({ success: false })))
+    ),
+    Promise.all(
+      MY_STOCKS.map(s => fetch(WORKER + '/stock/macd/' + s.symbol).then(r => r.json()).catch(() => ({ success: false })))
     )
   ]);
 
@@ -2045,6 +2051,46 @@ async function loadMyStock() {
     html += `<div id="stockrsi_${i}" style="display:none;">
       ${renderStockRsi(rsiResults[i])}
     </div>`;
+
+    // 隨機指標
+    html += `
+      <div class="row">
+        <span class="row-label">隨機指標<br>KD大於80可能超買，KD小於20可能超賣</span>
+        <span style="cursor:pointer;user-select:none;" onclick="
+          const ob = document.getElementById('stockkdj_${i}');
+          const btn = this;
+          if (ob.style.display === 'none') {
+            ob.style.display = 'block';
+            btn.textContent = '－';
+          } else {
+            ob.style.display = 'none';
+            btn.textContent = '＋';
+          }
+        ">＋</span>
+      </div>`;
+    html += `<div id="stockkdj_${i}" style="display:none;">
+      ${renderStockKdj(kdjResults[i])}
+    </div>`;
+
+    // 平滑異同移動平均線（MACD）
+    html += `
+      <div class="row">
+        <span class="row-label">平滑異同移動平均線（MACD）<br>MACD 慢慢往上交叉信號線時，這通常被視為買進<br>MACD 慢慢往下交叉信號線時，這通常被視為賣出</span>
+        <span style="cursor:pointer;user-select:none;" onclick="
+          const ob = document.getElementById('stockmacd_${i}');
+          const btn = this;
+          if (ob.style.display === 'none') {
+            ob.style.display = 'block';
+            btn.textContent = '－';
+          } else {
+            ob.style.display = 'none';
+            btn.textContent = '＋';
+          }
+        ">＋</span>
+      </div>`;
+    html += `<div id="stockmacd_${i}" style="display:none;">
+      ${renderStockMacd(macdResults[i])}
+    </div>`;
   }
 
   // const urlParams = new URLSearchParams(window.location.search);
@@ -2128,7 +2174,7 @@ function renderStockHistory(data) {
     <tr>
       <th style="position:sticky;left:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);">日期</th>
       ${['開盤', '最高', '最低', '收盤', '漲跌', '成交量', '成交金額'].map(h =>
-        `<th style="padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:right;">${h}</th>`
+        `<th style="padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">${h}</th>`
       ).join('')}
     </tr>`;
 
@@ -2141,13 +2187,13 @@ function renderStockHistory(data) {
     return `
       <tr style="border-bottom:1px solid var(--border);">
         <td style="position:sticky;left:0;z-index:1;background:#1a2332;padding:6px 10px;white-space:nowrap;font-size:12px;">${d.date}</td>
-        <td style="padding:6px 10px;text-align:right;font-size:12px;">${d.open}</td>
-        <td style="padding:6px 10px;text-align:right;font-size:12px;">${d.high}</td>
-        <td style="padding:6px 10px;text-align:right;font-size:12px;">${d.low}</td>
-        <td style="padding:6px 10px;text-align:right;font-size:12px;">${d.close}</td>
-        <td style="padding:6px 10px;text-align:right;font-size:12px;${changeCls}">${sign}${d.change}</td>
-        <td style="padding:6px 10px;text-align:right;font-size:12px;">${volume}</td>
-        <td style="padding:6px 10px;text-align:right;font-size:12px;">${turnover}億</td>
+        <td style="padding:6px 10px;text-align:center;font-size:12px;">${d.open}</td>
+        <td style="padding:6px 10px;text-align:center;font-size:12px;">${d.high}</td>
+        <td style="padding:6px 10px;text-align:center;font-size:12px;">${d.low}</td>
+        <td style="padding:6px 10px;text-align:center;font-size:12px;">${d.close}</td>
+        <td style="padding:6px 10px;text-align:center;font-size:12px;${changeCls}">${sign}${d.change}</td>
+        <td style="padding:6px 10px;text-align:center;font-size:12px;">${volume}</td>
+        <td style="padding:6px 10px;text-align:center;font-size:12px;">${turnover}億</td>
       </tr>`;
   }).join('');
 
@@ -2166,19 +2212,19 @@ function renderStockSma(data) {
   const headerRow = `
     <tr>
       <th style="position:sticky;left:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);">日期</th>
-      <th style="padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:right;">SMA5</th>
-      <th style="padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:right;">SMA10</th>
-      <th style="padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:right;">SMA20</th>
-      <th style="padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:right;">SMA60</th>
+      <th style="padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">SMA5</th>
+      <th style="padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">SMA10</th>
+      <th style="padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">SMA20</th>
+      <th style="padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">SMA60</th>
     </tr>`;
 
   const bodyRows = data.data.map(d => `
     <tr style="border-bottom:1px solid var(--border);">
-      <td style="position:sticky;left:0;z-index:1;background:#1a2332;padding:6px 10px;white-space:nowrap;font-size:12px;">${d.date}</td>
-      <td style="padding:6px 10px;text-align:right;font-size:12px;">${d.sma_5  ?? '-'}</td>
-      <td style="padding:6px 10px;text-align:right;font-size:12px;">${d.sma_10 ?? '-'}</td>
-      <td style="padding:6px 10px;text-align:right;font-size:12px;">${d.sma_20 ?? '-'}</td>
-      <td style="padding:6px 10px;text-align:right;font-size:12px;">${d.sma_60 ?? '-'}</td>
+      <td style="position:sticky;left:0;z-index:1;background:#1a2332;padding:6px 10px;white-space:nowrap;text-align:center;font-size:12px;">${d.date}</td>
+      <td style="padding:6px 10px;text-align:center;font-size:12px;">${d.sma_5  ?? '-'}</td>
+      <td style="padding:6px 10px;text-align:center;font-size:12px;">${d.sma_10 ?? '-'}</td>
+      <td style="padding:6px 10px;text-align:center;font-size:12px;">${d.sma_20 ?? '-'}</td>
+      <td style="padding:6px 10px;text-align:center;font-size:12px;">${d.sma_60 ?? '-'}</td>
     </tr>`
   ).join('');
 
@@ -2197,19 +2243,76 @@ function renderStockRsi(data) {
   const headerRow = `
     <tr>
       <th style="position:sticky;left:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);">日期</th>
-      <th style="padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:right;">RS6</th>
-      <th style="padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:right;">RSI9</th>
-      <th style="padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:right;">RSI14</th>
-      <th style="padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:right;">RSI20</th>
+      <th style="padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">RS6</th>
+      <th style="padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">RSI9</th>
+      <th style="padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">RSI14</th>
+      <th style="padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">RSI20</th>
     </tr>`;
 
   const bodyRows = data.data.map(d => `
     <tr style="border-bottom:1px solid var(--border);">
-      <td style="position:sticky;left:0;z-index:1;background:#1a2332;padding:6px 10px;white-space:nowrap;font-size:12px;">${d.date}</td>
-      <td style="padding:6px 10px;text-align:right;font-size:12px;">${d.rsi_6  ?? '-'}</td>
-      <td style="padding:6px 10px;text-align:right;font-size:12px;">${d.rsi_9 ?? '-'}</td>
-      <td style="padding:6px 10px;text-align:right;font-size:12px;">${d.rsi_14 ?? '-'}</td>
-      <td style="padding:6px 10px;text-align:right;font-size:12px;">${d.rsi_20 ?? '-'}</td>
+      <td style="position:sticky;left:0;z-index:1;background:#1a2332;padding:6px 10px;white-space:nowrap;text-align:center;font-size:12px;">${d.date}</td>
+      <td style="padding:6px 10px;text-align:center;font-size:12px;">${d.rsi_6  ?? '-'}</td>
+      <td style="padding:6px 10px;text-align:center;font-size:12px;">${d.rsi_9 ?? '-'}</td>
+      <td style="padding:6px 10px;text-align:center;font-size:12px;">${d.rsi_14 ?? '-'}</td>
+      <td style="padding:6px 10px;text-align:center;font-size:12px;">${d.rsi_20 ?? '-'}</td>
+    </tr>`
+  ).join('');
+
+  return `
+    <div style="overflow-x:auto;">
+      <table style="border-collapse:collapse;font-family:var(--mono);min-width:400px;">
+        <thead>${headerRow}</thead>
+        <tbody>${bodyRows}</tbody>
+      </table>
+    </div>`;
+}
+
+function renderStockKdj(data) {
+  if (!data || !data.success || !data.data.length) return '<p>無KDJ資料</p>';
+
+  const headerRow = `
+    <tr>
+      <th style="position:sticky;left:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);">日期</th>
+      <th style="padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">K線（快速平均線）</th>
+      <th style="padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">D線（慢速平均線）</th>
+      <th style="padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">J線（方向線）</th>
+    </tr>`;
+
+  const bodyRows = data.data.map(d => `
+    <tr style="border-bottom:1px solid var(--border);">
+      <td style="position:sticky;left:0;z-index:1;background:#1a2332;padding:6px 10px;white-space:nowrap;text-align:center;font-size:12px;">${d.date}</td>
+      <td style="padding:6px 10px;text-align:center;font-size:12px;">${d.k  ?? '-'}</td>
+      <td style="padding:6px 10px;text-align:center;font-size:12px;">${d.d ?? '-'}</td>
+      <td style="padding:6px 10px;text-align:center;font-size:12px;">${d.j ?? '-'}</td>
+    </tr>`
+  ).join('');
+
+  return `
+    <div style="overflow-x:auto;">
+      <table style="border-collapse:collapse;font-family:var(--mono);min-width:400px;">
+        <thead>${headerRow}</thead>
+        <tbody>${bodyRows}</tbody>
+      </table>
+    </div>`;
+}
+
+function renderStockMacd(data) {
+  if (!data || !data.success || !data.data.length) return '<p>無MACD資料</p>';
+  console.log(data);
+
+  const headerRow = `
+    <tr>
+      <th style="position:sticky;left:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);">日期</th>
+      <th style="padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">MACD 線</th>
+      <th style="padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">信號線</th>
+    </tr>`;
+
+  const bodyRows = data.data.map(d => `
+    <tr style="border-bottom:1px solid var(--border);">
+      <td style="position:sticky;left:0;z-index:1;background:#1a2332;padding:6px 10px;white-space:nowrap;text-align:center;font-size:12px;">${d.date}</td>
+      <td style="padding:6px 10px;text-align:center;font-size:12px;">${d.macdLine  ?? '-'}</td>
+      <td style="padding:6px 10px;text-align:center;font-size:12px;">${d.signalLine ?? '-'}</td>
     </tr>`
   ).join('');
 

@@ -68,6 +68,7 @@ export default {
       if (method === "sma" && symbol)   return await fetchFugleSma(symbol, env);
       if (method === "rsi" && symbol)   return await fetchFugleRsi(symbol, env);
       if (method === "kdj" && symbol)   return await fetchFugleKdj(symbol, env);
+      if (method === "macd" && symbol)   return await fetchFugleMacd(symbol, env);
     }
 
     if (path.startsWith("/yahoo-finance/")) {
@@ -374,7 +375,13 @@ async function fetchTaifex(objId, contract) {
     });
     const data = await res.json();
 
-    const item = data.find(d => d.contract === contract);
+    // const item = data.find(d => d.contract === contract);
+    let item;
+    if (contract === 'TX046' || contract === 'TX056') {
+      item = data.find(d => d.contractName === '臺股期貨');
+    } else {
+      item = data.find(d => d.contract === contract);
+    }
 
     // 找不到時回傳空資料（資料從缺時正常現象）
     if (!item) {
@@ -1020,6 +1027,42 @@ async function fetchFugleKdj(symbol, env) {
   }
 }
 
+async function fetchFugleMacd(symbol, env) {
+  try {
+    const to   = new Date().toISOString().slice(0, 10);
+    const from = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+    const res = await fetch(
+      `https://api.fugle.tw/marketdata/v1.0/stock/technical/macd/${symbol}?from=${from}&to=${to}&timeframe=D&fast=12&slow=26&signal=9`,
+      {
+        headers: {
+          "X-API-KEY": env.FUGLE_KEY,
+          "Accept": "application/json"
+        }
+      }
+    );
+
+    if (!res.ok) {
+      return json({ success: false, error: `HTTP ${res.status}` });
+    }
+
+    const d = await res.json();
+    const data = d.data
+      .sort((a, b) => b.date.localeCompare(a.date))
+      .map(row => ({
+        date: row.date,
+        macdLine: parseFloat(row.macdLine.toFixed(2)),
+        signalLine: parseFloat(row.signalLine.toFixed(2)),
+      }));
+
+    return json({
+      success: true,
+      data,
+    });
+  } catch (e) {
+    return json({ success: false, error: e.message }, 500);
+  }
+}
+
 async function fetchYahooFinance(symbol, interval = 1, range = 1) {
   try {
     const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=${interval}d&range=${range}d`;
@@ -1087,7 +1130,7 @@ function isNeedTranslate(str) {
 
 // 呼叫 MyMemory 翻譯單一字串
 async function translateToZh(text) {
-  const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|zh-TW`;
+  const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|zh-TW&de=bau720123@gmail.com`;
   const res = await fetch(url, { headers: { "User-Agent": UA } });
   const data = await res.json();
   return data?.responseData?.translatedText || text; // 失敗就回傳原文
@@ -1571,7 +1614,7 @@ async function handleCron(env) {
   // 平行抓取所有資料
   const [taifexDay, taifexNight, taifexTsmc, twnRes, /*twnConRes, */brentRes, vixRes, tsmcStock] = await Promise.all([
     fetchTaifex(2, "TX046"), // 台股期貨日盤
-    fetchTaifex(12, "TX046"), // 台股期貨夜盤
+    fetchTaifex(12, "TX056"), // 台股期貨夜盤
     fetchTaifex(12, "CDF046"), // 台積電期貨夜盤
     fetchHiStock("stocktop2017", "TWN", "指數", "成交量(口)"),
     // fetchCnyesTwn(), // 富台指
