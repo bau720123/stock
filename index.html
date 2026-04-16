@@ -603,12 +603,14 @@ function syncAlertConfigs() {
 function syncAddBtnState() {
   const rowCount = document.querySelectorAll('.mystock-row').length;
   const addBtn = document.getElementById('mystock-add-btn');
-  const sotckLimit = document.getElementById('stock-limit');
+  const sotckLimit_max = document.getElementById('stock-limit-max');
+  const sotckLimit_min = document.getElementById('stock-limit-min');
   if (addBtn) {
     addBtn.disabled = rowCount >= 5;
     addBtn.style.opacity = rowCount >= 5 ? '0.4' : '1';
     addBtn.style.cursor  = rowCount >= 5 ? 'not-allowed' : 'pointer';
-    sotckLimit.style.display  = rowCount >= 5 ? 'block' : 'none';
+    sotckLimit_max.style.display  = rowCount >= 5 ? 'block' : 'none';
+    sotckLimit_min.style.display  = rowCount == 0 ? 'block' : 'none';
   }
 }
 
@@ -674,8 +676,11 @@ async function openMyStockSettings() {
         <br>
         股票名稱若不填，會自動抓取並對應
       </div>
-      <div id="stock-limit" style="display:none; font-size:.75rem; color:red; margin-bottom:12px; text-align:left;">
+      <div id="stock-limit-max" style="display:none; font-size:.75rem; color:red; margin-bottom:12px; text-align:left;">
         已達到最大能新增的數量
+      </div>
+      <div id="stock-limit-min" style="display:none; font-size:.75rem; color:red; margin-bottom:12px; text-align:left;">
+        請至少保留一檔股票
       </div>
       <div id="mystock-rows">${renderRows()}</div>
       <button
@@ -738,7 +743,7 @@ async function openMyStockSettings() {
         if (symbol) list.push({ symbol, name: name || symbol });
       });
       if (list.length === 0) {
-        Swal.showValidationMessage('請至少保留一檔股票');
+        // Swal.showValidationMessage('請至少保留一檔股票');
         return false;
       }
       return list;
@@ -2322,7 +2327,6 @@ function renderStockKdj(data) {
 
 function renderStockMacd(data) {
   if (!data || !data.success || !data.data.length) return '<p>無MACD資料</p>';
-  console.log(data);
 
   const headerRow = `
     <tr>
@@ -2350,7 +2354,6 @@ function renderStockMacd(data) {
 
 function renderStockBrands(data) {
   if (!data || !data.success || !data.data.length) return '<p>無BRANDS資料</p>';
-  console.log(data);
 
   const headerRow = `
     <tr>

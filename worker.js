@@ -1180,9 +1180,9 @@ async function fetchNewsRss(env) {
   // const KEYWORDS = ['伊朗', '油價', '荷姆茲', '荷莫茲', '原油', '戰爭', '中東', '美國', '川普', '軍事', '衝突', '制裁', '核子', '核武', '導彈', '攻擊', '防空', '航運', '油輪'];
   const KEYWORDS = [
     // 中文（原有）
-    '伊朗', '油價', '荷姆茲', '荷莫茲', '原油', '戰爭', '中東', '川普', '軍事', '衝突', '制裁', '核子', '核武', '導彈', '攻擊', '防空', '航運', '油輪',
+    '伊朗', '油價', '荷姆茲', '荷莫茲', '原油', '戰爭', '中東', '川普', '軍事', '衝突', '制裁', '核子', '核武', '導彈', '攻擊', '防空', '航運', '油輪', '台積電', 'ADR' 
     // 英文（新增）
-    'Trump', 'Iran', 'Hormuz', 'crude', 'sanction', 'missile', 'ceasefire', 'tariff',
+    // 'Trump', 'Iran', 'Hormuz', 'crude', 'sanction', 'missile', 'ceasefire', 'tariff',
   ];
  
   // RSS 來源清單
@@ -1443,7 +1443,7 @@ function generateCustomEvents(year) {
   events.push(createEventObj(
     new Date("2026-04-16"), 
     "TSM",
-    "台積電下午4點財報發布", 
+    "台積電下午2點法說會", 
     "#3498db", 
     "001"
   ));
