@@ -65,6 +65,7 @@ export default {
       if (method === "quote" && symbol)   return await fetchFugleQuote(symbol, env);
       if (method === "volume" && symbol)   return await fetchFugleVolume(symbol, env);
       if (method === "history" && symbol)   return await fetchFugleHistory(symbol, env);
+      if (method === "institutional" && symbol)   return await fetchFugleInstitutional(symbol);
       if (method === "sma" && symbol)   return await fetchFugleSma(symbol, env);
       if (method === "rsi" && symbol)   return await fetchFugleRsi(symbol, env);
       if (method === "kdj" && symbol)   return await fetchFugleKdj(symbol, env);
@@ -919,6 +920,64 @@ async function fetchFugleHistory(symbol, env) {
   } catch (e) {
     return json({ success: false, error: e.message }, 500);
   }
+}
+
+async function fetchFugleInstitutional(symbol) {
+  try {
+    const url = `https://stock.wearn.com/netbuy.asp?kind=${symbol}`;
+    const res = await fetch(url, {
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        "Referer": "https://stock.wearn.com/",
+        "Accept": "text/html,application/xhtml+xml",
+      },
+    });
+
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    const html = await res.text();
+
+    // 找 class="mobile_img" 的 table
+    const tableMatch = html.match(/<table[^>]*class="mobile_img"[^>]*>([\s\S]*?)<\/table>/i);
+    if (!tableMatch) throw new Error("Table not found");
+
+    const tableHtml = tableMatch[1];
+
+    // 抓所有 <tr>，跳過前兩列（標題列）
+    const rows = [...tableHtml.matchAll(/<tr[^>]*>([\s\S]*?)<\/tr>/gi)].slice(2);
+
+    const data = rows.map(row => {
+      const cells = [...row[1].matchAll(/<td[^>]*>([\s\S]*?)<\/td>/gi)];
+      if (cells.length < 4) return null;
+
+      const rawDate = stripTags(cells[0][1]).trim(); // "115/04/15"
+      const trust    = parseNumber(cells[1][1]);     // 投信
+      const dealer   = parseNumber(cells[2][1]);     // 自營商
+      const foreign  = parseNumber(cells[3][1]);     // 外資
+
+      // 民國年轉西元
+      const [y, m, d] = rawDate.split("/");
+      const date = `${parseInt(y) + 1911}-${m}-${d}`;
+
+      return { date, trust, dealer, foreign };
+    }).filter(Boolean);
+
+    return Response.json({ success: true, data });
+  } catch (e) {
+    return Response.json({ success: false, error: e.message }, { status: 500 });
+  }
+}
+
+// 去除 HTML tags
+function stripTags(html) {
+  return html.replace(/<[^>]+>/g, "").replace(/&nbsp;/g, "").trim();
+}
+
+// 解析數字，處理 "+ 4,826" / "-138" 格式
+function parseNumber(html) {
+  const text = stripTags(html).replace(/,/g, "").replace(/\s/g, "");
+  const match = text.match(/[+-]?\d+/);
+  return match ? parseInt(match[0], 10) : 0;
 }
 
 async function fetchFugleSma(symbol, env) {
