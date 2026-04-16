@@ -69,6 +69,7 @@ export default {
       if (method === "rsi" && symbol)   return await fetchFugleRsi(symbol, env);
       if (method === "kdj" && symbol)   return await fetchFugleKdj(symbol, env);
       if (method === "macd" && symbol)   return await fetchFugleMacd(symbol, env);
+      if (method === "brands" && symbol)   return await fetchFugleBrands(symbol, env);
     }
 
     if (path.startsWith("/yahoo-finance/")) {
@@ -1063,6 +1064,43 @@ async function fetchFugleMacd(symbol, env) {
   }
 }
 
+async function fetchFugleBrands(symbol, env) {
+  try {
+    const to   = new Date().toISOString().slice(0, 10);
+    const from = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+    const res = await fetch(
+      `https://api.fugle.tw/marketdata/v1.0/stock/technical/bb/${symbol}?from=${from}&to=${to}&timeframe=D&period=20`,
+      {
+        headers: {
+          "X-API-KEY": env.FUGLE_KEY,
+          "Accept": "application/json"
+        }
+      }
+    );
+
+    if (!res.ok) {
+      return json({ success: false, error: `HTTP ${res.status}` });
+    }
+
+    const d = await res.json();
+    const data = d.data
+      .sort((a, b) => b.date.localeCompare(a.date))
+      .map(row => ({
+        date: row.date,
+        upper: parseFloat(row.upper.toFixed(2)),
+        middle: parseFloat(row.middle.toFixed(2)),
+        lower: parseFloat(row.lower.toFixed(2)),
+      }));
+
+    return json({
+      success: true,
+      data,
+    });
+  } catch (e) {
+    return json({ success: false, error: e.message }, 500);
+  }
+}
+
 async function fetchYahooFinance(symbol, interval = 1, range = 1) {
   try {
     const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=${interval}d&range=${range}d`;
@@ -1142,7 +1180,7 @@ async function fetchNewsRss(env) {
   // const KEYWORDS = ['伊朗', '油價', '荷姆茲', '荷莫茲', '原油', '戰爭', '中東', '美國', '川普', '軍事', '衝突', '制裁', '核子', '核武', '導彈', '攻擊', '防空', '航運', '油輪'];
   const KEYWORDS = [
     // 中文（原有）
-    '伊朗', '油價', '荷姆茲', '荷莫茲', '原油', '戰爭', '中東', '美國', '川普', '軍事', '衝突', '制裁', '核子', '核武', '導彈', '攻擊', '防空', '航運', '油輪',
+    '伊朗', '油價', '荷姆茲', '荷莫茲', '原油', '戰爭', '中東', '川普', '軍事', '衝突', '制裁', '核子', '核武', '導彈', '攻擊', '防空', '航運', '油輪',
     // 英文（新增）
     'Trump', 'Iran', 'Hormuz', 'crude', 'sanction', 'missile', 'ceasefire', 'tariff',
   ];
@@ -1155,8 +1193,8 @@ async function fetchNewsRss(env) {
     { url: 'https://feeds.feedburner.com/rsscna/politics',           name: '中央社政治' },
     { url: 'https://news.ltn.com.tw/rss/world.xml',                  name: '自由時報國際' },
     { url: 'https://news.ltn.com.tw/rss/business.xml',               name: '自由時報財經' },
-    { url: 'https://news.google.com/rss/search?q=when:24h+allinurl:reuters.com+Trump&hl=en-US&gl=US&ceid=US:en', name: 'Reuters-Trump' },
-    { url: 'https://news.google.com/rss/search?q=when:24h+allinurl:reuters.com+Iran+oil&hl=en-US&gl=US&ceid=US:en', name: 'Reuters-Iran' },
+    // { url: 'https://news.google.com/rss/search?q=when:24h+allinurl:reuters.com+Trump&hl=en-US&gl=US&ceid=US:en', name: 'Reuters-Trump' },
+    // { url: 'https://news.google.com/rss/search?q=when:24h+allinurl:reuters.com+Iran+oil&hl=en-US&gl=US&ceid=US:en', name: 'Reuters-Iran' },
   ];
  
   // 解析單一 RSS XML，回傳 items 陣列
@@ -1275,9 +1313,9 @@ async function fetchNewsRss(env) {
     // 去重後，統一翻譯英文標題
     const translated = await Promise.all(
       unique.map(async (item) => {
-        if (isNeedTranslate(item.title)) {
-          item.title = await translateToZh(item.title);
-        }
+        // if (isNeedTranslate(item.title)) {
+        //   item.title = await translateToZh(item.title);
+        // }
         return item;
       })
     );
@@ -1405,7 +1443,7 @@ function generateCustomEvents(year) {
   events.push(createEventObj(
     new Date("2026-04-16"), 
     "TSM",
-    "台積電下午2點財報發布", 
+    "台積電下午4點財報發布", 
     "#3498db", 
     "001"
   ));

@@ -1876,7 +1876,7 @@ async function loadSentiment() {
 // 我的自選股
 async function loadMyStock() {
   // 平行抓取所有自選股票的相關屬性資訊
-  const [quoteResults, volumeResults, historyResults, smaResults, rsiResults, kdjResults, macdResults] = await Promise.all([
+  const [quoteResults, volumeResults, historyResults, smaResults, rsiResults, kdjResults, macdResults, brandsResults] = await Promise.all([
     Promise.all(
       MY_STOCKS.map(s => fetch(WORKER + '/stock/quote/' + s.symbol).then(r => r.json()).catch(() => ({ success: false })))
     ),
@@ -1897,6 +1897,9 @@ async function loadMyStock() {
     ),
     Promise.all(
       MY_STOCKS.map(s => fetch(WORKER + '/stock/macd/' + s.symbol).then(r => r.json()).catch(() => ({ success: false })))
+    ),
+    Promise.all(
+      MY_STOCKS.map(s => fetch(WORKER + '/stock/brands/' + s.symbol).then(r => r.json()).catch(() => ({ success: false })))
     )
   ]);
 
@@ -2090,6 +2093,26 @@ async function loadMyStock() {
       </div>`;
     html += `<div id="stockmacd_${i}" style="display:none;">
       ${renderStockMacd(macdResults[i])}
+    </div>`;
+
+    // 布林通道（Bollinger Bands）
+    html += `
+      <div class="row">
+        <span class="row-label">布林通道（Bollinger Bands）<br>上、中、下軌則代表價格的波動範圍<br>也間接代表了超買或是超賣的可能機率</span>
+        <span style="cursor:pointer;user-select:none;" onclick="
+          const ob = document.getElementById('stockbrands_${i}');
+          const btn = this;
+          if (ob.style.display === 'none') {
+            ob.style.display = 'block';
+            btn.textContent = '－';
+          } else {
+            ob.style.display = 'none';
+            btn.textContent = '＋';
+          }
+        ">＋</span>
+      </div>`;
+    html += `<div id="stockbrands_${i}" style="display:none;">
+      ${renderStockBrands(brandsResults[i])}
     </div>`;
   }
 
@@ -2313,6 +2336,36 @@ function renderStockMacd(data) {
       <td style="position:sticky;left:0;z-index:1;background:#1a2332;padding:6px 10px;white-space:nowrap;text-align:center;font-size:12px;">${d.date}</td>
       <td style="padding:6px 10px;text-align:center;font-size:12px;">${d.macdLine  ?? '-'}</td>
       <td style="padding:6px 10px;text-align:center;font-size:12px;">${d.signalLine ?? '-'}</td>
+    </tr>`
+  ).join('');
+
+  return `
+    <div style="overflow-x:auto;">
+      <table style="border-collapse:collapse;font-family:var(--mono);min-width:400px;">
+        <thead>${headerRow}</thead>
+        <tbody>${bodyRows}</tbody>
+      </table>
+    </div>`;
+}
+
+function renderStockBrands(data) {
+  if (!data || !data.success || !data.data.length) return '<p>無BRANDS資料</p>';
+  console.log(data);
+
+  const headerRow = `
+    <tr>
+      <th style="position:sticky;left:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);">日期</th>
+      <th style="padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">上軌</th>
+      <th style="padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">中軌</th>
+      <th style="padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">下軌</th>
+    </tr>`;
+
+  const bodyRows = data.data.map(d => `
+    <tr style="border-bottom:1px solid var(--border);">
+      <td style="position:sticky;left:0;z-index:1;background:#1a2332;padding:6px 10px;white-space:nowrap;text-align:center;font-size:12px;">${d.date}</td>
+      <td style="padding:6px 10px;text-align:center;font-size:12px;">${d.upper  ?? '-'}</td>
+      <td style="padding:6px 10px;text-align:center;font-size:12px;">${d.middle ?? '-'}</td>
+      <td style="padding:6px 10px;text-align:center;font-size:12px;">${d.lower ?? '-'}</td>
     </tr>`
   ).join('');
 
