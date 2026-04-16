@@ -954,17 +954,18 @@ async function fetchFugleInstitutional(symbol) {
       const trust    = parseNumber(cells[1][1]);     // 投信
       const dealer   = parseNumber(cells[2][1]);     // 自營商
       const foreign  = parseNumber(cells[3][1]);     // 外資
+      const total  = trust + dealer + foreign;       // 合計
 
       // 民國年轉西元
       const [y, m, d] = rawDate.split("/");
       const date = `${parseInt(y) + 1911}-${m}-${d}`;
 
-      return { date, trust, dealer, foreign };
+      return { date, trust, dealer, foreign, total };
     }).filter(Boolean);
 
-    return Response.json({ success: true, data });
+    return json({ success: true, data });
   } catch (e) {
-    return Response.json({ success: false, error: e.message }, { status: 500 });
+    return json({ success: false, error: e.message }, 500);
   }
 }
 
