@@ -50,7 +50,8 @@ export default {
     if (path === "/cnbc")    return await fetchCnbc();
     if (path === "/rh")      return await fetchRobinHood();
 
-    if (path === "/ts")      return await fetchFugleTwInstitutional();
+    if (path === "/foreign-net-position")      return await fetchForeignNetPosition();
+    if (path === "/institutional")      return await fetchInstitutional();
   
     if (path === "/subscribe") return await handleSubscribe(request, env);
     if (path === "/push-test") return await handlePushTest(env);
@@ -925,7 +926,7 @@ async function fetchFugleHistory(symbol, env) {
   }
 }
 
-async function fetchFugleTwInstitutional() {
+async function fetchForeignNetPosition() {
   try {
     const url = `https://stock.wearn.com/taifexphoto.asp`;
     const res = await fetch(url, {
@@ -961,6 +962,58 @@ async function fetchFugleTwInstitutional() {
       const date = `${parseInt(y) + 1911}-${m}-${d}`;
 
       return { date, foreign };
+    }).filter(Boolean);
+
+    return json({ success: true, data });
+  } catch (e) {
+    return json({ success: false, error: e.message }, 500);
+  }
+}
+
+function formatValue(str) {
+  const cleanStr = str.replace(/\s+/g, '').replace(/^\+/, '');
+  return Number(cleanStr); // 這裡改回傳數字型別
+}
+
+async function fetchInstitutional() {
+  try {
+    const url = `https://stock.wearn.com/fundthree.asp`;
+    const res = await fetch(url, {
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        "Referer": "https://stock.wearn.com/",
+        "Accept": "text/html,application/xhtml+xml",
+      },
+    });
+
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    const html = await res.text();
+
+    // 找 class="mobile_img" 的 table
+    const tableMatches = [...html.matchAll(/<table[^>]*class="mobile_img"[^>]*>([\s\S]*?)<\/table>/gi)];
+    if (tableMatches.length < 2) throw new Error("Table not found");
+
+    const tableHtml = tableMatches[1][1]; // 取第二筆
+
+    // 抓所有 <tr>，跳過前兩列（標題列）
+    const rows = [...tableHtml.matchAll(/<tr[^>]*>([\s\S]*?)<\/tr>/gi)].slice(2);
+
+    const data = rows.map(row => {
+      const cells = [...row[1].matchAll(/<td[^>]*>([\s\S]*?)<\/td>/gi)];
+      if (cells.length < 4) return null;
+
+      const rawDate = stripTags(cells[0][1]).trim(); // "115/04/15"
+      const trust    = formatValue(stripTags(cells[1][1]));     // 投信
+      const dealer   = formatValue(stripTags(cells[2][1]));     // 自營商
+      const foreign  = formatValue(stripTags(cells[3][1]));     // 外資
+      const total  = trust + dealer + foreign;       // 合計
+
+      // 民國年轉西元
+      const [y, m, d] = rawDate.split("/");
+      const date = `${parseInt(y) + 1911}-${m}-${d}`;
+
+      return { date, trust, dealer, foreign, total };
     }).filter(Boolean);
 
     return json({ success: true, data });

@@ -1232,7 +1232,7 @@ function getMarketEmoji() {
 
 // 台股市場概況
 async function loadTw() {
-  const [taifexNight, taifexDay, twn, /*twncon, */taifexTsmc, fugleQuote/*, fugleVolume, fugleHistory*/, twinstitutionalResults] = await Promise.all([
+  const [taifexNight, taifexDay, twn, /*twncon, */taifexTsmc, fugleQuote/*, fugleVolume, fugleHistory*/, ForeignNetPosition, Institutional] = await Promise.all([
     fetch(WORKER + '/taifex/12/TX056').then(r => r.json()), // 台股期貨夜盤
     fetch(WORKER + '/taifex/2/TX046').then(r => r.json()), // 台股期貨日盤
     fetch(WORKER + '/twn').then(r => r.json()), // 富台指
@@ -1241,7 +1241,8 @@ async function loadTw() {
     fetch(WORKER + '/stock/quote/2330').then(r => r.json()), // 台積電現貨日盤股價資訊
     // fetch(WORKER + '/stock/volume/2330').then(r => r.json()), // 台積電現貨日盤分價量表
     // fetch(WORKER + '/stock/history/2330').then(r => r.json()), // 台積電現股歷史股價資料
-    fetch(WORKER + '/ts').then(r => r.json()), // 外資空單數
+    fetch(WORKER + '/foreign-net-position').then(r => r.json()), // 外資空單數
+    fetch(WORKER + '/institutional').then(r => r.json()), // 三大法人買賣超
   ]);
 
   const { isDaySession, isNightSession, isTsmcNight } = getMarketEmoji();
@@ -1430,7 +1431,7 @@ async function loadTw() {
     <div class="row">
       <span class="row-label">外資空單數</span>
       <span style="cursor:pointer;user-select:none;" onclick="
-        const ob = document.getElementById('twinstitutional');
+        const ob = document.getElementById('foreignnetposition');
         const btn = this;
         if (ob.style.display === 'none') {
           ob.style.display = 'block';
@@ -1441,22 +1442,41 @@ async function loadTw() {
         }
       ">＋</span>
     </div>`;
-  html += `<div id="twinstitutional" style="display:none;">
-    ${renderTwInstitutional(twinstitutionalResults)}
+  html += `<div id="foreignnetposition" style="display:none;">
+    ${renderForeignNetPosition(ForeignNetPosition)}
+  </div>`;
+
+  // 三大法人買賣超
+  html += `
+    <div class="row">
+      <span class="row-label">三大法人買賣超</span>
+      <span style="cursor:pointer;user-select:none;" onclick="
+        const ob = document.getElementById('institutional');
+        const btn = this;
+        if (ob.style.display === 'none') {
+          ob.style.display = 'block';
+          btn.textContent = '－';
+        } else {
+          ob.style.display = 'none';
+          btn.textContent = '＋';
+        }
+      ">＋</span>
+    </div>`;
+  html += `<div id="institutional" style="display:none;">
+    ${renderInstitutional(Institutional)}
   </div>`;
 
   setCard('card-tw', 0, html);
 }
 
-function renderTwInstitutional(data) {
+function renderForeignNetPosition(data) {
   if (!data || !data.success || !data.data.length) return '<p>無外資空單數資料</p>';
 
   const headerRow = `
     <tr>
-      <th style="position:sticky;left:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);">日期</th>
-      <th style="padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">外資空單數</th>
+      <th style="position:sticky;left:0;top:0;z-index:3;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);">日期</th>
+      <th style="position:sticky;top:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">外資空單數</th>
     </tr>`;
-
   const bodyRows = data.data.map(d => `
     <tr style="border-bottom:1px solid var(--border);">
       <td style="position:sticky;left:0;z-index:1;background:#1a2332;padding:6px 10px;white-space:nowrap;text-align:center;font-size:12px;">${d.date}</td>
@@ -1465,7 +1485,37 @@ function renderTwInstitutional(data) {
   ).join('');
 
   return `
-    <div style="overflow-x:auto;">
+    <div style="overflow-x:auto;overflow-y:auto;max-height:180px;">
+      <table style="border-collapse:collapse;font-family:var(--mono);width:100%;">
+        <thead>${headerRow}</thead>
+        <tbody>${bodyRows}</tbody>
+      </table>
+    </div>`;
+}
+
+function renderInstitutional(data) {
+  if (!data || !data.success || !data.data.length) return '<p>無三大法人買賣超資料</p>';
+
+  const headerRow = `
+    <tr>
+      <th style="position:sticky;left:0;top:0;z-index:3;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);">日期</th>
+      <th style="position:sticky;top:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">投信</th>
+      <th style="position:sticky;top:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">自營商</th>
+      <th style="position:sticky;top:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">外資</th>
+      <th style="position:sticky;top:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">合計</th>
+    </tr>`;
+  const bodyRows = data.data.map(d => `
+    <tr style="border-bottom:1px solid var(--border);">
+      <td style="position:sticky;left:0;z-index:1;background:#1a2332;padding:6px 10px;white-space:nowrap;text-align:center;font-size:12px;">${d.date}</td>
+      <td style="padding:6px 10px;text-align:center;font-size:12px;">${d.trust  ?? '-'}</td>
+      <td style="padding:6px 10px;text-align:center;font-size:12px;">${d.dealer ?? '-'}</td>
+      <td style="padding:6px 10px;text-align:center;font-size:12px;">${d.foreign ?? '-'}</td>
+      <td style="padding:6px 10px;text-align:center;font-size:12px;">${d.total ?? '-'}</td>
+    </tr>`
+  ).join('');
+
+  return `
+    <div style="overflow-x:auto;overflow-y:auto;max-height:180px;">
       <table style="border-collapse:collapse;font-family:var(--mono);width:100%;">
         <thead>${headerRow}</thead>
         <tbody>${bodyRows}</tbody>
@@ -2314,11 +2364,11 @@ function renderStockInstitutional(data) {
 
   const headerRow = `
     <tr>
-      <th style="position:sticky;left:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);">日期</th>
-      <th style="padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">投信</th>
-      <th style="padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">自營商</th>
-      <th style="padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">外資</th>
-      <th style="padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">合計</th>
+      <th style="position:sticky;left:0;top:0;z-index:3;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);">日期</th>
+      <th style="position:sticky;top:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">投信</th>
+      <th style="position:sticky;top:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">自營商</th>
+      <th style="position:sticky;top:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">外資</th>
+      <th style="position:sticky;top:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">合計</th>
     </tr>`;
 
   const bodyRows = data.data.map(d => `
@@ -2332,7 +2382,7 @@ function renderStockInstitutional(data) {
   ).join('');
 
   return `
-    <div style="overflow-x:auto;">
+    <div style="overflow-x:auto;overflow-y:auto;max-height:180px;">
       <table style="border-collapse:collapse;font-family:var(--mono);width:100%;">
         <thead>${headerRow}</thead>
         <tbody>${bodyRows}</tbody>
@@ -2345,11 +2395,11 @@ function renderStockSma(data) {
 
   const headerRow = `
     <tr>
-      <th style="position:sticky;left:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);">日期</th>
-      <th style="padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">SMA5</th>
-      <th style="padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">SMA10</th>
-      <th style="padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">SMA20</th>
-      <th style="padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">SMA60</th>
+      <th style="position:sticky;left:0;top:0;z-index:3;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);">日期</th>
+      <th style="position:sticky;top:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">SMA5</th>
+      <th style="position:sticky;top:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">SMA10</th>
+      <th style="position:sticky;top:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">SMA20</th>
+      <th style="position:sticky;top:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">SMA60</th>
     </tr>`;
 
   const bodyRows = data.data.map(d => `
@@ -2363,7 +2413,7 @@ function renderStockSma(data) {
   ).join('');
 
   return `
-    <div style="overflow-x:auto;">
+    <div style="overflow-x:auto;overflow-y:auto;max-height:180px;">
       <table style="border-collapse:collapse;font-family:var(--mono);width:100%;">
         <thead>${headerRow}</thead>
         <tbody>${bodyRows}</tbody>
@@ -2376,11 +2426,11 @@ function renderStockRsi(data) {
 
   const headerRow = `
     <tr>
-      <th style="position:sticky;left:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);">日期</th>
-      <th style="padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">RS6</th>
-      <th style="padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">RSI9</th>
-      <th style="padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">RSI14</th>
-      <th style="padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">RSI20</th>
+      <th style="position:sticky;left:0;top:0;z-index:3;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);">日期</th>
+      <th style="position:sticky;top:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">RS6</th>
+      <th style="position:sticky;top:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">RSI9</th>
+      <th style="position:sticky;top:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">RSI14</th>
+      <th style="position:sticky;top:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">RSI20</th>
     </tr>`;
 
   const bodyRows = data.data.map(d => `
@@ -2394,7 +2444,7 @@ function renderStockRsi(data) {
   ).join('');
 
   return `
-    <div style="overflow-x:auto;">
+    <div style="overflow-x:auto;overflow-y:auto;max-height:180px;">
       <table style="border-collapse:collapse;font-family:var(--mono);width:100%;">
         <thead>${headerRow}</thead>
         <tbody>${bodyRows}</tbody>
@@ -2407,10 +2457,10 @@ function renderStockKdj(data) {
 
   const headerRow = `
     <tr>
-      <th style="position:sticky;left:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);">日期</th>
-      <th style="padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">K線（快速平均線）</th>
-      <th style="padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">D線（慢速平均線）</th>
-      <th style="padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">J線（方向線）</th>
+      <th style="position:sticky;left:0;top:0;z-index:3;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);">日期</th>
+      <th style="position:sticky;top:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">K線（快速平均線）</th>
+      <th style="position:sticky;top:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">D線（慢速平均線）</th>
+      <th style="position:sticky;top:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">J線（方向線）</th>
     </tr>`;
 
   const bodyRows = data.data.map(d => `
@@ -2423,7 +2473,7 @@ function renderStockKdj(data) {
   ).join('');
 
   return `
-    <div style="overflow-x:auto;">
+    <div style="overflow-x:auto;overflow-y:auto;max-height:180px;">
       <table style="border-collapse:collapse;font-family:var(--mono);width:100%;">
         <thead>${headerRow}</thead>
         <tbody>${bodyRows}</tbody>
@@ -2436,9 +2486,9 @@ function renderStockMacd(data) {
 
   const headerRow = `
     <tr>
-      <th style="position:sticky;left:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);">日期</th>
-      <th style="padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">MACD 線</th>
-      <th style="padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">信號線</th>
+      <th style="position:sticky;left:0;top:0;z-index:3;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);">日期</th>
+      <th style="position:sticky;top:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">MACD 線</th>
+      <th style="position:sticky;top:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">信號線</th>
     </tr>`;
 
   const bodyRows = data.data.map(d => `
@@ -2450,7 +2500,7 @@ function renderStockMacd(data) {
   ).join('');
 
   return `
-    <div style="overflow-x:auto;">
+    <div style="overflow-x:auto;overflow-y:auto;max-height:180px;">
       <table style="border-collapse:collapse;font-family:var(--mono);width:100%;">
         <thead>${headerRow}</thead>
         <tbody>${bodyRows}</tbody>
@@ -2463,10 +2513,10 @@ function renderStockBrands(data) {
 
   const headerRow = `
     <tr>
-      <th style="position:sticky;left:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);">日期</th>
-      <th style="padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">上軌</th>
-      <th style="padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">中軌</th>
-      <th style="padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">下軌</th>
+      <th style="position:sticky;left:0;top:0;z-index:3;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);">日期</th>
+      <th style="position:sticky;top:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">上軌</th>
+      <th style="position:sticky;top:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">中軌</th>
+      <th style="position:sticky;top:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">下軌</th>
     </tr>`;
 
   const bodyRows = data.data.map(d => `
@@ -2479,7 +2529,7 @@ function renderStockBrands(data) {
   ).join('');
 
   return `
-    <div style="overflow-x:auto;">
+    <div style="overflow-x:auto;overflow-y:auto;max-height:180px;">
       <table style="border-collapse:collapse;font-family:var(--mono);width:100%;">
         <thead>${headerRow}</thead>
         <tbody>${bodyRows}</tbody>
