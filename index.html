@@ -1232,7 +1232,7 @@ function getMarketEmoji() {
 
 // 台股市場概況
 async function loadTw() {
-  const [taifexNight, taifexDay, twn, /*twncon, */taifexTsmc, fugleQuote/*, fugleVolume, fugleHistory*/, ForeignNetPosition, Institutional] = await Promise.all([
+  const [taifexNight, taifexDay, twn, /*twncon, */taifexTsmc, fugleQuote/*, fugleVolume, fugleHistory*/, ForeignNetPosition, Institutional, MarginTradingBalance] = await Promise.all([
     fetch(WORKER + '/taifex/12/TX056').then(r => r.json()), // 台股期貨夜盤
     fetch(WORKER + '/taifex/2/TX046').then(r => r.json()), // 台股期貨日盤
     fetch(WORKER + '/twn').then(r => r.json()), // 富台指
@@ -1243,17 +1243,20 @@ async function loadTw() {
     // fetch(WORKER + '/stock/history/2330').then(r => r.json()), // 台積電現股歷史股價資料
     fetch(WORKER + '/foreign-net-position').then(r => r.json()), // 外資空單數
     fetch(WORKER + '/institutional').then(r => r.json()), // 三大法人買賣超
+    fetch(WORKER + '/margin-trading-balance').then(r => r.json()), // 融資餘額
   ]);
 
   const { isDaySession, isNightSession, isTsmcNight } = getMarketEmoji();
 
   // 各種時間區段標籤
-  const dayLabel   = `【期貨日盤】${isDaySession   ? '🟢' : ''}`;
-  const nightLabel = `【期貨夜盤】${isNightSession  ? '🟢' : ''}`;
-  const tsmcNight  = `【期貨夜盤】${isTsmcNight   ? '🟢' : ''}`;
-  const spotDay    = `【現貨日盤】${isDaySession    ? '🟢' : ''}`;
+  const dayLabel   = `${isDaySession ? '🟢' : '🔴'} 期貨日盤`;
+  const nightLabel = `${isNightSession ? '🟢' : '🔴'} 期貨夜盤`;
+  const tsmcNight  = `${isTsmcNight ? '🟢' : '🔴'} 期貨夜盤`;
+  const spotDay    = `${isDaySession ? '🟢' : '🔴'} 現貨日盤`;
 
-  let html = `<div class="card-title">大盤指數</div>`;
+  let html = `<div class="card-title">台股市場概況</div>`;
+
+  html += `<div class="card-title" style="color: sandybrown;">㊣大盤指數㊣</div>`;
 
   // 【台股期貨夜盤】
   html += groupHeader(nightLabel, '', '台股期貨（簡稱「台指期」）是以「台灣加權股價指數」為標的物的期貨契約，讓投資人透過保證金制度，以小博大操作台股漲跌。具高槓桿、多空靈活、交易成本低等特性，熱門商品包括大台指、小台指、微台指，結算日為每月第三個星期三。<br><br>交易時間：每週一至週五的下午15:00至隔日凌晨05:00。');
@@ -1309,7 +1312,7 @@ async function loadTw() {
   //   html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
   // }
 
-  html += `<div class="card-title" style="margin-top: 20px;">台積電</div>`;
+  html += `<div class="card-title" style="margin-top: 20px; color: sandybrown;">㊣台積電㊣</div>`;
   
   // 【台積電期貨夜盤】
   html += groupHeader(tsmcNight, '', '台積電期貨（股票期貨）是由台灣期貨交易所推出的金融衍生品，標的為台積電（2330）股票。具備低保證金（高槓桿）、多空雙向操作、交易稅低等特性，一口標準期貨代表2張台積電股票（2,000股）。此外，還有小台積電期貨（100股）供資金較小投資人選擇，且具備夜盤交易功能，可靈活應對ADR漲跌。<br><br>交易時間：每週一至週五的下午17:25至隔日凌晨05:00。');
@@ -1424,7 +1427,7 @@ async function loadTw() {
   //   ${renderStockHistory(fugleHistory)}
   // </div>`;
 
-  html += `<div class="card-title" style="margin-top: 20px; margin-bottom: 0px;">其它相關</div>`;
+  html += `<div class="card-title" style="margin-top: 20px;  margin-bottom: 5px; color: sandybrown;">㊣其它相關㊣</div>`;
 
   // 外資空單數
   html += `
@@ -1465,6 +1468,8 @@ async function loadTw() {
   html += `<div id="institutional" style="display:none;">
     ${renderInstitutional(Institutional)}
   </div>`;
+
+  html += row('融資餘額', MarginTradingBalance.marginBalance + ' 億' + '（ ' + MarginTradingBalance.date + '）');
 
   setCard('card-tw', 0, html);
 }
@@ -2246,11 +2251,11 @@ async function loadMyStock() {
     </div>`;
   }
 
-  // const urlParams = new URLSearchParams(window.location.search);
-  // const card_type = urlParams.get('card_type') || 'my-stock';
+  const urlParams = new URLSearchParams(window.location.search);
+  const card_type = urlParams.get('card_type') || 'my-stock';
 
-  // setCard('card-mystock', 0, html, card_type === 'my-stock' ? 'card-wide' : '');
-  setCard('card-mystock', 0, html, '');
+  setCard('card-mystock', 0, html, card_type === 'my-stock' ? 'card-wide' : '');
+  // setCard('card-mystock', 0, html, '');
 }
 
 function renderVolumeProfile(data, id) {

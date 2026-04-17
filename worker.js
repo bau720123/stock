@@ -52,6 +52,7 @@ export default {
 
     if (path === "/foreign-net-position")      return await fetchForeignNetPosition();
     if (path === "/institutional")      return await fetchInstitutional();
+    if (path === "/margin-trading-balance")      return await fetchMarginTradingBalance();
   
     if (path === "/subscribe") return await handleSubscribe(request, env);
     if (path === "/push-test") return await handlePushTest(env);
@@ -1028,6 +1029,52 @@ async function fetchInstitutional() {
     }).filter(Boolean);
 
     return json({ success: true, data });
+  } catch (e) {
+    return json({ success: false, error: e.message }, 500);
+  }
+}
+
+async function fetchMarginTradingBalance() {
+  try {
+    const res = await fetch("https://www.twse.com.tw/rwd/zh/marginTrading/MI_MARGN?response=html", {
+      headers: {
+        "User-Agent": UA,
+        "Referer": "https://www.twse.com.tw/",
+        "Accept": "text/html,application/xhtml+xml",
+      },
+    });
+
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    const html = await res.text();
+
+    // 抓日期：「115年04月16日 信用交易統計」
+    const dateMatch = html.match(/(\d+)年(\d+)月(\d+)日\s*信用交易統計/);
+    if (!dateMatch) throw new Error("Date not found");
+    const date = `${parseInt(dateMatch[1]) + 1911}-${dateMatch[2]}-${dateMatch[3]}`;
+
+    // 抓 tbody 所有 <tr>
+    const tbodyMatch = html.match(/<tbody>([\s\S]*?)<\/tbody>/i);
+    if (!tbodyMatch) throw new Error("tbody not found");
+
+    const rows = [...tbodyMatch[1].matchAll(/<tr[^>]*>([\s\S]*?)<\/tr>/gi)];
+    if (rows.length < 3) throw new Error("Row not found");
+
+    // 第三列（index 2）是「融資金額(仟元)」，取最後一個 td（今日餘額）
+    const cells = [...rows[2][1].matchAll(/<td[^>]*>([\s\S]*?)<\/td>/gi)];
+    if (cells.length < 6) throw new Error("Cell not found");
+
+    const rawValue = stripTags(cells[5][1]).trim(); // 今日餘額，仟元
+    const valueKThousand = parseInt(rawValue.replace(/,/g, ""));
+    const valueHundredMillion = (valueKThousand / 100000).toFixed(2); // 仟元 → 億元
+
+    return json({
+      success: true,
+      date,
+      marginBalance: parseFloat(valueHundredMillion), // 融資餘額（億元）
+      marginBalanceRaw: valueKThousand,               // 原始值（仟元）
+    });
+
   } catch (e) {
     return json({ success: false, error: e.message }, 500);
   }
