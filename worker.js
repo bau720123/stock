@@ -49,6 +49,9 @@ export default {
 
     if (path === "/cnbc")    return await fetchCnbc();
     if (path === "/rh")      return await fetchRobinHood();
+
+    if (path === "/ts")      return await fetchFugleTwInstitutional();
+  
     if (path === "/subscribe") return await handleSubscribe(request, env);
     if (path === "/push-test") return await handlePushTest(env);
     if (path === "/read-subs") return await readSubs(env);
@@ -917,6 +920,50 @@ async function fetchFugleHistory(symbol, env) {
       success: true,
       data,
     });
+  } catch (e) {
+    return json({ success: false, error: e.message }, 500);
+  }
+}
+
+async function fetchFugleTwInstitutional() {
+  try {
+    const url = `https://stock.wearn.com/taifexphoto.asp`;
+    const res = await fetch(url, {
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        "Referer": "https://stock.wearn.com/",
+        "Accept": "text/html,application/xhtml+xml",
+      },
+    });
+
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    const html = await res.text();
+
+    // 找 class="mobile_img" 的 table
+    const tableMatch = html.match(/<table[^>]*class="taifexphoto"[^>]*>([\s\S]*?)<\/table>/i);
+    if (!tableMatch) throw new Error("Table not found");
+
+    const tableHtml = tableMatch[1];
+
+    // 抓所有 <tr>，跳過前兩列（標題列）
+    const rows = [...tableHtml.matchAll(/<tr[^>]*>([\s\S]*?)<\/tr>/gi)].slice(2);
+
+    const data = rows.map(row => {
+      const cells = [...row[1].matchAll(/<td[^>]*>([\s\S]*?)<\/td>/gi)];
+      if (cells.length < 4) return null;
+
+      const rawDate = stripTags(cells[0][1]).trim(); // "115/04/15"
+      const foreign  = parseNumber(cells[5][1]);     // 外資
+
+      // 民國年轉西元
+      const [y, m, d] = rawDate.split("/");
+      const date = `${parseInt(y) + 1911}-${m}-${d}`;
+
+      return { date, foreign };
+    }).filter(Boolean);
+
+    return json({ success: true, data });
   } catch (e) {
     return json({ success: false, error: e.message }, 500);
   }

@@ -1232,7 +1232,7 @@ function getMarketEmoji() {
 
 // 台股市場概況
 async function loadTw() {
-  const [taifexNight, taifexDay, twn, /*twncon, */taifexTsmc, fugleQuote/*, fugleVolume, fugleHistory*/] = await Promise.all([
+  const [taifexNight, taifexDay, twn, /*twncon, */taifexTsmc, fugleQuote/*, fugleVolume, fugleHistory*/, twinstitutionalResults] = await Promise.all([
     fetch(WORKER + '/taifex/12/TX056').then(r => r.json()), // 台股期貨夜盤
     fetch(WORKER + '/taifex/2/TX046').then(r => r.json()), // 台股期貨日盤
     fetch(WORKER + '/twn').then(r => r.json()), // 富台指
@@ -1241,6 +1241,7 @@ async function loadTw() {
     fetch(WORKER + '/stock/quote/2330').then(r => r.json()), // 台積電現貨日盤股價資訊
     // fetch(WORKER + '/stock/volume/2330').then(r => r.json()), // 台積電現貨日盤分價量表
     // fetch(WORKER + '/stock/history/2330').then(r => r.json()), // 台積電現股歷史股價資料
+    fetch(WORKER + '/ts').then(r => r.json()), // 外資空單數
   ]);
 
   const { isDaySession, isNightSession, isTsmcNight } = getMarketEmoji();
@@ -1422,7 +1423,54 @@ async function loadTw() {
   //   ${renderStockHistory(fugleHistory)}
   // </div>`;
 
+  html += `<div class="card-title" style="margin-top: 20px; margin-bottom: 0px;">其它相關</div>`;
+
+  // 外資空單數
+  html += `
+    <div class="row">
+      <span class="row-label">外資空單數</span>
+      <span style="cursor:pointer;user-select:none;" onclick="
+        const ob = document.getElementById('twinstitutional');
+        const btn = this;
+        if (ob.style.display === 'none') {
+          ob.style.display = 'block';
+          btn.textContent = '－';
+        } else {
+          ob.style.display = 'none';
+          btn.textContent = '＋';
+        }
+      ">＋</span>
+    </div>`;
+  html += `<div id="twinstitutional" style="display:none;">
+    ${renderTwInstitutional(twinstitutionalResults)}
+  </div>`;
+
   setCard('card-tw', 0, html);
+}
+
+function renderTwInstitutional(data) {
+  if (!data || !data.success || !data.data.length) return '<p>無外資空單數資料</p>';
+
+  const headerRow = `
+    <tr>
+      <th style="position:sticky;left:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);">日期</th>
+      <th style="padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">外資空單數</th>
+    </tr>`;
+
+  const bodyRows = data.data.map(d => `
+    <tr style="border-bottom:1px solid var(--border);">
+      <td style="position:sticky;left:0;z-index:1;background:#1a2332;padding:6px 10px;white-space:nowrap;text-align:center;font-size:12px;">${d.date}</td>
+      <td style="padding:6px 10px;text-align:center;font-size:12px;">${d.foreign ?? '-'}</td>
+    </tr>`
+  ).join('');
+
+  return `
+    <div style="overflow-x:auto;">
+      <table style="border-collapse:collapse;font-family:var(--mono);width:100%;">
+        <thead>${headerRow}</thead>
+        <tbody>${bodyRows}</tbody>
+      </table>
+    </div>`;
 }
 
 // 美股市場概況
@@ -2285,7 +2333,7 @@ function renderStockInstitutional(data) {
 
   return `
     <div style="overflow-x:auto;">
-      <table style="border-collapse:collapse;font-family:var(--mono);min-width:400px;">
+      <table style="border-collapse:collapse;font-family:var(--mono);width:100%;">
         <thead>${headerRow}</thead>
         <tbody>${bodyRows}</tbody>
       </table>
@@ -2316,7 +2364,7 @@ function renderStockSma(data) {
 
   return `
     <div style="overflow-x:auto;">
-      <table style="border-collapse:collapse;font-family:var(--mono);min-width:400px;">
+      <table style="border-collapse:collapse;font-family:var(--mono);width:100%;">
         <thead>${headerRow}</thead>
         <tbody>${bodyRows}</tbody>
       </table>
@@ -2347,7 +2395,7 @@ function renderStockRsi(data) {
 
   return `
     <div style="overflow-x:auto;">
-      <table style="border-collapse:collapse;font-family:var(--mono);min-width:400px;">
+      <table style="border-collapse:collapse;font-family:var(--mono);width:100%;">
         <thead>${headerRow}</thead>
         <tbody>${bodyRows}</tbody>
       </table>
@@ -2376,7 +2424,7 @@ function renderStockKdj(data) {
 
   return `
     <div style="overflow-x:auto;">
-      <table style="border-collapse:collapse;font-family:var(--mono);min-width:400px;">
+      <table style="border-collapse:collapse;font-family:var(--mono);width:100%;">
         <thead>${headerRow}</thead>
         <tbody>${bodyRows}</tbody>
       </table>
@@ -2403,7 +2451,7 @@ function renderStockMacd(data) {
 
   return `
     <div style="overflow-x:auto;">
-      <table style="border-collapse:collapse;font-family:var(--mono);min-width:400px;">
+      <table style="border-collapse:collapse;font-family:var(--mono);width:100%;">
         <thead>${headerRow}</thead>
         <tbody>${bodyRows}</tbody>
       </table>
@@ -2432,7 +2480,7 @@ function renderStockBrands(data) {
 
   return `
     <div style="overflow-x:auto;">
-      <table style="border-collapse:collapse;font-family:var(--mono);min-width:400px;">
+      <table style="border-collapse:collapse;font-family:var(--mono);width:100%;">
         <thead>${headerRow}</thead>
         <tbody>${bodyRows}</tbody>
       </table>
@@ -2561,11 +2609,6 @@ async function loadWar() {
 }
 
 // 美股行事曆
-// async function loadAmericaCalendar() {
-//   let html = `<div class="card-title">美股行事曆</div>`;
-
-//   setCard('card-america-calendar', 0, html);
-// }
 let calendarDataCache = null; // 儲存從 Worker 拿到的所有資料
 let currentCalView = { year: new Date().getFullYear(), month: new Date().getMonth() };
 
