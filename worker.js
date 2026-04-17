@@ -971,8 +971,17 @@ async function fetchForeignNetPosition() {
 }
 
 function formatValue(str) {
-  const cleanStr = str.replace(/\s+/g, '').replace(/^\+/, '');
-  return Number(cleanStr); // 這裡改回傳數字型別
+  if (!str) return 0; // 防止 stripTags 噴出 null 或 undefined
+
+  const cleanStr = str
+    .replace(/\s+/g, '')    // 1. 移除所有空白 (包含 - 1,208 中的空格)
+    .replace(/,/g, '')      // 2. 移除千分位逗號 (把 1,208 變成 1208)
+    .replace(/^\+/, '');    // 3. 移除開頭的正號
+
+  const num = Number(cleanStr);
+  
+  // 檢查轉換是否成功，失敗則回傳 0，避免讓 total 變成 NaN
+  return isNaN(num) ? 0 : num;
 }
 
 async function fetchInstitutional() {
@@ -1007,13 +1016,15 @@ async function fetchInstitutional() {
       const trust    = formatValue(stripTags(cells[1][1]));     // 投信
       const dealer   = formatValue(stripTags(cells[2][1]));     // 自營商
       const foreign  = formatValue(stripTags(cells[3][1]));     // 外資
-      const total  = trust + dealer + foreign;       // 合計
+
+      // 現在這三個變數都是純數字了
+      const totalNum = trust + dealer + foreign;
 
       // 民國年轉西元
       const [y, m, d] = rawDate.split("/");
       const date = `${parseInt(y) + 1911}-${m}-${d}`;
 
-      return { date, trust, dealer, foreign, total };
+      return { date, trust, dealer, foreign, total: totalNum.toFixed(2) };
     }).filter(Boolean);
 
     return json({ success: true, data });

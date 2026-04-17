@@ -2277,7 +2277,7 @@ function renderVolumeProfile(data, id) {
     if (!priceColor && askRatio > 0.8) priceColor = 'color:#ffd600;font-weight:bold;';
 
     return `
-      <div style="display:none;align-items:center;margin-bottom:0px;border-bottom: 1px solid var(--border);padding: 10px 0px 10px 12px" class="ordervolume_${id}">
+      <div style="display:none;align-items:center;margin-bottom:0px;border-bottom: 1px solid var(--border);padding: 10px 0px 10px 12px;" class="ordervolume_${id}">
         <!-- 左側文字 -->
         <div style="width:160px;font-size:12px;line-height:1.6;flex-shrink:0;">
           <div style="${priceColor}">成交價：${d.price.toFixed(2)}</div>
@@ -2313,7 +2313,9 @@ function renderVolumeProfile(data, id) {
           btn.textContent = isHidden ? '－' : '＋';
         ">＋</span>
       </div>
+      <div style="overflow-y:auto;max-height:200px;">
       ${rows}
+      </div>
     </div>
   `;
 }
@@ -2321,13 +2323,11 @@ function renderVolumeProfile(data, id) {
 function renderStockHistory(data) {
   if (!data || !data.success || !data.data.length) return '<p>無歷史資料</p>';
 
-  const headers = ['日期', '開盤', '最高', '最低', '收盤', '漲跌', '成交量', '成交金額'];
-
   const headerRow = `
     <tr>
-      <th style="position:sticky;left:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);">日期</th>
+      <th style="position:sticky;left:0;top:0;z-index:3;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);">日期</th>
       ${['開盤', '最高', '最低', '收盤', '漲跌', '成交量', '成交金額'].map(h =>
-        `<th style="padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">${h}</th>`
+        `<th style="position:sticky;top:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">${h}</th>`
       ).join('')}
     </tr>`;
 
@@ -2351,8 +2351,8 @@ function renderStockHistory(data) {
   }).join('');
 
   return `
-    <div style="overflow-x:auto;">
-      <table style="border-collapse:collapse;font-family:var(--mono);min-width:500px;">
+    <div style="overflow-x:auto;overflow-y:auto;max-height:180px;">
+      <table style="border-collapse:collapse;font-family:var(--mono);width:100%;">
         <thead>${headerRow}</thead>
         <tbody>${bodyRows}</tbody>
       </table>
