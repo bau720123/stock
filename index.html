@@ -1222,12 +1222,15 @@ function getMarketEmoji() {
   const h = tpe.getHours();
   const m = tpe.getMinutes();
   const hm = h * 100 + m; // 例如 09:37 → 937
+  const day = tpe.getDay(); // 0=週日, 1=週一, ..., 6=週六
+  const isWeekday = day >= 1 && day <= 5;
 
-  const isDaySession    = hm >= 900  && hm <= 1330; // 09:00 ~ 13:30
-  const isNightSession  = hm >= 1500 || hm <= 859;  // 15:00 ~ 隔日08:59
-  const isTsmcNight     = hm >= 1725 || hm <= 859;  // 17:25 ~ 隔日08:59
+  const isDaySession    = isWeekday && hm >= 900  && hm <= 1330; // 09:00 ~ 13:30
+  const isNightSession  = isWeekday && hm >= 1500 || hm <= 859;  // 15:00 ~ 隔日08:59
+  const isTsmcNight     = isWeekday && hm >= 1725 || hm <= 859;  // 17:25 ~ 隔日08:59
+  const isTwn           = isWeekday;  // 17:25 ~ 隔日08:59
 
-  return { isDaySession, isNightSession, isTsmcNight };
+  return { isDaySession, isNightSession, isTsmcNight, isTwn };
 }
 
 // 台股市場概況
@@ -1246,13 +1249,14 @@ async function loadTw() {
     fetch(WORKER + '/margin-trading-balance').then(r => r.json()), // 融資餘額
   ]);
 
-  const { isDaySession, isNightSession, isTsmcNight } = getMarketEmoji();
+  const { isDaySession, isNightSession, isTsmcNight, isTwn } = getMarketEmoji();
 
   // 各種時間區段標籤
   const dayLabel   = `${isDaySession ? '🟢' : '🔴'} 期貨日盤`;
   const nightLabel = `${isNightSession ? '🟢' : '🔴'} 期貨夜盤`;
   const tsmcNight  = `${isTsmcNight ? '🟢' : '🔴'} 期貨夜盤`;
   const spotDay    = `${isDaySession ? '🟢' : '🔴'} 現貨日盤`;
+  const twnDay    = `${isTwn ? '🟢' : '🔴'} 富台指`;
 
   let html = `<div class="card-title">台股市場概況</div>`;
 
@@ -1283,7 +1287,7 @@ async function loadTw() {
   }
 
   // 【富台指】
-  html += groupHeader('🟢 富台指', '', '「富台指」全名為「富時台灣指數期貨」（FTSE Taiwan Index Futures），是新加坡交易所（SGX）與富時羅素（FTSE Russell）合作推出的金融衍生工具。它以美元計價，因 MSCI 摩台指移出新加坡而誕生，成為國際投資人衡量台股表現、避險及在台股休市時預估開盤方向的核心工具。');
+  html += groupHeader(twnDay, '', '「富台指」全名為「富時台灣指數期貨」（FTSE Taiwan Index Futures），是新加坡交易所（SGX）與富時羅素（FTSE Russell）合作推出的金融衍生工具。它以美元計價，因 MSCI 摩台指移出新加坡而誕生，成為國際投資人衡量台股表現、避險及在台股休市時預估開盤方向的核心工具。');
   if (twn.success) {
     const cls = changeClass(twn.changeText, 1);
     const formattedTime = twn.updateTime.replace(/\./g, '-');
@@ -1298,7 +1302,7 @@ async function loadTw() {
   }
 
   // 【富台指】
-  // html += groupHeader('🟢 富台指', '', '「富台指」全名為「富時台灣指數期貨」（FTSE Taiwan Index Futures），是新加坡交易所（SGX）與富時羅素（FTSE Russell）合作推出的金融衍生工具。它以美元計價，因 MSCI 摩台指移出新加坡而誕生，成為國際投資人衡量台股表現、避險及在台股休市時預估開盤方向的核心工具。');
+  // html += groupHeader(twnDay, '', '「富台指」全名為「富時台灣指數期貨」（FTSE Taiwan Index Futures），是新加坡交易所（SGX）與富時羅素（FTSE Russell）合作推出的金融衍生工具。它以美元計價，因 MSCI 摩台指移出新加坡而誕生，成為國際投資人衡量台股表現、避險及在台股休市時預估開盤方向的核心工具。');
   // if (twncon.success) {
   //   const cls = changeClass(twncon.updown, 1);
   //   const formattedTime = twncon.updateTime.replace(/\./g, '-');
@@ -1343,7 +1347,7 @@ async function loadTw() {
     html += row('漲跌', sign + fugleQuote.change, cls);
     html += row('低減開', lowMinusOpen, lowMinusOpenCls);
 
-    // 委託簿（並排顯示）
+    // 委託簿
     html += `
       <div class="row">
         <span class="row-label">委託簿</span>
