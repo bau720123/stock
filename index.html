@@ -391,6 +391,7 @@ header h1 {
 .calendar-nav-btn:hover { border-color: var(--accent); color: var(--accent); }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
 </head>
 <body>
 
@@ -2134,6 +2135,10 @@ async function loadMyStock() {
       ${renderStockHistory(historyResults[i])}
     </div>`;
 
+    html += `<div class="row">
+      ${renderStockChartHistory(historyResults[i], i)}
+    </div>`;
+
     // 三大法人買賣超
     html += `
       <div class="row">
@@ -2152,6 +2157,10 @@ async function loadMyStock() {
       </div>`;
     html += `<div id="stockinstitutional_${i}" style="display:none;">
       ${renderStockInstitutional(institutionalResults[i])}
+    </div>`;
+
+    html += `<div class="row">
+      ${renderStockChartInstitutional(institutionalResults[i], i)}
     </div>`;
 
     // 簡單移動平均線
@@ -2174,6 +2183,10 @@ async function loadMyStock() {
       ${renderStockSma(smaResults[i])}
     </div>`;
 
+    html += `<div class="row">
+      ${renderStockChartSma(smaResults[i], i)}
+    </div>`;
+
     // 相對強弱指數
     html += `
       <div class="row">
@@ -2192,6 +2205,10 @@ async function loadMyStock() {
       </div>`;
     html += `<div id="stockrsi_${i}" style="display:none;">
       ${renderStockRsi(rsiResults[i])}
+    </div>`;
+
+    html += `<div class="row">
+      ${renderStockChartRsi(rsiResults[i], i)}
     </div>`;
 
     // 隨機指標
@@ -2214,6 +2231,10 @@ async function loadMyStock() {
       ${renderStockKdj(kdjResults[i])}
     </div>`;
 
+    html += `<div class="row">
+      ${renderStockChartKdj(kdjResults[i], i)}
+    </div>`;
+
     // 平滑異同移動平均線（MACD）
     html += `
       <div class="row">
@@ -2232,6 +2253,10 @@ async function loadMyStock() {
       </div>`;
     html += `<div id="stockmacd_${i}" style="display:none;">
       ${renderStockMacd(macdResults[i])}
+    </div>`;
+
+    html += `<div class="row">
+      ${renderStockChartMacd(macdResults[i], i)}
     </div>`;
 
     // 布林通道（Bollinger Bands）
@@ -2253,6 +2278,10 @@ async function loadMyStock() {
     html += `<div id="stockbrands_${i}" style="display:none;">
       ${renderStockBrands(brandsResults[i])}
     </div>`;
+
+    html += `<div class="row">
+      ${renderStockChartBrands(brandsResults[i], i)}
+    </div>`;
   }
 
   const urlParams = new URLSearchParams(window.location.search);
@@ -2260,6 +2289,83 @@ async function loadMyStock() {
 
   setCard('card-mystock', 0, html, card_type === 'my-stock' ? 'card-wide' : '');
   // setCard('card-mystock', 0, html, '');
+
+  StockChartHistory();
+  StockChartInstitutional();
+  StockChartSma();
+  StockChartRsi();
+  StockChartKdj();
+  StockChartMacd();
+  StockChartBrands();
+}
+
+function StockChartHistory() {
+  const pending = window._history_chartPending || {};
+  for (const i in pending) {
+    const el = document.getElementById('stock_history_chart_' + i);
+    if (!el) continue;
+    const sorted = pending[i];
+
+    const chart = LightweightCharts.createChart(el, {
+      width:  el.offsetWidth || 300,
+      height: 260,
+      layout: { background: { color: '#0a0e14' }, textColor: '#5a7080' },
+      grid:   { vertLines: { color: '#1e2736' }, horzLines: { color: '#1e2736' } },
+      crosshair:       { mode: LightweightCharts.CrosshairMode.Normal },
+      rightPriceScale: { borderColor: '#1e2736' },
+      timeScale:       { borderColor: '#1e2736', fixLeftEdge: true, fixRightEdge: true },
+      handleScroll:    { mouseWheel: true },
+      handleScale:     { mouseWheel: true },
+    });
+
+    const candleSeries = chart.addSeries(LightweightCharts.CandlestickSeries, {
+      upColor: '#ff4d6a', downColor: '#00c98a',
+      borderUpColor: '#ff4d6a', borderDownColor: '#00c98a',
+      wickUpColor:   '#ff4d6a', wickDownColor:   '#00c98a',
+    });
+    candleSeries.setData(sorted.map(d => ({
+      time: d.date, open: d.open, high: d.high, low: d.low, close: d.close,
+    })));
+
+    const volSeries = chart.addSeries(LightweightCharts.HistogramSeries, {
+      priceFormat: { type: 'volume' }, priceScaleId: 'vol',
+    });
+    chart.priceScale('vol').applyOptions({
+      scaleMargins: { top: 0.82, bottom: 0 },
+    });
+    volSeries.setData(sorted.map(d => ({
+      time:  d.date,
+      value: Math.round(d.volume / 1000),
+      color: d.change >= 0 ? '#ff4d6a33' : '#00c98a33',
+    })));
+
+    new ResizeObserver(() => chart.applyOptions({ width: el.offsetWidth })).observe(el);
+  }
+  window._history_chartPending = {}; // 清空，避免重複初始化
+}
+
+function StockChartInstitutional() {
+  
+}
+
+function StockChartSma() {
+
+}
+
+function StockChartRsi() {
+
+}
+
+function StockChartKdj() {
+
+}
+
+function StockChartMacd() {
+
+}
+
+function StockChartBrands() {
+
 }
 
 function renderVolumeProfile(data, id) {
@@ -2330,7 +2436,7 @@ function renderVolumeProfile(data, id) {
 }
 
 function renderStockHistory(data) {
-  if (!data || !data.success || !data.data.length) return '<p>無歷史資料</p>';
+  if (!data || !data.success || !data.data.length) return '<p>無歷史股價資料</p>';
 
   const headerRow = `
     <tr>
@@ -2368,6 +2474,19 @@ function renderStockHistory(data) {
     </div>`;
 }
 
+function renderStockChartHistory(data, i) {
+  if (!data || !data.success || !data.data || !data.data.length) return '<p>無歷史股價圖表資料</p>';
+
+  const sorted = [...data.data].sort((a, b) => a.date.localeCompare(b.date));
+
+  // 把資料暫存到 window，等 DOM 就緒後取用
+  window._history_chartPending = window._history_chartPending || {};
+  window._history_chartPending[i] = sorted;
+
+  // 回傳容器，圖表由 setTimeout 在 DOM 就緒後掛入
+  return `<div id="stock_history_chart_${i}" style="height:260px;"></div>`;
+}
+
 function renderStockInstitutional(data) {
   if (!data || !data.success || !data.data.length) return '<p>無三大法人買賣超資料</p>';
 
@@ -2399,8 +2518,21 @@ function renderStockInstitutional(data) {
     </div>`;
 }
 
+function renderStockChartInstitutional(data, i) {
+  if (!data || !data.success || !data.data || !data.data.length) return '<p>無三大法人買賣超圖表資料</p>';
+
+  const sorted = [...data.data].sort((a, b) => a.date.localeCompare(b.date));
+
+  // 把資料暫存到 window，等 DOM 就緒後取用
+  window._institutional_chartPending = window._institutional_chartPending || {};
+  window._institutional_chartPending[i] = sorted;
+
+  // 回傳容器，圖表由 setTimeout 在 DOM 就緒後掛入
+  return `<div id="stock_institutional_chart_${i}" style="height:260px;"></div>`;
+}
+
 function renderStockSma(data) {
-  if (!data || !data.success || !data.data.length) return '<p>無SMA資料</p>';
+  if (!data || !data.success || !data.data.length) return '<p>無簡單移動平均線資料</p>';
 
   const headerRow = `
     <tr>
@@ -2430,8 +2562,21 @@ function renderStockSma(data) {
     </div>`;
 }
 
+function renderStockChartSma(data, i) {
+  if (!data || !data.success || !data.data || !data.data.length) return '<p>無簡單移動平均線圖表資料</p>';
+
+  const sorted = [...data.data].sort((a, b) => a.date.localeCompare(b.date));
+
+  // 把資料暫存到 window，等 DOM 就緒後取用
+  window._sma_chartPending = window._sma_chartPending || {};
+  window._sma_chartPending[i] = sorted;
+
+  // 回傳容器，圖表由 setTimeout 在 DOM 就緒後掛入
+  return `<div id="stock_sma_chart_${i}" style="height:260px;"></div>`;
+}
+
 function renderStockRsi(data) {
-  if (!data || !data.success || !data.data.length) return '<p>無RSI資料</p>';
+  if (!data || !data.success || !data.data.length) return '<p>無相對強弱指標資料</p>';
 
   const headerRow = `
     <tr>
@@ -2461,8 +2606,21 @@ function renderStockRsi(data) {
     </div>`;
 }
 
+function renderStockChartRsi(data, i) {
+  if (!data || !data.success || !data.data || !data.data.length) return '<p>無相對強弱指標圖表資料</p>';
+
+  const sorted = [...data.data].sort((a, b) => a.date.localeCompare(b.date));
+
+  // 把資料暫存到 window，等 DOM 就緒後取用
+  window._rsi_chartPending = window._rsi_chartPending || {};
+  window._rsi_chartPending[i] = sorted;
+
+  // 回傳容器，圖表由 setTimeout 在 DOM 就緒後掛入
+  return `<div id="stock_rsi_chart_${i}" style="height:260px;"></div>`;
+}
+
 function renderStockKdj(data) {
-  if (!data || !data.success || !data.data.length) return '<p>無KDJ資料</p>';
+  if (!data || !data.success || !data.data.length) return '<p>無隨機指標資料</p>';
 
   const headerRow = `
     <tr>
@@ -2490,8 +2648,21 @@ function renderStockKdj(data) {
     </div>`;
 }
 
+function renderStockChartKdj(data, i) {
+  if (!data || !data.success || !data.data || !data.data.length) return '<p>無隨機指標圖表資料</p>';
+
+  const sorted = [...data.data].sort((a, b) => a.date.localeCompare(b.date));
+
+  // 把資料暫存到 window，等 DOM 就緒後取用
+  window._kdj_chartPending = window._kdj_chartPending || {};
+  window._kdj_chartPending[i] = sorted;
+
+  // 回傳容器，圖表由 setTimeout 在 DOM 就緒後掛入
+  return `<div id="stock_kdj_chart_${i}" style="height:260px;"></div>`;
+}
+
 function renderStockMacd(data) {
-  if (!data || !data.success || !data.data.length) return '<p>無MACD資料</p>';
+  if (!data || !data.success || !data.data.length) return '<p>無平滑異同移動平均線資料</p>';
 
   const headerRow = `
     <tr>
@@ -2517,8 +2688,21 @@ function renderStockMacd(data) {
     </div>`;
 }
 
+function renderStockChartMacd(data, i) {
+  if (!data || !data.success || !data.data || !data.data.length) return '<p>無平滑異同移動平均線圖表資料</p>';
+
+  const sorted = [...data.data].sort((a, b) => a.date.localeCompare(b.date));
+
+  // 把資料暫存到 window，等 DOM 就緒後取用
+  window._macd_chartPending = window._macd_chartPending || {};
+  window._macd_chartPending[i] = sorted;
+
+  // 回傳容器，圖表由 setTimeout 在 DOM 就緒後掛入
+  return `<div id="stock_macd_chart_${i}" style="height:260px;"></div>`;
+}
+
 function renderStockBrands(data) {
-  if (!data || !data.success || !data.data.length) return '<p>無BRANDS資料</p>';
+  if (!data || !data.success || !data.data.length) return '<p>無布林通道資料</p>';
 
   const headerRow = `
     <tr>
@@ -2544,6 +2728,19 @@ function renderStockBrands(data) {
         <tbody>${bodyRows}</tbody>
       </table>
     </div>`;
+}
+
+function renderStockChartBrands(data, i) {
+  if (!data || !data.success || !data.data || !data.data.length) return '<p>無布林通道圖表資料</p>';
+
+  const sorted = [...data.data].sort((a, b) => a.date.localeCompare(b.date));
+
+  // 把資料暫存到 window，等 DOM 就緒後取用
+  window._brands_chartPending = window._brands_chartPending || {};
+  window._brands_chartPending[i] = sorted;
+
+  // 回傳容器，圖表由 setTimeout 在 DOM 就緒後掛入
+  return `<div id="stock_brands_chart_${i}" style="height:260px;"></div>`;
 }
 
 // 已讀清單：用 localStorage 儲存已點擊過的新聞連結
