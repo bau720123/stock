@@ -391,8 +391,11 @@ header h1 {
 .calendar-nav-btn:hover { border-color: var(--accent); color: var(--accent); }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+<!--<script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>-->
 </head>
+<script src="
+https://cdn.jsdelivr.net/npm/echarts@6.0.0/dist/echarts.min.js
+"></script>
 <body>
 
 <!-- Overlay 背景遮罩 -->
@@ -2299,7 +2302,7 @@ async function loadMyStock() {
   StockChartBrands();
 }
 
-function StockChartHistory() {
+function StockChartHistory_lightweight_charts() {
   const pending = window._history_chartPending || {};
   for (const i in pending) {
     const el = document.getElementById('stock_history_chart_' + i);
@@ -2344,28 +2347,541 @@ function StockChartHistory() {
   window._history_chartPending = {}; // 清空，避免重複初始化
 }
 
+function StockChartHistory() {
+  const pending = window._history_chartPending || {};
+  for (const i in pending) {
+    const el = document.getElementById('stock_history_chart_' + i);
+    if (!el) continue;
+    const sorted = pending[i];
+
+    const dates = sorted.map(d => d.date);
+    const ohlc  = sorted.map(d => [d.open, d.close, d.low, d.high]);
+    const vols  = sorted.map(d => ({
+      value: Math.round(d.volume / 1000),
+      itemStyle: { color: d.change >= 0 ? '#ff4d6a55' : '#00c98a55' }
+    }));
+
+    el.style.width = '100%';
+    const chart = echarts.init(el, null, { height: 300 });
+    chart.setOption({
+      backgroundColor: '#0a0e14',
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: { type: 'cross' },
+        backgroundColor: '#1e2736',
+        borderColor: '#3a4a5c',
+        textStyle: { color: '#c8d8e8', fontSize: 11 },
+        formatter(params) {
+          const c = params.find(p => p.seriesType === 'candlestick');
+          const v = params.find(p => p.seriesName === 'vol');
+          if (!c) return '';
+          const [, o, cl, lo, hi] = c.value;  // 第0位是index，用逗號跳過
+          const chg = cl - o;
+          const col = chg >= 0 ? '#ff4d6a' : '#00c98a';
+          return `<div style="font-family:monospace;font-size:11px;line-height:1.8">
+            <b style="color:#c8d8e8">${c.name}</b><br>
+            開 ${o} &nbsp; 高 <span style="color:${col}">${hi}</span><br>
+            低 <span style="color:${col}">${lo}</span> &nbsp; 收 <span style="color:${col}">${cl}</span><br>
+            漲跌 <span style="color:${col}">${chg >= 0 ? '+' : ''}${chg}</span><br>
+            量 ${v ? v.value.toLocaleString() + ' 張' : '-'}
+          </div>`;
+        }
+      },
+      axisPointer: { link: [{ xAxisIndex: 'all' }] },
+      grid: [
+        { left: 55, right: 10, top: 8,   bottom: 100 },
+        { left: 55, right: 10, top: 220, bottom: 30  },
+      ],
+      xAxis: [
+        { type: 'category', data: dates, gridIndex: 0,
+          axisLine:  { lineStyle: { color: '#1e2736' } },
+          axisLabel: { show: false },
+          splitLine: { show: false } },
+        { type: 'category', data: dates, gridIndex: 1,
+          axisLine:  { lineStyle: { color: '#1e2736' } },
+          axisLabel: { color: '#5a7080', fontSize: 10 },
+          splitLine: { show: false } },
+      ],
+      yAxis: [
+        { scale: true, gridIndex: 0,
+          axisLine:  { lineStyle: { color: '#1e2736' } },
+          axisLabel: { color: '#5a7080', fontSize: 10 },
+          splitLine: { lineStyle: { color: '#1e2736' } } },
+        { scale: true, gridIndex: 1,
+          axisLine:  { lineStyle: { color: '#1e2736' } },
+          axisLabel: { color: '#5a7080', fontSize: 9 },
+          splitLine: { show: false } },
+      ],
+      dataZoom: [
+        { type: 'inside', xAxisIndex: [0, 1], start: 0, end: 100 },
+        { type: 'slider', xAxisIndex: [0, 1], bottom: 0, height: 20,
+          borderColor: '#3a4a5c', backgroundColor: '#0a0e14',
+          fillerColor: '#1e273680',
+          handleStyle: { color: '#5a9eff' },
+          textStyle: { color: '#5a7080', fontSize: 10 } },
+      ],
+      series: [
+        { type: 'candlestick', name: 'K線', xAxisIndex: 0, yAxisIndex: 0, data: ohlc,
+          itemStyle: {
+            color: '#ff4d6a', color0: '#00c98a',
+            borderColor: '#ff4d6a', borderColor0: '#00c98a',
+          } },
+        { type: 'bar', name: 'vol', xAxisIndex: 1, yAxisIndex: 1, data: vols,
+          barMaxWidth: 8 },
+      ],
+    });
+
+    new ResizeObserver(() => chart.resize()).observe(el);
+  }
+  window._history_chartPending = {};
+}
+
 function StockChartInstitutional() {
-  
+  const pending = window._institutional_chartPending || {};
+  for (const i in pending) {
+    const el = document.getElementById('stock_institutional_chart_' + i);
+    if (!el) continue;
+    const sorted = pending[i];
+
+    const dates   = sorted.map(d => d.date);
+    const trust   = sorted.map(d => d.trust   ?? 0);
+    const dealer  = sorted.map(d => d.dealer  ?? 0);
+    const foreign = sorted.map(d => d.foreign ?? 0);
+
+    el.style.width = '100%';
+    const chart = echarts.init(el, null, { height: 260 });
+    chart.setOption({
+      backgroundColor: '#0a0e14',
+      tooltip: {
+        trigger: 'axis',
+        backgroundColor: '#1e2736',
+        borderColor: '#3a4a5c',
+        textStyle: { color: '#c8d8e8', fontSize: 11 },
+      },
+      legend: {
+        data: ['投信', '自營商', '外資'],
+        textStyle: { color: '#5a7080', fontSize: 11 },
+        top: 4,
+      },
+      grid: { left: 55, right: 10, top: 32, bottom: 40 },
+      xAxis: {
+        type: 'category',
+        data: dates,
+        axisLine:  { lineStyle: { color: '#1e2736' } },
+        axisLabel: { color: '#5a7080', fontSize: 10, rotate: 30 },
+        splitLine: { show: false },
+      },
+      yAxis: {
+        type: 'value',
+        axisLine:  { lineStyle: { color: '#1e2736' } },
+        axisLabel: { color: '#5a7080', fontSize: 10 },
+        splitLine: { lineStyle: { color: '#1e2736' } },
+      },
+      dataZoom: [
+        { type: 'inside', start: 0, end: 100 },
+        { type: 'slider', bottom: 0, height: 20,
+          borderColor: '#3a4a5c', backgroundColor: '#0a0e14',
+          fillerColor: '#1e273680',
+          handleStyle: { color: '#5a9eff' },
+          textStyle: { color: '#5a7080', fontSize: 10 } }
+      ],
+      series: [
+        { name: '投信',   type: 'bar', data: trust,   stack: 'total', itemStyle: { color: '#5a9eff' } },
+        { name: '自營商', type: 'bar', data: dealer,  stack: 'total', itemStyle: { color: '#f0b429' } },
+        { name: '外資',   type: 'bar', data: foreign, stack: 'total',
+          itemStyle: { color: (params) => params.value >= 0 ? '#ff4d6a' : '#00c98a' } },
+      ],
+    });
+
+    new ResizeObserver(() => chart.resize()).observe(el);
+  }
+  window._institutional_chartPending = {};
 }
 
 function StockChartSma() {
+  const pending = window._sma_chartPending || {};
+  for (const i in pending) {
+    const el = document.getElementById('stock_sma_chart_' + i);
+    if (!el) continue;
+    const sorted = pending[i];
 
+    const dates  = sorted.map(d => d.date);
+    const sma5   = sorted.map(d => d.sma_5  ?? null);
+    const sma10  = sorted.map(d => d.sma_10 ?? null);
+    const sma20  = sorted.map(d => d.sma_20 ?? null);
+    const sma60  = sorted.map(d => d.sma_60 ?? null);
+
+    el.style.width = '100%';
+    const chart = echarts.init(el, null, { height: 260 });
+    chart.setOption({
+      backgroundColor: '#0a0e14',
+      tooltip: {
+        trigger: 'axis',
+        backgroundColor: '#1e2736',
+        borderColor: '#3a4a5c',
+        textStyle: { color: '#c8d8e8', fontSize: 11 },
+      },
+      legend: {
+        data: ['SMA5', 'SMA10', 'SMA20', 'SMA60'],
+        textStyle: { color: '#5a7080', fontSize: 11 },
+        top: 4,
+      },
+      grid: { left: 55, right: 10, top: 32, bottom: 40 },
+      xAxis: {
+        type: 'category',
+        data: dates,
+        axisLine:  { lineStyle: { color: '#1e2736' } },
+        axisLabel: { color: '#5a7080', fontSize: 10, rotate: 30 },
+        splitLine: { show: false },
+      },
+      yAxis: {
+        type: 'value',
+        scale: true,
+        axisLine:  { lineStyle: { color: '#1e2736' } },
+        axisLabel: { color: '#5a7080', fontSize: 10 },
+        splitLine: { lineStyle: { color: '#1e2736' } },
+      },
+      dataZoom: [
+        { type: 'inside', start: 0, end: 100 },
+        { type: 'slider', bottom: 0, height: 20,
+          borderColor: '#3a4a5c', backgroundColor: '#0a0e14',
+          fillerColor: '#1e273680',
+          handleStyle: { color: '#5a9eff' },
+          textStyle: { color: '#5a7080', fontSize: 10 } }
+      ],
+      series: [
+        { name: 'SMA5',  type: 'line', data: sma5,  smooth: true,
+          symbol: 'none', lineStyle: { color: '#ff4d6a', width: 1.5 } },
+        { name: 'SMA10', type: 'line', data: sma10, smooth: true,
+          symbol: 'none', lineStyle: { color: '#f0b429', width: 1.5 } },
+        { name: 'SMA20', type: 'line', data: sma20, smooth: true,
+          symbol: 'none', lineStyle: { color: '#5a9eff', width: 1.5 } },
+        { name: 'SMA60', type: 'line', data: sma60, smooth: true,
+          symbol: 'none', lineStyle: { color: '#00c98a', width: 1.5 } },
+      ],
+    });
+
+    new ResizeObserver(() => chart.resize()).observe(el);
+  }
+  window._sma_chartPending = {};
 }
 
 function StockChartRsi() {
+  const pending = window._rsi_chartPending || {};
+  for (const i in pending) {
+    const el = document.getElementById('stock_rsi_chart_' + i);
+    if (!el) continue;
+    const sorted = pending[i];
 
+    const dates  = sorted.map(d => d.date);
+    const rsi6   = sorted.map(d => d.rsi_6  ?? null);
+    const rsi9   = sorted.map(d => d.rsi_9  ?? null);
+    const rsi14  = sorted.map(d => d.rsi_14 ?? null);
+    const rsi20  = sorted.map(d => d.rsi_20 ?? null);
+
+    el.style.width = '100%';
+    const chart = echarts.init(el, null, { height: 260 });
+    chart.setOption({
+      backgroundColor: '#0a0e14',
+      tooltip: {
+        trigger: 'axis',
+        backgroundColor: '#1e2736',
+        borderColor: '#3a4a5c',
+        textStyle: { color: '#c8d8e8', fontSize: 11 },
+      },
+      legend: {
+        data: ['RSI6', 'RSI9', 'RSI14', 'RSI20'],
+        textStyle: { color: '#5a7080', fontSize: 11 },
+        top: 4,
+      },
+      grid: { left: 45, right: 10, top: 32, bottom: 40 },
+      xAxis: {
+        type: 'category',
+        data: dates,
+        axisLine:  { lineStyle: { color: '#1e2736' } },
+        axisLabel: { color: '#5a7080', fontSize: 10, rotate: 30 },
+        splitLine: { show: false },
+      },
+      yAxis: {
+        type: 'value',
+        min: 0,
+        max: 100,
+        axisLine:  { lineStyle: { color: '#1e2736' } },
+        axisLabel: { color: '#5a7080', fontSize: 10 },
+        splitLine: { lineStyle: { color: '#1e2736' } },
+        markLine:  { silent: true },
+      },
+      dataZoom: [
+        { type: 'inside', start: 0, end: 100 },
+        { type: 'slider', bottom: 0, height: 20,
+          borderColor: '#3a4a5c', backgroundColor: '#0a0e14',
+          fillerColor: '#1e273680',
+          handleStyle: { color: '#5a9eff' },
+          textStyle: { color: '#5a7080', fontSize: 10 } }
+      ],
+      series: [
+        { name: 'RSI6',  type: 'line', data: rsi6,  smooth: true,
+          symbol: 'none', lineStyle: { color: '#ff4d6a', width: 1.5 } },
+        { name: 'RSI9',  type: 'line', data: rsi9,  smooth: true,
+          symbol: 'none', lineStyle: { color: '#f0b429', width: 1.5 } },
+        { name: 'RSI14', type: 'line', data: rsi14, smooth: true,
+          symbol: 'none', lineStyle: { color: '#5a9eff', width: 1.5 } },
+        { name: 'RSI20', type: 'line', data: rsi20, smooth: true,
+          symbol: 'none', lineStyle: { color: '#00c98a', width: 1.5 } },
+        {
+          // 超買線 70
+          type: 'line', markLine: { silent: true }, symbol: 'none',
+          lineStyle: { color: 'transparent' },
+          markLine: {
+            silent: true,
+            symbol: 'none',
+            data: [
+              { yAxis: 70, lineStyle: { color: '#ff4d6a55', type: 'dashed', width: 1 },
+                label: { formatter: '超買 70', color: '#ff4d6a', fontSize: 10 } },
+              { yAxis: 30, lineStyle: { color: '#00c98a55', type: 'dashed', width: 1 },
+                label: { formatter: '超賣 30', color: '#00c98a', fontSize: 10 } },
+            ],
+          },
+        },
+      ],
+    });
+
+    new ResizeObserver(() => chart.resize()).observe(el);
+  }
+  window._rsi_chartPending = {};
 }
 
 function StockChartKdj() {
+  const pending = window._kdj_chartPending || {};
+  for (const i in pending) {
+    const el = document.getElementById('stock_kdj_chart_' + i);
+    if (!el) continue;
+    const sorted = pending[i];
 
+    const dates = sorted.map(d => d.date);
+    const kLine = sorted.map(d => d.k ?? null);
+    const dLine = sorted.map(d => d.d ?? null);
+    const jLine = sorted.map(d => d.j ?? null);
+
+    el.style.width = '100%';
+    const chart = echarts.init(el, null, { height: 260 });
+    chart.setOption({
+      backgroundColor: '#0a0e14',
+      tooltip: {
+        trigger: 'axis',
+        backgroundColor: '#1e2736',
+        borderColor: '#3a4a5c',
+        textStyle: { color: '#c8d8e8', fontSize: 11 },
+      },
+      legend: {
+        data: ['K', 'D', 'J'],
+        textStyle: { color: '#5a7080', fontSize: 11 },
+        top: 4,
+      },
+      grid: { left: 45, right: 10, top: 32, bottom: 40 },
+      xAxis: {
+        type: 'category',
+        data: dates,
+        axisLine:  { lineStyle: { color: '#1e2736' } },
+        axisLabel: { color: '#5a7080', fontSize: 10, rotate: 30 },
+        splitLine: { show: false },
+      },
+      yAxis: {
+        type: 'value',
+        min: 0,
+        max: 100,
+        axisLine:  { lineStyle: { color: '#1e2736' } },
+        axisLabel: { color: '#5a7080', fontSize: 10 },
+        splitLine: { lineStyle: { color: '#1e2736' } },
+      },
+      dataZoom: [
+        { type: 'inside', start: 0, end: 100 },
+        { type: 'slider', bottom: 0, height: 20,
+          borderColor: '#3a4a5c', backgroundColor: '#0a0e14',
+          fillerColor: '#1e273680',
+          handleStyle: { color: '#5a9eff' },
+          textStyle: { color: '#5a7080', fontSize: 10 } }
+      ],
+      series: [
+        { name: 'K', type: 'line', data: kLine, smooth: true,
+          symbol: 'none', lineStyle: { color: '#ff4d6a', width: 1.5 } },
+        { name: 'D', type: 'line', data: dLine, smooth: true,
+          symbol: 'none', lineStyle: { color: '#5a9eff', width: 1.5 } },
+        { name: 'J', type: 'line', data: jLine, smooth: true,
+          symbol: 'none', lineStyle: { color: '#f0b429', width: 1.5 } },
+        {
+          type: 'line', symbol: 'none',
+          lineStyle: { color: 'transparent' },
+          markLine: {
+            silent: true,
+            symbol: 'none',
+            data: [
+              { yAxis: 80, lineStyle: { color: '#ff4d6a55', type: 'dashed', width: 1 },
+                label: { formatter: '超買 80', color: '#ff4d6a', fontSize: 10 } },
+              { yAxis: 20, lineStyle: { color: '#00c98a55', type: 'dashed', width: 1 },
+                label: { formatter: '超賣 20', color: '#00c98a', fontSize: 10 } },
+            ],
+          },
+        },
+      ],
+    });
+
+    new ResizeObserver(() => chart.resize()).observe(el);
+  }
+  window._kdj_chartPending = {};
 }
 
 function StockChartMacd() {
+  const pending = window._macd_chartPending || {};
+  for (const i in pending) {
+    const el = document.getElementById('stock_macd_chart_' + i);
+    if (!el) continue;
+    const sorted = pending[i];
 
+    const dates      = sorted.map(d => d.date);
+    const macdLine   = sorted.map(d => d.macdLine   ?? null);
+    const signalLine = sorted.map(d => d.signalLine ?? null);
+    const histogram  = sorted.map(d => d.histogram  ?? null);
+
+    el.style.width = '100%';
+    const chart = echarts.init(el, null, { height: 280 });
+    chart.setOption({
+      backgroundColor: '#0a0e14',
+      tooltip: {
+        trigger: 'axis',
+        backgroundColor: '#1e2736',
+        borderColor: '#3a4a5c',
+        textStyle: { color: '#c8d8e8', fontSize: 11 },
+      },
+      legend: {
+        data: ['MACD', '信號線', '差離值'],
+        textStyle: { color: '#5a7080', fontSize: 11 },
+        top: 4,
+      },
+      axisPointer: { link: [{ xAxisIndex: 'all' }] },
+      grid: [
+        { left: 55, right: 10, top: 32,  bottom: 120 },
+        { left: 55, right: 10, top: 180, bottom: 40  },
+      ],
+      xAxis: [
+        { type: 'category', data: dates, gridIndex: 0,
+          axisLine:  { lineStyle: { color: '#1e2736' } },
+          axisLabel: { show: false },
+          splitLine: { show: false } },
+        { type: 'category', data: dates, gridIndex: 1,
+          axisLine:  { lineStyle: { color: '#1e2736' } },
+          axisLabel: { color: '#5a7080', fontSize: 10, rotate: 30 },
+          splitLine: { show: false } },
+      ],
+      yAxis: [
+        { scale: true, gridIndex: 0,
+          axisLine:  { lineStyle: { color: '#1e2736' } },
+          axisLabel: { color: '#5a7080', fontSize: 10 },
+          splitLine: { lineStyle: { color: '#1e2736' } } },
+        { scale: true, gridIndex: 1,
+          axisLine:  { lineStyle: { color: '#1e2736' } },
+          axisLabel: { color: '#5a7080', fontSize: 10 },
+          splitLine: { show: false } },
+      ],
+      dataZoom: [
+        { type: 'inside', xAxisIndex: [0, 1], start: 0, end: 100 },
+        { type: 'slider', xAxisIndex: [0, 1], bottom: 0, height: 20,
+          borderColor: '#3a4a5c', backgroundColor: '#0a0e14',
+          fillerColor: '#1e273680',
+          handleStyle: { color: '#5a9eff' },
+          textStyle: { color: '#5a7080', fontSize: 10 } },
+      ],
+      series: [
+        { name: 'MACD',   type: 'line', data: macdLine,   xAxisIndex: 0, yAxisIndex: 0,
+          smooth: true, symbol: 'none', lineStyle: { color: '#ff4d6a', width: 1.5 } },
+        { name: '信號線', type: 'line', data: signalLine, xAxisIndex: 0, yAxisIndex: 0,
+          smooth: true, symbol: 'none', lineStyle: { color: '#5a9eff', width: 1.5 } },
+        { name: '差離值', type: 'bar',  data: histogram,  xAxisIndex: 1, yAxisIndex: 1,
+          barMaxWidth: 8,
+          itemStyle: {
+            color: (params) => params.value >= 0 ? '#ff4d6a99' : '#00c98a99'
+          } },
+      ],
+    });
+
+    new ResizeObserver(() => chart.resize()).observe(el);
+  }
+  window._macd_chartPending = {};
 }
 
 function StockChartBrands() {
+  const pending = window._brands_chartPending || {};
+  for (const i in pending) {
+    const el = document.getElementById('stock_brands_chart_' + i);
+    if (!el) continue;
+    const sorted = pending[i];
 
+    const dates  = sorted.map(d => d.date);
+    const upper  = sorted.map(d => d.upper  ?? null);
+    const middle = sorted.map(d => d.middle ?? null);
+    const lower  = sorted.map(d => d.lower  ?? null);
+
+    el.style.width = '100%';
+    const chart = echarts.init(el, null, { height: 260 });
+    chart.setOption({
+      backgroundColor: '#0a0e14',
+      tooltip: {
+        trigger: 'axis',
+        backgroundColor: '#1e2736',
+        borderColor: '#3a4a5c',
+        textStyle: { color: '#c8d8e8', fontSize: 11 },
+      },
+      legend: {
+        data: ['上軌', '中軌', '下軌'],
+        textStyle: { color: '#5a7080', fontSize: 11 },
+        top: 4,
+      },
+      grid: { left: 55, right: 10, top: 32, bottom: 40 },
+      xAxis: {
+        type: 'category',
+        data: dates,
+        axisLine:  { lineStyle: { color: '#1e2736' } },
+        axisLabel: { color: '#5a7080', fontSize: 10, rotate: 30 },
+        splitLine: { show: false },
+      },
+      yAxis: {
+        scale: true,
+        axisLine:  { lineStyle: { color: '#1e2736' } },
+        axisLabel: { color: '#5a7080', fontSize: 10 },
+        splitLine: { lineStyle: { color: '#1e2736' } },
+      },
+      dataZoom: [
+        { type: 'inside', start: 0, end: 100 },
+        { type: 'slider', bottom: 0, height: 20,
+          borderColor: '#3a4a5c', backgroundColor: '#0a0e14',
+          fillerColor: '#1e273680',
+          handleStyle: { color: '#5a9eff' },
+          textStyle: { color: '#5a7080', fontSize: 10 } },
+      ],
+      series: [
+        { name: '上軌', type: 'line', data: upper, smooth: true,
+          symbol: 'none',
+          lineStyle: { color: '#ff4d6a', width: 1.5 },
+          areaStyle: { color: 'transparent' },
+        },
+        { name: '中軌', type: 'line', data: middle, smooth: true,
+          symbol: 'none',
+          lineStyle: { color: '#f0b429', width: 1.5, type: 'dashed' },
+        },
+        { name: '下軌', type: 'line', data: lower, smooth: true,
+          symbol: 'none',
+          lineStyle: { color: '#00c98a', width: 1.5 },
+          areaStyle: {
+            color: 'transparent',
+            origin: 'auto',
+          },
+        },
+      ],
+    });
+
+    new ResizeObserver(() => chart.resize()).observe(el);
+  }
+  window._brands_chartPending = {};
 }
 
 function renderVolumeProfile(data, id) {
@@ -2484,7 +3000,7 @@ function renderStockChartHistory(data, i) {
   window._history_chartPending[i] = sorted;
 
   // 回傳容器，圖表由 setTimeout 在 DOM 就緒後掛入
-  return `<div id="stock_history_chart_${i}" style="height:260px;"></div>`;
+  return `<div id="stock_history_chart_${i}" style="height:300px;"></div>`;
 }
 
 function renderStockInstitutional(data) {
@@ -2669,6 +3185,7 @@ function renderStockMacd(data) {
       <th style="position:sticky;left:0;top:0;z-index:3;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);">日期</th>
       <th style="position:sticky;top:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">MACD 線</th>
       <th style="position:sticky;top:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">信號線</th>
+      <th style="position:sticky;top:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">差離值</th>
     </tr>`;
 
   const bodyRows = data.data.map(d => `
@@ -2676,6 +3193,7 @@ function renderStockMacd(data) {
       <td style="position:sticky;left:0;z-index:1;background:#1a2332;padding:6px 10px;white-space:nowrap;text-align:center;font-size:12px;">${d.date}</td>
       <td style="padding:6px 10px;text-align:center;font-size:12px;">${d.macdLine  ?? '-'}</td>
       <td style="padding:6px 10px;text-align:center;font-size:12px;">${d.signalLine ?? '-'}</td>
+      <td style="padding:6px 10px;text-align:center;font-size:12px;">${d.histogram ?? '-'}</td>
     </tr>`
   ).join('');
 
@@ -2698,7 +3216,7 @@ function renderStockChartMacd(data, i) {
   window._macd_chartPending[i] = sorted;
 
   // 回傳容器，圖表由 setTimeout 在 DOM 就緒後掛入
-  return `<div id="stock_macd_chart_${i}" style="height:260px;"></div>`;
+  return `<div id="stock_macd_chart_${i}" style="height:280px;"></div>`;
 }
 
 function renderStockBrands(data) {

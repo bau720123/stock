@@ -1271,6 +1271,7 @@ async function fetchFugleMacd(symbol, env) {
         date: row.date,
         macdLine: parseFloat(row.macdLine.toFixed(2)),
         signalLine: parseFloat(row.signalLine.toFixed(2)),
+        histogram: parseFloat((row.macdLine - row.signalLine).toFixed(4)),
       }));
 
     return json({
