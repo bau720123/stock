@@ -1457,6 +1457,10 @@ async function loadTw() {
     ${renderForeignNetPosition(ForeignNetPosition)}
   </div>`;
 
+  html += `<div class="row">
+    ${renderChartForeignNetPosition(ForeignNetPosition)}
+  </div>`;
+
   // 三大法人買賣超
   html += `
     <div class="row">
@@ -1485,7 +1489,102 @@ async function loadTw() {
 
   setCard('card-tw', 0, html);
 
+  ChartForeignNetPosition();
   ChartInstitutional();
+}
+
+function renderChartForeignNetPosition(data) {
+  if (!data || !data.success || !data.data || !data.data.length) return '<p>無外資空單口數圖表資料</p>';
+
+  const sorted = [...data.data].sort((a, b) => a.date.localeCompare(b.date));
+
+  // 把資料暫存到 window，等 DOM 就緒後取用
+  window._tw_foreignnetposition_chartPending = window._tw_foreignnetposition_chartPending || {};
+  window._tw_foreignnetposition_chartPending[0] = sorted;
+
+  // 回傳容器，圖表由 setTimeout 在 DOM 就緒後掛入
+  return `<div id="tw_foreignnetposition_chart" style="height:260px;"></div>`;
+}
+
+function ChartForeignNetPosition() {
+  const pending = window._tw_foreignnetposition_chartPending || {};
+  const el = document.getElementById('tw_foreignnetposition_chart');
+  if (!el || !pending[0]) return;
+  const sorted = pending[0];
+
+  const dates   = sorted.map(d => d.date);
+  const foreign = sorted.map(d => d.foreign ?? null);
+
+  el.style.width = '100%';
+  const chart = echarts.init(el, null, { height: 260 });
+  chart.setOption({
+    backgroundColor: '#0a0e14',
+    tooltip: {
+      trigger: 'axis',
+      backgroundColor: '#1e2736',
+      borderColor: '#3a4a5c',
+      textStyle: { color: '#c8d8e8', fontSize: 11 },
+      formatter(params) {
+        const p = params[0];
+        if (!p) return '';
+        const col = p.value >= 0 ? '#ff4d6a' : '#00c98a';
+        return `<div style="font-family:monospace;font-size:11px;line-height:1.8">
+          <b style="color:#c8d8e8">${p.name}</b><br>
+          外資淨部位 <span style="color:${col}">${p.value?.toLocaleString() ?? '-'}</span> 口
+        </div>`;
+      }
+    },
+    grid: { left: 70, right: 10, top: 16, bottom: 40 },
+    xAxis: {
+      type: 'category',
+      data: dates,
+      axisLine:  { lineStyle: { color: '#1e2736' } },
+      axisLabel: { color: '#5a7080', fontSize: 10, rotate: 30 },
+      splitLine: { show: false },
+    },
+    yAxis: {
+      type: 'value',
+      scale: true,
+      inverse: true,
+      axisLine:  { lineStyle: { color: '#1e2736' } },
+      axisLabel: { color: '#5a7080', fontSize: 10,
+        formatter: v => v.toLocaleString()
+      },
+      splitLine: { lineStyle: { color: '#1e2736' } },
+    },
+    dataZoom: [
+      { type: 'inside', start: 0, end: 100 },
+      { type: 'slider', bottom: 0, height: 20,
+        borderColor: '#3a4a5c', backgroundColor: '#0a0e14',
+        fillerColor: '#1e273680',
+        handleStyle: { color: '#5a9eff' },
+        textStyle: { color: '#5a7080', fontSize: 10 } },
+    ],
+    series: [
+      { type: 'line', data: foreign, smooth: true, symbol: 'none',
+        lineStyle: { color: '#5a9eff', width: 1.5 },
+        areaStyle: {
+          color: {
+            type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
+            colorStops: [
+              { offset: 0, color: '#5a9eff33' },
+              { offset: 1, color: '#5a9eff00' },
+            ]
+          }
+        },
+        markLine: {
+          silent: true,
+          symbol: 'none',
+          data: [
+            { yAxis: 0, lineStyle: { color: '#5a7080', type: 'dashed', width: 1 } }
+          ]
+        }
+      },
+    ],
+  });
+
+  new ResizeObserver(() => chart.resize()).observe(el);
+  window._tw_foreignnetposition_chartPending = {};
 }
 
 function renderChartInstitutional(data) {
