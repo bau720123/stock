@@ -475,6 +475,8 @@ https://cdn.jsdelivr.net/npm/echarts@6.0.0/dist/echarts.min.js
 </div>
 
 <script>
+const urlParams = new URLSearchParams(window.location.search);
+const card_type = urlParams.get('card_type') || 'taiwan-market';
 
 // 警示閾值 localStorage 工具
 const ALERT_PREFIX = 'alert_';
@@ -1142,9 +1144,6 @@ async function loadAll() {
   //   loadMyStock(),
   // ]);
 
-  const urlParams = new URLSearchParams(window.location.search);
-  const card_type = urlParams.get('card_type') || 'taiwan-market';
-
   // 先移除所有選單的 active 狀態（避免切換時殘留）
   document.querySelectorAll('#menuList a').forEach(link => {
     link.classList.remove('active');
@@ -1487,7 +1486,7 @@ async function loadTw() {
 
   html += row('融資餘額', MarginTradingBalance.marginBalance + ' 億' + '（ ' + MarginTradingBalance.date + '）');
 
-  setCard('card-tw', 0, html);
+  setCard('card-tw', 0, html, card_type === 'taiwan-market' ? 'card-wide' : '');
 
   ChartForeignNetPosition();
   ChartInstitutional();
@@ -2467,11 +2466,7 @@ async function loadMyStock() {
     </div>`;
   }
 
-  const urlParams = new URLSearchParams(window.location.search);
-  const card_type = urlParams.get('card_type') || 'my-stock';
-
   setCard('card-mystock', 0, html, card_type === 'my-stock' ? 'card-wide' : '');
-  // setCard('card-mystock', 0, html, '');
 
   StockChartHistory();
   StockChartInstitutional();
