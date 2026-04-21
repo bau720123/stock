@@ -475,6 +475,34 @@ https://cdn.jsdelivr.net/npm/echarts@6.0.0/dist/echarts.min.js
 </div>
 
 <script>
+const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36";
+
+const CORS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type",
+};
+(async () => {
+  const todayStr = new Date().toISOString().split('T')[0];
+  try {
+    const res = await fetch('https://www.macromicro.me/calendar/earnings', {
+      method: 'POST',
+      headers: {
+        ...CORS, 'Content-Type': 'application/x-www-form-urlencoded',
+        'User-Agent': UA,
+        'Origin': 'https://www.macromicro.me',
+        'Referer': 'https://www.macromicro.me/calendar/earnings'
+      },
+      body: `date=${todayStr}`
+    });
+    const text = await res.text();
+    console.log('[MacroMicro Test] status:', res.status);
+    console.log('[MacroMicro Test] body:', text);
+  } catch (e) {
+    console.error('[MacroMicro Test] 失敗:', e.message);
+  }
+})();
+
 const urlParams = new URLSearchParams(window.location.search);
 const card_type = urlParams.get('card_type') || 'taiwan-market';
 
