@@ -1477,9 +1477,90 @@ async function loadTw() {
     ${renderInstitutional(Institutional)}
   </div>`;
 
+  html += `<div class="row">
+    ${renderChartInstitutional(Institutional)}
+  </div>`;
+
   html += row('融資餘額', MarginTradingBalance.marginBalance + ' 億' + '（ ' + MarginTradingBalance.date + '）');
 
   setCard('card-tw', 0, html);
+
+  ChartInstitutional();
+}
+
+function renderChartInstitutional(data) {
+  if (!data || !data.success || !data.data || !data.data.length) return '<p>無三大法人買賣超圖表資料</p>';
+
+  const sorted = [...data.data].sort((a, b) => a.date.localeCompare(b.date));
+
+  // 把資料暫存到 window，等 DOM 就緒後取用
+  window._tw_institutional_chartPending = window._tw_institutional_chartPending || {};
+  window._tw_institutional_chartPending[0] = sorted;
+
+  // 回傳容器，圖表由 setTimeout 在 DOM 就緒後掛入
+  return `<div id="tw_institutional_chart" style="height:260px;"></div>`;
+}
+
+function ChartInstitutional() {
+  const pending = window._tw_institutional_chartPending || {};
+  for (const i in pending) {
+    const el = document.getElementById('tw_institutional_chart');
+    if (!el) continue;
+    const sorted = pending[i];
+
+    const dates   = sorted.map(d => d.date);
+    const trust   = sorted.map(d => d.trust   ?? 0);
+    const dealer  = sorted.map(d => d.dealer  ?? 0);
+    const foreign = sorted.map(d => d.foreign ?? 0);
+
+    el.style.width = '100%';
+    const chart = echarts.init(el, null, { height: 260 });
+    chart.setOption({
+      backgroundColor: '#0a0e14',
+      tooltip: {
+        trigger: 'axis',
+        backgroundColor: '#1e2736',
+        borderColor: '#3a4a5c',
+        textStyle: { color: '#c8d8e8', fontSize: 11 },
+      },
+      legend: {
+        data: ['投信', '自營商', '外資'],
+        textStyle: { color: '#5a7080', fontSize: 11 },
+        top: 4,
+      },
+      grid: { left: 55, right: 10, top: 32, bottom: 40 },
+      xAxis: {
+        type: 'category',
+        data: dates,
+        axisLine:  { lineStyle: { color: '#1e2736' } },
+        axisLabel: { color: '#5a7080', fontSize: 10, rotate: 30 },
+        splitLine: { show: false },
+      },
+      yAxis: {
+        type: 'value',
+        axisLine:  { lineStyle: { color: '#1e2736' } },
+        axisLabel: { color: '#5a7080', fontSize: 10 },
+        splitLine: { lineStyle: { color: '#1e2736' } },
+      },
+      dataZoom: [
+        { type: 'inside', start: 0, end: 100 },
+        { type: 'slider', bottom: 0, height: 20,
+          borderColor: '#3a4a5c', backgroundColor: '#0a0e14',
+          fillerColor: '#1e273680',
+          handleStyle: { color: '#5a9eff' },
+          textStyle: { color: '#5a7080', fontSize: 10 } }
+      ],
+      series: [
+        { name: '投信',   type: 'bar', data: trust,   stack: 'total', itemStyle: { color: '#5a9eff' } },
+        { name: '自營商', type: 'bar', data: dealer,  stack: 'total', itemStyle: { color: '#f0b429' } },
+        { name: '外資',   type: 'bar', data: foreign, stack: 'total',
+          itemStyle: { color: (params) => params.value >= 0 ? '#ff4d6a' : '#00c98a' } },
+      ],
+    });
+
+    new ResizeObserver(() => chart.resize()).observe(el);
+  }
+  window._tw_institutional_chartPending = {};
 }
 
 function renderForeignNetPosition(data) {
