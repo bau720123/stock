@@ -458,13 +458,13 @@ https://cdn.jsdelivr.net/npm/echarts@6.0.0/dist/echarts.min.js
       <div class="card-title">市場情緒</div>
       <div class="skeleton"></div>
   </div>
-  <div class="card" id="card-war" style="display: none;">
-      <div class="card-title">美伊戰爭消息</div>
-      <div class="skeleton"></div>
-  </div>
   <div class="card" id="card-mystock" style="display: none;">
       <div class="card-title">我的自選股</div>
       <div class="skeleton"></div>
+      <div class="skeleton"></div>
+  </div>
+  <div class="card" id="card-war" style="display: none;">
+      <div class="card-title">美伊戰爭消息</div>
       <div class="skeleton"></div>
   </div>
   <div class="card" id="card-america-calendar" style="display: none;">
@@ -1255,8 +1255,8 @@ async function loadTw() {
   const { isDaySession, isNightSession, isTsmcNight, isTwn } = getMarketEmoji();
 
   // 各種時間區段標籤
-  const dayLabel   = `${isDaySession ? '🟢' : '🔴'} 期貨日盤`;
-  const nightLabel = `${isNightSession ? '🟢' : '🔴'} 期貨夜盤`;
+  const futuresDay   = `${isDaySession ? '🟢' : '🔴'} 期貨日盤`;
+  const futuresNight = `${isNightSession ? '🟢' : '🔴'} 期貨夜盤`;
   const tsmcNight  = `${isTsmcNight ? '🟢' : '🔴'} 期貨夜盤`;
   const spotDay    = `${isDaySession ? '🟢' : '🔴'} 現貨日盤`;
   const twnDay    = `${isTwn ? '🟢' : '🔴'} 富台指`;
@@ -1266,7 +1266,7 @@ async function loadTw() {
   html += `<div class="card-title" style="color: sandybrown;">㊣大盤指數㊣</div>`;
 
   // 【台股期貨夜盤】
-  html += groupHeader(nightLabel, '', '台股期貨（簡稱「台指期」）是以「台灣加權股價指數」為標的物的期貨契約，讓投資人透過保證金制度，以小博大操作台股漲跌。具高槓桿、多空靈活、交易成本低等特性，熱門商品包括大台指、小台指、微台指，結算日為每月第三個星期三。<br><br>交易時間：每週一至週五的下午15:00至隔日凌晨05:00。');
+  html += groupHeader(futuresNight, '', '台股期貨（簡稱「台指期」）是以「台灣加權股價指數」為標的物的期貨契約，讓投資人透過保證金制度，以小博大操作台股漲跌。具高槓桿、多空靈活、交易成本低等特性，熱門商品包括大台指、小台指、微台指，結算日為每月第三個星期三。<br><br>交易時間：每週一至週五的下午15:00至隔日凌晨05:00。');
   if (taifexNight.success && taifexNight.price > 0) {
     const sign = taifexNight.updown > 0 ? '▲' : taifexNight.updown < 0 ? '▼' : '';
     var cls = 'up';
@@ -1278,7 +1278,7 @@ async function loadTw() {
   }
 
   // 【台股期貨日盤】
-  html += groupHeader(dayLabel, '', '台股期貨（簡稱「台指期」）是以「台灣加權股價指數」為標的物的期貨契約，讓投資人透過保證金制度，以小博大操作台股漲跌。具高槓桿、多空靈活、交易成本低等特性，熱門商品包括大台指、小台指、微台指，結算日為每月第三個星期三。<br><br>交易時間：每週一至週五的上午8:45至下午1:45');
+  html += groupHeader(futuresDay, '', '台股期貨（簡稱「台指期」）是以「台灣加權股價指數」為標的物的期貨契約，讓投資人透過保證金制度，以小博大操作台股漲跌。具高槓桿、多空靈活、交易成本低等特性，熱門商品包括大台指、小台指、微台指，結算日為每月第三個星期三。<br><br>交易時間：每週一至週五的上午8:45至下午1:45');
   if (taifexDay.success && taifexDay.price > 0) {
     const sign = taifexDay.updown > 0 ? '▲' : taifexDay.updown < 0 ? '▼' : '';
     var cls = 'up';
