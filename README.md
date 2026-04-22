@@ -20,11 +20,19 @@
     └─ Cloudflare Worker     → 代理爬蟲 / 推播發送
             │
             ├─ HiStock       → 台股期貨、富台指
-            ├─ TaiFex        → 台積電期貨
-            ├─ Fugle         → 台積電現貨（需 API Key）
+            ├─ 鉅亨網         → 富台指（備援來源）
+            ├─ TaiFex        → 台股/台積電期貨
+            ├─ Fugle         → 台股現貨即時報價、歷史K線、技術指標（需 API Key）
+            ├─ 玩股網 (wearn) → 外資期貨淨部位、三大法人買賣、個股法人明細
+            ├─ 台灣證券交易所  → 融資餘額
             ├─ 新浪財經       → 布蘭特原油、黃金、白銀、美元指數、VIX
-            ├─ CNBC          → 美股四大指數、盤前電子盤、TSM ADR
-            └─ RobinHood     → TSM ADR 即時報價
+            ├─ Yahoo Finance  → 美股/ETF 個股行情
+            ├─ CNBC          → 美股四大指數、盤前 Fair Value、TSM ADR
+            ├─ RobinHood     → TSM ADR 即時報價（目前因 TLS 封鎖暫停）
+            ├─ CNN           → 恐慌貪婪指數（Fear & Greed Index）
+            ├─ MoneyDJ       → 美股重要經濟指標行事曆
+            ├─ Finnhub       → 科技股財報發布日曆（需 API Key）
+            └─ RSS Feeds     → Yahoo奇摩財經、中央社、自由時報
 ```
 
 ---
@@ -63,21 +71,37 @@ fetch("https://histock.tw/stock/module/function.aspx", {
 
 **語言環境：** JavaScript（ES Modules），基於 Web Standards API（Fetch API），非 Node.js 環境。
 
+**注意：** `env` 是每次 Request 注入的參數，不是全域變數；若在 `fetch()` 之外的函式中需要 `env`，必須明確透過參數傳遞。
+
 **現有路徑：**
 
 | 路徑 | 資料來源 | 說明 |
 |------|----------|------|
-| `/fitx` | HiStock | 台股期貨即時報價 |
-| `/twn` | HiStock | 富台指即時報價 |
-| `/taifex` | TaiFex | 台積電期貨報價 |
-| `/tsmc` | Fugle | 台積電現貨即時報價（含委託簿） |
-| `/sina/hf_OIL` | 新浪財經 | 布蘭特原油 |
-| `/sina/hf_GC` | 新浪財經 | 黃金期貨 |
-| `/sina/hf_SI` | 新浪財經 | 白銀期貨 |
-| `/sina/DINIW` | 新浪財經 | 美元指數（DINIW） |
-| `/sina/znb_VIX` | 新浪財經 | VIX 恐慌指數 |
-| `/cnbc` | CNBC | 美股四大指數 + 盤前電子盤 + TSM ADR |
-| `/rh` | RobinHood | TSM ADR 即時變動 |
+| `/fitx` | HiStock | 台股期貨（FITX）即時報價 |
+| `/twn` | HiStock | 富台指即時報價（備援） |
+| `/twncon` | 鉅亨網 | 富台指即時報價（主要） |
+| `/taifex/{objId}/{contract}` | TaiFex 官方 API | 台股/台積電期貨報價（日盤/夜盤） |
+| `/stock/quote/{symbol}` | Fugle | 台股個股即時報價（含委買委賣五檔） |
+| `/stock/volume/{symbol}` | Fugle | 台股個股分價量表 |
+| `/stock/history/{symbol}` | Fugle | 台股個股歷史 K 線（近 30 天，日線） |
+| `/stock/institutional/{symbol}` | 玩股網 | 個股三大法人買賣明細 |
+| `/stock/sma/{symbol}` | Fugle | 均線（SMA 5/10/20/60 日） |
+| `/stock/rsi/{symbol}` | Fugle | RSI 指標（6/9/14/20 日） |
+| `/stock/kdj/{symbol}` | Fugle | KDJ 指標（9/3/3） |
+| `/stock/macd/{symbol}` | Fugle | MACD（12/26/9） |
+| `/stock/brands/{symbol}` | Fugle | 布林通道（BB，20 日） |
+| `/yahoo-finance/{symbol}` | Yahoo Finance | 美股/ETF 個股行情（近 1 日收盤資料） |
+| `/sina/{symbol}` | 新浪財經 | 原物料/指數即時報價（多 symbol 格式） |
+| `/debug-sina` | 新浪財經 | 批次查詢多個 Sina symbol 原始回應（除錯用） |
+| `/cnbc` | CNBC | 美股四大指數 + 盤前 Fair Value + TSM ADR |
+| `/rh` | RobinHood | TSM ADR 即時變動（TLS 封鎖中） |
+| `/fear-greed` | CNN | 恐慌貪婪指數（Fear & Greed Index） |
+| `/foreign-net-position` | 玩股網 | 外資期貨淨未平倉口數（日期序列） |
+| `/institutional` | 玩股網 | 三大法人合計買賣超（日期序列） |
+| `/margin-trading-balance` | 台灣證券交易所 | 全市場融資餘額（億元） |
+| `/news-rss` | Yahoo奇摩/中央社/自由時報 | 關鍵字過濾財經新聞 |
+| `/america-calendar` | MoneyDJ + Finnhub + 自訂 | 美股重要事件行事曆 |
+| `/generateCustomEventsFinnhub/{from}/{to}` | Finnhub | 科技股財報日曆（最多 14 天） |
 | `/subscribe` | — | 接收並儲存裝置推播訂閱資料 |
 | `/push-test` | — | 手動觸發推播測試 |
 | `/read-subs` | — | 查看所有訂閱裝置清單 |
@@ -94,57 +118,161 @@ fetch("https://histock.tw/stock/module/function.aspx", {
 
 **用途：** 即時原物料與市場情緒指數報價
 
-**解決的問題：** HiStock、StockQ 等網站需要 HTML 爬蟲解析，資料延遲較高。新浪財經的 `hq.sinajs.cn` 接口直接回傳結構化字串，更新頻率接近 Investing.com、TradingView 等專業平台等級。
+**解決的問題：** 直接回傳結構化字串，更新頻率接近 Investing.com、TradingView 等專業平台等級。
 
-**注意事項：** 此為非官方、未公開文件的接口，新浪沒有義務維持相容性，使用時需加 `Referer` header 才能正常回應。
+**注意事項：**
+- 此為非官方、未公開文件的接口，使用時需加 `Referer` header 才能正常回應
+- 回應編碼為 GBK，需透過 `TextDecoder("gbk")` 轉換後才能正確解析中文
 
-**常用 Symbol 對照：**
+**支援的 Symbol 格式與欄位對照：**
 
-| Symbol | 說明 |
-|--------|------|
-| `hf_OIL` | 布蘭特原油 |
-| `hf_GC` | 黃金期貨 |
-| `hf_SI` | 白銀期貨 |
-| `znb_VIX` | VIX 恐慌指數 |
-| `DINIW` | 美元指數（欄位格式與其他不同，需特殊處理） |
+| 前綴 | 範例 | 說明 | 特殊處理 |
+|------|------|------|----------|
+| `hf_` | `hf_OIL`, `hf_GC`, `hf_SI` | 期貨（原油/黃金/白銀） | 標準欄位格式 |
+| `znb_` | `znb_VIX` | 市場指數（VIX） | 獨立欄位格式 |
+| `gb_` | `gb_dji`, `gb_inx`, `gb_ixic` | 美股現貨指數 | 獨立欄位格式 |
+| `DINIW` | `DINIW` | 美元指數 | 欄位順序與其他完全不同，需特殊處理 |
 
 ---
 
 ### 4. Fugle 富果 API
 
-**用途：** 台積電現貨即時報價（含委託簿）
+**用途：** 台股即時報價、歷史 K 線、技術指標
 
-**解決的問題：** 提供台灣股市的官方即時報價，包含委買委賣五檔、均價、漲跌幅等完整資訊，資料來源可靠且有官方文件支援。
+**API 端點（現有）：**
 
-**API 端點：**
-```
-https://api.fugle.tw/marketdata/v1.0/stock/intraday/quote/{symbol}
-```
+| 端點類型 | URL 格式 |
+|----------|----------|
+| 即時報價 | `https://api.fugle.tw/marketdata/v1.0/stock/intraday/quote/{symbol}` |
+| 分價量表 | `https://api.fugle.tw/marketdata/v1.0/stock/intraday/volumes/{symbol}` |
+| 歷史K線 | `https://api.fugle.tw/marketdata/v1.0/stock/historical/candles/{symbol}?from=...&to=...&timeframe=D` |
+| 均線 SMA | `https://api.fugle.tw/marketdata/v1.0/stock/technical/sma/{symbol}?period={N}` |
+| RSI | `https://api.fugle.tw/marketdata/v1.0/stock/technical/rsi/{symbol}?period={N}` |
+| KDJ | `https://api.fugle.tw/marketdata/v1.0/stock/technical/kdj/{symbol}` |
+| MACD | `https://api.fugle.tw/marketdata/v1.0/stock/technical/macd/{symbol}` |
+| 布林通道 | `https://api.fugle.tw/marketdata/v1.0/stock/technical/bb/{symbol}` |
 
 **認證方式：** Header 帶入 `X-API-KEY`，API Key 存放於 Cloudflare Worker Secrets（`FUGLE_KEY`）。
+
+---
+
+### 5. 台灣期貨交易所（TaiFex）API
+
+**用途：** 台股/台積電期貨即時報價（日盤/夜盤）
+
+**端點格式：**
+```
+https://www.taifex.com.tw/cht/quotesApi/getQuotes?objId={objId}
+```
+
+**常用 objId 與 contract 對照：**
+
+| objId | contract | 說明 |
+|-------|----------|------|
+| `2` | `TX046` | 台股期貨日盤（以 `contractName=臺股期貨` 比對） |
+| `12` | `TX056` | 台股期貨夜盤（以 `contractName=臺股期貨` 比對） |
+| `12` | `CDF056` | 台積電期貨夜盤（以 `contract` 欄位比對） |
+
+---
+
+### 6. CNN 恐慌貪婪指數（Fear & Greed Index）
+
+**用途：** 反映市場整體情緒，作為 VIX 的補充情緒指標
+
+**來源：** `https://production.dataviz.cnn.io/index/fearandgreed/graphdata`
 
 **回傳欄位：**
 
 | 欄位 | 說明 |
 |------|------|
-| `previousClose` | 上個收盤價 |
-| `openPrice` | 開盤價 |
-| `highPrice` | 最高價 |
-| `lowPrice` | 最低價 |
-| `closePrice` | 現價 |
-| `avgPrice` | 均價 |
-| `change` | 漲跌點數 |
-| `changePercent` | 漲跌幅（%） |
-| `bids` | 委買五檔（price + size） |
-| `asks` | 委賣五檔（price + size） |
+| `score` | 目前分數（0～100） |
+| `rating` | 英文評級（extreme fear / fear / neutral / greed / extreme greed） |
+| `ratingZh` | 中文評級（極度恐慌 / 恐慌 / 中性 / 貪婪 / 極度貪婪） |
+| `updateTime` | 更新時間（台北時區） |
+| `prevClose` | 昨收分數 |
+| `prev1Week` | 一週前分數 |
+| `prev1Month` | 一個月前分數 |
+| `prev1Year` | 一年前分數 |
 
 ---
 
-### 5. PWA（Progressive Web App）
+### 7. 新聞 RSS 聚合（/news-rss）
+
+**用途：** 聚合多個台灣財經媒體 RSS，依關鍵字過濾相關新聞
+
+**RSS 來源：**
+
+| 名稱 | URL |
+|------|-----|
+| Yahoo奇摩財經 | `https://tw.news.yahoo.com/rss/finance` |
+| 中央社國際 | `https://feeds.feedburner.com/rsscna/intworld` |
+| 中央社產經 | `https://feeds.feedburner.com/rsscna/finance` |
+| 中央社政治 | `https://feeds.feedburner.com/rsscna/politics` |
+| 自由時報國際 | `https://news.ltn.com.tw/rss/world.xml` |
+| 自由時報財經 | `https://news.ltn.com.tw/rss/business.xml` |
+
+**過濾關鍵字（部分）：** 伊朗、油價、原油、台積電、ADR、戰爭、中東、川普、軍事、衝突…等
+
+**其他特性：**
+- 依 `pubDate` 降冪排序，最多回傳 30 則
+- 依標題去重（相同標題只保留最早出現的一筆）
+- `description` 超過 120 字自動截斷並加 `…`
+- 預留 `ai_suggest` 欄位（目前 Gemini 分析程式碼暫以 comment-out 方式保留）
+
+---
+
+### 8. 美股行事曆（/america-calendar）
+
+**用途：** 整合多來源，提供完整的美股投資重要事件日曆
+
+**資料來源合併順序：**
+1. MoneyDJ（經濟指標，依關鍵字過濾）
+2. 自訂週期性事件（`generateCustomEvents`）
+3. Finnhub 科技股財報（`generateCustomEventsFinnhub`，僅查未來 14 天）
+
+**自動計算的週期性事件：**
+
+| 事件 | 規則 |
+|------|------|
+| 台指期/選擇權結算日 | 每月第三個星期三 |
+| 美股四巫日 | 3、6、9、12 月第三個星期五 |
+| 富時羅素指數重組 | 6 月最後一個星期五、11 月第二個星期五 |
+| MSCI 指數調整 | 2、5、8、11 月最後一個平日 |
+
+**Finnhub 財報追蹤清單（部分）：**
+NVDA、TSM、AAPL、META、MSFT、GOOGL、AMZN、TSLA、AMD、PLTR、AVGO、QCOM、ASML、MU、INTC、NFLX、SMCI、ARM 等 AI/科技股
+
+> **注意：** Finnhub 免費方案日期範圍超過 14 天會靜默截斷結果，查詢時需限制在 14 天內。
+
+---
+
+### 9. Cron 定時推播（handleCron）
+
+**觸發時間：** 每小時整點（UTC `0 */1 * * *`）
+
+**執行條件（台灣時間）：** 週一至週五，05:00～23:59
+
+**推播內容（依時段顯示）：**
+
+| 時段（台灣時間） | 推播項目 |
+|-----------------|----------|
+| 全時段 | 今日特殊事件、富台指漲跌、布蘭特原油（含評級）、VIX（含評級） |
+| 09:00～14:00 | 台股期貨日盤、台積電現貨（Fugle） |
+| 15:00 以後 或 08:00 以前 | 台股期貨夜盤 |
+| 17:00 以後 或 08:00 以前 | 台積電期貨夜盤 |
+
+**情緒評級輔助函式：**
+
+```javascript
+getBrentStatus(price)  // < 100: 平靜 / < 110: 留意 / < 120: 波動加劇 / ≥ 120: 恐慌
+getVixStatus(value)    // < 20: 平靜 / < 25: 留意 / < 30: 波動加劇 / ≥ 30: 恐慌
+```
+
+---
+
+### 10. PWA（Progressive Web App）
 
 **用途：** 讓網頁可安裝至手機桌面，提供類原生 App 體驗
-
-**解決的問題：** 使用者不需要透過 App Store 安裝，直接從瀏覽器加入主畫面，開啟時沒有瀏覽器 UI，體驗接近原生 App。
 
 **實作所需檔案：**
 
@@ -172,7 +300,7 @@ https://api.fugle.tw/marketdata/v1.0/stock/intraday/quote/{symbol}
 
 ---
 
-### 6. Service Worker（sw.js）
+### 11. Service Worker（sw.js）
 
 **用途：** 在瀏覽器背景執行的 JavaScript，是 PWA 推播通知的核心
 
@@ -188,7 +316,7 @@ https://api.fugle.tw/marketdata/v1.0/stock/intraday/quote/{symbol}
 
 ---
 
-### 7. Web Push Protocol
+### 12. Web Push Protocol
 
 **用途：** 從伺服器主動推送通知到使用者裝置
 
@@ -206,7 +334,7 @@ https://api.fugle.tw/marketdata/v1.0/stock/intraday/quote/{symbol}
 ```
 1. 使用者點擊「訂閱通知」按鈕並允許權限
 2. 瀏覽器向 FCM/APNs/WNS 申請 subscription（含 endpoint URL）
-3. 前端將 subscription 傳送到 Worker，存入 KV
+3. 前端將 subscription + userAgent 完整字串傳送到 Worker，存入 KV
 4. Worker 需要推播時，向 endpoint URL 發送加密訊息
 5. FCM/APNs/WNS 將通知推送到使用者裝置
 6. Service Worker 接收並顯示通知
@@ -214,28 +342,32 @@ https://api.fugle.tw/marketdata/v1.0/stock/intraday/quote/{symbol}
 
 **訊息加密：** Web Push 規範要求訊息必須使用 `aes128gcm` 加密，搭配 ECDH 金鑰交換和 HKDF 金鑰推導，本專案使用 Cloudflare Workers 內建的 Web Crypto API 手動實作，不依賴任何外部套件。
 
-**平台差異：**
+**平台差異與 Action 按鈕：**
 
 | 平台 | Action 按鈕 | 備註 |
 |------|-------------|------|
 | 電腦 Chrome | ✅ 正常 | 完整支援 |
-| Android Chrome | ❌ 有 bug | 永遠回傳最後一個按鈕的 action，已改為不帶 actions |
-| iOS Safari PWA | ❌ 不顯示 | 系統不支援 action 按鈕，已改為不帶 actions |
+| Android Chrome | ❌ 停用 | 永遠回傳最後一個按鈕的 action，已改為不帶 actions |
+| iOS Safari PWA | ❌ 停用 | 系統不支援 action 按鈕，已改為不帶 actions |
 | Windows Edge | ✅ 正常 | WNS 通道，完整支援 |
+
+**平台偵測函式：**
+```javascript
+isAndroidPlatform(platform)  // 偵測 Android 裝置
+isApplePlatform(platform)    // 偵測 iPhone / iPad / iPod / Mac
+```
+
+> 訂閱時會儲存完整 `User-Agent` 字串（`platform` 欄位），而非僅儲存 boolean，以支援更細緻的平台判斷。
 
 ---
 
-### 8. VAPID 金鑰（vapidkeys.com）
+### 13. VAPID 金鑰（vapidkeys.com）
 
 **用途：** Web Push 身份驗證
 
-**解決的問題：** FCM/APNs 要求推播請求必須附帶有效的身份證明，才會接受並轉送通知。VAPID（Voluntary Application Server Identification）透過一對公私鑰提供這個驗證機制。
-
-**產生方式：** 透過 [vapidkeys.com](https://vapidkeys.com/) 線上產生一組公私鑰。
-
 **注意事項：**
 - `VAPID_SUBJECT` 格式必須是 `mailto:email@example.com`，不能有空格或角括號，否則 Apple APNs 會回傳 `BadJwtToken` 錯誤
-- `VAPID_SUBJECT` 為 Plaintext 變數，需加入 `wrangler.toml` 的 `[vars]` 區塊，否則每次 `wrangler deploy` 會將其覆蓋清除
+- `VAPID_SUBJECT` 為 Plaintext 變數，需加入 `wrangler.toml` 的 `[vars]` 區塊，否則每次 `wrangler deploy` 會將其清除
 
 **儲存位置：**
 
@@ -245,10 +377,11 @@ https://api.fugle.tw/marketdata/v1.0/stock/intraday/quote/{symbol}
 | `VAPID_PRIVATE_KEY` | Secret | Cloudflare 後台 |
 | `VAPID_SUBJECT` | Plaintext | `wrangler.toml` `[vars]` |
 | `FUGLE_KEY` | Secret | Cloudflare 後台 |
+| `FINNHUB_KEY` | Secret | Cloudflare 後台 |
 
 ---
 
-### 9. Cloudflare KV
+### 14. Cloudflare KV
 
 **用途：** 儲存推播訂閱資料與系統 LOG
 
@@ -264,14 +397,15 @@ https://api.fugle.tw/marketdata/v1.0/stock/intraday/quote/{symbol}
 {
   "endpoint": "https://fcm.googleapis.com/...",
   "keys": { "auth": "...", "p256dh": "..." },
-  "platform": "Mozilla/5.0 (Linux; Android...)"
+  "platform": "Mozilla/5.0 (Linux; Android...)",
+  "time": "2026-04-22 10:00:00"
 }
 ```
 
 **LOG 資料結構：**
 ```json
 {
-  "time": "2026-03-28 16:48:16",
+  "time": "2026-04-22 10:00:00",
   "tag": "SW",
   "message": "Push 訂閱完成，已傳送到 Worker"
 }
@@ -281,20 +415,11 @@ https://api.fugle.tw/marketdata/v1.0/stock/intraday/quote/{symbol}
 
 ---
 
-### 10. Cloudflare Cron Trigger
+### 15. Cloudflare Cron Trigger
 
 **用途：** 定時執行推播邏輯
 
 **現有設定：** 每小時整點觸發（`0 */1 * * *`）
-
-**時間過濾邏輯：** 在 `handleCron()` 內判斷台灣時間，週六週日及凌晨 00:00～04:59 不執行推播：
-
-```javascript
-const twHour = (now.getUTCHours() + 8) % 24;
-const twDay  = new Date(now.getTime() + 8 * 3600 * 1000).getUTCDay();
-if (twDay === 0 || twDay === 6) return; // 週末不執行
-if (twHour < 5) return;                 // 凌晨不執行
-```
 
 **本地測試方式（需開兩個終端機）：**
 ```powershell
@@ -307,7 +432,7 @@ npm run cron-test
 
 ---
 
-### 11. Node.js 與 npm
+### 16. Node.js 與 Wrangler CLI
 
 **用途：** 執行 Wrangler CLI 工具
 
@@ -315,12 +440,6 @@ npm run cron-test
 ```powershell
 npm install -g wrangler
 ```
-
----
-
-### 12. Wrangler CLI
-
-**用途：** Cloudflare Workers 的開發與部署工具
 
 **常用指令：**
 
@@ -349,7 +468,7 @@ VAPID_SUBJECT = "mailto:your@email.com"
 
 **重要注意：**
 - `npm run deploy` 會自動 minify 程式碼，後台 Edit code 看到的是壓縮版本，原始碼以本地 `worker.js` 為準
-- Secret 變數（`VAPID_PUBLIC_KEY`、`VAPID_PRIVATE_KEY`、`FUGLE_KEY`）不可放入 `wrangler.toml`，只能在後台設定
+- Secret 變數（`VAPID_PUBLIC_KEY`、`VAPID_PRIVATE_KEY`、`FUGLE_KEY`、`FINNHUB_KEY`）不可放入 `wrangler.toml`，只能在後台設定
 - Plaintext 變數（`VAPID_SUBJECT`）必須放入 `wrangler.toml`，否則每次 deploy 會被清除
 
 ---
@@ -371,22 +490,26 @@ VAPID_SUBJECT = "mailto:your@email.com"
 
 | 卡片 | 內容 |
 |------|------|
-| 台股市場概況 | 台積電期貨、台股期貨（FITX）、富台指（TWN）、台積電現貨（含委託簿） |
+| 台股市場概況 | 台積電期貨/現貨、台股期貨（FITX）、富台指（TWN/TWNCON）、委買委賣五檔 |
 | 美股市場概況 | 盤前電子盤 Fair Value、道瓊/標普/納斯達克/費城半導體、TSM ADR |
-| 原物料市場 | 布蘭特原油、黃金、白銀 |
-| 市場情緒 | 美元指數（DXY）、VIX 恐慌指數 |
+| 原物料市場 | 布蘭特原油（含評級）、黃金、白銀 |
+| 市場情緒 | 美元指數（DXY）、VIX 恐慌指數（含評級）、CNN 恐慌貪婪指數 |
 | 台積電 ADR | CNBC 盤中/盤前/盤後變動 |
+| 財經新聞 | 關鍵字過濾新聞、已讀/未讀標記 |
+| 美股行事曆 | 月曆視圖，含經濟指標、財報日、結算日等 |
+| 法人動向 | 三大法人買賣超、外資期貨淨部位、融資餘額 |
+| 自選股 | localStorage 自訂股票清單，支援 `^` 符號（Yahoo Finance 格式） |
 
 **Header 功能：**
 - `☰` 漢堡按鈕：開啟左側 Slide Menu
-- 重新整理按鈕：手動刷新資料（含倒數計時）
+- 重新整理按鈕：手動刷新資料（含倒數計時，5 分鐘自動刷新）
 - 訂閱通知按鈕：開啟推播訂閱流程（鈴鐺圖示，已授權時亮起）
 
 **URL 參數（隱藏功能）：**
 ```
-?size=200&price=1785
+?card_type=xxx          → 切換單一卡片模式（card-wide 版面）
+?size=200&price=1785    → 台積電委買張數/委賣價格門檻，符合條件觸發本地通知
 ```
-帶入台積電委買張數門檻與委賣價格門檻，符合條件時觸發本地通知警示。
 
 ---
 
@@ -414,24 +537,38 @@ stock/
 | 資料 | 來源 | 類型 |
 |------|------|------|
 | 台股期貨（FITX） | HiStock | HTML 爬蟲（POST） |
-| 富台指（TWN） | HiStock | HTML 爬蟲（POST） |
-| 台積電期貨 | TaiFex 官方 API | JSON API |
-| 台積電現貨 | Fugle 官方 API | JSON API（需 API Key） |
-| 布蘭特原油 | 新浪財經 | 非官方字串 API |
-| 黃金、白銀 | 新浪財經 | 非官方字串 API |
-| 美元指數（DXY） | 新浪財經 | 非官方字串 API（特殊欄位格式） |
-| VIX 恐慌指數 | 新浪財經 | 非官方字串 API |
+| 富台指（TWN） | HiStock | HTML 爬蟲（POST，備援） |
+| 富台指（TWNCON） | 鉅亨網 | JSON API（主要） |
+| 台股/台積電期貨 | TaiFex 官方 API | JSON API |
+| 台股個股現貨 | Fugle 官方 API | JSON API（需 API Key） |
+| 技術指標（SMA/RSI/KDJ/MACD/BB） | Fugle 官方 API | JSON API（需 API Key） |
+| 個股法人明細 | 玩股網 (wearn.com) | HTML 爬蟲 |
+| 三大法人合計 | 玩股網 (wearn.com) | HTML 爬蟲 |
+| 外資期貨淨部位 | 玩股網 (wearn.com) | HTML 爬蟲 |
+| 融資餘額 | 台灣證券交易所 (TWSE) | HTML 爬蟲 |
+| 布蘭特原油 | 新浪財經 (hf_OIL) | 非官方字串 API |
+| 黃金、白銀 | 新浪財經 (hf_GC, hf_SI) | 非官方字串 API |
+| 美元指數（DXY） | 新浪財經 (DINIW) | 非官方字串 API（特殊欄位格式） |
+| VIX 恐慌指數 | 新浪財經 (znb_VIX) | 非官方字串 API |
 | 美股四大指數 + 盤前 | CNBC | 非官方 JSON API |
 | 台積電 ADR（TSM） | CNBC | 非官方 JSON API |
+| 美股/ETF 個股 | Yahoo Finance | 非官方 JSON API |
 | TSM ADR 即時 | RobinHood | 暫停（TLS fingerprint 封鎖） |
+| 恐慌貪婪指數 | CNN | 非官方 JSON API |
+| 科技股財報日 | Finnhub | 官方 API（需 API Key，免費方案限 14 天） |
+| 美股經濟行事曆 | MoneyDJ | 非官方 JSON API |
+| 財經新聞 | Yahoo奇摩/中央社/自由時報 | RSS Feed |
 
 ---
 
 ## 注意事項
 
-- 本專案使用的第三方 API（新浪、HiStock、CNBC）均為非官方接口，可能隨時變更或中斷
+- 本專案使用的第三方 API（新浪、HiStock、CNBC、MoneyDJ）均為非官方接口，可能隨時變更或中斷
 - RobinHood API 因 CloudFront WAF + TLS fingerprint 驗證，目前從非瀏覽器環境（Workers、curl、Java）無法存取
-- VAPID 私鑰與 Fugle API Key 存放於 Cloudflare Worker Secrets，請勿提交至 Git
+- Finnhub 免費方案超過 14 天的查詢會靜默截斷，不會報錯，查詢前需主動限制日期範圍
+- VAPID 私鑰與 Fugle/Finnhub API Key 存放於 Cloudflare Worker Secrets，請勿提交至 Git
 - `node_modules/` 和 `.wrangler/` 已加入 `.gitignore`
-- Cron Trigger 時間為 UTC，台灣時間需減 8 小時換算
+- Cron Trigger 時間為 UTC，台灣時間需加 8 小時換算
 - Android 與 iOS 的推播 Action 按鈕有平台限制，目前僅電腦版與 Windows Edge 支援
+- 前端資料自動刷新間隔為 5 分鐘（避免觸發第三方 API 封鎖限制）
+- 新浪財經 API 回應為 GBK 編碼，必須透過 `TextDecoder("gbk")` 解碼，不可直接使用 `res.text()`
