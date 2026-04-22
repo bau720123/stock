@@ -13,6 +13,24 @@ function json(data, status = 200) {
   });
 }
 
+/**
+ * 統一處理帶有超時機制的 fetch (使用 AbortController)
+ */
+async function fetchWithTimeout(url, options = {}, timeout = 5000) {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeout);
+
+  try {
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal,
+    });
+    return response;
+  } finally {
+    clearTimeout(id);
+  }
+}
+
 export default {
   async fetch(request, env) {
     // 呼叫網址：https://billowing-queen-4a58.bau720123.workers.dev/path
@@ -116,12 +134,12 @@ export default {
 };
 
 async function debugSina() {
-  const res = await fetch("https://hq.sinajs.cn/list=hf_YM,hf_ES,hf_NQ,gb_dji,gb_inx,gb_ixic,gb_sox,gb_tsm,hf_OIL,hf_GC,hf_SI,DINIW,znb_VIX", {
+  const res = await fetchWithTimeout("https://hq.sinajs.cn/list=hf_YM,hf_ES,hf_NQ,gb_dji,gb_inx,gb_ixic,gb_sox,gb_tsm,hf_OIL,hf_GC,hf_SI,DINIW,znb_VIX", {
     headers: {
       "User-Agent": UA,
       "Referer": "https://finance.sina.com.cn/"
     }
-  });
+  }, 5000);
 
   // 1. 先取得原始的 ArrayBuffer (二進位資料)
   const buffer = await res.arrayBuffer();
@@ -142,23 +160,17 @@ async function debugSina() {
 // HiStock（台指期 / 富台指）
 async function fetchHiStock(m, no, current_title, volume_title) {
   try {
-    const timeout = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error("Request timeout")), 3000)
-    );
+    const res = await fetchWithTimeout("https://histock.tw/stock/module/function.aspx", {
+      method: "POST",
+      headers: {
+        "User-Agent": UA,
+        "Origin": "https://histock.tw",
+        "Referer": "https://histock.tw/",
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({ m, no })
+    }, 3000);
 
-    const res = await Promise.race([
-      fetch("https://histock.tw/stock/module/function.aspx", {
-        method: "POST",
-        headers: {
-          "User-Agent": UA,
-          "Origin": "https://histock.tw",
-          "Referer": "https://histock.tw/",
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: new URLSearchParams({ m, no })
-      }),
-      timeout
-    ]);
     const html = await res.text();
 
     const data = {};
@@ -183,28 +195,25 @@ async function fetchHiStock(m, no, current_title, volume_title) {
       updateTime: timeMatch ? timeMatch[1].trim() : "未知",
     });
   } catch (e) {
-    return json({ success: false, error: e.message }, 500);
+    const errorMsg = e.name === 'AbortError' ? "連線逾時" : e.message;
+    return json({ success: false, error: errorMsg }, 500);
   }
 }
 
 // 鉅亨網（富台指）
 async function fetchCnyesTwn() {
   try {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 5000);
-
-    const res = await fetch(
+    const res = await fetchWithTimeout(
       "https://ws.api.cnyes.com/ws/api/v1/quote/quotes/GF:TWNCON:FUTURES?column=G,QUOTES",
       {
-        signal: controller.signal,
         headers: {
           "User-Agent": UA,
           "Referer": "https://invest.cnyes.com/",
           "Origin": "https://invest.cnyes.com",
         }
-      }
+      },
+      5000
     );
-    clearTimeout(timer);
 
     const json_data = await res.json();
     const item = json_data?.data?.[0];
@@ -227,16 +236,17 @@ async function fetchCnyesTwn() {
       updateTime,
     });
   } catch (e) {
-    return json({ success: false, error: e.message }, 500);
+    const errorMsg = e.name === 'AbortError' ? "連線逾時" : e.message;
+    return json({ success: false, error: errorMsg }, 500);
   }
 }
 
 // StockQ（布蘭特原油）
 async function fetchBrent() {
   try {
-    const res = await fetch("https://www.stockq.org/commodity/FUTRBOIL.php", {
+    const res = await fetchWithTimeout("https://www.stockq.org/commodity/FUTRBOIL.php", {
       headers: { "User-Agent": UA }
-    });
+    }, 5000);
     const html = await res.text();
 
     // 找 class='row2' 的位置，然後找後面第一個 <td...> 到 </td>
@@ -254,7 +264,8 @@ async function fetchBrent() {
 
     return json({ success: true, price, priceText });
   } catch (e) {
-    return json({ success: false, error: e.message }, 500);
+    const errorMsg = e.name === 'AbortError' ? "連線逾時" : e.message;
+    return json({ success: false, error: errorMsg }, 500);
   }
 }
 
@@ -262,12 +273,12 @@ async function fetchBrent() {
 async function fetchSina(list) {
   // https://gu.sina.cn/ft/hq/hf.php?symbol=OIL
   try {
-    const res = await fetch(`https://hq.sinajs.cn/list=${list}`, {
+    const res = await fetchWithTimeout(`https://hq.sinajs.cn/list=${list}`, {
       headers: {
         "User-Agent": UA,
         "Referer": "https://finance.sina.com.cn/"
       }
-    });
+    }, 5000);
     // const text = await res.text();
 
   // 1. 先取得原始的 ArrayBuffer (二進位資料)
@@ -370,16 +381,17 @@ async function fetchSina(list) {
     }
 
   } catch (e) {
-    return json({ success: false, error: e.message }, 500);
+    const errorMsg = e.name === 'AbortError' ? "連線逾時" : e.message;
+    return json({ success: false, error: errorMsg }, 500);
   }
 }
 
 // 台灣期貨交易所
 async function fetchTaifex(objId, contract) {
   try {
-    const res = await fetch("https://www.taifex.com.tw/cht/quotesApi/getQuotes?objId=" + objId, {
+    const res = await fetchWithTimeout("https://www.taifex.com.tw/cht/quotesApi/getQuotes?objId=" + objId, {
       headers: { "User-Agent": UA, "Accept": "application/json" }
-    });
+    }, 5000);
     const data = await res.json();
 
     // const item = data.find(d => d.contract === contract);
@@ -411,20 +423,20 @@ async function fetchTaifex(objId, contract) {
       ttlvol:       toInt(item.ttlvol),
     });
   } catch (e) {
-    return json({ success: false, error: e.message }, 500);
+    const errorMsg = e.name === 'AbortError' ? "連線逾時" : e.message;
+    return json({ success: false, error: errorMsg }, 500);
   }
 }
 
 // ── CNBC（美股四大指數 + TSM ADR + 盤前電子盤）─────────────
 async function fetchCnbc() {
   try {
-    const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
-
     // 1. 盤前 Fair Value (邏輯保持不變)
     // https://www.cnbc.com/pre-markets/
-    const fvRes = await fetch(
+    const fvRes = await fetchWithTimeout(
       "https://quote.cnbc.com/quote-html-webservice/fvquote.htm?requestMethod=quick&noform=0&realtime=0&client=fairValue&output=json&symbols=DJ|SP|ND|TF",
-      { headers: { "User-Agent": UA } }
+      { headers: { "User-Agent": UA } },
+      5000
     );
     const fvData = await fvRes.json();
     const fvQuotes = fvData?.FairValueQuoteResult?.FairValueQuote || [];
@@ -436,9 +448,10 @@ async function fetchCnbc() {
     }
 
     // 2. 四大指數 + 個股 (未來可在 symbols 繼續累加，如 |NVDA|AAPL)
-    const qRes = await fetch(
+    const qRes = await fetchWithTimeout(
       "https://quote.cnbc.com/quote-html-webservice/restQuote/symbolType/symbol?symbols=.DJI|.SPX|.IXIC|.SOX|TSM&requestMethod=itv&noform=1&partnerId=2&fund=1&exthrs=1&output=json&events=1",
-      { headers: { "User-Agent": UA } }
+      { headers: { "User-Agent": UA } },
+      5000
     );
     const qData = await qRes.json();
     const quotes = qData?.FormattedQuoteResult?.FormattedQuote || [];
@@ -484,7 +497,8 @@ async function fetchCnbc() {
       stock, // 這裡現在會是 { TSM: { regular: "...", type: "...", market: "..." } }
     });
   } catch (e) {
-    return json({ success: false, error: e.message }, 500);
+    const errorMsg = e.name === 'AbortError' ? "連線逾時" : e.message;
+    return json({ success: false, error: errorMsg }, 500);
   }
 }
 
@@ -492,9 +506,10 @@ async function fetchCnbc() {
 async function fetchRobinHood() {
   try {
     const instrumentId = "ca4821f9-06c3-4c22-bbb8-efe569f23d2b";
-    const res = await fetch(
+    const res = await fetchWithTimeout(
       `https://bonfire.robinhood.com/instruments/${instrumentId}/detail-page-live-updating-data/?display_span=day&hide_extended_hours=false`,
-      { headers: { "User-Agent": UA, "Accept": "application/json" } }
+      { headers: { "User-Agent": UA, "Accept": "application/json" } },
+      5000
     );
     const data = await res.json();
 
@@ -521,7 +536,8 @@ async function fetchRobinHood() {
     const success = changeText !== "" || tertiaryText !== "" || previousClose !== "" || previousCloseDate !== "" || updated_at !== "";
     return json({ success, changeText, tertiaryText, previousClose, previousCloseDate, updated_at });
   } catch (e) {
-    return json({ success: false, error: e.message }, 500);
+    const errorMsg = e.name === 'AbortError' ? "連線逾時" : e.message;
+    return json({ success: false, error: errorMsg }, 500);
   }
 }
 
@@ -823,14 +839,15 @@ async function clearLogs(env) {
 
 async function fetchFugleQuote(symbol, env) {
   try {
-    const res = await fetch(
+    const res = await fetchWithTimeout(
       `https://api.fugle.tw/marketdata/v1.0/stock/intraday/quote/${symbol}`,
       {
         headers: {
           "X-API-KEY": env.FUGLE_KEY,
           "Accept": "application/json"
         }
-      }
+      },
+      5000
     );
 
     if (!res.ok) {
@@ -863,20 +880,22 @@ async function fetchFugleQuote(symbol, env) {
       transaction:       d.total?.transaction        || 0,
     });
   } catch (e) {
-    return json({ success: false, error: e.message }, 500);
+    const errorMsg = e.name === 'AbortError' ? "連線逾時" : e.message;
+    return json({ success: false, error: errorMsg }, 500);
   }
 }
 
 async function fetchFugleVolume(symbol, env) {
   try {
-    const res = await fetch(
+    const res = await fetchWithTimeout(
       `https://api.fugle.tw/marketdata/v1.0/stock/intraday/volumes/${symbol}`,
       {
         headers: {
           "X-API-KEY": env.FUGLE_KEY,
           "Accept": "application/json"
         }
-      }
+      },
+      5000
     );
 
     if (!res.ok) {
@@ -893,7 +912,8 @@ async function fetchFugleVolume(symbol, env) {
       data,
     });
   } catch (e) {
-    return json({ success: false, error: e.message }, 500);
+    const errorMsg = e.name === 'AbortError' ? "連線逾時" : e.message;
+    return json({ success: false, error: errorMsg }, 500);
   }
 }
 
@@ -901,14 +921,15 @@ async function fetchFugleHistory(symbol, env) {
   try {
     const to   = new Date().toISOString().slice(0, 10);
     const from = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
-    const res = await fetch(
+    const res = await fetchWithTimeout(
       `https://api.fugle.tw/marketdata/v1.0/stock/historical/candles/${symbol}?from=${from}&to=${to}&timeframe=D&fields=open,high,low,close,volume,turnover,change&sort=desc`,
       {
         headers: {
           "X-API-KEY": env.FUGLE_KEY,
           "Accept": "application/json"
         }
-      }
+      },
+      5000
     );
 
     if (!res.ok) {
@@ -923,20 +944,21 @@ async function fetchFugleHistory(symbol, env) {
       data,
     });
   } catch (e) {
-    return json({ success: false, error: e.message }, 500);
+    const errorMsg = e.name === 'AbortError' ? "連線逾時" : e.message;
+    return json({ success: false, error: errorMsg }, 500);
   }
 }
 
 async function fetchForeignNetPosition() {
   try {
     const url = `https://stock.wearn.com/taifexphoto.asp`;
-    const res = await fetch(url, {
+    const res = await fetchWithTimeout(url, {
       headers: {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
         "Referer": "https://stock.wearn.com/",
         "Accept": "text/html,application/xhtml+xml",
       },
-    });
+    }, 5000);
 
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
@@ -967,7 +989,8 @@ async function fetchForeignNetPosition() {
 
     return json({ success: true, data });
   } catch (e) {
-    return json({ success: false, error: e.message }, 500);
+    const errorMsg = e.name === 'AbortError' ? "連線逾時" : e.message;
+    return json({ success: false, error: errorMsg }, 500);
   }
 }
 
@@ -988,13 +1011,13 @@ function formatValue(str) {
 async function fetchInstitutional() {
   try {
     const url = `https://stock.wearn.com/fundthree.asp`;
-    const res = await fetch(url, {
+    const res = await fetchWithTimeout(url, {
       headers: {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
         "Referer": "https://stock.wearn.com/",
         "Accept": "text/html,application/xhtml+xml",
       },
-    });
+    }, 5000);
 
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
@@ -1030,19 +1053,20 @@ async function fetchInstitutional() {
 
     return json({ success: true, data });
   } catch (e) {
-    return json({ success: false, error: e.message }, 500);
+    const errorMsg = e.name === 'AbortError' ? "連線逾時" : e.message;
+    return json({ success: false, error: errorMsg }, 500);
   }
 }
 
 async function fetchMarginTradingBalance() {
   try {
-    const res = await fetch("https://www.twse.com.tw/rwd/zh/marginTrading/MI_MARGN?response=html", {
+    const res = await fetchWithTimeout("https://www.twse.com.tw/rwd/zh/marginTrading/MI_MARGN?response=html", {
       headers: {
         "User-Agent": UA,
         "Referer": "https://www.twse.com.tw/",
         "Accept": "text/html,application/xhtml+xml",
       },
-    });
+    }, 5000);
 
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
@@ -1076,20 +1100,21 @@ async function fetchMarginTradingBalance() {
     });
 
   } catch (e) {
-    return json({ success: false, error: e.message }, 500);
+    const errorMsg = e.name === 'AbortError' ? "連線逾時" : e.message;
+    return json({ success: false, error: errorMsg }, 500);
   }
 }
 
 async function fetchFugleInstitutional(symbol) {
   try {
     const url = `https://stock.wearn.com/netbuy.asp?kind=${symbol}`;
-    const res = await fetch(url, {
+    const res = await fetchWithTimeout(url, {
       headers: {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
         "Referer": "https://stock.wearn.com/",
         "Accept": "text/html,application/xhtml+xml",
       },
-    });
+    }, 5000);
 
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
@@ -1123,7 +1148,8 @@ async function fetchFugleInstitutional(symbol) {
 
     return json({ success: true, data });
   } catch (e) {
-    return json({ success: false, error: e.message }, 500);
+    const errorMsg = e.name === 'AbortError' ? "連線逾時" : e.message;
+    return json({ success: false, error: errorMsg }, 500);
   }
 }
 
@@ -1148,9 +1174,10 @@ async function fetchFugleSma(symbol, env) {
     // 平行打四支API
     const results = await Promise.all(
       periods.map(period =>
-        fetch(
+        fetchWithTimeout(
           `https://api.fugle.tw/marketdata/v1.0/stock/technical/sma/${symbol}?from=${from}&to=${to}&timeframe=D&period=${period}`,
-          { headers: { "X-API-KEY": env.FUGLE_KEY, "Accept": "application/json" } }
+          { headers: { "X-API-KEY": env.FUGLE_KEY, "Accept": "application/json" } },
+          5000
         ).then(r => r.json())
       )
     );
@@ -1183,9 +1210,10 @@ async function fetchFugleRsi(symbol, env) {
     // 平行打四支API
     const results = await Promise.all(
       periods.map(period =>
-        fetch(
+        fetchWithTimeout(
           `https://api.fugle.tw/marketdata/v1.0/stock/technical/rsi/${symbol}?from=${from}&to=${to}&timeframe=D&period=${period}`,
-          { headers: { "X-API-KEY": env.FUGLE_KEY, "Accept": "application/json" } }
+          { headers: { "X-API-KEY": env.FUGLE_KEY, "Accept": "application/json" } },
+          5000
         ).then(r => r.json())
       )
     );
@@ -1213,14 +1241,15 @@ async function fetchFugleKdj(symbol, env) {
   try {
     const to   = new Date().toISOString().slice(0, 10);
     const from = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
-    const res = await fetch(
+    const res = await fetchWithTimeout(
       `https://api.fugle.tw/marketdata/v1.0/stock/technical/kdj/${symbol}?from=${from}&to=${to}&timeframe=D&rPeriod=9&kPeriod=3&dPeriod=3`,
       {
         headers: {
           "X-API-KEY": env.FUGLE_KEY,
           "Accept": "application/json"
         }
-      }
+      },
+      5000
     );
 
     if (!res.ok) {
@@ -1242,7 +1271,8 @@ async function fetchFugleKdj(symbol, env) {
       data,
     });
   } catch (e) {
-    return json({ success: false, error: e.message }, 500);
+    const errorMsg = e.name === 'AbortError' ? "連線逾時" : e.message;
+    return json({ success: false, error: errorMsg }, 500);
   }
 }
 
@@ -1250,14 +1280,15 @@ async function fetchFugleMacd(symbol, env) {
   try {
     const to   = new Date().toISOString().slice(0, 10);
     const from = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
-    const res = await fetch(
+    const res = await fetchWithTimeout(
       `https://api.fugle.tw/marketdata/v1.0/stock/technical/macd/${symbol}?from=${from}&to=${to}&timeframe=D&fast=12&slow=26&signal=9`,
       {
         headers: {
           "X-API-KEY": env.FUGLE_KEY,
           "Accept": "application/json"
         }
-      }
+      },
+      5000
     );
 
     if (!res.ok) {
@@ -1279,7 +1310,8 @@ async function fetchFugleMacd(symbol, env) {
       data,
     });
   } catch (e) {
-    return json({ success: false, error: e.message }, 500);
+    const errorMsg = e.name === 'AbortError' ? "連線逾時" : e.message;
+    return json({ success: false, error: errorMsg }, 500);
   }
 }
 
@@ -1287,14 +1319,15 @@ async function fetchFugleBrands(symbol, env) {
   try {
     const to   = new Date().toISOString().slice(0, 10);
     const from = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
-    const res = await fetch(
+    const res = await fetchWithTimeout(
       `https://api.fugle.tw/marketdata/v1.0/stock/technical/bb/${symbol}?from=${from}&to=${to}&timeframe=D&period=20`,
       {
         headers: {
           "X-API-KEY": env.FUGLE_KEY,
           "Accept": "application/json"
         }
-      }
+      },
+      5000
     );
 
     if (!res.ok) {
@@ -1316,19 +1349,20 @@ async function fetchFugleBrands(symbol, env) {
       data,
     });
   } catch (e) {
-    return json({ success: false, error: e.message }, 500);
+    const errorMsg = e.name === 'AbortError' ? "連線逾時" : e.message;
+    return json({ success: false, error: errorMsg }, 500);
   }
 }
 
 async function fetchYahooFinance(symbol, interval = 1, range = 1) {
   try {
     const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=${interval}d&range=${range}d`;
-    const res = await fetch(url, {
+    const res = await fetchWithTimeout(url, {
       headers: {
         "User-Agent": UA,
         "Accept": "application/json",
       }
-    });
+    }, 5000);
  
     if (!res.ok) {
       return json({ success: false, error: `HTTP ${res.status}` }, res.status);
@@ -1376,7 +1410,8 @@ async function fetchYahooFinance(symbol, interval = 1, range = 1) {
       updateTime
     });
   } catch (e) {
-    return json({ success: false, error: e.message }, 500);
+    const errorMsg = e.name === 'AbortError' ? "連線逾時" : e.message;
+    return json({ success: false, error: errorMsg }, 500);
   }
 }
 
@@ -1388,7 +1423,7 @@ function isNeedTranslate(str) {
 // 呼叫 MyMemory 翻譯單一字串
 async function translateToZh(text) {
   const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|zh-TW&de=bau720123@gmail.com`;
-  const res = await fetch(url, { headers: { "User-Agent": UA } });
+  const res = await fetchWithTimeout(url, { headers: { "User-Agent": UA } }, 5000);
   const data = await res.json();
   return data?.responseData?.translatedText || text; // 失敗就回傳原文
 }
@@ -1465,7 +1500,7 @@ async function fetchNewsRss(env) {
     // 平行抓取所有 RSS 來源
     const results = await Promise.allSettled(
       SOURCES.map(s =>
-        fetch(s.url, { headers: { "User-Agent": UA } })
+        fetchWithTimeout(s.url, { headers: { "User-Agent": UA } }, 8000)
           .then(r => r.text())
           .then(xml => parseRss(xml, s.name))
           .catch(() => [])
@@ -1543,7 +1578,8 @@ async function fetchNewsRss(env) {
       headers: { ...CORS, "Content-Type": "application/json; charset=utf-8" }
     });
   } catch (e) {
-    return json({ success: false, error: e.message }, 500);
+    const errorMsg = e.name === 'AbortError' ? "連線逾時" : e.message;
+    return json({ success: false, error: errorMsg }, 500);
   }
 }
 
@@ -1559,9 +1595,9 @@ async function fetchAmericaCalendar(env) {
     const to = `${currentYear}-12-31`;
     
     // 1. 抓取 MoneyDJ 資料
-    const res = await fetch(`https://www.moneydj.com/us/rest/eventlist?from=${from}&to=${to}`, {
+    const res = await fetchWithTimeout(`https://www.moneydj.com/us/rest/eventlist?from=${from}&to=${to}`, {
       headers: { "User-Agent": UA, "Referer": "https://www.moneydj.com/us/home" }
-    });
+    }, 8000);
     const data = await res.json();
 
     const keywords = ['美國核心CPI年增率', '美國生產者物價指數', 'EI020089', '美國零售額月增率', '申請失業救濟人數', '美國非農業就業人數變化', '美國消費者信心指數'];
@@ -1609,7 +1645,8 @@ async function fetchAmericaCalendar(env) {
 
     return json({ success: true, items: finalData });
   } catch (e) {
-    return json({ success: false, error: e.message }, 500);
+    const errorMsg = e.name === 'AbortError' ? "連線逾時" : e.message;
+    return json({ success: false, error: errorMsg }, 500);
   }
 }
 
@@ -1742,7 +1779,7 @@ async function generateCustomEventsFinnhub(from, to, env) {
   const url = `https://finnhub.io/api/v1/calendar/earnings?from=${from}&to=${to}&token=${cleanKey}`;
   
   try {
-    const res = await fetch(url, { headers: { "User-Agent": UA } });
+    const res = await fetchWithTimeout(url, { headers: { "User-Agent": UA } }, 5000);
 
     // 如果 API 報錯 (如 401)，記錄錯誤並回傳空陣列，避免主程式壞掉
     if (!res.ok) {
@@ -1801,20 +1838,15 @@ async function generateCustomEventsFinnhub(from, to, env) {
 
 // CNN Fear & Greed Index
 async function fetchFearAndGreed() {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 8000);
-
   try {
-    const res = await fetch("https://production.dataviz.cnn.io/index/fearandgreed/graphdata", {
+    const res = await fetchWithTimeout("https://production.dataviz.cnn.io/index/fearandgreed/graphdata", {
       headers: {
         "User-Agent": UA,
         "Accept": "application/json",
         "Referer": "https://edition.cnn.com/markets/fear-and-greed",
-      },
-      signal: controller.signal,
-    });
+      }
+    }, 8000);
 
-    clearTimeout(timer);
     if (!res.ok) return json({ success: false, error: `HTTP ${res.status}` });
 
     const data = await res.json();
@@ -1846,8 +1878,8 @@ async function fetchFearAndGreed() {
     });
 
   } catch (e) {
-    clearTimeout(timer);
-    return json({ success: false, error: e.message });
+    const errorMsg = e.name === 'AbortError' ? "連線逾時" : e.message;
+    return json({ success: false, error: errorMsg });
   }
 }
 
