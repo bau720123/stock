@@ -16,7 +16,7 @@ function json(data, status = 200) {
 /**
  * 統一處理帶有超時機制的 fetch (使用 AbortController)
  */
-async function fetchWithTimeout(url, options = {}, timeout = 5000) {
+async function fetchWithTimeout(url, options = {}, timeout = 3000) {
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), timeout);
 
@@ -134,12 +134,12 @@ export default {
 };
 
 async function debugSina() {
-  const res = await fetchWithTimeout("https://hq.sinajs.cn/list=hf_YM,hf_ES,hf_NQ,gb_dji,gb_inx,gb_ixic,gb_sox,gb_tsm,hf_OIL,hf_GC,hf_SI,DINIW,znb_VIX", {
+  const res = await fetchWithTimeout("https://hq.sinajs.cn/list=hf_YM,hf_ES,hf_NQ,gb_dji,gb_inx,gb_ixic,gb_sox,gb_tsm,hf_OIL,hf_GC,hf_SI,DINIW,znb_VIX,hf_VX", {
     headers: {
       "User-Agent": UA,
       "Referer": "https://finance.sina.com.cn/"
     }
-  }, 5000);
+  });
 
   // 1. 先取得原始的 ArrayBuffer (二進位資料)
   const buffer = await res.arrayBuffer();
@@ -169,7 +169,7 @@ async function fetchHiStock(m, no, current_title, volume_title) {
         "Content-Type": "application/x-www-form-urlencoded",
       },
       body: new URLSearchParams({ m, no })
-    }, 3000);
+    });
 
     const html = await res.text();
 
@@ -211,8 +211,7 @@ async function fetchCnyesTwn() {
           "Referer": "https://invest.cnyes.com/",
           "Origin": "https://invest.cnyes.com",
         }
-      },
-      5000
+      }
     );
 
     const json_data = await res.json();
@@ -246,7 +245,7 @@ async function fetchBrent() {
   try {
     const res = await fetchWithTimeout("https://www.stockq.org/commodity/FUTRBOIL.php", {
       headers: { "User-Agent": UA }
-    }, 5000);
+    });
     const html = await res.text();
 
     // 找 class='row2' 的位置，然後找後面第一個 <td...> 到 </td>
@@ -278,7 +277,7 @@ async function fetchSina(list) {
         "User-Agent": UA,
         "Referer": "https://finance.sina.com.cn/"
       }
-    }, 5000);
+    });
     // const text = await res.text();
 
   // 1. 先取得原始的 ArrayBuffer (二進位資料)
@@ -348,6 +347,7 @@ async function fetchSina(list) {
       // hf_OIL 布蘭特原油
       // hf_GC 黃金
       // hf_SI 白銀
+      // hf_VX VIX 恐慌指數期貨  
 
       const price = toFloat(parts[0]);
 
@@ -364,6 +364,9 @@ async function fetchSina(list) {
 
       if (list === 'hf_OIL') {
         result.rating = getBrentStatus(price);
+      }
+      if (list === 'hf_VX') {
+        result.rating = getVixStatus(price);
       }
 
       return json(result);
@@ -391,7 +394,7 @@ async function fetchTaifex(objId, contract) {
   try {
     const res = await fetchWithTimeout("https://www.taifex.com.tw/cht/quotesApi/getQuotes?objId=" + objId, {
       headers: { "User-Agent": UA, "Accept": "application/json" }
-    }, 5000);
+    });
     const data = await res.json();
 
     // const item = data.find(d => d.contract === contract);
@@ -435,8 +438,7 @@ async function fetchCnbc() {
     // https://www.cnbc.com/pre-markets/
     const fvRes = await fetchWithTimeout(
       "https://quote.cnbc.com/quote-html-webservice/fvquote.htm?requestMethod=quick&noform=0&realtime=0&client=fairValue&output=json&symbols=DJ|SP|ND|TF",
-      { headers: { "User-Agent": UA } },
-      5000
+      { headers: { "User-Agent": UA } }
     );
     const fvData = await fvRes.json();
     const fvQuotes = fvData?.FairValueQuoteResult?.FairValueQuote || [];
@@ -450,8 +452,7 @@ async function fetchCnbc() {
     // 2. 四大指數 + 個股 (未來可在 symbols 繼續累加，如 |NVDA|AAPL)
     const qRes = await fetchWithTimeout(
       "https://quote.cnbc.com/quote-html-webservice/restQuote/symbolType/symbol?symbols=.DJI|.SPX|.IXIC|.SOX|TSM&requestMethod=itv&noform=1&partnerId=2&fund=1&exthrs=1&output=json&events=1",
-      { headers: { "User-Agent": UA } },
-      5000
+      { headers: { "User-Agent": UA } }
     );
     const qData = await qRes.json();
     const quotes = qData?.FormattedQuoteResult?.FormattedQuote || [];
@@ -508,8 +509,7 @@ async function fetchRobinHood() {
     const instrumentId = "ca4821f9-06c3-4c22-bbb8-efe569f23d2b";
     const res = await fetchWithTimeout(
       `https://bonfire.robinhood.com/instruments/${instrumentId}/detail-page-live-updating-data/?display_span=day&hide_extended_hours=false`,
-      { headers: { "User-Agent": UA, "Accept": "application/json" } },
-      5000
+      { headers: { "User-Agent": UA, "Accept": "application/json" } }
     );
     const data = await res.json();
 
@@ -846,8 +846,7 @@ async function fetchFugleQuote(symbol, env) {
           "X-API-KEY": env.FUGLE_KEY,
           "Accept": "application/json"
         }
-      },
-      5000
+      }
     );
 
     if (!res.ok) {
@@ -894,8 +893,7 @@ async function fetchFugleVolume(symbol, env) {
           "X-API-KEY": env.FUGLE_KEY,
           "Accept": "application/json"
         }
-      },
-      5000
+      }
     );
 
     if (!res.ok) {
@@ -928,8 +926,7 @@ async function fetchFugleHistory(symbol, env) {
           "X-API-KEY": env.FUGLE_KEY,
           "Accept": "application/json"
         }
-      },
-      5000
+      }
     );
 
     if (!res.ok) {
@@ -958,7 +955,7 @@ async function fetchForeignNetPosition() {
         "Referer": "https://stock.wearn.com/",
         "Accept": "text/html,application/xhtml+xml",
       },
-    }, 5000);
+    });
 
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
@@ -1017,7 +1014,7 @@ async function fetchInstitutional() {
         "Referer": "https://stock.wearn.com/",
         "Accept": "text/html,application/xhtml+xml",
       },
-    }, 5000);
+    });
 
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
@@ -1066,7 +1063,7 @@ async function fetchMarginTradingBalance() {
         "Referer": "https://www.twse.com.tw/",
         "Accept": "text/html,application/xhtml+xml",
       },
-    }, 5000);
+    });
 
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
@@ -1114,7 +1111,7 @@ async function fetchFugleInstitutional(symbol) {
         "Referer": "https://stock.wearn.com/",
         "Accept": "text/html,application/xhtml+xml",
       },
-    }, 5000);
+    });
 
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
@@ -1176,8 +1173,7 @@ async function fetchFugleSma(symbol, env) {
       periods.map(period =>
         fetchWithTimeout(
           `https://api.fugle.tw/marketdata/v1.0/stock/technical/sma/${symbol}?from=${from}&to=${to}&timeframe=D&period=${period}`,
-          { headers: { "X-API-KEY": env.FUGLE_KEY, "Accept": "application/json" } },
-          5000
+          { headers: { "X-API-KEY": env.FUGLE_KEY, "Accept": "application/json" } }
         ).then(r => r.json())
       )
     );
@@ -1212,8 +1208,7 @@ async function fetchFugleRsi(symbol, env) {
       periods.map(period =>
         fetchWithTimeout(
           `https://api.fugle.tw/marketdata/v1.0/stock/technical/rsi/${symbol}?from=${from}&to=${to}&timeframe=D&period=${period}`,
-          { headers: { "X-API-KEY": env.FUGLE_KEY, "Accept": "application/json" } },
-          5000
+          { headers: { "X-API-KEY": env.FUGLE_KEY, "Accept": "application/json" } }
         ).then(r => r.json())
       )
     );
@@ -1248,8 +1243,7 @@ async function fetchFugleKdj(symbol, env) {
           "X-API-KEY": env.FUGLE_KEY,
           "Accept": "application/json"
         }
-      },
-      5000
+      }
     );
 
     if (!res.ok) {
@@ -1287,8 +1281,7 @@ async function fetchFugleMacd(symbol, env) {
           "X-API-KEY": env.FUGLE_KEY,
           "Accept": "application/json"
         }
-      },
-      5000
+      }
     );
 
     if (!res.ok) {
@@ -1326,8 +1319,7 @@ async function fetchFugleBrands(symbol, env) {
           "X-API-KEY": env.FUGLE_KEY,
           "Accept": "application/json"
         }
-      },
-      5000
+      }
     );
 
     if (!res.ok) {
@@ -1362,7 +1354,7 @@ async function fetchYahooFinance(symbol, interval = 1, range = 1) {
         "User-Agent": UA,
         "Accept": "application/json",
       }
-    }, 5000);
+    });
  
     if (!res.ok) {
       return json({ success: false, error: `HTTP ${res.status}` }, res.status);
@@ -1423,7 +1415,7 @@ function isNeedTranslate(str) {
 // 呼叫 MyMemory 翻譯單一字串
 async function translateToZh(text) {
   const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|zh-TW&de=bau720123@gmail.com`;
-  const res = await fetchWithTimeout(url, { headers: { "User-Agent": UA } }, 5000);
+  const res = await fetchWithTimeout(url, { headers: { "User-Agent": UA } });
   const data = await res.json();
   return data?.responseData?.translatedText || text; // 失敗就回傳原文
 }
@@ -1500,7 +1492,7 @@ async function fetchNewsRss(env) {
     // 平行抓取所有 RSS 來源
     const results = await Promise.allSettled(
       SOURCES.map(s =>
-        fetchWithTimeout(s.url, { headers: { "User-Agent": UA } }, 8000)
+        fetchWithTimeout(s.url, { headers: { "User-Agent": UA } }, 5000)
           .then(r => r.text())
           .then(xml => parseRss(xml, s.name))
           .catch(() => [])
@@ -1597,7 +1589,7 @@ async function fetchAmericaCalendar(env) {
     // 1. 抓取 MoneyDJ 資料
     const res = await fetchWithTimeout(`https://www.moneydj.com/us/rest/eventlist?from=${from}&to=${to}`, {
       headers: { "User-Agent": UA, "Referer": "https://www.moneydj.com/us/home" }
-    }, 8000);
+    });
     const data = await res.json();
 
     const keywords = ['美國核心CPI年增率', '美國生產者物價指數', 'EI020089', '美國零售額月增率', '申請失業救濟人數', '美國非農業就業人數變化', '美國消費者信心指數'];
@@ -1779,7 +1771,7 @@ async function generateCustomEventsFinnhub(from, to, env) {
   const url = `https://finnhub.io/api/v1/calendar/earnings?from=${from}&to=${to}&token=${cleanKey}`;
   
   try {
-    const res = await fetchWithTimeout(url, { headers: { "User-Agent": UA } }, 5000);
+    const res = await fetchWithTimeout(url, { headers: { "User-Agent": UA } });
 
     // 如果 API 報錯 (如 401)，記錄錯誤並回傳空陣列，避免主程式壞掉
     if (!res.ok) {
@@ -1845,7 +1837,7 @@ async function fetchFearAndGreed() {
         "Accept": "application/json",
         "Referer": "https://edition.cnn.com/markets/fear-and-greed",
       }
-    }, 8000);
+    });
 
     if (!res.ok) return json({ success: false, error: `HTTP ${res.status}` });
 
@@ -1908,7 +1900,7 @@ async function handleCron(env) {
     fetchHiStock("stocktop2017", "TWN", "指數", "成交量(口)"),
     // fetchCnyesTwn(), // 富台指
     fetchSina("hf_OIL"),
-    fetchSina("znb_VIX"),
+    fetchSina("hf_VX"),
     fetchFugleQuote("2330", env),
   ]);
 
