@@ -1349,9 +1349,9 @@ async function loadTw() {
     const lowMinusOpenCls = lowMinusOpen > 0 ? 'up' : lowMinusOpen < 0 ? 'down' : '';
 
     html += row('上個收盤價', fugleQuote.previousClose.toFixed(0));
-    // html += row('開盤價', fugleQuote.openPrice.toFixed(0));
-    // html += row('最高價', fugleQuote.highPrice.toFixed(0));
-    // html += row('最低價', fugleQuote.lowPrice.toFixed(0));
+    html += row('開盤價', fugleQuote.openPrice.toFixed(0));
+    html += row('最高價', fugleQuote.highPrice.toFixed(0));
+    html += row('最低價', fugleQuote.lowPrice.toFixed(0));
     html += row('現價', fugleQuote.closePrice.toFixed(0), 'accent');
     html += row('均價', fugleQuote.avgPrice.toFixed(2));
     html += row('漲跌', sign + fugleQuote.change, cls);
@@ -1397,22 +1397,22 @@ async function loadTw() {
     html += `</div>`;
 
     // 價格門檻通知（從 localStorage 讀取，未設定則不觸發）
-    const tsmcHigh = alertGet('tsmc_high');
-    const tsmcLow  = alertGet('tsmc_low');
-    if (tsmcHigh !== null && fugleQuote.closePrice >= tsmcHigh) {
-      sendNotification(
-        '台積電股票警示',
-        `價格 ${fugleQuote.closePrice.toFixed(2)} TWD，已高於設定門檻 ${tsmcHigh} TWD`,
-        'https://tw.stock.yahoo.com/quote/2330.TW'
-      );
-    }
-    if (tsmcLow !== null && fugleQuote.closePrice <= tsmcLow) {
-      sendNotification(
-        '台積電股票警示',
-        `價格 ${fugleQuote.closePrice.toFixed(2)} TWD，已低於設定門檻 ${tsmcLow} TWD`,
-        'https://tw.stock.yahoo.com/quote/2330.TW'
-      );
-    }
+    // const tsmcHigh = alertGet('tsmc_high');
+    // const tsmcLow  = alertGet('tsmc_low');
+    // if (tsmcHigh !== null && fugleQuote.closePrice >= tsmcHigh) {
+    //   sendNotification(
+    //     '台積電股票警示',
+    //     `價格 ${fugleQuote.closePrice.toFixed(2)} TWD，已高於設定門檻 ${tsmcHigh} TWD`,
+    //     'https://tw.stock.yahoo.com/quote/2330.TW'
+    //   );
+    // }
+    // if (tsmcLow !== null && fugleQuote.closePrice <= tsmcLow) {
+    //   sendNotification(
+    //     '台積電股票警示',
+    //     `價格 ${fugleQuote.closePrice.toFixed(2)} TWD，已低於設定門檻 ${tsmcLow} TWD`,
+    //     'https://tw.stock.yahoo.com/quote/2330.TW'
+    //   );
+    // }
   } else {
     html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
   }
