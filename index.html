@@ -551,29 +551,29 @@ const ALERT_CONFIGS = {
   tsmc: {
     title: '台積電 偵測設定',
     fields: [
-      { key: 'tsmc_high', label: '價格高於此值時通知', placeholder: '例：2000', unit: 'TWD' },
-      { key: 'tsmc_low',  label: '價格低於此值時通知', placeholder: '例：1800',  unit: 'TWD' },
+      { key: 'tsmc_high', label: '價格大於等於此值時通知', placeholder: '例：2000', unit: 'TWD' },
+      { key: 'tsmc_low',  label: '價格小於等於此值時通知', placeholder: '例：1800',  unit: 'TWD' },
     ]
   },
   brent: {
     title: '布蘭特原油 偵測設定',
     fields: [
-      { key: 'brent_high', label: '價格高於此值時通知', placeholder: '例：100', unit: 'USD' },
-      { key: 'brent_low',  label: '價格低於此值時通知', placeholder: '例：95',  unit: 'USD' },
+      { key: 'brent_high', label: '價格大於等於此值時通知', placeholder: '例：100', unit: 'USD' },
+      { key: 'brent_low',  label: '價格小於等於此值時通知', placeholder: '例：95',  unit: 'USD' },
     ]
   },
   gold: {
     title: '黃金 偵測設定',
     fields: [
-      { key: 'gold_high', label: '價格高於此值時通知', placeholder: '例：4000', unit: 'USD' },
-      { key: 'gold_low',  label: '價格低於此值時通知', placeholder: '例：3500',  unit: 'USD' },
+      { key: 'gold_high', label: '價格大於等於此值時通知', placeholder: '例：4000', unit: 'USD' },
+      { key: 'gold_low',  label: '價格小於等於此值時通知', placeholder: '例：3500',  unit: 'USD' },
     ]
   },
   silver: {
     title: '白銀 偵測設定',
     fields: [
-      { key: 'silver_high', label: '價格高於此值時通知', placeholder: '例：70', unit: 'USD' },
-      { key: 'silver_low',  label: '價格低於此值時通知', placeholder: '例：65',  unit: 'USD' },
+      { key: 'silver_high', label: '價格大於等於此值時通知', placeholder: '例：70', unit: 'USD' },
+      { key: 'silver_low',  label: '價格小於等於此值時通知', placeholder: '例：65',  unit: 'USD' },
     ]
   },
   vix: {
@@ -593,8 +593,8 @@ const ALERT_CONFIGS = {
   usdollar: {
     title: '美元指數 偵測設定',
     fields: [
-      { key: 'usdollar_high', label: '價格高於此值時通知', placeholder: '例：100', unit: '' },
-      { key: 'usdollar_low',  label: '價格低於此值時通知', placeholder: '例：99',  unit: '' },
+      { key: 'usdollar_high', label: '價格大於等於此值時通知', placeholder: '例：100', unit: '' },
+      { key: 'usdollar_low',  label: '價格小於等於此值時通知', placeholder: '例：99',  unit: '' },
     ]
   }
 };
@@ -606,8 +606,12 @@ function syncAlertConfigs() {
     ALERT_CONFIGS[`mystock_${stock.symbol}`] = {
       title: `${stock.name}（${stock.symbol}）偵測設定`,
       fields: [
-        { key: `mystock_${stock.symbol}_high`, label: '價格高於此值時通知', placeholder: '例：1000', unit: 'TWD' },
-        { key: `mystock_${stock.symbol}_low`,  label: '價格低於此值時通知', placeholder: '例：800',  unit: 'TWD' },
+        // { key: `mystock_${stock.symbol}_high`, label: '價格大於等於此值時通知', placeholder: '例：1000', unit: 'TWD' },
+        // { key: `mystock_${stock.symbol}_low`,  label: '價格小於等於此值時通知', placeholder: '例：800',  unit: 'TWD' },
+        { key: `mystock_${stock.symbol}_bids_price`, label: '委買的價格（等於）、委買的張數（小於等於）<br>符合下述情境時通知', placeholder: '委買的價格', unit: 'TWD' },
+        { key: `mystock_${stock.symbol}_bids_qty`, label: '', placeholder: '委買的張數', unit: '張' },
+        { key: `mystock_${stock.symbol}_asks_price`, label: '委賣的價格（等於）、委賣的張數（小於等於）<br>符合下述情境時通知', placeholder: '委賣的價格', unit: 'TWD' },
+        { key: `mystock_${stock.symbol}_asks_qty`, label: '', placeholder: '委賣的張數', unit: '張' },
       ]
     };
   }
@@ -2268,12 +2272,13 @@ async function loadMyStock() {
       const sign = data.change > 0 ? '▲' : data.change < 0 ? '▼' : '';
       const lowMinusOpen = (data.lowPrice - data.openPrice).toFixed(0);
       const lowMinusOpenCls = lowMinusOpen > 0 ? 'up' : lowMinusOpen < 0 ? 'down' : '';
+      const closePrice = data.closePrice.toFixed(0);
 
       html += row('上個收盤價', data.previousClose.toFixed(0));
       html += row('開盤價',     data.openPrice.toFixed(0));
       html += row('最高價',     data.highPrice.toFixed(0));
       html += row('最低價',     data.lowPrice.toFixed(0));
-      html += row('現價',       data.closePrice.toFixed(0), 'accent');
+      html += row('現價',       closePrice, 'accent');
       html += row('均價',       data.avgPrice.toFixed(2));
       html += row('漲跌',       sign + data.change, cls);
       html += row('低減開',     lowMinusOpen, lowMinusOpenCls);
@@ -2318,24 +2323,55 @@ async function loadMyStock() {
       html += `</div>`;
 
       // 價格門檻通知（從 localStorage 讀取）
-      if (isDaySession) {
+      // if (isDaySession) {
         const stockHigh = alertGet(`mystock_${stock.symbol}_high`);
         const stockLow  = alertGet(`mystock_${stock.symbol}_low`);
-        if (stockHigh !== null && data.closePrice >= stockHigh) {
+
+        // if (stockHigh !== null && closePrice >= stockHigh) {
+        //   sendNotification(
+        //     `${data.name} 股票警示`,
+        //     `價格 ${closePrice} TWD，已高於設定門檻 ${stockHigh} TWD`,
+        //     `https://tw.stock.yahoo.com/quote/${stock.symbol}.TW`
+        //   );
+        // }
+        // if (stockLow !== null && closePrice <= stockLow) {
+        //   sendNotification(
+        //     `${data.name} 股票警示`,
+        //     `價格 ${closePrice} TWD，已低於設定門檻 ${stockLow} TWD`,
+        //     `https://tw.stock.yahoo.com/quote/${stock.symbol}.TW`
+        //   );
+        // }
+
+        // 讀取委買的價格與張數設定
+        const stockBidsPrice = alertGet(`mystock_${stock.symbol}_bids_price`);
+        const stockBidsQty = alertGet(`mystock_${stock.symbol}_bids_qty`);
+        const now_stockBidsPrice = data.bids[0].price;
+        const now_stockBidsQty = data.bids[0].size;
+
+        if (stockBidsPrice == now_stockBidsPrice && now_stockBidsQty <= stockBidsQty) {
           sendNotification(
             `${data.name} 股票警示`,
-            `價格 ${data.closePrice.toFixed(0)} TWD，已高於設定門檻 ${stockHigh} TWD`,
+            `委買價格 ${now_stockBidsPrice} TWD，已等於設定門檻 ${stockBidsPrice} TWD`,
+            `委買張數 ${now_stockBidsQty} 張，已小於等於設定門檻 ${stockBidsQty} 張`,
             `https://tw.stock.yahoo.com/quote/${stock.symbol}.TW`
           );
         }
-        if (stockLow !== null && data.closePrice <= stockLow) {
+
+        // 讀取委賣的價格與張數設定
+        const stockAsksPrice = alertGet(`mystock_${stock.symbol}_asks_price`);
+        const stockAsksQty = alertGet(`mystock_${stock.symbol}_asks_qty`);
+        const now_stockAsksPrice = data.asks[0].price;
+        const now_stockAsksQty = data.asks[0].size;
+
+        if (stockAsksPrice == now_stockAsksPrice && now_stockAsksQty <= stockAsksQty) {
           sendNotification(
             `${data.name} 股票警示`,
-            `價格 ${data.closePrice.toFixed(0)} TWD，已低於設定門檻 ${stockLow} TWD`,
+            `委賣價格 ${now_stockAsksPrice} TWD，已等於設定門檻 ${stockAsksPrice} TWD`,
+            `委賣張數 ${now_stockAsksQty} 張，已小於等於設定門檻 ${stockAsksQty} 張`,
             `https://tw.stock.yahoo.com/quote/${stock.symbol}.TW`
           );
         }
-      }
+      // }
     } else {
       html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
     }
@@ -3705,7 +3741,10 @@ function gotoMoneyDJ(code = '') {
 }
 
 
-const REFRESH_INTERVAL = 300; // 秒，改這個就通吃
+var REFRESH_INTERVAL = 300; // 秒，改這個就通吃
+if (card_type == 'my-stock') {
+  REFRESH_INTERVAL = 60; // 我的股票更新頻率較高
+}
 let _countdownTimer = null;
 
 function startCountdown() {
