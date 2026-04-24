@@ -2351,7 +2351,7 @@ async function loadMyStock() {
         if (stockBidsPrice == now_stockBidsPrice && now_stockBidsQty <= stockBidsQty) {
           sendNotification(
             `${data.name} 股票警示`,
-            `委買價格 ${now_stockBidsPrice} TWD，已等於設定門檻 ${stockBidsPrice} TWD<br>委買張數 ${now_stockBidsQty} 張，已小於等於設定門檻 ${stockBidsQty} 張`,
+            `委買價格 ${now_stockBidsPrice} TWD，已等於設定門檻 ${stockBidsPrice} TWD\n委買張數 ${now_stockBidsQty} 張，已小於等於設定門檻 ${stockBidsQty} 張`,
             `https://tw.stock.yahoo.com/quote/${stock.symbol}.TW`
           );
         }
