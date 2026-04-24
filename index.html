@@ -2323,7 +2323,7 @@ async function loadMyStock() {
       html += `</div>`;
 
       // 價格門檻通知（從 localStorage 讀取）
-      // if (isDaySession) {
+      if (isDaySession) {
         const stockHigh = alertGet(`mystock_${stock.symbol}_high`);
         const stockLow  = alertGet(`mystock_${stock.symbol}_low`);
 
@@ -2365,12 +2365,11 @@ async function loadMyStock() {
         if (stockAsksPrice == now_stockAsksPrice && now_stockAsksQty <= stockAsksQty) {
           sendNotification(
             `${data.name} 股票警示`,
-            `委賣價格 ${now_stockAsksPrice} TWD，已等於設定門檻 ${stockAsksPrice} TWD`,
-            `委賣張數 ${now_stockAsksQty} 張，已小於等於設定門檻 ${stockAsksQty} 張`,
+            `委賣價格 ${now_stockAsksPrice} TWD，已等於設定門檻 ${stockAsksPrice} TWD\n委賣張數 ${now_stockAsksQty} 張，已小於等於設定門檻 ${stockAsksQty} 張`,
             `https://tw.stock.yahoo.com/quote/${stock.symbol}.TW`
           );
         }
-      // }
+      }
     } else {
       html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
     }
@@ -3739,9 +3738,9 @@ function gotoMoneyDJ(code = '') {
   } 
 }
 
-
+const { isDaySession } = getMarketEmoji();
 var REFRESH_INTERVAL = 300; // 秒，改這個就通吃
-if (card_type == 'my-stock') {
+if (card_type == 'my-stock' && isDaySession) {
   REFRESH_INTERVAL = 60; // 我的股票更新頻率較高
 }
 let _countdownTimer = null;
