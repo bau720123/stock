@@ -933,7 +933,7 @@ async function sendNotification(title, body, url = '/stock/index.html', sound = 
 
   // 頁面在前景時播放音效
   new Audio(`/stock/sounds/${sound}.wav`).play().catch((err) => {
-    showSweetAlert('error', '發生錯誤', err.message);
+    // showSweetAlert('error', '發生錯誤', err.message);
   });
 
   const isAndroid = /Android/i.test(navigator.userAgent);
