@@ -927,13 +927,13 @@ async function openAlertSettings(configKey) {
   });
 }
 
-async function sendNotification(title, body, url = '/stock/index.html') {
+async function sendNotification(title, body, url = '/stock/index.html', sound = 'alert_alert') {
   // 確認有通知權限
   if (Notification.permission !== 'granted') return;
 
-  // ✅ 頁面在前景時播放音效
-  new Audio('/stock/sounds/alert_alert.wav').play().catch((err) => {
-    alert('音效播放失敗：' + err.message);
+  // 頁面在前景時播放音效
+  new Audio(`/stock/sounds/${sound}.wav`).play().catch((err) => {
+    showSweetAlert('error', '發生錯誤', err.message);
   });
 
   const isAndroid = /Android/i.test(navigator.userAgent);
@@ -2357,7 +2357,8 @@ async function loadMyStock() {
           sendNotification(
             `${data.name} 股票警示`,
             `委買價格 ${now_stockBidsPrice} TWD，已等於設定門檻 ${stockBidsPrice} TWD\n委買張數 ${now_stockBidsQty} 張，已小於等於設定門檻 ${stockBidsQty} 張`,
-            `https://tw.stock.yahoo.com/quote/${stock.symbol}.TW`
+            `https://tw.stock.yahoo.com/quote/${stock.symbol}.TW`,
+            `down_alert`
           );
         }
 
@@ -2371,7 +2372,8 @@ async function loadMyStock() {
           sendNotification(
             `${data.name} 股票警示`,
             `委賣價格 ${now_stockAsksPrice} TWD，已等於設定門檻 ${stockAsksPrice} TWD\n委賣張數 ${now_stockAsksQty} 張，已小於等於設定門檻 ${stockAsksQty} 張`,
-            `https://tw.stock.yahoo.com/quote/${stock.symbol}.TW`
+            `https://tw.stock.yahoo.com/quote/${stock.symbol}.TW`,
+            `up_alert`
           );
         }
       }
