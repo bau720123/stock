@@ -931,6 +931,11 @@ async function sendNotification(title, body, url = '/stock/index.html') {
   // 確認有通知權限
   if (Notification.permission !== 'granted') return;
 
+  // ✅ 頁面在前景時播放音效
+  new Audio('/stock/sounds/alert_alert.wav').play().catch((err) => {
+    alert('音效播放失敗：' + err.message);
+  });
+
   const isAndroid = /Android/i.test(navigator.userAgent);
 
   const reg = await navigator.serviceWorker.ready;
