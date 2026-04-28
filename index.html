@@ -807,10 +807,10 @@ async function openMyStockSettings() {
   });
 }
 
-async function showInfo(wording = '') {
+async function showInfo(wording = '', title = '內容說明') {
     Swal.fire({
     icon: 'info',
-    title: '內容說明',
+    title: title,
     html: `<div style="text-align: left;">${wording.replace(/\n/g, '<br>')}</div>`,
     showCancelButton: false,
     background: '#111620',
@@ -928,13 +928,17 @@ async function openAlertSettings(configKey) {
 }
 
 async function sendNotification(title, body, url = '/stock/index.html', sound = 'alert_alert') {
-  // 確認有通知權限
-  if (Notification.permission !== 'granted') return;
+  // 發出 alert
+  // showSweetAlert('warning', title + "：" + body);
+  showInfo(body, title);
 
   // 頁面在前景時播放音效
   new Audio(`/stock/sounds/${sound}.wav`).play().catch((err) => {
     // showSweetAlert('error', '發生錯誤', err.message);
   });
+
+  // 確認有通知權限
+  if (Notification.permission !== 'granted') return;
 
   const isAndroid = /Android/i.test(navigator.userAgent);
 
