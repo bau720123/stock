@@ -1999,7 +1999,7 @@ async function handleCron(env) {
     fetchHiStock("stocktop2017", "TWN", "指數", "成交量(口)"),
     // fetchCnyesTwn(), // 富台指
     fetchSina("hf_OIL"),
-    fetchSina("hf_VX"),
+    fetchSina("znb_VIX"),
     fetchFugleQuote("2330", env),
   ]);
 
