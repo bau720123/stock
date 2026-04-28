@@ -1631,8 +1631,11 @@ async function fetchAmericaCalendar(env) {
     const finnhubTo = new Date(twTime.getTime() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]; // +14天
     const earningsEvents = await generateCustomEventsFinnhub(finnhubFrom, finnhubTo, env);
 
-    // 5. 合併所有來源並排序 (依日期 ID)：MoneyDJ + 週期性事件 + 手動事件 + Finnhub
-    const finalData = [...processed, ...customEvents, ...earningsEvents]
+    // 5. 取得 MacroMicro 靜態 JSON 財報資料
+    const macroMicroEvents = await generateCustomEventsMacroMicro();
+
+    // 6. 合併所有來源並排序 (依日期 ID)：MoneyDJ + 週期性事件 + 手動事件 + Finnhub + MacroMicro
+    const finalData = [...processed, ...customEvents, ...earningsEvents, ...macroMicroEvents]
       .sort((a, b) => a.id.localeCompare(b.id));
 
     return json({ success: true, items: finalData });
@@ -1825,6 +1828,73 @@ async function generateCustomEventsFinnhub(from, to, env) {
   } catch (e) {
     console.error("Finnhub 執行失敗：", e.message);
     return []; // 發生例外時也回傳空陣列
+  }
+}
+
+// MacroMicro 靜態 JSON 財報資料
+async function generateCustomEventsMacroMicro() {
+  const AI_TECH_SYMBOLS = new Set([
+    'NVDA', // NVIDIA - AI 晶片龍頭
+    'TSM',  // 台積電 - 半導體代工龍頭
+    'AAPL', // Apple - AI 手機與生態整合
+    'META', // Meta - 生成式 AI 廣告與模型
+    'MSFT', // Microsoft - Azure AI 與 OpenAI 合作
+    'GOOGL',// Alphabet - Google AI 搜尋與雲端
+    'AMZN', // Amazon - AWS AI 雲端服務
+    'TSLA', // Tesla - 自動駕駛與機器人 AI
+    'AMD',  // AMD - AI 替代方案與 CPU 大廠
+    'PLTR', // Palantir - AI 數據分析平台
+    'CRM',  // Salesforce - 企業級 AI CRM
+    'NOW',  // ServiceNow - 企業流程 AI
+    'SNOW', // Snowflake - 資料倉儲 AI
+    'ORCL', // Oracle - 雲端資料庫與 OCI
+    'AVGO', // Broadcom - AI 網通與客製化晶片 (ASIC)
+    'QCOM', // Qualcomm - 行動端邊緣 AI
+    'ASML', // ASML - EUV 光刻機 (AI 產能關鍵)
+    'MU',   // Micron - HBM 高頻寬記憶體 (AI 必備)
+    'INTC', // Intel - 晶片與晶圓代工競爭者
+    'NFLX', // Netflix - 串流領頭羊，AI 推薦演算法
+    'SMCI', // Supermicro - AI 伺服器基礎設施
+    'ARM'   // Arm - AI 晶片架構設計核心
+  ]);
+
+  try {
+    const res = await fetch('https://bau720123.github.io/stock/data/macromicro_earnings.json');
+    if (!res.ok) {
+      console.error(`MacroMicro JSON 讀取失敗 (${res.status})`);
+      return [];
+    }
+
+    const data = await res.json();
+    const calendarItems = data.calendarItems || {};
+    const results = [];
+    let index = 0;
+
+    // calendarItems 結構：{ "2026-04-28": [...], "2026-04-29": [...] }
+    for (const [dateStr, items] of Object.entries(calendarItems)) {
+      const dateObj = new Date(dateStr);
+      if (isNaN(dateObj.getTime())) continue;
+
+      for (const item of items) {
+        const symbol = (item.symbol || '').toUpperCase();
+        if (!AI_TECH_SYMBOLS.has(symbol)) continue;
+
+        results.push(createEventObj(
+          dateObj,
+          symbol,
+          `${symbol} 財報發布（MacroMicro，${item.period || ''} ${item.calendar_year || ''}）`,
+          '#27ae60',
+          `61${String(index).padStart(3, '0')}` // 61xxx，與 Finnhub 60xx 不衝突
+        ));
+        index++;
+      }
+    }
+
+    return results;
+
+  } catch (e) {
+    console.error('MacroMicro 靜態 JSON 執行失敗：', e.message);
+    return [];
   }
 }
 
