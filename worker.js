@@ -1326,34 +1326,42 @@ async function fetchFugleBrands(symbol, env) {
   try {
     const to   = new Date().toISOString().slice(0, 10);
     const from = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
-    const res = await fetchWithTimeout(
-      `https://api.fugle.tw/marketdata/v1.0/stock/technical/bb/${symbol}?from=${from}&to=${to}&timeframe=D&period=20`,
-      {
-        headers: {
-          "X-API-KEY": env.FUGLE_KEY,
-          "Accept": "application/json"
-        }
-      }
+
+    // 同時打兩支 API
+    const [bbRes, histRes] = await Promise.all([
+      fetchWithTimeout(
+        `https://api.fugle.tw/marketdata/v1.0/stock/technical/bb/${symbol}?from=${from}&to=${to}&timeframe=D&period=20`,
+        { headers: { "X-API-KEY": env.FUGLE_KEY, "Accept": "application/json" } }
+      ),
+      fetchWithTimeout(
+        `https://api.fugle.tw/marketdata/v1.0/stock/historical/candles/${symbol}?from=${from}&to=${to}&timeframe=D&fields=close&sort=desc`,
+        { headers: { "X-API-KEY": env.FUGLE_KEY, "Accept": "application/json" } }
+      ),
+    ]);
+
+    if (!bbRes.ok)   return json({ success: false, error: `BB HTTP ${bbRes.status}` });
+    if (!histRes.ok) return json({ success: false, error: `Hist HTTP ${histRes.status}` });
+
+    const bbData   = await bbRes.json();
+    const histData = await histRes.json();
+
+    // 用 date 建立 close price 的查找 Map
+    const priceMap = new Map(
+      (histData.data || []).map(row => [row.date, row.close])
     );
 
-    if (!res.ok) {
-      return json({ success: false, error: `HTTP ${res.status}` });
-    }
-
-    const d = await res.json();
-    const data = d.data
+    const data = bbData.data
       .sort((a, b) => b.date.localeCompare(a.date))
       .map(row => ({
-        date: row.date,
-        upper: parseFloat(row.upper.toFixed(2)),
-        middle: parseFloat(row.middle.toFixed(2)),
-        lower: parseFloat(row.lower.toFixed(2)),
+        date:        row.date,
+        upper:       parseFloat(row.upper.toFixed(2)),
+        middle:      parseFloat(row.middle.toFixed(2)),
+        lower:       parseFloat(row.lower.toFixed(2)),
+        price: priceMap.get(row.date) ?? null,  // ← 新增，找不到日期就給 null
       }));
 
-    return json({
-      success: true,
-      data,
-    });
+    return json({ success: true, data });
+
   } catch (e) {
     const errorMsg = e.name === 'AbortError' ? "連線逾時" : e.message;
     return json({ success: false, error: errorMsg }, 500);

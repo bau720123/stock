@@ -2750,8 +2750,7 @@ function StockChartInstitutional() {
       series: [
         { name: '投信',   type: 'bar', data: trust,   stack: 'total', itemStyle: { color: '#5a9eff' } },
         { name: '自營商', type: 'bar', data: dealer,  stack: 'total', itemStyle: { color: '#f0b429' } },
-        { name: '外資',   type: 'bar', data: foreign, stack: 'total',
-          itemStyle: { color: (params) => params.value >= 0 ? '#ff4d6a' : '#00c98a' } },
+        { name: '外資',   type: 'bar', data: foreign, stack: 'total', itemStyle: { color: '#ff4d6a' } },
       ],
     });
 
@@ -2785,6 +2784,9 @@ function StockChartSma() {
       },
       legend: {
         data: ['SMA5', 'SMA10', 'SMA20', 'SMA60'],
+        icon: 'rect',  // 設為矩形
+        itemWidth: 20,  // 線段長度
+        itemHeight: 2,  // 線段粗細（看起來就是一條線）
         textStyle: { color: '#5a7080', fontSize: 11 },
         top: 4,
       },
@@ -2813,13 +2815,13 @@ function StockChartSma() {
       ],
       series: [
         { name: 'SMA5',  type: 'line', data: sma5,  smooth: true,
-          symbol: 'none', lineStyle: { color: '#ff4d6a', width: 1.5 } },
+          symbol: 'none', lineStyle: { color: '#ff4d6a', width: 1.5 }, itemStyle: { color: '#ff4d6a' } },
         { name: 'SMA10', type: 'line', data: sma10, smooth: true,
-          symbol: 'none', lineStyle: { color: '#f0b429', width: 1.5 } },
+          symbol: 'none', lineStyle: { color: '#f0b429', width: 1.5 }, itemStyle: { color: '#f0b429' } },
         { name: 'SMA20', type: 'line', data: sma20, smooth: true,
-          symbol: 'none', lineStyle: { color: '#5a9eff', width: 1.5 } },
+          symbol: 'none', lineStyle: { color: '#5a9eff', width: 1.5 }, itemStyle: { color: '#5a9eff' } },
         { name: 'SMA60', type: 'line', data: sma60, smooth: true,
-          symbol: 'none', lineStyle: { color: '#00c98a', width: 1.5 } },
+          symbol: 'none', lineStyle: { color: '#00c98a', width: 1.5 }, itemStyle: { color: '#00c98a' } },
       ],
     });
 
@@ -2853,6 +2855,9 @@ function StockChartRsi() {
       },
       legend: {
         data: ['RSI6', 'RSI9', 'RSI14', 'RSI20'],
+        icon: 'rect',  // 設為矩形
+        itemWidth: 20,  // 線段長度
+        itemHeight: 2,  // 線段粗細（看起來就是一條線）
         textStyle: { color: '#5a7080', fontSize: 11 },
         top: 4,
       },
@@ -2883,14 +2888,14 @@ function StockChartRsi() {
       ],
       series: [
         { name: 'RSI6',  type: 'line', data: rsi6,  smooth: true,
-          symbol: 'none', lineStyle: { color: '#ff4d6a', width: 1.5 } },
+          symbol: 'none', lineStyle: { color: '#ff4d6a', width: 1.5 }, itemStyle: { color: '#ff4d6a' } },
         { name: 'RSI9',  type: 'line', data: rsi9,  smooth: true,
-          symbol: 'none', lineStyle: { color: '#f0b429', width: 1.5 } },
+          symbol: 'none', lineStyle: { color: '#f0b429', width: 1.5 }, itemStyle: { color: '#f0b429' } },
         { name: 'RSI14', type: 'line', data: rsi14, smooth: true,
-          symbol: 'none', lineStyle: { color: '#5a9eff', width: 1.5 } },
+          symbol: 'none', lineStyle: { color: '#5a9eff', width: 1.5 }, itemStyle: { color: '#5a9eff' } },
         { name: 'RSI20', type: 'line', data: rsi20, smooth: true,
-          symbol: 'none', lineStyle: { color: '#00c98a', width: 1.5 } },
-        {
+          symbol: 'none', lineStyle: { color: '#00c98a', width: 1.5 }, itemStyle: { color: '#00c98a' } },
+        /*{
           // 超買線 70
           type: 'line', markLine: { silent: true }, symbol: 'none',
           lineStyle: { color: 'transparent' },
@@ -2904,7 +2909,7 @@ function StockChartRsi() {
                 label: { formatter: '超賣 30', color: '#00c98a', fontSize: 10 } },
             ],
           },
-        },
+        },*/
       ],
     });
 
@@ -2923,7 +2928,7 @@ function StockChartKdj() {
     const dates = sorted.map(d => d.date);
     const kLine = sorted.map(d => d.k ?? null);
     const dLine = sorted.map(d => d.d ?? null);
-    const jLine = sorted.map(d => d.j ?? null);
+    // const jLine = sorted.map(d => d.j ?? null);
 
     el.style.width = '100%';
     const chart = echarts.init(el, null, { height: 260 });
@@ -2936,7 +2941,10 @@ function StockChartKdj() {
         textStyle: { color: '#c8d8e8', fontSize: 11 },
       },
       legend: {
-        data: ['K', 'D', 'J'],
+        data: ['K', 'D'/*, 'J'*/],
+        icon: 'rect',  // 設為矩形
+        itemWidth: 20,  // 線段長度
+        itemHeight: 2,  // 線段粗細（看起來就是一條線）
         textStyle: { color: '#5a7080', fontSize: 11 },
         top: 4,
       },
@@ -2966,12 +2974,12 @@ function StockChartKdj() {
       ],
       series: [
         { name: 'K', type: 'line', data: kLine, smooth: true,
-          symbol: 'none', lineStyle: { color: '#ff4d6a', width: 1.5 } },
+          symbol: 'none', lineStyle: { color: '#ff4d6a', width: 1.5 }, itemStyle: { color: '#ff4d6a' } },
         { name: 'D', type: 'line', data: dLine, smooth: true,
-          symbol: 'none', lineStyle: { color: '#5a9eff', width: 1.5 } },
-        { name: 'J', type: 'line', data: jLine, smooth: true,
-          symbol: 'none', lineStyle: { color: '#f0b429', width: 1.5 } },
-        {
+          symbol: 'none', lineStyle: { color: '#5a9eff', width: 1.5 }, itemStyle: { color: '#5a9eff' } },
+        // { name: 'J', type: 'line', data: jLine, smooth: true,
+        //   symbol: 'none', lineStyle: { color: '#f0b429', width: 1.5 }, itemStyle: { color: '#f0b429' } },
+        /*{
           type: 'line', symbol: 'none',
           lineStyle: { color: 'transparent' },
           markLine: {
@@ -2984,7 +2992,7 @@ function StockChartKdj() {
                 label: { formatter: '超賣 20', color: '#00c98a', fontSize: 10 } },
             ],
           },
-        },
+        },*/
       ],
     });
 
@@ -3017,6 +3025,9 @@ function StockChartMacd() {
       },
       legend: {
         data: ['MACD', '信號線', '差離值'],
+        icon: 'rect',  // 設為矩形
+        itemWidth: 20,  // 線段長度
+        itemHeight: 2,  // 線段粗細（看起來就是一條線）
         textStyle: { color: '#5a7080', fontSize: 11 },
         top: 4,
       },
@@ -3055,13 +3066,13 @@ function StockChartMacd() {
       ],
       series: [
         { name: 'MACD',   type: 'line', data: macdLine,   xAxisIndex: 0, yAxisIndex: 0,
-          smooth: true, symbol: 'none', lineStyle: { color: '#ff4d6a', width: 1.5 } },
+          smooth: true, symbol: 'none', lineStyle: { color: '#ff4d6a', width: 1.5 }, itemStyle: { color: '#ff4d6a' } },
         { name: '信號線', type: 'line', data: signalLine, xAxisIndex: 0, yAxisIndex: 0,
-          smooth: true, symbol: 'none', lineStyle: { color: '#5a9eff', width: 1.5 } },
+          smooth: true, symbol: 'none', lineStyle: { color: '#5a9eff', width: 1.5 }, itemStyle: { color: '#5a9eff' } },
         { name: '差離值', type: 'bar',  data: histogram,  xAxisIndex: 1, yAxisIndex: 1,
           barMaxWidth: 8,
           itemStyle: {
-            color: (params) => params.value >= 0 ? '#ff4d6a99' : '#00c98a99'
+            color: '#00c98a99'
           } },
       ],
     });
@@ -3082,6 +3093,7 @@ function StockChartBrands() {
     const upper  = sorted.map(d => d.upper  ?? null);
     const middle = sorted.map(d => d.middle ?? null);
     const lower  = sorted.map(d => d.lower  ?? null);
+    const price = sorted.map(d => d.price ?? null);
 
     el.style.width = '100%';
     const chart = echarts.init(el, null, { height: 260 });
@@ -3094,7 +3106,10 @@ function StockChartBrands() {
         textStyle: { color: '#c8d8e8', fontSize: 11 },
       },
       legend: {
-        data: ['上軌', '中軌', '下軌'],
+        data: ['上軌', '中軌', '下軌', '股價'],
+        icon: 'rect',  // 設為矩形
+        itemWidth: 20,  // 線段長度
+        itemHeight: 2,  // 線段粗細（看起來就是一條線）
         textStyle: { color: '#5a7080', fontSize: 11 },
         top: 4,
       },
@@ -3125,10 +3140,12 @@ function StockChartBrands() {
           symbol: 'none',
           lineStyle: { color: '#ff4d6a', width: 1.5 },
           areaStyle: { color: 'transparent' },
+          itemStyle: { color: '#ff4d6a' }
         },
         { name: '中軌', type: 'line', data: middle, smooth: true,
           symbol: 'none',
-          lineStyle: { color: '#f0b429', width: 1.5, type: 'dashed' },
+          lineStyle: { color: '#f0b429', width: 1.5/*, type: 'dashed'*/ },
+          itemStyle: { color: '#f0b429' }
         },
         { name: '下軌', type: 'line', data: lower, smooth: true,
           symbol: 'none',
@@ -3137,6 +3154,12 @@ function StockChartBrands() {
             color: 'transparent',
             origin: 'auto',
           },
+          itemStyle: { color: '#00c98a' },
+        },
+        { name: '股價', type: 'line', data: price, smooth: true,
+          symbol: 'none',
+          lineStyle: { color: '#5a9eff', width: 1.5 },
+          itemStyle: { color: '#5a9eff' }
         },
       ],
     });
