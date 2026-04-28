@@ -1936,6 +1936,24 @@ async function loadMaterials() {
     html += row('漲跌', changeNum.toFixed(2), cls);
     html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
     html += row('更新時間', sinaGold.time);
+
+    // 價格門檻通知（從 localStorage 讀取，未設定則不觸發）
+    const goldHigh = alertGet('gold_high');
+    const goldLow  = alertGet('gold_low');
+    if (goldHigh !== null && sinaGold.price >= goldHigh) {
+      sendNotification(
+        '黃金價格警示',
+        `價格 ${sinaGold.price.toFixed(2)} USD，已高於設定門檻 ${goldHigh} USD`,
+        'https://hk.investing.com/commodities/gold'
+      );
+    }
+    if (goldLow !== null && sinaGold.price <= goldLow) {
+      sendNotification(
+        '黃金價格警示',
+        `價格 ${sinaGold.price.toFixed(2)} USD，已低於設定門檻 ${goldLow} USD`,
+        'https://hk.investing.com/commodities/gold'
+      );
+    }
   } else {
     html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
   }
@@ -1954,6 +1972,24 @@ async function loadMaterials() {
     html += row('漲跌', changeNum.toFixed(2), cls);
     html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
     html += row('更新時間', sinaSilver.time);
+
+    // 價格門檻通知（從 localStorage 讀取，未設定則不觸發）
+    const silverHigh = alertGet('silver_high');
+    const silverLow  = alertGet('silver_low');
+    if (silverHigh !== null && sinaSilver.price >= silverHigh) {
+      sendNotification(
+        '白銀價格警示',
+        `價格 ${sinaSilver.price.toFixed(2)} USD，已高於設定門檻 ${silverHigh} USD`,
+        'https://hk.investing.com/commodities/silver'
+      );
+    }
+    if (silverLow !== null && sinaSilver.price <= silverLow) {
+      sendNotification(
+        '白銀價格警示',
+        `價格 ${sinaSilver.price.toFixed(2)} USD，已低於設定門檻 ${silverLow} USD`,
+        'https://hk.investing.com/commodities/silver'
+      );
+    }
   } else {
     html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
   }
