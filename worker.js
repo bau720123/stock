@@ -1886,7 +1886,7 @@ async function generateCustomEventsMacroMicro() {
     // 判斷是否過期：台北時間今天 > endDate
     const twNow = new Date(Date.now() + 8 * 3600 * 1000);
     const twToday = twNow.toISOString().split('T')[0]; // YYYY-MM-DD
-    const expired = endDate ? twToday > endDate : false;
+    const expired = endDate ? twToday >= endDate : false;
 
     const events = [];
     let index = 0;
