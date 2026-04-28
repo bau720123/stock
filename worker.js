@@ -124,6 +124,20 @@ export default {
       }
     }
 
+    if (path === "/test-macromicro-json") {
+      try {
+        const events = await generateCustomEventsMacroMicro();
+        return new Response(JSON.stringify({ success: true, count: events.length, data: events }, null, 2), {
+          headers: { 'Content-Type': 'application/json' }
+        });
+      } catch (e) {
+        return new Response(JSON.stringify({ success: false, error: e.message, stack: e.stack }), {
+          status: 500,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+    }
+
     if (path === "/fear-greed") return await fetchFearAndGreed();
 
     return json({ error: "unknown path" }, 404);
