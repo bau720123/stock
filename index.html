@@ -807,21 +807,31 @@ async function openMyStockSettings() {
   });
 }
 
+const swalQueue = [];
+let isSwalRunning = false;
+
 async function showInfo(wording = '', title = '內容說明') {
-    Swal.fire({
-    icon: 'info',
-    title: title,
-    html: `<div style="text-align: left;">${wording.replace(/\n/g, '<br>')}</div>`,
-    showCancelButton: false,
-    background: '#111620',
-    color: '#c8d8e8',
-    confirmButtonText: '知道了',
-    cancelButtonText: '取消'
-  }).then((result) => {
-    if (result.isConfirmed) {
-      // 內容說明
+    swalQueue.push({ wording, title });
+    if (!isSwalRunning) {
+        await processSwalQueue();
     }
-  });
+}
+
+async function processSwalQueue() {
+    isSwalRunning = true;
+    while (swalQueue.length > 0) {
+        const { wording, title } = swalQueue.shift();
+        await Swal.fire({
+            icon: 'info',
+            title: title,
+            html: `<div style="text-align: left;">${wording.toString().replace(/\n/g, '<br>')}</div>`,
+            showCancelButton: false,
+            background: '#111620',
+            color: '#c8d8e8',
+            confirmButtonText: '知道了',
+        });
+    }
+    isSwalRunning = false;
 }
 
 async function openAlertSettings(configKey) {
