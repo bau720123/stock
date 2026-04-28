@@ -1641,18 +1641,18 @@ async function fetchAmericaCalendar(env) {
     const customEvents = generateCustomEvents(currentYear);
 
     // 4. 取得 Finnhub 財報資料（只查近 14 天，避免超出免費方案限制）
-    const finnhubFrom = twTime.toISOString().split('T')[0]; // 今天
-    const finnhubTo = new Date(twTime.getTime() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]; // +14天
-    const earningsEvents = await generateCustomEventsFinnhub(finnhubFrom, finnhubTo, env);
+    // const finnhubFrom = twTime.toISOString().split('T')[0]; // 今天
+    // const finnhubTo = new Date(twTime.getTime() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]; // +14天
+    // const earningsEvents = await generateCustomEventsFinnhub(finnhubFrom, finnhubTo, env);
 
     // 5. 取得 MacroMicro 靜態 JSON 財報資料
-    const macroMicroEvents = await generateCustomEventsMacroMicro();
+    const { events: macroMicroEvents, expired: macroMicroExpired, endDate: macroMicroEndDate } = await generateCustomEventsMacroMicro();
 
     // 6. 合併所有來源並排序 (依日期 ID)：MoneyDJ + 週期性事件 + 手動事件 + Finnhub + MacroMicro
-    const finalData = [...processed, ...customEvents, ...earningsEvents, ...macroMicroEvents]
+    const finalData = [...processed, ...customEvents, /*...earningsEvents, */...macroMicroEvents]
       .sort((a, b) => a.id.localeCompare(b.id));
 
-    return json({ success: true, items: finalData });
+    return json({ success: true, items: finalData, macroMicroExpired, macroMicroEndDate });
   } catch (e) {
     const errorMsg = e.name === 'AbortError' ? "連線逾時" : e.message;
     return json({ success: false, error: errorMsg }, 500);
@@ -1876,12 +1876,19 @@ async function generateCustomEventsMacroMicro() {
     const res = await fetch('https://bau720123.github.io/stock/data/macromicro_earnings.json');
     if (!res.ok) {
       console.error(`MacroMicro JSON 讀取失敗 (${res.status})`);
-      return [];
+      return { events: [], expired: false, endDate: null };
     }
 
     const data = await res.json();
     const calendarItems = data.calendarItems || {};
-    const results = [];
+    const endDate = data.endDate || null;
+
+    // 判斷是否過期：台北時間今天 > endDate
+    const twNow = new Date(Date.now() + 8 * 3600 * 1000);
+    const twToday = twNow.toISOString().split('T')[0]; // YYYY-MM-DD
+    const expired = endDate ? twToday > endDate : false;
+
+    const events = [];
     let index = 0;
 
     // calendarItems 結構：{ "2026-04-28": [...], "2026-04-29": [...] }
@@ -1893,7 +1900,7 @@ async function generateCustomEventsMacroMicro() {
         const symbol = (item.symbol || '').toUpperCase();
         if (!AI_TECH_SYMBOLS.has(symbol)) continue;
 
-        results.push(createEventObj(
+        events.push(createEventObj(
           dateObj,
           symbol,
           `${symbol} 財報發布（MacroMicro，${item.period || ''} ${item.calendar_year || ''}）`,
@@ -1904,11 +1911,11 @@ async function generateCustomEventsMacroMicro() {
       }
     }
 
-    return results;
+    return { events, expired, endDate };
 
   } catch (e) {
     console.error('MacroMicro 靜態 JSON 執行失敗：', e.message);
-    return [];
+    return { events: [], expired: false, endDate: null };
   }
 }
 

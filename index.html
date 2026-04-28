@@ -3659,6 +3659,12 @@ async function loadAmericaCalendar() {
       const data = await res.json();
       if (!data.success) throw new Error(data.error);
       calendarDataCache = data.items;
+
+      // 檢查 MacroMicro 財報資料是否過期
+      if (data.macroMicroExpired) {
+        showSweetAlert('warning', 'MacroMicro 財報資料已過期', `資料涵蓋範圍至：${data.macroMicroEndDate}`);
+      }
+
     } catch (e) {
       container.innerHTML = `<div class="card-title">美股行事曆</div><div class="error-text">載入失敗：${e.message}</div>`;
       return;
