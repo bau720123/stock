@@ -1873,7 +1873,7 @@ async function generateCustomEventsMacroMicro() {
   ]);
 
   try {
-    const res = await fetch('https://bau720123.github.io/stock/data/macromicro_earnings.json');
+    const res = await fetch('https://bau720123.github.io/stock/data/macromicro_earnings.json?v=20260510');
     if (!res.ok) {
       console.error(`MacroMicro JSON 讀取失敗 (${res.status})`);
       return { events: [], expired: false, endDate: null };
