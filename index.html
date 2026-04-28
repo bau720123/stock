@@ -769,23 +769,30 @@ async function openMyStockSettings() {
 
   if (!result.isConfirmed) return;
 
+  // 先去重（由後往前，保留最早那筆）
+  const deduped = result.value.reduceRight((acc, item) => {
+      if (!acc.some(i => i.symbol === item.symbol)) {
+          acc.unshift(item);
+      }
+      return acc;
+  }, []);
+
   // 挑選出 symbol 等於 name 的資料
-  const needFetch = result.value.filter(s => s.symbol === s.name);
+  const needFetch = deduped.filter(s => s.symbol === s.name);
 
   // 平行抓取缺少 name 的股票資料
   if (needFetch.length > 0) {
-    await Promise.all(
-      needFetch.map(async s => {
-        const data = await fetch(WORKER + '/stock/quote/' + s.symbol).then(r => r.json()).catch(() => null);
-        if (data && data.success && data.name) {
-          // 補回 result.value 對應的那筆
-          const target = result.value.find(r => r.symbol === s.symbol);
-          if (target) target.name = data.name;
-        }
-      })
-    );
+      await Promise.all(
+          needFetch.map(async s => {
+              const data = await fetch(WORKER + '/stock/quote/' + s.symbol).then(r => r.json()).catch(() => null);
+              if (data && data.success && data.name) {
+                  const target = deduped.find(r => r.symbol === s.symbol);
+                  if (target) target.name = data.name;
+              }
+          })
+      );
   }
-  saveMyStocksList(result.value);
+  saveMyStocksList(deduped);
 
   Swal.fire({
     icon: 'success',
