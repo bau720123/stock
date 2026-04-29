@@ -126,7 +126,7 @@ export default {
 
     if (path === "/test-macromicro-json") {
       try {
-        const events = await generateCustomEventsMacroMicro();
+        const events = await generateCustomEventsMacroEarnings();
         return new Response(JSON.stringify({ success: true, count: events.length, data: events }, null, 2), {
           headers: { 'Content-Type': 'application/json' }
         });
@@ -1653,14 +1653,24 @@ async function fetchAmericaCalendar(env) {
     // const finnhubTo = new Date(twTime.getTime() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]; // +14天
     // const earningsEvents = await generateCustomEventsFinnhub(finnhubFrom, finnhubTo, env);
 
-    // 5. 取得 MacroMicro 靜態 JSON 財報資料
-    const { events: macroMicroEvents, expired: macroMicroExpired, endDate: macroMicroEndDate } = await generateCustomEventsMacroMicro();
+    // 5. 取得 MacroMicro 靜態 JSON 財報資料（earnings）
+    const { events: macroEarningsEvents, expired: macroEarningsExpired, endDate: macroEarningsEndDate } = await generateCustomEventsMacroEarnings();
 
-    // 6. 合併所有來源並排序 (依日期 ID)：MoneyDJ + 週期性事件 + 手動事件 + Finnhub + MacroMicro
-    const finalData = [...processed, ...customEvents, /*...earningsEvents, */...macroMicroEvents]
+    // 6. 取得 MacroMicro 靜態 JSON 總體經濟事件（macro）
+    const { events: macroMacroEvents, expired: macroMacroExpired, endDate: macroMacroEndDate } = await generateCustomEventsMacroMacro();
+
+    // 7. 合併所有來源並排序 (依日期 ID)：MoneyDJ + 週期性事件 + 手動事件 + MacroMicro財報 + MacroMicro總經
+    const finalData = [...processed, ...customEvents, /*...earningsEvents,*/ ...macroEarningsEvents, ...macroMacroEvents]
       .sort((a, b) => a.id.localeCompare(b.id));
 
-    return json({ success: true, items: finalData, macroMicroExpired, macroMicroEndDate });
+    return json({
+      success: true,
+      items: finalData,
+      macroEarningsExpired,
+      macroEarningsEndDate,
+      macroMacroExpired,
+      macroMacroEndDate
+    });
   } catch (e) {
     const errorMsg = e.name === 'AbortError' ? "連線逾時" : e.message;
     return json({ success: false, error: errorMsg }, 500);
@@ -1854,7 +1864,7 @@ async function generateCustomEventsFinnhub(from, to, env) {
 }
 
 // MacroMicro 靜態 JSON 財報資料
-async function generateCustomEventsMacroMicro() {
+async function generateCustomEventsMacroEarnings() {
   const AI_TECH_SYMBOLS = new Set([
     'NVDA', // NVIDIA - AI 晶片龍頭
     'TSM',  // 台積電 - 半導體代工龍頭
@@ -1902,6 +1912,7 @@ async function generateCustomEventsMacroMicro() {
     // calendarItems 結構：{ "2026-04-28": [...], "2026-04-29": [...] }
     for (const [dateStr, items] of Object.entries(calendarItems)) {
       const dateObj = new Date(dateStr);
+      dateObj.setDate(dateObj.getDate() + 1); // 因為是美東時間，所以日期會比台北晚一天，這裡先加一天轉回台北日期
       if (isNaN(dateObj.getTime())) continue;
 
       for (const item of items) {
@@ -1923,6 +1934,82 @@ async function generateCustomEventsMacroMicro() {
 
   } catch (e) {
     console.error('MacroMicro 靜態 JSON 執行失敗：', e.message);
+    return { events: [], expired: false, endDate: null };
+  }
+}
+
+// MacroMicro 靜態 JSON 總體經濟事件
+async function generateCustomEventsMacroMacro() {
+  const US_MACRO_EVENTS = new Set([
+    // === 絕對要的（直接影響市場）===
+    '美國聯準會利率決策',
+    '美國聯準會會議紀要',
+    '美國聯準會褐皮書',
+    '美國非農就業',
+    '美國失業率',
+    '美國每小時薪資',
+    '美國消費者物價',       // CPI
+    '美國PCE物價指數',
+    '美國GDP',
+    '美國EIA原油庫存',
+
+    // === 次要、可選的 ===
+    '美國ADP非農就業',
+    '美國ISM製造業PMI',
+    '美國ISM非製造業NMI',
+    '美國生產者物價',       // PPI
+    '美國零售銷售',
+    '美國耐久財新訂單',
+    '美國密大消費者信心',
+    '美國消費者信心',
+    '美國JOLTs職位空缺',
+
+    // === 每週固定發布 ===
+    '美國申請失業金人數',
+  ]);
+
+  try {
+    const res = await fetch('https://bau720123.github.io/stock/data/macromicro_macro.json?v=20260510');
+    if (!res.ok) {
+      console.error(`MacroMicro Macro JSON 讀取失敗 (${res.status})`);
+      return { events: [], expired: false, endDate: null };
+    }
+
+    const data = await res.json();
+    const items = data.calendarItems || [];
+
+    // 過期判斷：endTs 轉台北日期
+    const endDate = data.endTs
+      ? new Date((data.endTs * 1000) + 8 * 3600 * 1000).toISOString().split('T')[0]
+      : null;
+    const twTodayDash = new Date(Date.now() + 8 * 3600 * 1000).toISOString().split('T')[0];
+    const expired = endDate ? twTodayDash > endDate : false;
+
+    const events = [];
+    let index = 0;
+
+    for (const item of items) {
+      if (item.country !== 'us') continue;
+      if (!US_MACRO_EVENTS.has(item.name)) continue;
+
+      // eta 是 UTC 秒，+8h 轉台北時間
+      const dateObj = new Date((item.eta * 1000) + 8 * 3600 * 1000);
+      if (isNaN(dateObj.getTime())) continue;
+
+      events.push(createEventObj(
+        dateObj,
+        item.name,
+        `${item.name}（MacroMicro 總經）`,
+        '#e67e22',                              // 橘色，與財報綠色區分
+        `62${String(index).padStart(3, '0')}`   // 62xxx，與財報 61xxx 不衝突
+      ));
+      index++;
+    }
+
+    return { events, expired, endDate };
+
+  } catch (e) {
+    console.error('MacroMicro Macro 靜態 JSON 執行失敗：', e.message);
     return { events: [], expired: false, endDate: null };
   }
 }

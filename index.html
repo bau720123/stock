@@ -3741,8 +3741,13 @@ async function loadAmericaCalendar() {
       calendarDataCache = data.items;
 
       // 檢查 MacroMicro 財報資料是否過期
-      if (data.macroMicroExpired) {
-        showSweetAlert('warning', 'MacroMicro 財報資料已過期', `資料涵蓋範圍至：${data.macroMicroEndDate}`);
+      if (data.macroEarningsExpired) {
+        showSweetAlert('warning', 'MacroMicro 財報資料已過期', `資料涵蓋範圍至：${data.macroEarningsEndDate}`);
+      }
+
+      // 檢查 MacroMicro 總經資料是否過期
+      if (data.macroMacroExpired) {
+        showSweetAlert('warning', 'MacroMicro 總經資料已過期', `資料涵蓋範圍至：${data.macroMacroEndDate}`);
       }
 
     } catch (e) {
