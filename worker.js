@@ -2138,8 +2138,6 @@ async function handleCron(env) {
     if (taifex_night.success && taifex_night.price > 0) {
       const sign = taifex_night.updown > 0 ? '▲' : taifex_night.updown < 0 ? '▼' : '';
       lines.push(`台股期貨夜盤：${taifex_night.price.toFixed(0)} (${sign}${Math.abs(taifex_night.updown).toFixed(0)})`);
-    } else {
-      lines.push(`台股期貨夜盤_2：無資料`);
     }
   }
 
