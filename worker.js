@@ -148,7 +148,7 @@ export default {
 };
 
 async function debugSina() {
-  const res = await fetchWithTimeout("https://hq.sinajs.cn/list=hf_YM,hf_ES,hf_NQ,gb_dji,gb_inx,gb_ixic,gb_sox,gb_tsm,hf_OIL,hf_GC,hf_SI,DINIW,znb_VIX,hf_VX", {
+  const res = await fetchWithTimeout("https://hq.sinajs.cn/list=hf_YM,hf_ES,hf_NQ,gb_dji,gb_inx,gb_ixic,gb_sox,gb_tsm,hf_OIL,hf_OIL2606,hf_OIL2607,hf_GC,hf_SI,DINIW,znb_VIX,hf_VX,hf_VX2605,hf_VX2606", {
     headers: {
       "User-Agent": UA,
       "Referer": "https://finance.sina.com.cn/"
@@ -282,11 +282,82 @@ async function fetchBrent() {
   }
 }
 
+// 新浪網的布蘭特原油代碼是 hf_OIL，但它是近月合約，會隨著時間推移而變動，所以我們需要動態計算出正確的合約代碼
+function getOilSymbol() {
+    const now = new Date();
+    let year = now.getFullYear();
+    let month = now.getMonth() + 1 + 2; // getMonth() 從0開始，+1轉為實際月份，+2為往後兩個月
+
+    if (month > 12) {
+        month -= 12;
+        year += 1;
+    }
+
+    const yy = String(year).slice(-2);         // 取年份後兩碼
+    const mm = String(month).padStart(2, '0'); // 月份補零
+
+    return `hf_OIL${yy}${mm}`;
+}
+
+function getVixSymbol() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth(); // 0-11
+
+    // 1. 找出本月第 3 個禮拜五
+    function getThirdFriday(y, m) {
+        let count = 0;
+        let date = new Date(y, m, 1);
+        while (count < 3) {
+            if (date.getDay() === 5) count++; // 5 是禮拜五
+            if (count < 3) date.setDate(date.getDate() + 1);
+        }
+        return date;
+    }
+
+    const thirdFriday = getThirdFriday(year, month);
+    
+    // 2. 結算日通常是第三個禮拜五的前兩天 (禮拜三)
+    const settleDate = new Date(thirdFriday);
+    settleDate.setDate(thirdFriday.getDate() - 2);
+
+    // 3. 判斷今天要抓哪個月
+    let targetYear = year;
+    let targetMonth = month + 1; // 轉為 1-12
+
+    if (now > settleDate) {
+        targetMonth += 1;
+    }
+
+    // 4. 處理跨年問題
+    if (targetMonth > 12) {
+        targetMonth -= 12;
+        targetYear += 1;
+    }
+
+    const yy = String(targetYear).slice(-2);
+    const mm = String(targetMonth).padStart(2, '0');
+
+    return `hf_VX${yy}${mm}`;
+}
+
 // 新浪網
 async function fetchSina(list) {
   // https://gu.sina.cn/ft/hq/hf.php?symbol=OIL
+  // https://gu.sina.cn/ft/hq/hf.php?symbol=OIL2606
+  // https://gu.sina.cn/ft/hq/hf.php?symbol=OIL2607
+
+  // 定義動態代碼的計算函數映射
+  const symbolMap = {
+      'hf_OIL': getOilSymbol,
+      'hf_VX': getVixSymbol
+  };
+
+  // 如果 list 在映射表中，執行對應函數；否則直接使用原始 list
+  const processedList = symbolMap[list] ? symbolMap[list]() : list;
+
   try {
-    const res = await fetchWithTimeout(`https://hq.sinajs.cn/list=${list}`, {
+    const res = await fetchWithTimeout(`https://hq.sinajs.cn/list=${processedList}`, {
       headers: {
         "User-Agent": UA,
         "Referer": "https://finance.sina.com.cn/"
@@ -2086,7 +2157,7 @@ async function handleCron(env) {
     fetchHiStock("stocktop2017", "TWN", "指數", "成交量(口)"),
     // fetchCnyesTwn(), // 富台指
     fetchSina("hf_OIL"),
-    fetchSina("znb_VIX"),
+    fetchSina("hf_VX"),
     fetchFugleQuote("2330", env),
   ]);
 
@@ -2133,7 +2204,7 @@ async function handleCron(env) {
     }
   }
 
-  // 台股夜盤是從下午3點開始，直到隔天凌晨
+  // 台股夜盤是從下午3點開始，午夜12點前結束
   if (twHour >= 15 || twHour <= 8) {
     if (taifex_night.success && taifex_night.price > 0) {
       const sign = taifex_night.updown > 0 ? '▲' : taifex_night.updown < 0 ? '▼' : '';
@@ -2141,7 +2212,7 @@ async function handleCron(env) {
     }
   }
 
-  // 台積電期貨夜盤是從下午5點開始，直到隔天凌晨
+  // 台積電期貨夜盤是從下午5點開始，午夜12點前結束
   if (twHour >= 17 || twHour <= 8) {
     if (taifex_tsmc.success && taifex_tsmc.price > 0) {
       const sign = taifex_tsmc.updown > 0 ? '▲' : taifex_tsmc.updown < 0 ? '▼' : '';

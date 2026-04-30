@@ -2138,8 +2138,8 @@ async function loadMaterials() {
 
 // 市場情緒
 async function loadSentiment() {
-  const [sinaVix, sinaVixFutures, fearGreed, sinaUsdollar] = await Promise.all([
-    fetch(WORKER + '/sina/znb_VIX').then(r => r.json()).catch(() => ({ success: false })), // VIX 恐慌指數
+  const [/*sinaVix, */sinaVixFutures, fearGreed, sinaUsdollar] = await Promise.all([
+    // fetch(WORKER + '/sina/znb_VIX').then(r => r.json()).catch(() => ({ success: false })), // VIX 恐慌指數
     fetch(WORKER + '/sina/hf_VX').then(r => r.json()).catch(() => ({ success: false })), // VIX 恐慌指數期貨
     fetch(WORKER + '/fear-greed').then(r => r.json()).catch(() => ({ success: false })), // CNN Fear & Greed Index
     fetch(WORKER + '/sina/DINIW').then(r => r.json()).catch(() => ({ success: false })), // 美元指數
@@ -2148,7 +2148,7 @@ async function loadSentiment() {
   let html = `<div class="card-title">市場情緒</div>`;
 
   // 【VIX 恐慌指數】
-  html += groupHeader('【VIX 恐慌指數】', 'vix', 'VIX 恐慌指數（全稱：CBOE Volatility Index，簡稱 VIX）是衡量標準普爾 500 指數（S&P 500）期權隱含波動率的指標，反映市場對未來 30 天美股波動幅度的預期。數值越高代表投資者越恐慌、預期波動越大；通常在股市急跌或市場震盪時飆升。');
+  /*html += groupHeader('【VIX 恐慌指數】', 'vix', 'VIX 恐慌指數（全稱：CBOE Volatility Index，簡稱 VIX）是衡量標準普爾 500 指數（S&P 500）期權隱含波動率的指標，反映市場對未來 30 天美股波動幅度的預期。數值越高代表投資者越恐慌、預期波動越大；通常在股市急跌或市場震盪時飆升。');
   if (sinaVix.success) {
     const changeNum = sinaVix.price - sinaVix.prev;
     const cls = changeNum < 0 ? 'down' : 'up';
@@ -2183,7 +2183,7 @@ async function loadSentiment() {
     }
   } else {
     html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
-  }
+  }*/
 
   // 【VIX 恐慌指數期貨】
   html += groupHeader('【VIX 恐慌指數期貨】', 'vix_futures', 'VIX 恐慌指數期貨是基於 VIX 指數的衍生品，反映市場對未來 30 天美股波動幅度的預期。數值越高代表投資者越恐慌、預期波動越大；通常在股市急跌或市場震盪時飆升。');
