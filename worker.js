@@ -365,12 +365,12 @@ async function fetchSina(list) {
     });
     // const text = await res.text();
 
-  // 1. 先取得原始的 ArrayBuffer (二進位資料)
-  const buffer = await res.arrayBuffer();
+    // 1. 先取得原始的 ArrayBuffer (二進位資料)
+    const buffer = await res.arrayBuffer();
 
-  // 2. 使用 TextDecoder 並指定 'gbk' 編碼
-  const decoder = new TextDecoder("gbk");
-  const text = decoder.decode(buffer);
+    // 2. 使用 TextDecoder 並指定 'gbk' 編碼
+    const decoder = new TextDecoder("gbk");
+    const text = decoder.decode(buffer);
 
     const match = text.match(/"([^"]+)"/);
     if (!match) return json({ success: false, error: "解析失敗" });
@@ -467,7 +467,6 @@ async function fetchSina(list) {
         prev:   0,
       });
     }
-
   } catch (e) {
     const errorMsg = e.name === 'AbortError' ? "連線逾時" : e.message;
     return json({ success: false, error: errorMsg }, 500);
