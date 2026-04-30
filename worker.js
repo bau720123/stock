@@ -2209,7 +2209,7 @@ async function handleCron(env) {
       const sign = taifex_night.updown >= 0 ? '▲' : taifex_night.updown < 0 ? '▼' : '';
       lines.push(`台股期貨夜盤：${taifex_night.price.toFixed(0)} (${sign}${Math.abs(taifex_night.updown).toFixed(0)})`);
     } else {
-      lines.push(`台股期貨夜盤：因為一些原因沒有資料`);
+      lines.push(`台股期貨夜盤：` + taifex_night.error);
     }
   }
 
@@ -2219,7 +2219,7 @@ async function handleCron(env) {
       const sign = taifex_tsmc.updown >= 0 ? '▲' : taifex_tsmc.updown < 0 ? '▼' : '';
       lines.push(`台積電期貨夜盤：${taifex_tsmc.price.toFixed(0)} (${sign}${Math.abs(taifex_tsmc.updown).toFixed(0)})`);
     } else {
-      lines.push(`台積電期貨夜盤：因為一些原因沒有資料`);
+      lines.push(`台積電期貨夜盤：` + taifex_tsmc.error);
     }
   }
 
