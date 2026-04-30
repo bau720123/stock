@@ -2205,17 +2205,21 @@ async function handleCron(env) {
 
   // 台股夜盤是從下午3點開始，午夜12點前結束
   if (twHour >= 15 || twHour <= 8) {
-    if (taifex_night.success && taifex_night.price > 0) {
-      const sign = taifex_night.updown > 0 ? '▲' : taifex_night.updown < 0 ? '▼' : '';
+    if (taifex_night.success && taifex_night.price >= 0) {
+      const sign = taifex_night.updown >= 0 ? '▲' : taifex_night.updown < 0 ? '▼' : '';
       lines.push(`台股期貨夜盤：${taifex_night.price.toFixed(0)} (${sign}${Math.abs(taifex_night.updown).toFixed(0)})`);
+    } else {
+      lines.push(`台股期貨夜盤：因為一些原因沒有資料`);
     }
   }
 
   // 台積電期貨夜盤是從下午5點開始，午夜12點前結束
   if (twHour >= 17 || twHour <= 8) {
-    if (taifex_tsmc.success && taifex_tsmc.price > 0) {
-      const sign = taifex_tsmc.updown > 0 ? '▲' : taifex_tsmc.updown < 0 ? '▼' : '';
+    if (taifex_tsmc.success && taifex_tsmc.price >= 0) {
+      const sign = taifex_tsmc.updown >= 0 ? '▲' : taifex_tsmc.updown < 0 ? '▼' : '';
       lines.push(`台積電期貨夜盤：${taifex_tsmc.price.toFixed(0)} (${sign}${Math.abs(taifex_tsmc.updown).toFixed(0)})`);
+    } else {
+      lines.push(`台積電期貨夜盤：因為一些原因沒有資料`);
     }
   }
 

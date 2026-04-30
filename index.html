@@ -3838,8 +3838,12 @@ function gotoMoneyDJ(code = '') {
 
 const { isDaySession } = getMarketEmoji();
 var REFRESH_INTERVAL = 300; // 秒，改這個就通吃
-if (card_type == 'my-stock' && isDaySession) {
-  REFRESH_INTERVAL = 60; // 我的股票更新頻率較高
+if (card_type == 'my-stock') {
+  if (isDaySession) {
+    REFRESH_INTERVAL = 60; // 我的股票更新頻率較高
+  } else {
+    REFRESH_INTERVAL = 9999; // 非交易時間不自動更新，避免浪費資源
+  }
 }
 let _countdownTimer = null;
 
