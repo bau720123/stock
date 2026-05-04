@@ -478,7 +478,7 @@ async function fetchTaifex(objId, contract) {
   try {
     const res = await fetchWithTimeout("https://www.taifex.com.tw/cht/quotesApi/getQuotes?objId=" + objId, {
       headers: { "User-Agent": UA, "Accept": "application/json" }
-    });
+    }, 8000);
     const data = await res.json();
 
     // const item = data.find(d => d.contract === contract);
@@ -2148,11 +2148,17 @@ async function handleCron(env) {
 
   const list = JSON.parse(existing);
 
-  // 平行抓取所有資料
-  const [taifexDay, taifexNight, taifexTsmc, twnRes, /*twnConRes, */brentRes, vixRes, tsmcStock] = await Promise.all([
-    fetchTaifex(2, "TX046"), // 台股期貨日盤
-    fetchTaifex(12, "TX056"), // 台股期貨夜盤
-    fetchTaifex(12, "CDF056"), // 台積電期貨夜盤
+  /*Cloudflare Workers 對外連線有並發限制 Workers 免費方案最多同時 6 個 subrequest*/
+
+  // 第一批：Taifex（容易逾時，先打）
+  const [taifexDay, taifexNight, taifexTsmc] = await Promise.all([
+    fetchTaifex(2, "TX046"),
+    fetchTaifex(12, "TX056"),
+    fetchTaifex(12, "CDF056"),
+  ]);
+
+  // 第二批：其他
+  const [twnRes, /*twnConRes, */brentRes, vixRes, tsmcStock] = await Promise.all([
     fetchHiStock("stocktop2017", "TWN", "指數", "成交量(口)"),
     // fetchCnyesTwn(), // 富台指
     fetchSina("hf_OIL"),
