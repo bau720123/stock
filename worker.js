@@ -1620,7 +1620,7 @@ async function fetchNewsRss(env) {
     let ai_suggest = null;
 //     const top10Titles = unique.slice(0, 10).map((item, i) => `${i + 1}. ${item.title}`).join('\n'); // 抓取前十則標題的資料
 //     try {
-//       const geminiRes = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent', {
+//       const geminiRes = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent', {
 //         method: 'POST',
 //         headers: {
 //           'Content-Type': 'application/json',
