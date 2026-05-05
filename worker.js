@@ -1992,7 +1992,7 @@ async function generateCustomEventsMacroEarnings() {
         events.push(createEventObj(
           dateObj,
           symbol,
-          `${symbol} 財報發布（MacroMicro，${item.period || ''} ${item.calendar_year || ''}）`,
+          `${item.name} 財報發布（${item.period || ''} ${item.calendar_year || ''}）`,
           '#27ae60',
           `61${String(index).padStart(3, '0')}` // 61xxx，與 Finnhub 60xx 不衝突
         ));
