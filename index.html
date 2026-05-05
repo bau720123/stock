@@ -1908,7 +1908,7 @@ async function loadMaterials() {
     const cls = changeNum < 0 ? 'down' : 'up';
     const changePercent = changeNum / sinaBrent.prev * 100;
 
-    // html += row('前次', sinaBrent.prev.toFixed(2));
+    html += row('前次', sinaBrent.prev.toFixed(2));
     html += row('開盤價', sinaBrent.open.toFixed(2));
     html += row('最高價', sinaBrent.high.toFixed(2));
     html += row('最低價', sinaBrent.low.toFixed(2));
@@ -1946,12 +1946,12 @@ async function loadMaterials() {
     const cls = changeNum < 0 ? 'down' : 'up';
     const changePercent = changeNum / sinaGold.prev * 100;
     // html += row('前次', sinaGold.prev.toFixed(2));
-    html += row('開盤價', sinaGold.open.toFixed(2));
-    html += row('最高價', sinaGold.high.toFixed(2));
-    html += row('最低價', sinaGold.low.toFixed(2));
+    // html += row('開盤價', sinaGold.open.toFixed(2));
+    // html += row('最高價', sinaGold.high.toFixed(2));
+    // html += row('最低價', sinaGold.low.toFixed(2));
     html += row('價格', sinaGold.price.toFixed(2), 'accent');
     html += row('漲跌', changeNum.toFixed(2), cls);
-    html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
+    // html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
     html += row('更新時間', sinaGold.time);
 
     // 價格門檻通知（從 localStorage 讀取，未設定則不觸發）
@@ -1982,12 +1982,12 @@ async function loadMaterials() {
     const cls = changeNum < 0 ? 'down' : 'up';
     const changePercent = changeNum / sinaSilver.prev * 100;
     // html += row('前次', sinaSilver.prev.toFixed(2));
-    html += row('開盤價', sinaSilver.open.toFixed(2));
-    html += row('最高價', sinaSilver.high.toFixed(2));
-    html += row('最低價', sinaSilver.low.toFixed(2));
+    // html += row('開盤價', sinaSilver.open.toFixed(2));
+    // html += row('最高價', sinaSilver.high.toFixed(2));
+    // html += row('最低價', sinaSilver.low.toFixed(2));
     html += row('價格', sinaSilver.price.toFixed(2), 'accent');
     html += row('漲跌', changeNum.toFixed(2), cls);
-    html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
+    // html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
     html += row('更新時間', sinaSilver.time);
 
     // 價格門檻通知（從 localStorage 讀取，未設定則不觸發）
