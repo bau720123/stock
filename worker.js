@@ -2239,6 +2239,10 @@ async function handleCron(env) {
 
   if (twn.success) {
     lines.push(`富台指漲跌：${twn.changeText}`);
+  } else if (twn.error) {
+    lines.push(`富台指：` + twn.error);
+  } else {
+    lines.push(`富台指：資料從缺`);
   }
 
   // if (twncon.success) {
@@ -2247,10 +2251,18 @@ async function handleCron(env) {
 
   if (brent.success) {
     lines.push(`布蘭特原油：${brent.price.toFixed(2)} 元（` + getBrentStatus(brent.price) + `）`);
+  } else if (brent.error) {
+    lines.push(`布蘭特原油：` + brent.error);
+  } else {
+    lines.push(`布蘭特原油：資料從缺`);
   }
 
   if (vix.success) {
     lines.push(`VIX 恐慌指數：${vix.price.toFixed(2)}（` + getVixStatus(vix.price) + `）`);
+  } else if (vix.error) {
+    lines.push(`VIX 恐慌指數：` + vix.error);
+  } else {
+    lines.push(`VIX 恐慌指數：資料從缺`);
   }
 
   const body = lines.length > 0 ? lines.join('\n') : '點擊查看即時報價';
