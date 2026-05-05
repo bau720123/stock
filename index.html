@@ -2138,11 +2138,12 @@ async function loadMaterials() {
 
 // 市場情緒
 async function loadSentiment() {
-  const [/*sinaVix, */sinaVixFutures, fearGreed, sinaUsdollar] = await Promise.all([
+  const [/*sinaVix, */sinaVixFutures, fearGreed, sinaUsdollar, yahooUtctwdx] = await Promise.all([
     // fetch(WORKER + '/sina/znb_VIX').then(r => r.json()).catch(() => ({ success: false })), // VIX 恐慌指數
     fetch(WORKER + '/sina/hf_VX').then(r => r.json()).catch(() => ({ success: false })), // VIX 恐慌指數期貨
     fetch(WORKER + '/fear-greed').then(r => r.json()).catch(() => ({ success: false })), // CNN Fear & Greed Index
     fetch(WORKER + '/sina/DINIW').then(r => r.json()).catch(() => ({ success: false })), // 美元指數
+    fetch(WORKER + '/yahoo-finance/USDTWD=X').then(r => r.json()).catch(() => ({ success: false })), // 美金兌換台幣匯率
   ]);
 
   let html = `<div class="card-title">市場情緒</div>`;
@@ -2273,6 +2274,25 @@ async function loadSentiment() {
         'https://hk.investing.com/indices/usdollar'
       );
     }
+  } else {
+    html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
+  }
+
+  // 【美金兌換台幣匯率】
+  html += groupHeader('【美金兌換台幣匯率】', '', '美金兌換台幣匯率（USDTWD）是反映美元與台灣新台幣之間兌換關係的指標。');
+  if (yahooUtctwdx.success) {
+    const changeNum = yahooUtctwdx.close - yahooUtctwdx.prev;
+    const cls = changeClass(changeNum, 1);
+    const changePercent = changeNum / yahooUtctwdx.prev * 100;
+
+    html += row('前次', yahooUtctwdx.prev.toFixed(2));
+    html += row('開盤價', yahooUtctwdx.open.toFixed(2));
+    html += row('最高價', yahooUtctwdx.high.toFixed(2));
+    html += row('最低價', yahooUtctwdx.low.toFixed(2));
+    html += row('價格', yahooUtctwdx.close.toFixed(2), 'accent');
+    html += row('漲跌', changeNum.toFixed(2), cls);
+    // html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
+    html += row('更新時間', yahooUtctwdx.updateTime);
   } else {
     html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
   }
