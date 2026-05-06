@@ -1787,13 +1787,6 @@ function generateCustomEvents(year) {
 
   // 自定義事件
   events.push(createEventObj(
-    new Date("2026-05-07"), 
-    "FOMC 利率會議",
-    "聯準會利率決議（凌晨2點），市場高度關注 Fed 的貨幣政策走向", 
-    "#3498db", 
-    "001"
-  ));
-  events.push(createEventObj(
     new Date("2026-05-08"), 
     "TSM",
     "台積電下午1點半公布4月份業績", 
