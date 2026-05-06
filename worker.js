@@ -1786,17 +1786,45 @@ function generateCustomEvents(year) {
   }
 
   // 自定義事件
-  // events.push(createEventObj(
-  //   new Date("2026-04-10"), 
-  //   "TSM",
-  //   "台積電下午1點半公布3月份業績", 
-  //   "#3498db", 
-  //   "001"
-  // ));
   events.push(createEventObj(
-    new Date("2026-04-16"), 
+    new Date("2026-05-07"), 
+    "FOMC 利率會議",
+    "聯準會利率決議（凌晨2點），市場高度關注 Fed 的貨幣政策走向", 
+    "#3498db", 
+    "001"
+  ));
+  events.push(createEventObj(
+    new Date("2026-05-08"), 
     "TSM",
-    "台積電下午2點法說會", 
+    "台積電下午1點半公布4月份業績", 
+    "#3498db", 
+    "001"
+  ));
+  events.push(createEventObj(
+    new Date("2026-05-15"), 
+    "川習會",
+    "川普與習近平見面，討論貿易與地緣政治議題", 
+    "#3498db", 
+    "001"
+  ));
+  events.push(createEventObj(
+    new Date("2026-05-15"), 
+    "聯準會主席任期屆滿",
+    "鮑爾主席任期屆滿、華許接任", 
+    "#3498db", 
+    "002"
+  ));
+  events.push(createEventObj(
+    new Date("2026-05-16"), 
+    "川習會",
+    "川普與習近平見面，討論貿易與地緣政治議題", 
+    "#3498db", 
+    "001"
+  ));
+  events.push(createEventObj(
+    new Date("2026-05-20"), 
+    "520 總統就職紀念日",
+    "520 總統就職紀念日", 
     "#3498db", 
     "001"
   ));
