@@ -1767,11 +1767,13 @@ function generateCustomEvents(year) {
     }
 
     // C. 富時羅素指數重組生效日
+
     // 6 月最後一個星期五
     if (month === 5) {
       const ftseJune = getNthDay(year, month, 5, -1);
       events.push(createEventObj(ftseJune, "富時", "富時羅素指數重組生效日", "#e66767"));
     }
+
     // 11 月第二個星期五
     if (month === 10) {
       const ftseNov = getNthDay(year, month, 5, 2);
