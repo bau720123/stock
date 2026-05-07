@@ -3860,7 +3860,7 @@ const { isDaySession } = getMarketEmoji();
 var REFRESH_INTERVAL = 300; // 秒，改這個就通吃
 if (card_type == 'my-stock') {
   if (isDaySession) {
-    REFRESH_INTERVAL = 60; // 我的股票更新頻率較高
+    REFRESH_INTERVAL = 30; // 我的股票更新頻率較高
   } else {
     REFRESH_INTERVAL = 9999; // 非交易時間不自動更新，避免浪費資源
   }
