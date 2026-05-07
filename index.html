@@ -1265,7 +1265,7 @@ function getMarketEmoji() {
   const day = tpe.getDay(); // 0=週日, 1=週一, ..., 6=週六
   const isWeekday = day >= 1 && day <= 5;
 
-  const isDaySession    = isWeekday && hm >= 900  && hm <= 1330; // 09:00 ~ 13:30
+  const isDaySession    = isWeekday && hm >= 830  && hm <= 1330; // 08:30 ~ 13:30
   const isNightSession  = isWeekday && hm >= 1500 || hm <= 859;  // 15:00 ~ 隔日08:59
   const isTsmcNight     = isWeekday && hm >= 1725 || hm <= 859;  // 17:25 ~ 隔日08:59
   const isTwn           = isWeekday;  // 17:25 ~ 隔日08:59
