@@ -1266,8 +1266,8 @@ function getMarketEmoji() {
   const isWeekday = day >= 1 && day <= 5;
 
   const isDaySession    = isWeekday && hm >= 830  && hm <= 1330; // 08:30 ~ 13:30
-  const isNightSession  = isWeekday && hm >= 1500 || hm <= 859;  // 15:00 ~ 隔日08:59
-  const isTsmcNight     = isWeekday && hm >= 1725 || hm <= 859;  // 17:25 ~ 隔日08:59
+  const isNightSession  = isWeekday && hm >= 1500 && hm <= 500;  // 15:00 ~ 隔日05:00
+  const isTsmcNight     = isWeekday && hm >= 1725 && hm <= 859;  // 17:25 ~ 隔日08:59
   const isTwn           = isWeekday;  // 17:25 ~ 隔日08:59
 
   return { isDaySession, isNightSession, isTsmcNight, isTwn };
