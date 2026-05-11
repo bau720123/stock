@@ -1,579 +1,5 @@
 {
     "calendarItems": {
-        "2026-03-25": [
-            {
-                "id": 54674,
-                "time": "09:00",
-                "symbol_id": 1294,
-                "calendar_year": 2026,
-                "period": "Q3",
-                "company_id": 1294,
-                "name": "信達思",
-                "logo": "https://cdn.macromicro.me/stocks/logo/C/CTAS-f7a4e896.png",
-                "symbol": "CTAS",
-                "industry_id": 202010,
-                "market_cap": 69898289152
-            },
-            {
-                "id": 74056,
-                "time": "09:00",
-                "symbol_id": 3792,
-                "calendar_year": 2026,
-                "period": "Q3",
-                "company_id": 3792,
-                "name": "沛齊",
-                "logo": "https://cdn.macromicro.me/stocks/logo/P/PAYX-d7b418ca.png",
-                "symbol": "PAYX",
-                "industry_id": 202020,
-                "market_cap": 32320841728
-            }
-        ],
-        "2026-03-30": [
-            {
-                "id": 149834,
-                "time": "00:00",
-                "symbol_id": 170,
-                "calendar_year": 2025,
-                "period": "Q4",
-                "company_id": 170,
-                "name": "Montana Technologies",
-                "logo": "0",
-                "symbol": "AIRJ",
-                "industry_id": 201060,
-                "market_cap": 188667088
-            }
-        ],
-        "2026-03-31": [
-            {
-                "id": 45523,
-                "time": "00:00",
-                "symbol_id": 115,
-                "calendar_year": 2026,
-                "period": "Q1",
-                "company_id": 115,
-                "name": "美國AES發電公司",
-                "logo": "https://cdn.macromicro.me/stocks/logo/A/AES-799b5b39.png",
-                "symbol": "AES",
-                "industry_id": 551050,
-                "market_cap": 10345860096
-            },
-            {
-                "id": 58981,
-                "time": "09:00",
-                "symbol_id": 1847,
-                "calendar_year": 2026,
-                "period": "Q2",
-                "company_id": 1847,
-                "name": "Factset公司",
-                "logo": "https://cdn.macromicro.me/stocks/logo/F/FDS-2430d8a6.png",
-                "symbol": "FDS",
-                "industry_id": 402030,
-                "market_cap": 8320760832
-            },
-            {
-                "id": 69317,
-                "time": "09:00",
-                "symbol_id": 3169,
-                "calendar_year": 2026,
-                "period": "Q1",
-                "company_id": 3169,
-                "name": "味好美",
-                "logo": "https://cdn.macromicro.me/stocks/logo/M/MKC-90f385fb.png",
-                "symbol": "MKC",
-                "industry_id": 302020,
-                "market_cap": 13547520000
-            },
-            {
-                "id": 71366,
-                "time": "09:00",
-                "symbol_id": 3446,
-                "calendar_year": 2026,
-                "period": "Q3",
-                "company_id": 3446,
-                "name": "耐吉",
-                "logo": "https://cdn.macromicro.me/stocks/logo/N/NKE-d2725daf.png",
-                "symbol": "NKE",
-                "industry_id": 252030,
-                "market_cap": 66757545984
-            }
-        ],
-        "2026-04-01": [
-            {
-                "id": 51490,
-                "time": "09:00",
-                "symbol_id": 887,
-                "calendar_year": 2026,
-                "period": "Q3",
-                "company_id": 887,
-                "name": "康尼格拉品牌",
-                "logo": "https://cdn.macromicro.me/stocks/logo/C/CAG-f3f78d04.png",
-                "symbol": "CAG",
-                "industry_id": 302020,
-                "market_cap": 6762067968
-            }
-        ],
-        "2026-04-07": [
-            {
-                "id": 89184,
-                "time": "09:00",
-                "symbol_id": 5548,
-                "calendar_year": 2026,
-                "period": "Q1",
-                "company_id": 5548,
-                "name": "埃克森美孚石油公司",
-                "logo": "0",
-                "symbol": "XOM",
-                "industry_id": 101020,
-                "market_cap": 641810890752
-            }
-        ],
-        "2026-04-08": [
-            {
-                "id": 55404,
-                "time": "09:00",
-                "symbol_id": 1385,
-                "calendar_year": 2026,
-                "period": "Q1",
-                "company_id": 1385,
-                "name": "達美航空",
-                "logo": "https://cdn.macromicro.me/stocks/logo/D/DAL-69fdc77f.png",
-                "symbol": "DAL",
-                "industry_id": 203020,
-                "market_cap": 44466401280
-            },
-            {
-                "id": 81216,
-                "time": "09:00",
-                "symbol_id": 4711,
-                "calendar_year": 2026,
-                "period": "Q4",
-                "company_id": 4711,
-                "name": "星座集團",
-                "logo": "https://cdn.macromicro.me/stocks/logo/S/STZ-fea25465.png",
-                "symbol": "STZ",
-                "industry_id": 302010,
-                "market_cap": 26900953088
-            }
-        ],
-        "2026-04-09": [
-            {
-                "id": 75981,
-                "time": "09:00",
-                "symbol_id": 4034,
-                "calendar_year": 2026,
-                "period": "Q2",
-                "company_id": 4034,
-                "name": "參數科技",
-                "logo": "https://cdn.macromicro.me/stocks/logo/P/PTC-4312f83f.png",
-                "symbol": "PTC",
-                "industry_id": 451030,
-                "market_cap": 16277805056
-            }
-        ],
-        "2026-04-10": [
-            {
-                "id": 50168,
-                "time": "09:00",
-                "symbol_id": 714,
-                "calendar_year": 2026,
-                "period": "Q1",
-                "company_id": 714,
-                "name": "貝萊德",
-                "logo": "https://cdn.macromicro.me/stocks/logo/B/BLK-c3055ff0.png",
-                "symbol": "BLK",
-                "industry_id": 402030,
-                "market_cap": 164130357248
-            }
-        ],
-        "2026-04-13": [
-            {
-                "id": 58729,
-                "time": "09:00",
-                "symbol_id": 1817,
-                "calendar_year": 2026,
-                "period": "Q1",
-                "company_id": 1817,
-                "name": "快扣公司",
-                "logo": "https://cdn.macromicro.me/stocks/logo/F/FAST-0f8debe7.png",
-                "symbol": "FAST",
-                "industry_id": 201070,
-                "market_cap": 51990495232
-            },
-            {
-                "id": 61911,
-                "time": "09:00",
-                "symbol_id": 2215,
-                "calendar_year": 2026,
-                "period": "Q1",
-                "company_id": 2215,
-                "name": "高盛集團",
-                "logo": "https://cdn.macromicro.me/stocks/logo/G/GS-c09a6dd4.png",
-                "symbol": "GS",
-                "industry_id": 402030,
-                "market_cap": 284906684416
-            }
-        ],
-        "2026-04-14": [
-            {
-                "id": 51390,
-                "time": "09:00",
-                "symbol_id": 874,
-                "calendar_year": 2026,
-                "period": "Q1",
-                "company_id": 874,
-                "name": "花旗集團",
-                "logo": "https://cdn.macromicro.me/stocks/logo/C/C-ca0e7a2f.png",
-                "symbol": "C",
-                "industry_id": 401010,
-                "market_cap": 224303267840
-            },
-            {
-                "id": 65524,
-                "time": "09:00",
-                "symbol_id": 2685,
-                "calendar_year": 2026,
-                "period": "Q1",
-                "company_id": 2685,
-                "name": "嬌生",
-                "logo": "https://cdn.macromicro.me/stocks/logo/J/JNJ-9b3f470a.png",
-                "symbol": "JNJ",
-                "industry_id": 352020,
-                "market_cap": 551008796672
-            },
-            {
-                "id": 65583,
-                "time": "09:00",
-                "symbol_id": 2693,
-                "calendar_year": 2026,
-                "period": "Q1",
-                "company_id": 2693,
-                "name": "摩根大通銀行",
-                "logo": "https://cdn.macromicro.me/stocks/logo/J/JPM-9d8fbe7f.png",
-                "symbol": "JPM",
-                "industry_id": 401010,
-                "market_cap": 869042552832
-            },
-            {
-                "id": 86054,
-                "time": "09:00",
-                "symbol_id": 5328,
-                "calendar_year": 2026,
-                "period": "Q1",
-                "company_id": 5328,
-                "name": "富國銀行",
-                "logo": "https://cdn.macromicro.me/stocks/logo/W/WFC-4e05c245.png",
-                "symbol": "WFC",
-                "industry_id": 401010,
-                "market_cap": 256108298240
-            }
-        ],
-        "2026-04-15": [
-            {
-                "id": 48875,
-                "time": "09:00",
-                "symbol_id": 538,
-                "calendar_year": 2026,
-                "period": "Q1",
-                "company_id": 538,
-                "name": "美國銀行",
-                "logo": "https://cdn.macromicro.me/stocks/logo/B/BAC-a269f867.png",
-                "symbol": "BAC",
-                "industry_id": 401010,
-                "market_cap": 381888528384
-            },
-            {
-                "id": 65329,
-                "time": "09:00",
-                "symbol_id": 2656,
-                "calendar_year": 2026,
-                "period": "Q1",
-                "company_id": 2656,
-                "name": "J.B. Hunt運輸服務",
-                "logo": "https://cdn.macromicro.me/stocks/logo/J/JBHT-599b0fad.png",
-                "symbol": "JBHT",
-                "industry_id": 203040,
-                "market_cap": 23816232960
-            },
-            {
-                "id": 70075,
-                "time": "09:00",
-                "symbol_id": 3270,
-                "calendar_year": 2026,
-                "period": "Q1",
-                "company_id": 3270,
-                "name": "摩根士丹利",
-                "logo": "https://cdn.macromicro.me/stocks/logo/M/MS-8f23fdb6.png",
-                "symbol": "MS",
-                "industry_id": 402030,
-                "market_cap": 298772791296
-            },
-            {
-                "id": 70238,
-                "time": "09:00",
-                "symbol_id": 3290,
-                "calendar_year": 2026,
-                "period": "Q1",
-                "company_id": 3290,
-                "name": "M&T銀行",
-                "logo": "https://cdn.macromicro.me/stocks/logo/M/MTB-2ef9f386.png",
-                "symbol": "MTB",
-                "industry_id": 401010,
-                "market_cap": 35585900544
-            },
-            {
-                "id": 74665,
-                "time": "09:00",
-                "symbol_id": 3870,
-                "calendar_year": 2026,
-                "period": "Q1",
-                "company_id": 3870,
-                "name": "先進公司",
-                "logo": "https://cdn.macromicro.me/stocks/logo/P/PGR-cdb64279.png",
-                "symbol": "PGR",
-                "industry_id": 403010,
-                "market_cap": 118279487488
-            },
-            {
-                "id": 75252,
-                "time": "09:00",
-                "symbol_id": 3944,
-                "calendar_year": 2026,
-                "period": "Q1",
-                "company_id": 3944,
-                "name": "PNC金融服務集團",
-                "logo": "https://cdn.macromicro.me/stocks/logo/P/PNC-cd22a3eb.png",
-                "symbol": "PNC",
-                "industry_id": 401010,
-                "market_cap": 90997170176
-            }
-        ],
-        "2026-04-16": [
-            {
-                "id": 44882,
-                "time": "09:00",
-                "symbol_id": 31,
-                "calendar_year": 2026,
-                "period": "Q1",
-                "company_id": 31,
-                "name": "亞培",
-                "logo": "https://cdn.macromicro.me/stocks/logo/A/ABT-42462347.png",
-                "symbol": "ABT",
-                "industry_id": 351010,
-                "market_cap": 162502131712
-            },
-            {
-                "id": 49968,
-                "time": "09:00",
-                "symbol_id": 689,
-                "calendar_year": 2026,
-                "period": "Q1",
-                "company_id": 689,
-                "name": "紐約梅隆銀行",
-                "logo": "https://cdn.macromicro.me/stocks/logo/B/BK-8586df4f.png",
-                "symbol": "BK",
-                "industry_id": 402030,
-                "market_cap": 92942704640
-            },
-            {
-                "id": 52414,
-                "time": "09:00",
-                "symbol_id": 1005,
-                "calendar_year": 2026,
-                "period": "Q1",
-                "company_id": 1005,
-                "name": "公民金融集團",
-                "logo": "https://cdn.macromicro.me/stocks/logo/C/CFG-5a91a98d.png",
-                "symbol": "CFG",
-                "industry_id": 401010,
-                "market_cap": 27553816576
-            },
-            {
-                "id": 65866,
-                "time": "09:00",
-                "symbol_id": 2732,
-                "calendar_year": 2026,
-                "period": "Q1",
-                "company_id": 2732,
-                "name": "科凱國際集團",
-                "logo": "https://cdn.macromicro.me/stocks/logo/K/KEY-0e263bf8.png",
-                "symbol": "KEY",
-                "industry_id": 401010,
-                "market_cap": 23756509184
-            },
-            {
-                "id": 66083,
-                "time": "09:00",
-                "symbol_id": 2758,
-                "calendar_year": 2026,
-                "period": "Q1",
-                "company_id": 2758,
-                "name": "金德摩根",
-                "logo": "https://cdn.macromicro.me/stocks/logo/K/KMI-eef72e6c.png",
-                "symbol": "KMI",
-                "industry_id": 101020,
-                "market_cap": 68863746048
-            },
-            {
-                "id": 71171,
-                "time": "09:00",
-                "symbol_id": 3421,
-                "calendar_year": 2026,
-                "period": "Q1",
-                "company_id": 3421,
-                "name": "網飛",
-                "logo": "https://cdn.macromicro.me/stocks/logo/N/NFLX-d5b86892.png",
-                "symbol": "NFLX",
-                "industry_id": 502020,
-                "market_cap": 385836056576
-            },
-            {
-                "id": 74453,
-                "time": "09:00",
-                "symbol_id": 3840,
-                "calendar_year": 2026,
-                "period": "Q1",
-                "company_id": 3840,
-                "name": "百事公司",
-                "logo": "https://cdn.macromicro.me/stocks/logo/P/PEP-0e83f2a2.png",
-                "symbol": "PEP",
-                "industry_id": 302010,
-                "market_cap": 210654707712
-            },
-            {
-                "id": 75015,
-                "time": "09:00",
-                "symbol_id": 3913,
-                "calendar_year": 2026,
-                "period": "Q1",
-                "company_id": 3913,
-                "name": "普洛斯",
-                "logo": "https://cdn.macromicro.me/stocks/logo/P/PLD-8a65422d.png",
-                "symbol": "PLD",
-                "industry_id": 601025,
-                "market_cap": 130395168768
-            },
-            {
-                "id": 78515,
-                "time": "09:00",
-                "symbol_id": 4365,
-                "calendar_year": 2026,
-                "period": "Q1",
-                "company_id": 4365,
-                "name": "嘉信理財",
-                "logo": "https://cdn.macromicro.me/stocks/logo/S/SCHW-eed085e3.png",
-                "symbol": "SCHW",
-                "industry_id": 402030,
-                "market_cap": 158466965504
-            },
-            {
-                "id": 83226,
-                "time": "09:00",
-                "symbol_id": 4969,
-                "calendar_year": 2026,
-                "period": "Q1",
-                "company_id": 4969,
-                "name": "旅行家集團",
-                "logo": "https://cdn.macromicro.me/stocks/logo/T/TRV-7a931b13.png",
-                "symbol": "TRV",
-                "industry_id": 403010,
-                "market_cap": 65364848640
-            },
-            {
-                "id": 83352,
-                "time": "09:00",
-                "symbol_id": 4985,
-                "calendar_year": 2026,
-                "period": "Q1",
-                "company_id": 4985,
-                "name": "台積電ADR",
-                "logo": "https://cdn.macromicro.me/stocks/logo/T/TSM-a779d839.png",
-                "symbol": "TSM",
-                "industry_id": 453010,
-                "market_cap": 2100321845248
-            },
-            {
-                "id": 84377,
-                "time": "09:00",
-                "symbol_id": 5112,
-                "calendar_year": 2026,
-                "period": "Q1",
-                "company_id": 5112,
-                "name": "美國合眾銀行",
-                "logo": "https://cdn.macromicro.me/stocks/logo/U/USB-97d8581d.png",
-                "symbol": "USB",
-                "industry_id": 401010,
-                "market_cap": 86977380352
-            }
-        ],
-        "2026-04-17": [
-            {
-                "id": 59346,
-                "time": "09:00",
-                "symbol_id": 1892,
-                "calendar_year": 2026,
-                "period": "Q1",
-                "company_id": 1892,
-                "name": "五三銀行",
-                "logo": "https://cdn.macromicro.me/stocks/logo/F/FITB-99bb44a1.png",
-                "symbol": "FITB",
-                "industry_id": 401010,
-                "market_cap": 41528238080
-            },
-            {
-                "id": 77117,
-                "time": "09:00",
-                "symbol_id": 4184,
-                "calendar_year": 2026,
-                "period": "Q1",
-                "company_id": 4184,
-                "name": "地區金融公司",
-                "logo": "https://cdn.macromicro.me/stocks/logo/R/RF-b6ab2acb.png",
-                "symbol": "RF",
-                "industry_id": 401010,
-                "market_cap": 24388380672
-            },
-            {
-                "id": 81163,
-                "time": "09:00",
-                "symbol_id": 4705,
-                "calendar_year": 2026,
-                "period": "Q1",
-                "company_id": 4705,
-                "name": "道富銀行",
-                "logo": "https://cdn.macromicro.me/stocks/logo/S/STT-a9a4d62c.png",
-                "symbol": "STT",
-                "industry_id": 402030,
-                "market_cap": 42884403200
-            },
-            {
-                "id": 82129,
-                "time": "09:00",
-                "symbol_id": 4833,
-                "calendar_year": 2026,
-                "period": "Q1",
-                "company_id": 4833,
-                "name": "Truist金融",
-                "logo": "https://cdn.macromicro.me/stocks/logo/T/TFC-30d9e6a6.png",
-                "symbol": "TFC",
-                "industry_id": 401010,
-                "market_cap": 63967211520
-            }
-        ],
-        "2026-04-20": [
-            {
-                "id": 81038,
-                "time": "09:00",
-                "symbol_id": 4689,
-                "calendar_year": 2026,
-                "period": "Q1",
-                "company_id": 4689,
-                "name": "鋼鐵動力公司",
-                "logo": "https://cdn.macromicro.me/stocks/logo/S/STLD-c9bab0ab.png",
-                "symbol": "STLD",
-                "industry_id": 151040,
-                "market_cap": 32585117696
-            }
-        ],
         "2026-04-21": [
             {
                 "id": 51759,
@@ -586,7 +12,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/C/CB-46fe8a75.png",
                 "symbol": "CB",
                 "industry_id": 403010,
-                "market_cap": 128087162880
+                "market_cap": 126129946624
             },
             {
                 "id": 53757,
@@ -599,7 +25,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/C/COF-c311488b.png",
                 "symbol": "COF",
                 "industry_id": 402020,
-                "market_cap": 120833474560
+                "market_cap": 117951299584
             },
             {
                 "id": 55842,
@@ -612,7 +38,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/D/DGX-6aa3dfd0.png",
                 "symbol": "DGX",
                 "industry_id": 351020,
-                "market_cap": 21629300736
+                "market_cap": 20612900864
             },
             {
                 "id": 55870,
@@ -625,7 +51,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/D/DHI-0f666000.png",
                 "symbol": "DHI",
                 "industry_id": 252010,
-                "market_cap": 45871108096
+                "market_cap": 42502676480
             },
             {
                 "id": 55888,
@@ -638,7 +64,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/D/DHR-ff5088cb.png",
                 "symbol": "DHR",
                 "industry_id": 352030,
-                "market_cap": 127860899840
+                "market_cap": 121164161024
             },
             {
                 "id": 57118,
@@ -651,7 +77,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/E/EFX-0b19f971.png",
                 "symbol": "EFX",
                 "industry_id": 202020,
-                "market_cap": 20468400128
+                "market_cap": 21099599872
             },
             {
                 "id": 57936,
@@ -664,7 +90,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/E/EQT-3d9fb33f.png",
                 "symbol": "EQT",
                 "industry_id": 101020,
-                "market_cap": 36657975296
+                "market_cap": 34982608896
             },
             {
                 "id": 60775,
@@ -677,7 +103,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/G/GE-1eede7fa.png",
                 "symbol": "GE",
                 "industry_id": 201010,
-                "market_cap": 295327137792
+                "market_cap": 308393508864
             },
             {
                 "id": 61663,
@@ -690,7 +116,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/G/GPC-0144b488.png",
                 "symbol": "GPC",
                 "industry_id": 255010,
-                "market_cap": 14664999936
+                "market_cap": 14411776000
             },
             {
                 "id": 62249,
@@ -703,7 +129,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/H/HAL-43200e72.png",
                 "symbol": "HAL",
                 "industry_id": 101010,
-                "market_cap": 33580439552
+                "market_cap": 33337710592
             },
             {
                 "id": 63686,
@@ -716,7 +142,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/I/IBKR-9e4e7a19.png",
                 "symbol": "IBKR",
                 "industry_id": 402030,
-                "market_cap": 134067290112
+                "market_cap": 145868800000
             },
             {
                 "id": 65039,
@@ -729,7 +155,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/I/ISRG-aae74d1f.png",
                 "symbol": "ISRG",
                 "industry_id": 351010,
-                "market_cap": 167154352128
+                "market_cap": 159726288896
             },
             {
                 "id": 69505,
@@ -742,7 +168,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/M/MMM-bebe2205.png",
                 "symbol": "MMM",
                 "industry_id": 201050,
-                "market_cap": 77126909952
+                "market_cap": 75814739968
             },
             {
                 "id": 70123,
@@ -755,7 +181,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/M/MSCI-2a007b79.png",
                 "symbol": "MSCI",
                 "industry_id": 402030,
-                "market_cap": 43321765888
+                "market_cap": 42911285248
             },
             {
                 "id": 71605,
@@ -768,7 +194,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/N/NOC-d534caa6.png",
                 "symbol": "NOC",
                 "industry_id": 201010,
-                "market_cap": 81747288064
+                "market_cap": 78086791168
             },
             {
                 "id": 77890,
@@ -781,7 +207,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/R/RTX-77008fc3.png",
                 "symbol": "RTX",
                 "industry_id": 201010,
-                "market_cap": 233716236288
+                "market_cap": 237369327616
             },
             {
                 "id": 81507,
@@ -794,7 +220,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/S/SYF-228e2e51.png",
                 "symbol": "SYF",
                 "industry_id": 402020,
-                "market_cap": 26279200768
+                "market_cap": 25043136512
             },
             {
                 "id": 83300,
@@ -807,7 +233,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/T/TSCO-004dcb67.png",
                 "symbol": "TSCO",
                 "industry_id": 255040,
-                "market_cap": 18763556864
+                "market_cap": 16131922944
             },
             {
                 "id": 83767,
@@ -820,7 +246,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/U/UAL-06f4186f.png",
                 "symbol": "UAL",
                 "industry_id": 203020,
-                "market_cap": 30032920576
+                "market_cap": 32542744576
             },
             {
                 "id": 84176,
@@ -833,7 +259,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/U/UNH-c97248d3.png",
                 "symbol": "UNH",
                 "industry_id": 351020,
-                "market_cap": 322767912960
+                "market_cap": 345781796864
             },
             {
                 "id": 86505,
@@ -846,7 +272,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/W/WRB-b618813d.png",
                 "symbol": "WRB",
                 "industry_id": 403010,
-                "market_cap": 25967876096
+                "market_cap": 25763899392
             }
         ],
         "2026-04-22": [
@@ -861,7 +287,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/B/BA-ef32d20b.png",
                 "symbol": "BA",
                 "industry_id": 201010,
-                "market_cap": 189269999616
+                "market_cap": 194203631616
             },
             {
                 "id": 50916,
@@ -874,7 +300,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/B/BSX-c215dae7.png",
                 "symbol": "BSX",
                 "industry_id": 351010,
-                "market_cap": 89019752448
+                "market_cap": 80080658432
             },
             {
                 "id": 51947,
@@ -887,7 +313,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/C/CCI-7edff70f.png",
                 "symbol": "CCI",
                 "industry_id": 601080,
-                "market_cap": 36379840512
+                "market_cap": 39488520192
             },
             {
                 "id": 53315,
@@ -900,7 +326,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/C/CME-879e7bd0.png",
                 "symbol": "CME",
                 "industry_id": 402030,
-                "market_cap": 101306114048
+                "market_cap": 101058191360
             },
             {
                 "id": 54664,
@@ -913,7 +339,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/C/CSX-ca0681da.png",
                 "symbol": "CSX",
                 "industry_id": 203040,
-                "market_cap": 84555603968
+                "market_cap": 83383803904
             },
             {
                 "id": 57434,
@@ -926,7 +352,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/E/ELV-7cf4bb59.png",
                 "symbol": "ELV",
                 "industry_id": 351020,
-                "market_cap": 78572969984
+                "market_cap": 83364438016
             },
             {
                 "id": 60915,
@@ -939,7 +365,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/G/GEV-18bc3ee8.png",
                 "symbol": "GEV",
                 "industry_id": 201040,
-                "market_cap": 301341868032
+                "market_cap": 279800348672
             },
             {
                 "id": 61173,
@@ -952,7 +378,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/G/GL-e620b27b.png",
                 "symbol": "GL",
                 "industry_id": 403010,
-                "market_cap": 11924404224
+                "market_cap": 11846773760
             },
             {
                 "id": 63695,
@@ -965,7 +391,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/I/IBM-601a16ed.png",
                 "symbol": "IBM",
                 "industry_id": 451020,
-                "market_cap": 214024929280
+                "market_cap": 215629758464
             },
             {
                 "id": 67812,
@@ -978,7 +404,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/L/LRCX-c98b536c.png",
                 "symbol": "LRCX",
                 "industry_id": 453010,
-                "market_cap": 324266917888
+                "market_cap": 367482503168
             },
             {
                 "id": 68069,
@@ -991,7 +417,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/L/LUV-713f98ab.png",
                 "symbol": "LUV",
                 "industry_id": 203020,
-                "market_cap": 19023599616
+                "market_cap": 20572379136
             },
             {
                 "id": 68110,
@@ -1004,7 +430,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/L/LVS-3c5f622c.png",
                 "symbol": "LVS",
                 "industry_id": 253010,
-                "market_cap": 36440428544
+                "market_cap": 35530588160
             },
             {
                 "id": 68433,
@@ -1017,7 +443,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/M/MAS-a0376f6e.png",
                 "symbol": "MAS",
                 "industry_id": 201020,
-                "market_cap": 15060114432
+                "market_cap": 14552971264
             },
             {
                 "id": 68683,
@@ -1030,7 +456,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/M/MCO-a9d96472.png",
                 "symbol": "MCO",
                 "industry_id": 402030,
-                "market_cap": 81492426752
+                "market_cap": 79793373184
             },
             {
                 "id": 71690,
@@ -1043,7 +469,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/N/NOW-4752ba9f.png",
                 "symbol": "NOW",
                 "industry_id": 451030,
-                "market_cap": 93628235776
+                "market_cap": 94383882240
             },
             {
                 "id": 72263,
@@ -1056,7 +482,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/N/NVR-0f8f9c56.png",
                 "symbol": "NVR",
                 "industry_id": 252010,
-                "market_cap": 18027915264
+                "market_cap": 16613889024
             },
             {
                 "id": 73628,
@@ -1069,7 +495,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/O/OTIS-848b696b.png",
                 "symbol": "OTIS",
                 "industry_id": 201060,
-                "market_cap": 30069987328
+                "market_cap": 29037641728
             },
             {
                 "id": 74917,
@@ -1082,7 +508,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/P/PKG-3c6cdbc5.png",
                 "symbol": "PKG",
                 "industry_id": 151030,
-                "market_cap": 18796611584
+                "market_cap": 19862290432
             },
             {
                 "id": 75172,
@@ -1095,7 +521,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/P/PM-6f18d12c.png",
                 "symbol": "PM",
                 "industry_id": 302030,
-                "market_cap": 251457814528
+                "market_cap": 267226677248
             },
             {
                 "id": 77344,
@@ -1108,7 +534,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/R/RJF-a4cf0911.png",
                 "symbol": "RJF",
                 "industry_id": 402030,
-                "market_cap": 30258229248
+                "market_cap": 30264113152
             },
             {
                 "id": 77691,
@@ -1121,7 +547,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/R/ROL-3dc30a13.png",
                 "symbol": "ROL",
                 "industry_id": 202010,
-                "market_cap": 26943119360
+                "market_cap": 25912954880
             },
             {
                 "id": 81595,
@@ -1134,7 +560,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/T/T-ca084bdc.png",
                 "symbol": "T",
                 "industry_id": 501010,
-                "market_cap": 178520981504
+                "market_cap": 176002646016
             },
             {
                 "id": 81964,
@@ -1147,7 +573,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/T/TDY-5e11846c.png",
                 "symbol": "TDY",
                 "industry_id": 452030,
-                "market_cap": 30676932608
+                "market_cap": 29080584192
             },
             {
                 "id": 82023,
@@ -1160,7 +586,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/T/TEL-2bac1695.png",
                 "symbol": "TEL",
                 "industry_id": 452030,
-                "market_cap": 61389361152
+                "market_cap": 60416598016
             },
             {
                 "id": 83334,
@@ -1173,7 +599,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/T/TSLA-94ad3cbf.png",
                 "symbol": "TSLA",
                 "industry_id": 251020,
-                "market_cap": 1224618803200
+                "market_cap": 1385283846144
             },
             {
                 "id": 83651,
@@ -1186,7 +612,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/T/TXN-5496f76d.png",
                 "symbol": "TXN",
                 "industry_id": 453010,
-                "market_cap": 244975501312
+                "market_cap": 261610192896
             },
             {
                 "id": 84326,
@@ -1199,7 +625,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/U/URI-e65c4332.png",
                 "symbol": "URI",
                 "industry_id": 201070,
-                "market_cap": 60854489088
+                "market_cap": 59405799424
             },
             {
                 "id": 85422,
@@ -1212,7 +638,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/V/VRT-c059a1ed.png",
                 "symbol": "VRT",
                 "industry_id": 201040,
-                "market_cap": 123465375744
+                "market_cap": 130181824512
             },
             {
                 "id": 85756,
@@ -1225,7 +651,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/W/WAB-258a6b91.png",
                 "symbol": "WAB",
                 "industry_id": 201060,
-                "market_cap": 45427400704
+                "market_cap": 45170700288
             }
         ],
         "2026-04-23": [
@@ -1240,7 +666,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/A/AMP-4d728d23.png",
                 "symbol": "AMP",
                 "industry_id": 402030,
-                "market_cap": 44584337408
+                "market_cap": 43436748800
             },
             {
                 "id": 48694,
@@ -1253,7 +679,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/A/AXP-fbbcf24c.png",
                 "symbol": "AXP",
                 "industry_id": 402020,
-                "market_cap": 218751680512
+                "market_cap": 218621345792
             },
             {
                 "id": 50022,
@@ -1266,7 +692,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/B/BKR-5fe04e06.png",
                 "symbol": "BKR",
                 "industry_id": 101010,
-                "market_cap": 67696201728
+                "market_cap": 63251099648
             },
             {
                 "id": 51239,
@@ -1279,7 +705,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/B/BX-8c41ed3d.png",
                 "symbol": "BX",
                 "industry_id": 402030,
-                "market_cap": 144586981376
+                "market_cap": 148671021056
             },
             {
                 "id": 51810,
@@ -1292,7 +718,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/C/CBRE-b15b504e.png",
                 "symbol": "CBRE",
                 "industry_id": 602010,
-                "market_cap": 43043876864
+                "market_cap": 43076259840
             },
             {
                 "id": 53297,
@@ -1305,7 +731,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/C/CMCSA-c107a8c8.png",
                 "symbol": "CMCSA",
                 "industry_id": 502010,
-                "market_cap": 99503669248
+                "market_cap": 91871797248
             },
             {
                 "id": 53593,
@@ -1318,7 +744,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/C/CNP-50a8da88.png",
                 "symbol": "CNP",
                 "industry_id": 551030,
-                "market_cap": 28013699072
+                "market_cap": 27243159552
             },
             {
                 "id": 56063,
@@ -1331,7 +757,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/D/DLR-28cf3744.png",
                 "symbol": "DLR",
                 "industry_id": 601080,
-                "market_cap": 67739852800
+                "market_cap": 67384487936
             },
             {
                 "id": 56311,
@@ -1344,7 +770,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/D/DOV-0b3df011.png",
                 "symbol": "DOV",
                 "industry_id": 201060,
-                "market_cap": 30535845888
+                "market_cap": 29671993344
             },
             {
                 "id": 56318,
@@ -1357,7 +783,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/D/DOW-5d759664.png",
                 "symbol": "DOW",
                 "industry_id": 151010,
-                "market_cap": 27470508032
+                "market_cap": 26590644224
             },
             {
                 "id": 57975,
@@ -1370,7 +796,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/E/ERIE-900f8574.png",
                 "symbol": "ERIE",
                 "industry_id": 403010,
-                "market_cap": 10767997952
+                "market_cap": 10054540288
             },
             {
                 "id": 58469,
@@ -1383,7 +809,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/E/EW-433761e0.png",
                 "symbol": "EW",
                 "industry_id": 351010,
-                "market_cap": 48340033536
+                "market_cap": 46312833024
             },
             {
                 "id": 58944,
@@ -1396,7 +822,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/F/FCX-db3b0b05.png",
                 "symbol": "FCX",
                 "industry_id": 151040,
-                "market_cap": 87463084032
+                "market_cap": 89022603264
             },
             {
                 "id": 59374,
@@ -1409,7 +835,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/F/FIX-3bd388db.png",
                 "symbol": "FIX",
                 "industry_id": 201030,
-                "market_cap": 63162765312
+                "market_cap": 68737089536
             },
             {
                 "id": 62295,
@@ -1422,7 +848,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/H/HBAN-0480c167.png",
                 "symbol": "HBAN",
                 "industry_id": 401010,
-                "market_cap": 30894569472
+                "market_cap": 30128279552
             },
             {
                 "id": 62660,
@@ -1435,7 +861,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/H/HIG-f0e648da.png",
                 "symbol": "HIG",
                 "industry_id": 403010,
-                "market_cap": 38046392320
+                "market_cap": 36741165056
             },
             {
                 "id": 62980,
@@ -1448,7 +874,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/H/HON-ac694489.png",
                 "symbol": "HON",
                 "industry_id": 201050,
-                "market_cap": 134588137472
+                "market_cap": 135267262464
             },
             {
                 "id": 64605,
@@ -1461,7 +887,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/I/INTC-2e2f8558.png",
                 "symbol": "INTC",
                 "industry_id": 453010,
-                "market_cap": 432004169728
+                "market_cap": 634968342528
             },
             {
                 "id": 65795,
@@ -1474,7 +900,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/K/KDP-296508f8.png",
                 "symbol": "KDP",
                 "industry_id": 302010,
-                "market_cap": 38261481472
+                "market_cap": 39185735680
             },
             {
                 "id": 67480,
@@ -1487,7 +913,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/L/LMT-bab36aae.png",
                 "symbol": "LMT",
                 "industry_id": 201010,
-                "market_cap": 118019162112
+                "market_cap": 116446650368
             },
             {
                 "id": 70915,
@@ -1500,7 +926,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/N/NDAQ-b807c5c2.png",
                 "symbol": "NDAQ",
                 "industry_id": 402030,
-                "market_cap": 51255721984
+                "market_cap": 50394189824
             },
             {
                 "id": 70974,
@@ -1513,7 +939,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/N/NEE-e31f3a92.png",
                 "symbol": "NEE",
                 "industry_id": 551010,
-                "market_cap": 198099877888
+                "market_cap": 194485895168
             },
             {
                 "id": 70989,
@@ -1526,7 +952,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/N/NEM-c8ef54d3.png",
                 "symbol": "NEM",
                 "industry_id": 151040,
-                "market_cap": 125946798080
+                "market_cap": 126413348864
             },
             {
                 "id": 74189,
@@ -1539,7 +965,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/P/PCG-2e82fd66.png",
                 "symbol": "PCG",
                 "industry_id": 551010,
-                "market_cap": 36041609216
+                "market_cap": 35337928704
             },
             {
                 "id": 74549,
@@ -1552,7 +978,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/P/PFG-ec0c68c1.png",
                 "symbol": "PFG",
                 "industry_id": 403010,
-                "market_cap": 21972422656
+                "market_cap": 22139848704
             },
             {
                 "id": 74750,
@@ -1565,7 +991,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/P/PHM-5aff5450.png",
                 "symbol": "PHM",
                 "industry_id": 252010,
-                "market_cap": 24592621568
+                "market_cap": 22535569408
             },
             {
                 "id": 75373,
@@ -1578,7 +1004,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/P/POOL-6f8f5a97.png",
                 "symbol": "POOL",
                 "industry_id": 255010,
-                "market_cap": 8191631360
+                "market_cap": 6827692544
             },
             {
                 "id": 77709,
@@ -1591,7 +1017,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/R/ROP-abca50cf.png",
                 "symbol": "ROP",
                 "industry_id": 451030,
-                "market_cap": 36760535040
+                "market_cap": 35808276480
             },
             {
                 "id": 79984,
@@ -1604,7 +1030,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/S/SNA-7d781c81.png",
                 "symbol": "SNA",
                 "industry_id": 201060,
-                "market_cap": 19953993728
+                "market_cap": 19410599936
             },
             {
                 "id": 82653,
@@ -1617,7 +1043,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/T/TMO-a955f471.png",
                 "symbol": "TMO",
                 "industry_id": 352030,
-                "market_cap": 174110883840
+                "market_cap": 172979994624
             },
             {
                 "id": 84203,
@@ -1630,7 +1056,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/U/UNP-60b93934.png",
                 "symbol": "UNP",
                 "industry_id": 203040,
-                "market_cap": 159505137664
+                "market_cap": 156937453568
             },
             {
                 "id": 85413,
@@ -1643,7 +1069,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/V/VRSN-c3b52572.png",
                 "symbol": "VRSN",
                 "industry_id": 451020,
-                "market_cap": 24539639808
+                "market_cap": 26400036864
             },
             {
                 "id": 86613,
@@ -1656,7 +1082,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/W/WST-28fce670.png",
                 "symbol": "WST",
                 "industry_id": 352030,
-                "market_cap": 21758400512
+                "market_cap": 23466240000
             }
         ],
         "2026-04-24": [
@@ -1671,7 +1097,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/C/CHTR-cc3e789e.png",
                 "symbol": "CHTR",
                 "industry_id": 502010,
-                "market_cap": 21911459840
+                "market_cap": 19433072640
             },
             {
                 "id": 62265,
@@ -1684,7 +1110,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/H/HAS-863b6d64.png",
                 "symbol": "HAS",
                 "industry_id": 252020,
-                "market_cap": 13303945216
+                "market_cap": 13738090496
             },
             {
                 "id": 62367,
@@ -1697,7 +1123,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/H/HCA-cf369fe1.png",
                 "symbol": "HCA",
                 "industry_id": 351020,
-                "market_cap": 101046444032
+                "market_cap": 98637119488
             },
             {
                 "id": 71861,
@@ -1710,7 +1136,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/N/NSC-49bf1dd4.png",
                 "symbol": "NSC",
                 "industry_id": 203040,
-                "market_cap": 71783055360
+                "market_cap": 70234349568
             },
             {
                 "id": 74630,
@@ -1723,7 +1149,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/P/PG-85c7b45d.png",
                 "symbol": "PG",
                 "industry_id": 303010,
-                "market_cap": 358608601088
+                "market_cap": 353823916032
             },
             {
                 "id": 79601,
@@ -1736,7 +1162,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/S/SLB-63e0398d.png",
                 "symbol": "SLB",
                 "industry_id": 101010,
-                "market_cap": 82789769216
+                "market_cap": 79851732992
             }
         ],
         "2026-04-27": [
@@ -1751,7 +1177,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/A/ARE-05f792f3.png",
                 "symbol": "ARE",
                 "industry_id": 601050,
-                "market_cap": 7763150848
+                "market_cap": 8714459136
             },
             {
                 "id": 48420,
@@ -1764,7 +1190,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/A/AVB-ab2d93f0.png",
                 "symbol": "AVB",
                 "industry_id": 601060,
-                "market_cap": 24543121408
+                "market_cap": 25739563008
             },
             {
                 "id": 50760,
@@ -1777,7 +1203,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/B/BRO-c8ff8700.png",
                 "symbol": "BRO",
                 "industry_id": 403010,
-                "market_cap": 22017959936
+                "market_cap": 18797850624
             },
             {
                 "id": 52119,
@@ -1790,7 +1216,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/C/CDNS-30036607.png",
                 "symbol": "CDNS",
                 "industry_id": 451030,
-                "market_cap": 91559411712
+                "market_cap": 98676523008
             },
             {
                 "id": 52836,
@@ -1803,7 +1229,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/C/CINF-bee3e92c.png",
                 "symbol": "CINF",
                 "industry_id": 403010,
-                "market_cap": 26128973824
+                "market_cap": 25000564736
             },
             {
                 "id": 56358,
@@ -1816,7 +1242,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/D/DPZ-aa1212c3.png",
                 "symbol": "DPZ",
                 "industry_id": 253010,
-                "market_cap": 11338169344
+                "market_cap": 10938476544
             },
             {
                 "id": 72090,
@@ -1829,7 +1255,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/N/NUE-ec2488d3.png",
                 "symbol": "NUE",
                 "industry_id": 151040,
-                "market_cap": 49213501440
+                "market_cap": 52074749952
             },
             {
                 "id": 75841,
@@ -1842,7 +1268,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/P/PSA-e08535ce.png",
                 "symbol": "PSA",
                 "industry_id": 601080,
-                "market_cap": 53617545216
+                "market_cap": 54593429504
             },
             {
                 "id": 84015,
@@ -1855,7 +1281,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/U/UHS-4fa97073.png",
                 "symbol": "UHS",
                 "industry_id": 351020,
-                "market_cap": 11413425152
+                "market_cap": 10378633216
             },
             {
                 "id": 85596,
@@ -1868,7 +1294,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/V/VTR-0893a802.png",
                 "symbol": "VTR",
                 "industry_id": 601050,
-                "market_cap": 40332869632
+                "market_cap": 41551904768
             },
             {
                 "id": 85727,
@@ -1881,7 +1307,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/V/VZ-5891bb26.png",
                 "symbol": "VZ",
                 "industry_id": 501010,
-                "market_cap": 198013452288
+                "market_cap": 198560104448
             }
         ],
         "2026-04-28": [
@@ -1896,7 +1322,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/A/ACGL-66662f54.png",
                 "symbol": "ACGL",
                 "industry_id": 403010,
-                "market_cap": 35885248512
+                "market_cap": 33998370816
             },
             {
                 "id": 46253,
@@ -1909,7 +1335,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/A/ALLE-158916f9.png",
                 "symbol": "ALLE",
                 "industry_id": 201020,
-                "market_cap": 12747559936
+                "market_cap": 11569257472
             },
             {
                 "id": 46799,
@@ -1922,7 +1348,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/A/AMT-46ef2cdb.png",
                 "symbol": "AMT",
                 "industry_id": 601080,
-                "market_cap": 82240741376
+                "market_cap": 82298642432
             },
             {
                 "id": 48580,
@@ -1935,7 +1361,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/A/AVY-7f475fa4.png",
                 "symbol": "AVY",
                 "industry_id": 151030,
-                "market_cap": 12769452032
+                "market_cap": 12590270464
             },
             {
                 "id": 49517,
@@ -1948,7 +1374,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/B/BEN-755ad1bb.png",
                 "symbol": "BEN",
                 "industry_id": 402030,
-                "market_cap": 14267474944
+                "market_cap": 16068374528
             },
             {
                 "id": 50013,
@@ -1961,7 +1387,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/B/BKNG-14602dfd.png",
                 "symbol": "BKNG",
                 "industry_id": 253010,
-                "market_cap": 144021979136
+                "market_cap": 131132096512
             },
             {
                 "id": 51270,
@@ -1974,7 +1400,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/B/BXP-2bb46a4a.png",
                 "symbol": "BXP",
                 "industry_id": 601040,
-                "market_cap": 9243360256
+                "market_cap": 9432284160
             },
             {
                 "id": 53428,
@@ -1987,7 +1413,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/C/CMS-5c244085.png",
                 "symbol": "CMS",
                 "industry_id": 551030,
-                "market_cap": 22858088448
+                "market_cap": 21824139264
             },
             {
                 "id": 53474,
@@ -2000,7 +1426,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/C/CNC-691fd3da.png",
                 "symbol": "CNC",
                 "industry_id": 351020,
-                "market_cap": 21366517760
+                "market_cap": 27536181248
             },
             {
                 "id": 54546,
@@ -2013,7 +1439,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/C/CSGP-a30d57c9.png",
                 "symbol": "CSGP",
                 "industry_id": 602010,
-                "market_cap": 15119328256
+                "market_cap": 13534010368
             },
             {
                 "id": 56914,
@@ -2026,7 +1452,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/E/ECL-05bc8373.png",
                 "symbol": "ECL",
                 "industry_id": 151010,
-                "market_cap": 75676098560
+                "market_cap": 71690043392
             },
             {
                 "id": 57258,
@@ -2039,7 +1465,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/E/EIX-2ac1bc88.png",
                 "symbol": "EIX",
                 "industry_id": 551010,
-                "market_cap": 26391750656
+                "market_cap": 26545750016
             },
             {
                 "id": 57919,
@@ -2052,7 +1478,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/E/EQR-d26102fd.png",
                 "symbol": "EQR",
                 "industry_id": 601060,
-                "market_cap": 23626821632
+                "market_cap": 24619642880
             },
             {
                 "id": 58153,
@@ -2065,7 +1491,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/E/ESS-6ea26513.png",
                 "symbol": "ESS",
                 "industry_id": 601060,
-                "market_cap": 16554851328
+                "market_cap": 16987091968
             },
             {
                 "id": 58602,
@@ -2078,7 +1504,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/E/EXR-61da9a57.png",
                 "symbol": "EXR",
                 "industry_id": 601080,
-                "market_cap": 29552474112
+                "market_cap": 30221533184
             },
             {
                 "id": 59015,
@@ -2091,7 +1517,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/F/FE-709c2d44.png",
                 "symbol": "FE",
                 "industry_id": 551010,
-                "market_cap": 28532649984
+                "market_cap": 25622740992
             },
             {
                 "id": 59150,
@@ -2104,7 +1530,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/F/FFIV-cb87eca0.png",
                 "symbol": "FFIV",
                 "industry_id": 452010,
-                "market_cap": 17163557888
+                "market_cap": 20076333056
             },
             {
                 "id": 59270,
@@ -2117,7 +1543,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/F/FICO-9be06e39.png",
                 "symbol": "FICO",
                 "industry_id": 451030,
-                "market_cap": 24051089408
+                "market_cap": 26605127680
             },
             {
                 "id": 61332,
@@ -2130,7 +1556,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/G/GLW-0052078b.png",
                 "symbol": "GLW",
                 "industry_id": 452030,
-                "market_cap": 144488595456
+                "market_cap": 161290092544
             },
             {
                 "id": 61350,
@@ -2143,7 +1569,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/G/GM-5913619e.png",
                 "symbol": "GM",
                 "industry_id": 251020,
-                "market_cap": 71679852544
+                "market_cap": 72452186112
             },
             {
                 "id": 62823,
@@ -2156,7 +1582,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/H/HLT-b6fa50fa.png",
                 "symbol": "HLT",
                 "industry_id": 253010,
-                "market_cap": 78458200064
+                "market_cap": 72542617600
             },
             {
                 "id": 62998,
@@ -2169,7 +1595,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/H/HOOD-65b65344.png",
                 "symbol": "HOOD",
                 "industry_id": 402030,
-                "market_cap": 75376787456
+                "market_cap": 69261901824
             },
             {
                 "id": 64362,
@@ -2182,7 +1608,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/I/INCY-77aef8d2.png",
                 "symbol": "INCY",
                 "industry_id": 352010,
-                "market_cap": 18899052544
+                "market_cap": 19647246336
             },
             {
                 "id": 64890,
@@ -2195,7 +1621,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/I/IR-a6e944cf.png",
                 "symbol": "IR",
                 "industry_id": 201060,
-                "market_cap": 33015930880
+                "market_cap": 29697091584
             },
             {
                 "id": 65235,
@@ -2208,7 +1634,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/I/IVZ-0d9cc47e.png",
                 "symbol": "IVZ",
                 "industry_id": 402030,
-                "market_cap": 11496576000
+                "market_cap": 12445848576
             },
             {
                 "id": 66065,
@@ -2221,7 +1647,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/K/KMB-8b9a725d.png",
                 "symbol": "KMB",
                 "industry_id": 303010,
-                "market_cap": 32727074816
+                "market_cap": 32629088256
             },
             {
                 "id": 66199,
@@ -2234,7 +1660,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/K/KO-a8c99fa6.png",
                 "symbol": "KO",
                 "industry_id": 302010,
-                "market_cap": 324542889984
+                "market_cap": 337362845696
             },
             {
                 "id": 68790,
@@ -2247,7 +1673,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/M/MDLZ-6cda002b.png",
                 "symbol": "MDLZ",
                 "industry_id": 302020,
-                "market_cap": 74014375936
+                "market_cap": 79337947136
             },
             {
                 "id": 72455,
@@ -2260,7 +1686,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/N/NXPI-1369b741.png",
                 "symbol": "NXPI",
                 "industry_id": 453010,
-                "market_cap": 59820097536
+                "market_cap": 74487742464
             },
             {
                 "id": 72929,
@@ -2273,7 +1699,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/O/OKE-e56b9b35.png",
                 "symbol": "OKE",
                 "industry_id": 101020,
-                "market_cap": 55282499584
+                "market_cap": 53710413824
             },
             {
                 "id": 73044,
@@ -2286,7 +1712,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/O/OMC-48598b96.png",
                 "symbol": "OMC",
                 "industry_id": 502010,
-                "market_cap": 15574449152
+                "market_cap": 15789593600
             },
             {
                 "id": 74171,
@@ -2299,7 +1725,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/P/PCAR-6478af59.png",
                 "symbol": "PCAR",
                 "industry_id": 201060,
-                "market_cap": 66907201536
+                "market_cap": 60207075328
             },
             {
                 "id": 75280,
@@ -2312,7 +1738,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/P/PNR-cf626e42.png",
                 "symbol": "PNR",
                 "industry_id": 201060,
-                "market_cap": 15076918272
+                "market_cap": 12483250176
             },
             {
                 "id": 75458,
@@ -2325,7 +1751,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/P/PPG-aa270cd8.png",
                 "symbol": "PPG",
                 "industry_id": 151010,
-                "market_cap": 24751319040
+                "market_cap": 24519757824
             },
             {
                 "id": 79223,
@@ -2338,7 +1764,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/S/SHW-1149f665.png",
                 "symbol": "SHW",
                 "industry_id": 151010,
-                "market_cap": 82815041536
+                "market_cap": 77842677760
             },
             {
                 "id": 80415,
@@ -2351,7 +1777,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/S/SPGI-5b02db9d.png",
                 "symbol": "SPGI",
                 "industry_id": 402030,
-                "market_cap": 131952992256
+                "market_cap": 124901679104
             },
             {
                 "id": 81197,
@@ -2364,7 +1790,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/S/STX-212c8eb7.png",
                 "symbol": "STX",
                 "industry_id": 452020,
-                "market_cap": 128109903872
+                "market_cap": 172963446784
             },
             {
                 "id": 81586,
@@ -2377,7 +1803,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/S/SYY-efadd83f.png",
                 "symbol": "SYY",
                 "industry_id": 301010,
-                "market_cap": 36123537408
+                "market_cap": 34723737600
             },
             {
                 "id": 82095,
@@ -2390,7 +1816,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/T/TER-b9e9ca7e.png",
                 "symbol": "TER",
                 "industry_id": 453010,
-                "market_cap": 62877622272
+                "market_cap": 56271626240
             },
             {
                 "id": 82680,
@@ -2403,7 +1829,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/T/TMUS-af5c3158.png",
                 "symbol": "TMUS",
                 "industry_id": 501020,
-                "market_cap": 203804622848
+                "market_cap": 213026684928
             },
             {
                 "id": 84265,
@@ -2416,7 +1842,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/U/UPS-2238953e.png",
                 "symbol": "UPS",
                 "industry_id": 203010,
-                "market_cap": 91895758848
+                "market_cap": 85662998528
             },
             {
                 "id": 84580,
@@ -2429,7 +1855,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/V/V-1ad6a4d3.png",
                 "symbol": "V",
                 "industry_id": 402010,
-                "market_cap": 592500097024
+                "market_cap": 609989033984
             },
             {
                 "id": 85110,
@@ -2442,7 +1868,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/V/VLTO-6c75d575.png",
                 "symbol": "VLTO",
                 "industry_id": 202010,
-                "market_cap": 21665490944
+                "market_cap": 21501583360
             },
             {
                 "id": 85976,
@@ -2455,7 +1881,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/W/WELL-3a06c861.png",
                 "symbol": "WELL",
                 "industry_id": 601050,
-                "market_cap": 144819109888
+                "market_cap": 150206021632
             },
             {
                 "id": 86329,
@@ -2468,7 +1894,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/W/WM-03931e08.png",
                 "symbol": "WM",
                 "industry_id": 202010,
-                "market_cap": 91181219840
+                "market_cap": 86837182464
             },
             {
                 "id": 89085,
@@ -2481,7 +1907,7 @@
                 "logo": "0",
                 "symbol": "EXE",
                 "industry_id": 101020,
-                "market_cap": 22965239808
+                "market_cap": 23011207168
             },
             {
                 "id": 89130,
@@ -2494,7 +1920,7 @@
                 "logo": "0",
                 "symbol": "XYL",
                 "industry_id": 201060,
-                "market_cap": 30062333952
+                "market_cap": 27609094144
             },
             {
                 "id": 89148,
@@ -2507,7 +1933,7 @@
                 "logo": "0",
                 "symbol": "ZBH",
                 "industry_id": 351020,
-                "market_cap": 18258747392
+                "market_cap": 16054349824
             }
         ],
         "2026-04-29": [
@@ -2535,7 +1961,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/A/ABBV-a1687d1f.png",
                 "symbol": "ABBV",
                 "industry_id": 352010,
-                "market_cap": 356042801152
+                "market_cap": 359579975680
             },
             {
                 "id": 45308,
@@ -2548,7 +1974,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/A/ADP-62435bc2.png",
                 "symbol": "ADP",
                 "industry_id": 202020,
-                "market_cap": 80210829312
+                "market_cap": 85871501312
             },
             {
                 "id": 45594,
@@ -2561,7 +1987,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/A/AFL-9fd3d63f.png",
                 "symbol": "AFL",
                 "industry_id": 403010,
-                "market_cap": 60786135040
+                "market_cap": 58028331008
             },
             {
                 "id": 46169,
@@ -2574,7 +2000,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/A/ALGN-a6911430.png",
                 "symbol": "ALGN",
                 "industry_id": 351010,
-                "market_cap": 13240034304
+                "market_cap": 12055111680
             },
             {
                 "id": 46244,
@@ -2587,7 +2013,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/A/ALL-753cb03d.png",
                 "symbol": "ALL",
                 "industry_id": 403010,
-                "market_cap": 55970459648
+                "market_cap": 55291109376
             },
             {
                 "id": 46856,
@@ -2600,7 +2026,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/A/AMZN-f3ea2380.png",
                 "symbol": "AMZN",
                 "industry_id": 255030,
-                "market_cap": 2796334088192
+                "market_cap": 2929401266176
             },
             {
                 "id": 47150,
@@ -2613,7 +2039,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/A/APH-5ae19adc.png",
                 "symbol": "APH",
                 "industry_id": 452030,
-                "market_cap": 182173188096
+                "market_cap": 157336059904
             },
             {
                 "id": 48605,
@@ -2626,7 +2052,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/A/AWK-9f2fb198.png",
                 "symbol": "AWK",
                 "industry_id": 551040,
-                "market_cap": 25732200448
+                "market_cap": 24384749568
             },
             {
                 "id": 49647,
@@ -2639,7 +2065,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/B/BG-9920d42a.png",
                 "symbol": "BG",
                 "industry_id": 302020,
-                "market_cap": 24187799552
+                "market_cap": 24207513600
             },
             {
                 "id": 49842,
@@ -2652,7 +2078,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/B/BIIB-11fd35d8.png",
                 "symbol": "BIIB",
                 "industry_id": 352010,
-                "market_cap": 26504288256
+                "market_cap": 28475840512
             },
             {
                 "id": 52712,
@@ -2665,7 +2091,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/C/CHRW-b8a8b338.png",
                 "symbol": "CHRW",
                 "industry_id": 203010,
-                "market_cap": 22588731392
+                "market_cap": 20533037056
             },
             {
                 "id": 53324,
@@ -2678,7 +2104,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/C/CMG-db3170b7.png",
                 "symbol": "CMG",
                 "industry_id": 253010,
-                "market_cap": 44232261632
+                "market_cap": 42179166208
             },
             {
                 "id": 54834,
@@ -2691,7 +2117,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/C/CTSH-50b4072b.png",
                 "symbol": "CTSH",
                 "industry_id": 451020,
-                "market_cap": 26277029888
+                "market_cap": 24651360256
             },
             {
                 "id": 55057,
@@ -2704,7 +2130,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/C/CVNA-8041a3ea.png",
                 "symbol": "CVNA",
                 "industry_id": 255040,
-                "market_cap": 90129825792
+                "market_cap": 86965264384
             },
             {
                 "id": 56814,
@@ -2717,7 +2143,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/E/EBAY-c3f316c5.png",
                 "symbol": "EBAY",
                 "industry_id": 255030,
-                "market_cap": 45230788608
+                "market_cap": 48245121024
             },
             {
                 "id": 57488,
@@ -2730,7 +2156,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/E/EME-b601f609.png",
                 "symbol": "EME",
                 "industry_id": 201030,
-                "market_cap": 39889440768
+                "market_cap": 41520803840
             },
             {
                 "id": 57901,
@@ -2743,7 +2169,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/E/EQIX-c7c7adbf.png",
                 "symbol": "EQIX",
                 "industry_id": 601080,
-                "market_cap": 107023269888
+                "market_cap": 105484091392
             },
             {
                 "id": 58249,
@@ -2756,7 +2182,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/E/ETR-53cbd49a.png",
                 "symbol": "ETR",
                 "industry_id": 551010,
-                "market_cap": 51248816128
+                "market_cap": 50853552128
             },
             {
                 "id": 58669,
@@ -2769,7 +2195,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/F/F-1d7efb62.png",
                 "symbol": "F",
                 "industry_id": 251020,
-                "market_cap": 49697710080
+                "market_cap": 49169121280
             },
             {
                 "id": 60692,
@@ -2782,7 +2208,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/G/GD-bb3d3546.png",
                 "symbol": "GD",
                 "industry_id": 201010,
-                "market_cap": 84351844352
+                "market_cap": 93632405504
             },
             {
                 "id": 61471,
@@ -2795,7 +2221,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/G/GNRC-1eeef581.png",
                 "symbol": "GNRC",
                 "industry_id": 201040,
-                "market_cap": 12842725376
+                "market_cap": 15736832000
             },
             {
                 "id": 61586,
@@ -2808,7 +2234,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/G/GOOG-3440b873.png",
                 "symbol": "GOOG",
                 "industry_id": 502030,
-                "market_cap": 4229654904832
+                "market_cap": 4849279172608
             },
             {
                 "id": 61595,
@@ -2821,7 +2247,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/G/GOOGL-4d0193e7.png",
                 "symbol": "GOOGL",
                 "industry_id": 502030,
-                "market_cap": 4229654904832
+                "market_cap": 4849279172608
             },
             {
                 "id": 61804,
@@ -2834,7 +2260,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/G/GRMN-a2fea59f.png",
                 "symbol": "GRMN",
                 "industry_id": 252010,
-                "market_cap": 49495744512
+                "market_cap": 46259101696
             },
             {
                 "id": 63436,
@@ -2847,7 +2273,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/H/HUM-e07bbbbd.png",
                 "symbol": "HUM",
                 "industry_id": 351020,
-                "market_cap": 26933071872
+                "market_cap": 33086486528
             },
             {
                 "id": 63976,
@@ -2860,7 +2286,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/I/IEX-2c1ea562.png",
                 "symbol": "IEX",
                 "industry_id": 201060,
-                "market_cap": 15512771584
+                "market_cap": 16117155840
             },
             {
                 "id": 64689,
@@ -2873,7 +2299,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/I/INVH-a8305ce9.png",
                 "symbol": "INVH",
                 "industry_id": 601060,
-                "market_cap": 16688719872
+                "market_cap": 17410304000
             },
             {
                 "id": 66019,
@@ -2886,7 +2312,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/K/KLAC-019f2ebe.png",
                 "symbol": "KLAC",
                 "industry_id": 453010,
-                "market_cap": 249882296320
+                "market_cap": 244693794816
             },
             {
                 "id": 67249,
@@ -2899,7 +2325,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/L/LII-9fe083c7.png",
                 "symbol": "LII",
                 "industry_id": 201020,
-                "market_cap": 17528176640
+                "market_cap": 18139500544
             },
             {
                 "id": 68313,
@@ -2912,7 +2338,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/M/MAA-6b847203.png",
                 "symbol": "MAA",
                 "industry_id": 601060,
-                "market_cap": 14668748800
+                "market_cap": 15058271232
             },
             {
                 "id": 68972,
@@ -2925,7 +2351,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/M/META-c39983c9.png",
                 "symbol": "META",
                 "industry_id": 502030,
-                "market_cap": 1710801027072
+                "market_cap": 1544802402304
             },
             {
                 "id": 69094,
@@ -2938,7 +2364,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/M/MGM-0d675151.png",
                 "symbol": "MGM",
                 "industry_id": 253010,
-                "market_cap": 10740270080
+                "market_cap": 9943739392
             },
             {
                 "id": 70142,
@@ -2951,7 +2377,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/M/MSFT-59c730da.png",
                 "symbol": "MSFT",
                 "industry_id": 451030,
-                "market_cap": 3156837400576
+                "market_cap": 3082681057280
             },
             {
                 "id": 72762,
@@ -2964,7 +2390,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/O/ODFL-d05425be.png",
                 "symbol": "ODFL",
                 "industry_id": 203040,
-                "market_cap": 46287261696
+                "market_cap": 41307578368
             },
             {
                 "id": 73505,
@@ -2977,7 +2403,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/O/ORLY-dd5a5496.png",
                 "symbol": "ORLY",
                 "industry_id": 255040,
-                "market_cap": 77644660736
+                "market_cap": 77954211840
             },
             {
                 "id": 75971,
@@ -2990,7 +2416,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/P/PSX-1ee9bfda.png",
                 "symbol": "PSX",
                 "industry_id": 101020,
-                "market_cap": 66152321024
+                "market_cap": 68973297664
             },
             {
                 "id": 76250,
@@ -3003,7 +2429,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/Q/QCOM-aef25e26.png",
                 "symbol": "QCOM",
                 "industry_id": 453010,
-                "market_cap": 160778207232
+                "market_cap": 233549938688
             },
             {
                 "id": 76939,
@@ -3016,7 +2442,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/R/REG-f24960e1.png",
                 "symbol": "REG",
                 "industry_id": 601070,
-                "market_cap": 15136391168
+                "market_cap": 14667846656
             },
             {
                 "id": 76948,
@@ -3029,7 +2455,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/R/REGN-785d76be.png",
                 "symbol": "REGN",
                 "industry_id": 352010,
-                "market_cap": 76602875904
+                "market_cap": 74348560384
             },
             {
                 "id": 78369,
@@ -3042,7 +2468,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/S/SBAC-b3672127.png",
                 "symbol": "SBAC",
                 "industry_id": 601080,
-                "market_cap": 22856650752
+                "market_cap": 23085658112
             },
             {
                 "id": 81396,
@@ -3055,7 +2481,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/S/SWK-f81ec4d1.png",
                 "symbol": "SWK",
                 "industry_id": 201060,
-                "market_cap": 12094477312
+                "market_cap": 12303101952
             },
             {
                 "id": 83713,
@@ -3068,7 +2494,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/T/TYL-37f59c9c.png",
                 "symbol": "TYL",
                 "industry_id": 451030,
-                "market_cap": 14535182336
+                "market_cap": 13868005376
             },
             {
                 "id": 84908,
@@ -3081,7 +2507,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/V/VICI-2f176f75.png",
                 "symbol": "VICI",
                 "industry_id": 601080,
-                "market_cap": 30177335296
+                "market_cap": 30812639232
             },
             {
                 "id": 85128,
@@ -3094,7 +2520,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/V/VMC-dd53e77e.png",
                 "symbol": "VMC",
                 "industry_id": 151020,
-                "market_cap": 38435938304
+                "market_cap": 37433212928
             },
             {
                 "id": 85404,
@@ -3107,7 +2533,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/V/VRSK-9465fa4e.png",
                 "symbol": "VRSK",
                 "industry_id": 202020,
-                "market_cap": 24319182848
+                "market_cap": 23205955584
             },
             {
                 "id": 89157,
@@ -3120,7 +2546,7 @@
                 "logo": "0",
                 "symbol": "YUM",
                 "industry_id": 253010,
-                "market_cap": 43137261568
+                "market_cap": 42090151936
             }
         ],
         "2026-04-30": [
@@ -3135,7 +2561,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/A/AAPL-7dc7c2bb.png",
                 "symbol": "AAPL",
                 "industry_id": 452020,
-                "market_cap": 3934734778368
+                "market_cap": 4228448780288
             },
             {
                 "id": 45825,
@@ -3148,7 +2574,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/A/AIG-30cd9a26.png",
                 "symbol": "AIG",
                 "industry_id": 403010,
-                "market_cap": 40115150848
+                "market_cap": 41089314816
             },
             {
                 "id": 45985,
@@ -3161,7 +2587,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/A/AJG-b102546f.png",
                 "symbol": "AJG",
                 "industry_id": 403010,
-                "market_cap": 55989760000
+                "market_cap": 51133255680
             },
             {
                 "id": 46566,
@@ -3174,7 +2600,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/A/AME-4a97b4b1.png",
                 "symbol": "AME",
                 "industry_id": 201040,
-                "market_cap": 53487583232
+                "market_cap": 53197058048
             },
             {
                 "id": 46593,
@@ -3187,7 +2613,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/A/AMGN-75c6766d.png",
                 "symbol": "AMGN",
                 "industry_id": 352010,
-                "market_cap": 183357014016
+                "market_cap": 179117998080
             },
             {
                 "id": 47106,
@@ -3200,7 +2626,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/A/APD-a3dac329.png",
                 "symbol": "APD",
                 "industry_id": 151010,
-                "market_cap": 67370262528
+                "market_cap": 65817346048
             },
             {
                 "id": 49050,
@@ -3213,7 +2639,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/B/BAX-e40251c8.png",
                 "symbol": "BAX",
                 "industry_id": 351010,
-                "market_cap": 9503859712
+                "market_cap": 9264849920
             },
             {
                 "id": 50129,
@@ -3226,7 +2652,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/B/BLDR-105925e9.png",
                 "symbol": "BLDR",
                 "industry_id": 201020,
-                "market_cap": 9940727808
+                "market_cap": 8503938048
             },
             {
                 "id": 50324,
@@ -3239,7 +2665,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/B/BMY-b62432f3.png",
                 "symbol": "BMY",
                 "industry_id": 352020,
-                "market_cap": 117928976384
+                "market_cap": 114763579392
             },
             {
                 "id": 50622,
@@ -3252,7 +2678,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/B/BR-443e8c55.png",
                 "symbol": "BR",
                 "industry_id": 202020,
-                "market_cap": 18262847488
+                "market_cap": 17386850304
             },
             {
                 "id": 51500,
@@ -3265,7 +2691,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/C/CAH-04eff66a.png",
                 "symbol": "CAH",
                 "industry_id": 351020,
-                "market_cap": 47752241152
+                "market_cap": 43157749760
             },
             {
                 "id": 51648,
@@ -3278,7 +2704,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/C/CARR-2982b77e.png",
                 "symbol": "CARR",
                 "industry_id": 201020,
-                "market_cap": 51954872320
+                "market_cap": 55803052032
             },
             {
                 "id": 51722,
@@ -3291,7 +2717,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/C/CAT-023e520a.png",
                 "symbol": "CAT",
                 "industry_id": 201060,
-                "market_cap": 386630549504
+                "market_cap": 415878316032
             },
             {
                 "id": 52759,
@@ -3304,7 +2730,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/C/CI-17f2aaff.png",
                 "symbol": "CI",
                 "industry_id": 351020,
-                "market_cap": 75164958720
+                "market_cap": 75627184128
             },
             {
                 "id": 53210,
@@ -3317,7 +2743,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/C/CLX-a6b9751c.png",
                 "symbol": "CLX",
                 "industry_id": 303010,
-                "market_cap": 11754049536
+                "market_cap": 11184814080
             },
             {
                 "id": 53914,
@@ -3330,7 +2756,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/C/COP-9e834b95.png",
                 "symbol": "COP",
                 "industry_id": 101020,
-                "market_cap": 149979725824
+                "market_cap": 139380981760
             },
             {
                 "id": 54141,
@@ -3343,7 +2769,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/C/CPT-d1f0992b.png",
                 "symbol": "CPT",
                 "industry_id": 601060,
-                "market_cap": 10954613760
+                "market_cap": 10877794304
             },
             {
                 "id": 54299,
@@ -3356,7 +2782,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/C/CRH-5ee0744f.png",
                 "symbol": "CRH",
                 "industry_id": 151020,
-                "market_cap": 78110564352
+                "market_cap": 76048556032
             },
             {
                 "id": 56547,
@@ -3369,7 +2795,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/D/DTE-56905622.png",
                 "symbol": "DTE",
                 "industry_id": 551030,
-                "market_cap": 30325499904
+                "market_cap": 29104199680
             },
             {
                 "id": 56689,
@@ -3382,7 +2808,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/D/DXCM-02b2918d.png",
                 "symbol": "DXCM",
                 "industry_id": 351010,
-                "market_cap": 23747246080
+                "market_cap": 23340910592
             },
             {
                 "id": 60085,
@@ -3395,7 +2821,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/F/FSLR-3c574cae.png",
                 "symbol": "FSLR",
                 "industry_id": 453010,
-                "market_cap": 21191380992
+                "market_cap": 23612731392
             },
             {
                 "id": 60252,
@@ -3408,7 +2834,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/F/FTV-88e79f1c.png",
                 "symbol": "FTV",
                 "industry_id": 201060,
-                "market_cap": 19619964928
+                "market_cap": 18709127168
             },
             {
                 "id": 60707,
@@ -3421,7 +2847,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/G/GDDY-ea6d270e.png",
                 "symbol": "GDDY",
                 "industry_id": 451020,
-                "market_cap": 11423555584
+                "market_cap": 12162638848
             },
             {
                 "id": 63312,
@@ -3434,7 +2860,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/H/HSY-64161dac.png",
                 "symbol": "HSY",
                 "industry_id": 302020,
-                "market_cap": 37949595648
+                "market_cap": 36942200832
             },
             {
                 "id": 63395,
@@ -3447,7 +2873,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/H/HUBB-193a8308.png",
                 "symbol": "HUBB",
                 "industry_id": 201040,
-                "market_cap": 29560193024
+                "market_cap": 26184515584
             },
             {
                 "id": 63795,
@@ -3460,7 +2886,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/I/ICE-a9330435.png",
                 "symbol": "ICE",
                 "industry_id": 402030,
-                "market_cap": 89640566784
+                "market_cap": 88349941760
             },
             {
                 "id": 64782,
@@ -3473,7 +2899,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/I/IP-6b3c7f07.png",
                 "symbol": "IP",
                 "industry_id": 151030,
-                "market_cap": 17239199744
+                "market_cap": 18016378880
             },
             {
                 "id": 64936,
@@ -3486,7 +2912,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/I/IRM-a85c49a8.png",
                 "symbol": "IRM",
                 "industry_id": 601080,
-                "market_cap": 33600819200
+                "market_cap": 38245896192
             },
             {
                 "id": 65178,
@@ -3499,7 +2925,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/I/ITW-3985f89f.png",
                 "symbol": "ITW",
                 "industry_id": 201060,
-                "market_cap": 78343602176
+                "market_cap": 73447309312
             },
             {
                 "id": 67198,
@@ -3512,7 +2938,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/L/LH-7fdc1baa.png",
                 "symbol": "LH",
                 "industry_id": 351020,
-                "market_cap": 21732974592
+                "market_cap": 20914075648
             },
             {
                 "id": 67207,
@@ -3525,7 +2951,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/L/LHX-dc39818d.png",
                 "symbol": "LHX",
                 "industry_id": 201010,
-                "market_cap": 59926020096
+                "market_cap": 55991123968
             },
             {
                 "id": 67419,
@@ -3538,7 +2964,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/L/LLY-bddcd88e.png",
                 "symbol": "LLY",
                 "industry_id": 352020,
-                "market_cap": 779708203008
+                "market_cap": 848388554752
             },
             {
                 "id": 67545,
@@ -3551,7 +2977,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/L/LNT-b28a9a13.png",
                 "symbol": "LNT",
                 "industry_id": 551010,
-                "market_cap": 18619181056
+                "market_cap": 18471024640
             },
             {
                 "id": 68304,
@@ -3564,7 +2990,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/M/MA-9f204a13.png",
                 "symbol": "MA",
                 "industry_id": 402010,
-                "market_cap": 454267699200
+                "market_cap": 441472679936
             },
             {
                 "id": 69417,
@@ -3577,7 +3003,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/M/MLM-0f07a564.png",
                 "symbol": "MLM",
                 "industry_id": 151020,
-                "market_cap": 36767924224
+                "market_cap": 35599912960
             },
             {
                 "id": 69674,
@@ -3590,7 +3016,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/M/MO-094908d0.png",
                 "symbol": "MO",
                 "industry_id": 302030,
-                "market_cap": 110681997312
+                "market_cap": 113964761088
             },
             {
                 "id": 69893,
@@ -3603,7 +3029,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/M/MPWR-b192e541.png",
                 "symbol": "MPWR",
                 "industry_id": 453010,
-                "market_cap": 77000318976
+                "market_cap": 78596440064
             },
             {
                 "id": 69980,
@@ -3616,7 +3042,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/M/MRK-1454ca56.png",
                 "symbol": "MRK",
                 "industry_id": 352020,
-                "market_cap": 274463440896
+                "market_cap": 275333021696
             },
             {
                 "id": 70848,
@@ -3629,7 +3055,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/N/NCLH-20bb3ad9.png",
                 "symbol": "NCLH",
                 "industry_id": 253010,
-                "market_cap": 8281121792
+                "market_cap": 7799660032
             },
             {
                 "id": 74696,
@@ -3642,7 +3068,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/P/PH-fc9d9f53.png",
                 "symbol": "PH",
                 "industry_id": 201060,
-                "market_cap": 122961707008
+                "market_cap": 110908342272
             },
             {
                 "id": 76156,
@@ -3655,7 +3081,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/P/PWR-49f66815.png",
                 "symbol": "PWR",
                 "industry_id": 201030,
-                "market_cap": 96664346624
+                "market_cap": 111585353728
             },
             {
                 "id": 76734,
@@ -3668,7 +3094,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/R/RCL-e6fdce08.png",
                 "symbol": "RCL",
                 "industry_id": 253010,
-                "market_cap": 70161899520
+                "market_cap": 74314801152
             },
             {
                 "id": 77510,
@@ -3681,7 +3107,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/R/RMD-530d0a3a.png",
                 "symbol": "RMD",
                 "industry_id": 351010,
-                "market_cap": 32519712768
+                "market_cap": 30284550144
             },
             {
                 "id": 80208,
@@ -3694,7 +3120,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/S/SO-badf5487.png",
                 "symbol": "SO",
                 "industry_id": 551010,
-                "market_cap": 103428308992
+                "market_cap": 103183196160
             },
             {
                 "id": 81516,
@@ -3707,7 +3133,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/S/SYK-06568b68.png",
                 "symbol": "SYK",
                 "industry_id": 351010,
-                "market_cap": 125846323200
+                "market_cap": 109306462208
             },
             {
                 "id": 81675,
@@ -3720,7 +3146,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/T/TAP-0108194f.png",
                 "symbol": "TAP",
                 "industry_id": 302010,
-                "market_cap": 8309308928
+                "market_cap": 8011249152
             },
             {
                 "id": 83129,
@@ -3733,7 +3159,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/T/TROW-27ae4f03.png",
                 "symbol": "TROW",
                 "industry_id": 402030,
-                "market_cap": 22681210880
+                "market_cap": 23531571200
             },
             {
                 "id": 83686,
@@ -3746,7 +3172,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/T/TXT-95a50a33.png",
                 "symbol": "TXT",
                 "industry_id": 201010,
-                "market_cap": 15949228032
+                "market_cap": 16033868800
             },
             {
                 "id": 85093,
@@ -3759,7 +3185,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/V/VLO-74f092a3.png",
                 "symbol": "VLO",
                 "industry_id": 101020,
-                "market_cap": 72189747200
+                "market_cap": 71835877376
             },
             {
                 "id": 85932,
@@ -3772,7 +3198,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/W/WDC-3337233d.png",
                 "symbol": "WDC",
                 "industry_id": 452020,
-                "market_cap": 138251845632
+                "market_cap": 165600002048
             },
             {
                 "id": 89112,
@@ -3785,7 +3211,7 @@
                 "logo": "0",
                 "symbol": "WTW",
                 "industry_id": 403010,
-                "market_cap": 27776638976
+                "market_cap": 24403501056
             },
             {
                 "id": 89166,
@@ -3798,7 +3224,7 @@
                 "logo": "0",
                 "symbol": "WY",
                 "industry_id": 402040,
-                "market_cap": 18046801920
+                "market_cap": 16971954176
             },
             {
                 "id": 89175,
@@ -3811,7 +3237,7 @@
                 "logo": "0",
                 "symbol": "XEL",
                 "industry_id": 551050,
-                "market_cap": 47248949248
+                "market_cap": 49539358720
             }
         ],
         "2026-05-01": [
@@ -3826,7 +3252,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/A/AON-a5fc6be8.png",
                 "symbol": "AON",
                 "industry_id": 403010,
-                "market_cap": 69645074432
+                "market_cap": 67030896640
             },
             {
                 "id": 47482,
@@ -3839,7 +3265,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/A/ARES-6797d528.png",
                 "symbol": "ARES",
                 "industry_id": 402030,
-                "market_cap": 37053009920
+                "market_cap": 42245349376
             },
             {
                 "id": 52575,
@@ -3852,7 +3278,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/C/CHD-f160d27f.png",
                 "symbol": "CHD",
                 "industry_id": 303010,
-                "market_cap": 22771980288
+                "market_cap": 22098558976
             },
             {
                 "id": 52940,
@@ -3865,7 +3291,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/C/CL-7f092fd4.png",
                 "symbol": "CL",
                 "industry_id": 303010,
-                "market_cap": 67731599360
+                "market_cap": 70241361920
             },
             {
                 "id": 55109,
@@ -3878,7 +3304,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/C/CVX-88202029.png",
                 "symbol": "CVX",
                 "industry_id": 101020,
-                "market_cap": 367794978816
+                "market_cap": 359634108416
             },
             {
                 "id": 55359,
@@ -3891,7 +3317,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/D/D-5aa40650.png",
                 "symbol": "D",
                 "industry_id": 551030,
-                "market_cap": 53389791232
+                "market_cap": 54395121664
             },
             {
                 "id": 57283,
@@ -3904,7 +3330,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/E/EL-c776e0f8.png",
                 "symbol": "EL",
                 "industry_id": 303020,
-                "market_cap": 27997571072
+                "market_cap": 31264739328
             },
             {
                 "id": 67278,
@@ -3917,7 +3343,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/L/LIN-f4b2e122.png",
                 "symbol": "LIN",
                 "industry_id": 151010,
-                "market_cap": 238135656448
+                "market_cap": 228851384320
             },
             {
                 "id": 68213,
@@ -3930,7 +3356,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/L/LYB-1686f034.png",
                 "symbol": "LYB",
                 "industry_id": 151010,
-                "market_cap": 22868439040
+                "market_cap": 23106719744
             },
             {
                 "id": 70002,
@@ -3943,7 +3369,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/M/MRNA-a6a131db.png",
                 "symbol": "MRNA",
                 "industry_id": 352010,
-                "market_cap": 19090399232
+                "market_cap": 21468250112
             },
             {
                 "id": 70180,
@@ -3956,7 +3382,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/M/MSI-e3ffb455.png",
                 "symbol": "MSI",
                 "industry_id": 452010,
-                "market_cap": 71731920896
+                "market_cap": 63665541120
             },
             {
                 "id": 89103,
@@ -3969,7 +3395,7 @@
                 "logo": "0",
                 "symbol": "CBOE",
                 "industry_id": 402030,
-                "market_cap": 31246667776
+                "market_cap": 36494233600
             }
         ],
         "2026-05-04": [
@@ -3984,7 +3410,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/F/FANG-17a382cb.png",
                 "symbol": "FANG",
                 "industry_id": 101020,
-                "market_cap": 56043143168
+                "market_cap": 53362851840
             },
             {
                 "id": 66631,
@@ -3997,7 +3423,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/L/L-b900ac4c.png",
                 "symbol": "L",
                 "industry_id": 403010,
-                "market_cap": 22989955072
+                "market_cap": 21545809920
             },
             {
                 "id": 73116,
@@ -4010,7 +3436,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/O/ON-0ef1236d.png",
                 "symbol": "ON",
                 "industry_id": 453010,
-                "market_cap": 39294431232
+                "market_cap": 40671121408
             },
             {
                 "id": 75097,
@@ -4023,7 +3449,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/P/PLTR-091cf62e.png",
                 "symbol": "PLTR",
                 "industry_id": 451030,
-                "market_cap": 341565964288
+                "market_cap": 329875161088
             },
             {
                 "id": 75313,
@@ -4036,7 +3462,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/P/PNW-a8aee8a5.png",
                 "symbol": "PNW",
                 "industry_id": 551010,
-                "market_cap": 12257145856
+                "market_cap": 12044980224
             },
             {
                 "id": 83362,
@@ -4049,7 +3475,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/T/TSN-bb90749f.png",
                 "symbol": "TSN",
                 "industry_id": 302020,
-                "market_cap": 21945450496
+                "market_cap": 24138139648
             },
             {
                 "id": 85440,
@@ -4062,7 +3488,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/V/VRTX-0e797fb4.png",
                 "symbol": "VRTX",
                 "industry_id": 352010,
-                "market_cap": 108163940352
+                "market_cap": 109217259520
             },
             {
                 "id": 86338,
@@ -4075,7 +3501,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/W/WMB-12c9a179.png",
                 "symbol": "WMB",
                 "industry_id": 101020,
-                "market_cap": 87507419136
+                "market_cap": 88007081984
             }
         ],
         "2026-05-05": [
@@ -4090,7 +3516,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/A/ADM-4d58a07a.png",
                 "symbol": "ADM",
                 "industry_id": 302020,
-                "market_cap": 34146199552
+                "market_cap": 37587439616
             },
             {
                 "id": 45411,
@@ -4103,7 +3529,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/A/AEE-65f6467b.png",
                 "symbol": "AEE",
                 "industry_id": 551030,
-                "market_cap": 30383564800
+                "market_cap": 30157854720
             },
             {
                 "id": 45498,
@@ -4116,7 +3542,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/A/AEP-83ff3b27.png",
                 "symbol": "AEP",
                 "industry_id": 551010,
-                "market_cap": 70509502464
+                "market_cap": 71424360448
             },
             {
                 "id": 45976,
@@ -4129,7 +3555,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/A/AIZ-f3859baa.png",
                 "symbol": "AIZ",
                 "industry_id": 403010,
-                "market_cap": 11682984960
+                "market_cap": 11912201216
             },
             {
                 "id": 46557,
@@ -4142,7 +3568,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/A/AMD-406d4445.png",
                 "symbol": "AMD",
                 "industry_id": 453010,
-                "market_cap": 545446887424
+                "market_cap": 666198278144
             },
             {
                 "id": 46902,
@@ -4155,7 +3581,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/A/ANET-cb61aaa8.png",
                 "symbol": "ANET",
                 "industry_id": 452010,
-                "market_cap": 216932761600
+                "market_cap": 178304122880
             },
             {
                 "id": 47287,
@@ -4168,7 +3594,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/A/APTV-8b08ceef.png",
                 "symbol": "APTV",
                 "industry_id": 251010,
-                "market_cap": 13260452864
+                "market_cap": 12387571712
             },
             {
                 "id": 48926,
@@ -4181,7 +3607,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/B/BALL-bd7691f8.png",
                 "symbol": "BALL",
                 "industry_id": 151030,
-                "market_cap": 16292804608
+                "market_cap": 15553328128
             },
             {
                 "id": 53333,
@@ -4194,7 +3620,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/C/CMI-9e307408.png",
                 "symbol": "CMI",
                 "industry_id": 201060,
-                "market_cap": 91322556416
+                "market_cap": 93981761536
             },
             {
                 "id": 54784,
@@ -4207,7 +3633,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/C/CTRA-8b6b75b2.png",
                 "symbol": "CTRA",
                 "industry_id": 101020,
-                "market_cap": 25656539136
+                "market_cap": 24713039872
             },
             {
                 "id": 54858,
@@ -4220,7 +3646,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/C/CTVA-64300320.png",
                 "symbol": "CTVA",
                 "industry_id": 151010,
-                "market_cap": 53463220224
+                "market_cap": 54559924224
             },
             {
                 "id": 55625,
@@ -4233,7 +3659,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/D/DD-2b015d64.png",
                 "symbol": "DD",
                 "industry_id": 151010,
-                "market_cap": 19315652608
+                "market_cap": 20406575104
             },
             {
                 "id": 56215,
@@ -4246,7 +3672,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/D/DOC-f6196d04.png",
                 "symbol": "DOC",
                 "industry_id": 601050,
-                "market_cap": 11275621376
+                "market_cap": 13652962304
             },
             {
                 "id": 56595,
@@ -4259,7 +3685,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/D/DUK-77b33b89.png",
                 "symbol": "DUK",
                 "industry_id": 551010,
-                "market_cap": 98748932096
+                "market_cap": 96604258304
             },
             {
                 "id": 56634,
@@ -4272,7 +3698,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/D/DVA-efa338ce.png",
                 "symbol": "DVA",
                 "industry_id": 351020,
-                "market_cap": 12919305216
+                "market_cap": 13387023360
             },
             {
                 "id": 56652,
@@ -4285,7 +3711,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/D/DVN-a1de308c.png",
                 "symbol": "DVN",
                 "industry_id": 101020,
-                "market_cap": 29932199936
+                "market_cap": 28323809280
             },
             {
                 "id": 56762,
@@ -4298,7 +3724,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/E/EA-d08f8d80.png",
                 "symbol": "EA",
                 "industry_id": 502020,
-                "market_cap": 50612498432
+                "market_cap": 50110001152
             },
             {
                 "id": 57527,
@@ -4311,7 +3737,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/E/EMR-a8692a7e.png",
                 "symbol": "EMR",
                 "industry_id": 201040,
-                "market_cap": 79477841920
+                "market_cap": 79246647296
             },
             {
                 "id": 57736,
@@ -4324,7 +3750,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/E/EOG-9beee00c.png",
                 "symbol": "EOG",
                 "industry_id": 101020,
-                "market_cap": 71836319744
+                "market_cap": 69175959552
             },
             {
                 "id": 58223,
@@ -4337,7 +3763,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/E/ETN-06000a45.png",
                 "symbol": "ETN",
                 "industry_id": 201040,
-                "market_cap": 161790115840
+                "market_cap": 155866185728
             },
             {
                 "id": 58566,
@@ -4350,7 +3776,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/E/EXPD-8a6364eb.png",
                 "symbol": "EXPD",
                 "industry_id": 203010,
-                "market_cap": 19874279424
+                "market_cap": 20924852224
             },
             {
                 "id": 62679,
@@ -4363,7 +3789,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/H/HII-24c65873.png",
                 "symbol": "HII",
                 "industry_id": 201010,
-                "market_cap": 14085120000
+                "market_cap": 12429803520
             },
             {
                 "id": 63267,
@@ -4376,7 +3802,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/H/HSIC-43aad7a3.png",
                 "symbol": "HSIC",
                 "industry_id": 351020,
-                "market_cap": 9060153344
+                "market_cap": 8140025344
             },
             {
                 "id": 63933,
@@ -4389,7 +3815,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/I/IDXX-8dfaec6c.png",
                 "symbol": "IDXX",
                 "industry_id": 351010,
-                "market_cap": 46051196928
+                "market_cap": 44862570496
             },
             {
                 "id": 63988,
@@ -4402,7 +3828,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/I/IFF-e22c6405.png",
                 "symbol": "IFF",
                 "industry_id": 151010,
-                "market_cap": 18173440000
+                "market_cap": 20748800000
             },
             {
                 "id": 64881,
@@ -4415,7 +3841,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/I/IQV-cc125d10.png",
                 "symbol": "IQV",
                 "industry_id": 352030,
-                "market_cap": 27852800000
+                "market_cap": 30094764032
             },
             {
                 "id": 65070,
@@ -4428,7 +3854,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/I/IT-dba61857.png",
                 "symbol": "IT",
                 "industry_id": 451020,
-                "market_cap": 10712160256
+                "market_cap": 11073135616
             },
             {
                 "id": 65262,
@@ -4441,7 +3867,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/J/J-ebc58883.png",
                 "symbol": "J",
                 "industry_id": 202020,
-                "market_cap": 14921496576
+                "market_cap": 14045087744
             },
             {
                 "id": 65484,
@@ -4454,7 +3880,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/J/JKHY-bf252c3f.png",
                 "symbol": "JKHY",
                 "industry_id": 402010,
-                "market_cap": 10935087104
+                "market_cap": 10497271808
             },
             {
                 "id": 66009,
@@ -4467,7 +3893,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/K/KKR-8d4a9676.png",
                 "symbol": "KKR",
                 "industry_id": 402030,
-                "market_cap": 89790947328
+                "market_cap": 91360223232
             },
             {
                 "id": 66922,
@@ -4480,7 +3906,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/L/LDOS-1b8d27c8.png",
                 "symbol": "LDOS",
                 "industry_id": 202020,
-                "market_cap": 19098972160
+                "market_cap": 16393860096
             },
             {
                 "id": 67353,
@@ -4493,7 +3919,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/L/LITE-7a13468a.png",
                 "symbol": "LITE",
                 "industry_id": 452010,
-                "market_cap": 61123248128
+                "market_cap": 64621699072
             },
             {
                 "id": 68265,
@@ -4506,7 +3932,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/L/LYV-d2858b6a.png",
                 "symbol": "LYV",
                 "industry_id": 502020,
-                "market_cap": 36841103360
+                "market_cap": 37946433536
             },
             {
                 "id": 69844,
@@ -4519,7 +3945,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/M/MPC-231343f0.png",
                 "symbol": "MPC",
                 "industry_id": 101020,
-                "market_cap": 67935789056
+                "market_cap": 72236646400
             },
             {
                 "id": 73770,
@@ -4532,7 +3958,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/O/OXY-a632e131.png",
                 "symbol": "OXY",
                 "industry_id": 101020,
-                "market_cap": 56582758400
+                "market_cap": 51730763776
             },
             {
                 "id": 74410,
@@ -4545,7 +3971,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/P/PEG-3f46adde.png",
                 "symbol": "PEG",
                 "industry_id": 551030,
-                "market_cap": 40024788992
+                "market_cap": 38487871488
             },
             {
                 "id": 74540,
@@ -4558,7 +3984,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/P/PFE-72fc3f89.png",
                 "symbol": "PFE",
                 "industry_id": 352020,
-                "market_cap": 152241111040
+                "market_cap": 146144886784
             },
             {
                 "id": 75823,
@@ -4571,7 +3997,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/P/PRU-e2330834.png",
                 "symbol": "PRU",
                 "industry_id": 403010,
-                "market_cap": 33449013248
+                "market_cap": 35051638784
             },
             {
                 "id": 76203,
@@ -4584,7 +4010,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/P/PYPL-6d24fce1.png",
                 "symbol": "PYPL",
                 "industry_id": 402010,
-                "market_cap": 46335868928
+                "market_cap": 41422811136
             },
             {
                 "id": 77673,
@@ -4597,7 +4023,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/R/ROK-9405fa7a.png",
                 "symbol": "ROK",
                 "industry_id": 201040,
-                "market_cap": 45859885056
+                "market_cap": 50881069056
             },
             {
                 "id": 77990,
@@ -4610,7 +4036,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/R/RVTY-1eaf766e.png",
                 "symbol": "RVTY",
                 "industry_id": 352030,
-                "market_cap": 9826974720
+                "market_cap": 11299476480
             },
             {
                 "id": 79830,
@@ -4623,7 +4049,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/S/SMCI-8136cd7d.png",
                 "symbol": "SMCI",
                 "industry_id": 452020,
-                "market_cap": 16639174656
+                "market_cap": 21148712960
             },
             {
                 "id": 80270,
@@ -4636,7 +4062,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/S/SOLV-f2ce267b.png",
                 "symbol": "SOLV",
                 "industry_id": 351010,
-                "market_cap": 12148698112
+                "market_cap": 12782795776
             },
             {
                 "id": 81415,
@@ -4649,7 +4075,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/S/SWKS-6bffd73b.png",
                 "symbol": "SWKS",
                 "industry_id": 453010,
-                "market_cap": 9286939648
+                "market_cap": 10037033984
             },
             {
                 "id": 85812,
@@ -4662,7 +4088,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/W/WAT-1c494a09.png",
                 "symbol": "WAT",
                 "industry_id": 352030,
-                "market_cap": 17851295744
+                "market_cap": 29170022400
             },
             {
                 "id": 85967,
@@ -4675,7 +4101,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/W/WEC-6632599d.png",
                 "symbol": "WEC",
                 "industry_id": 551030,
-                "market_cap": 37460049920
+                "market_cap": 36356497408
             }
         ],
         "2026-05-06": [
@@ -4690,7 +4116,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/A/ALB-ebc4cfbd.png",
                 "symbol": "ALB",
                 "industry_id": 151010,
-                "market_cap": 23484880896
+                "market_cap": 23985645568
             },
             {
                 "id": 47078,
@@ -4703,7 +4129,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/A/APA-94e7ca27.png",
                 "symbol": "APA",
                 "industry_id": 101020,
-                "market_cap": 13642649600
+                "market_cap": 12828959744
             },
             {
                 "id": 47207,
@@ -4716,7 +4142,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/A/APO-2cfd7673.png",
                 "symbol": "APO",
                 "industry_id": 402010,
-                "market_cap": 74973995008
+                "market_cap": 79254003712
             },
             {
                 "id": 47226,
@@ -4729,7 +4155,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/A/APP-b584f006.png",
                 "symbol": "APP",
                 "industry_id": 451030,
-                "market_cap": 155651211264
+                "market_cap": 158088298496
             },
             {
                 "id": 48145,
@@ -4742,7 +4168,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/A/ATO-cb0aa2dc.png",
                 "symbol": "ATO",
                 "industry_id": 551020,
-                "market_cap": 30205386752
+                "market_cap": 30108344320
             },
             {
                 "id": 52169,
@@ -4755,7 +4181,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/C/CDW-2c4c4755.png",
                 "symbol": "CDW",
                 "industry_id": 452030,
-                "market_cap": 17304299520
+                "market_cap": 13517910016
             },
             {
                 "id": 52374,
@@ -4768,7 +4194,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/C/CF-0631d25d.png",
                 "symbol": "CF",
                 "industry_id": 151010,
-                "market_cap": 19273916416
+                "market_cap": 17736083456
             },
             {
                 "id": 53785,
@@ -4781,7 +4207,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/C/COHR-0b0f308a.png",
                 "symbol": "COHR",
                 "industry_id": 452030,
-                "market_cap": 49997914112
+                "market_cap": 52132929536
             },
             {
                 "id": 53924,
@@ -4794,7 +4220,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/C/COR-5c4a28d4.png",
                 "symbol": "COR",
                 "industry_id": 351020,
-                "market_cap": 60238966784
+                "market_cap": 50791809024
             },
             {
                 "id": 55084,
@@ -4807,7 +4233,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/C/CVS-30128cb6.png",
                 "symbol": "CVS",
                 "industry_id": 351020,
-                "market_cap": 99517202432
+                "market_cap": 115270148096
             },
             {
                 "id": 55455,
@@ -4820,7 +4246,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/D/DASH-37b32967.png",
                 "symbol": "DASH",
                 "industry_id": 253010,
-                "market_cap": 75295399936
+                "market_cap": 71379877888
             },
             {
                 "id": 55947,
@@ -4833,7 +4259,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/D/DIS-1955fe5f.png",
                 "symbol": "DIS",
                 "industry_id": 502020,
-                "market_cap": 182797107200
+                "market_cap": 190763319296
             },
             {
                 "id": 58018,
@@ -4846,7 +4272,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/E/ES-34817528.png",
                 "symbol": "ES",
                 "industry_id": 551010,
-                "market_cap": 25805266944
+                "market_cap": 25009496064
             },
             {
                 "id": 58514,
@@ -4859,7 +4285,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/E/EXC-b55661e5.png",
                 "symbol": "EXC",
                 "industry_id": 551010,
-                "market_cap": 47102488576
+                "market_cap": 44963840000
             },
             {
                 "id": 59321,
@@ -4872,7 +4298,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/F/FIS-6833db1b.png",
                 "symbol": "FIS",
                 "industry_id": 402010,
-                "market_cap": 23575199744
+                "market_cap": 22397349888
             },
             {
                 "id": 60225,
@@ -4885,7 +4311,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/F/FTNT-f9d72497.png",
                 "symbol": "FTNT",
                 "industry_id": 451030,
-                "market_cap": 63661375488
+                "market_cap": 84274913280
             },
             {
                 "id": 61708,
@@ -4898,7 +4324,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/G/GPN-9f1a48cd.png",
                 "symbol": "GPN",
                 "industry_id": 402010,
-                "market_cap": 16384782336
+                "market_cap": 16591000576
             },
             {
                 "id": 63294,
@@ -4911,7 +4337,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/H/HST-db6b5207.png",
                 "symbol": "HST",
                 "industry_id": 601030,
-                "market_cap": 14459400192
+                "market_cap": 15421974528
             },
             {
                 "id": 65951,
@@ -4924,7 +4350,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/K/KHC-2b6d095b.png",
                 "symbol": "KHC",
                 "industry_id": 302020,
-                "market_cap": 26019039232
+                "market_cap": 28464480256
             },
             {
                 "id": 68407,
@@ -4937,7 +4363,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/M/MAR-199bd7d5.png",
                 "symbol": "MAR",
                 "industry_id": 253010,
-                "market_cap": 96839892992
+                "market_cap": 94828830720
             },
             {
                 "id": 68963,
@@ -4950,7 +4376,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/M/MET-a961016e.png",
                 "symbol": "MET",
                 "industry_id": 403010,
-                "market_cap": 51647229952
+                "market_cap": 50908160000
             },
             {
                 "id": 71776,
@@ -4963,7 +4389,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/N/NRG-dbae4532.png",
                 "symbol": "NRG",
                 "industry_id": 551010,
-                "market_cap": 30488813568
+                "market_cap": 28588769280
             },
             {
                 "id": 72567,
@@ -4976,7 +4402,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/O/O-37429879.png",
                 "symbol": "O",
                 "industry_id": 601070,
-                "market_cap": 56775340032
+                "market_cap": 56024371200
             },
             {
                 "id": 75347,
@@ -4989,7 +4415,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/P/PODD-47bf9e96.png",
                 "symbol": "PODD",
                 "industry_id": 351010,
-                "market_cap": 13250244608
+                "market_cap": 10789042176
             },
             {
                 "id": 81922,
@@ -5002,7 +4428,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/T/TDG-d6231036.png",
                 "symbol": "TDG",
                 "industry_id": 201010,
-                "market_cap": 67416551424
+                "market_cap": 70717652992
             },
             {
                 "id": 81987,
@@ -5015,7 +4441,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/T/TECH-2f0fa258.png",
                 "symbol": "TECH",
                 "industry_id": 352030,
-                "market_cap": 8588287488
+                "market_cap": 7538985472
             },
             {
                 "id": 82508,
@@ -5028,7 +4454,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/T/TKO-8216ab08.png",
                 "symbol": "TKO",
                 "industry_id": 502020,
-                "market_cap": 14597815296
+                "market_cap": 14443626496
             },
             {
                 "id": 82913,
@@ -5041,7 +4467,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/T/TPL-fe04b100.png",
                 "symbol": "TPL",
                 "industry_id": 101020,
-                "market_cap": 30123923456
+                "market_cap": 27183642624
             },
             {
                 "id": 83055,
@@ -5054,7 +4480,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/T/TRMB-790801a3.png",
                 "symbol": "TRMB",
                 "industry_id": 452030,
-                "market_cap": 15946158080
+                "market_cap": 14257600512
             },
             {
                 "id": 83812,
@@ -5067,7 +4493,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/U/UBER-3fa95c11.png",
                 "symbol": "UBER",
                 "industry_id": 203040,
-                "market_cap": 158144544768
+                "market_cap": 154837516288
             }
         ],
         "2026-05-07": [
@@ -5082,7 +4508,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/A/ABNB-60ef5a3b.png",
                 "symbol": "ABNB",
                 "industry_id": 253010,
-                "market_cap": 87609958400
+                "market_cap": 83995082752
             },
             {
                 "id": 46005,
@@ -5095,7 +4521,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/A/AKAM-e8e18f9d.png",
                 "symbol": "AKAM",
                 "industry_id": 451020,
-                "market_cap": 13835408384
+                "market_cap": 16951556096
             },
             {
                 "id": 48685,
@@ -5108,7 +4534,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/A/AXON-7212ccf8.png",
                 "symbol": "AXON",
                 "industry_id": 201010,
-                "market_cap": 32367300608
+                "market_cap": 32343730176
             },
             {
                 "id": 49425,
@@ -5121,7 +4547,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/B/BDX-0a8149db.png",
                 "symbol": "BDX",
                 "industry_id": 351010,
-                "market_cap": 42823909376
+                "market_cap": 41936035840
             },
             {
                 "id": 53803,
@@ -5134,7 +4560,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/C/COIN-c1acecb3.png",
                 "symbol": "COIN",
                 "industry_id": 402030,
-                "market_cap": 52762755072
+                "market_cap": 53262139392
             },
             {
                 "id": 54342,
@@ -5147,7 +4573,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/C/CRL-f094d7ec.png",
                 "symbol": "CRL",
                 "industry_id": 352030,
-                "market_cap": 8427255808
+                "market_cap": 8694676480
             },
             {
                 "id": 55659,
@@ -5160,7 +4586,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/D/DDOG-9efc15c5.png",
                 "symbol": "DDOG",
                 "industry_id": 451030,
-                "market_cap": 46549331968
+                "market_cap": 70710927360
             },
             {
                 "id": 56964,
@@ -5173,7 +4599,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/E/ED-aa61b964.png",
                 "symbol": "ED",
                 "industry_id": 551030,
-                "market_cap": 39287631872
+                "market_cap": 38590529536
             },
             {
                 "id": 57785,
@@ -5186,7 +4612,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/E/EPAM-b7f1f405.png",
                 "symbol": "EPAM",
                 "industry_id": 451020,
-                "market_cap": 6390304256
+                "market_cap": 5337879552
             },
             {
                 "id": 58420,
@@ -5199,7 +4625,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/E/EVRG-19a91bb2.png",
                 "symbol": "EVRG",
                 "industry_id": 551010,
-                "market_cap": 18806495232
+                "market_cap": 18866644992
             },
             {
                 "id": 58575,
@@ -5212,7 +4638,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/E/EXPE-8ccc20da.png",
                 "symbol": "EXPE",
                 "industry_id": 253010,
-                "market_cap": 30099038208
+                "market_cap": 28017772544
             },
             {
                 "id": 60828,
@@ -5225,7 +4651,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/G/GEN-f60d2680.png",
                 "symbol": "GEN",
                 "industry_id": 451030,
-                "market_cap": 11697300480
+                "market_cap": 13659379712
             },
             {
                 "id": 61131,
@@ -5238,7 +4664,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/G/GILD-22c8093b.png",
                 "symbol": "GILD",
                 "industry_id": 352010,
-                "market_cap": 158665506816
+                "market_cap": 163111862272
             },
             {
                 "id": 62160,
@@ -5251,7 +4677,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/G/GWW-a7456a82.png",
                 "symbol": "GWW",
                 "industry_id": 201070,
-                "market_cap": 55008800768
+                "market_cap": 58354483200
             },
             {
                 "id": 63540,
@@ -5264,7 +4690,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/H/HWM-cdb47a20.png",
                 "symbol": "HWM",
                 "industry_id": 201010,
-                "market_cap": 97163403264
+                "market_cap": 108494561280
             },
             {
                 "id": 68634,
@@ -5277,7 +4703,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/M/MCD-e8aa91e5.png",
                 "symbol": "MCD",
                 "industry_id": 253010,
-                "market_cap": 207265366016
+                "market_cap": 195975528448
             },
             {
                 "id": 68654,
@@ -5290,7 +4716,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/M/MCHP-020c2676.png",
                 "symbol": "MCHP",
                 "industry_id": 453010,
-                "market_cap": 46824128512
+                "market_cap": 53657235456
             },
             {
                 "id": 68673,
@@ -5303,7 +4729,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/M/MCK-1e56d88e.png",
                 "symbol": "MCK",
                 "industry_id": 351020,
-                "market_cap": 102049021952
+                "market_cap": 89876586496
             },
             {
                 "id": 70263,
@@ -5316,7 +4742,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/M/MTD-7b749874.png",
                 "symbol": "MTD",
                 "industry_id": 352030,
-                "market_cap": 25978963968
+                "market_cap": 22810945536
             },
             {
                 "id": 71278,
@@ -5329,7 +4755,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/N/NI-a37590ba.png",
                 "symbol": "NI",
                 "industry_id": 551030,
-                "market_cap": 22803238912
+                "market_cap": 22378881024
             },
             {
                 "id": 72395,
@@ -5342,7 +4768,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/N/NWS-e9f0b85b.png",
                 "symbol": "NWS",
                 "industry_id": 502010,
-                "market_cap": 17701029888
+                "market_cap": 17527339008
             },
             {
                 "id": 72405,
@@ -5355,7 +4781,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/N/NWSA-cbf8c96d.png",
                 "symbol": "NWSA",
                 "industry_id": 502010,
-                "market_cap": 15217190912
+                "market_cap": 15125795840
             },
             {
                 "id": 77846,
@@ -5368,7 +4794,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/R/RSG-a92265fa.png",
                 "symbol": "RSG",
                 "industry_id": 202010,
-                "market_cap": 63832268800
+                "market_cap": 61826183168
             },
             {
                 "id": 80655,
@@ -5381,7 +4807,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/S/SRE-c6390112.png",
                 "symbol": "SRE",
                 "industry_id": 551030,
-                "market_cap": 60392099840
+                "market_cap": 59823001600
             },
             {
                 "id": 83014,
@@ -5394,7 +4820,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/T/TRGP-a39f8e8b.png",
                 "symbol": "TRGP",
                 "industry_id": 101020,
-                "market_cap": 51877351424
+                "market_cap": 53345800192
             },
             {
                 "id": 85500,
@@ -5407,7 +4833,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/V/VST-556ce455.png",
                 "symbol": "VST",
                 "industry_id": 551050,
-                "market_cap": 56603885568
+                "market_cap": 50195255296
             },
             {
                 "id": 85605,
@@ -5420,7 +4846,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/V/VTRS-6b2e8c35.png",
                 "symbol": "VTRS",
                 "industry_id": 352020,
-                "market_cap": 17070006272
+                "market_cap": 19838218240
             },
             {
                 "id": 85858,
@@ -5433,7 +4859,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/W/WBD-289f1557.png",
                 "symbol": "WBD",
                 "industry_id": 502020,
-                "market_cap": 66379501568
+                "market_cap": 67558121472
             },
             {
                 "id": 89121,
@@ -5446,7 +4872,7 @@
                 "logo": "0",
                 "symbol": "ZTS",
                 "industry_id": 352020,
-                "market_cap": 51650633728
+                "market_cap": 34962542592
             },
             {
                 "id": 89139,
@@ -5459,7 +4885,7 @@
                 "logo": "0",
                 "symbol": "WYNN",
                 "industry_id": 253010,
-                "market_cap": 10860144640
+                "market_cap": 10557862912
             },
             {
                 "id": 148650,
@@ -5472,7 +4898,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/S/SQ-a068877b.png",
                 "symbol": "XYZ",
                 "industry_id": 402010,
-                "market_cap": 43640680448
+                "market_cap": 44729311232
             }
         ],
         "2026-05-08": [
@@ -5487,7 +4913,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/K/KVUE-26ca4c22.png",
                 "symbol": "KVUE",
                 "industry_id": 303020,
-                "market_cap": 33587480576
+                "market_cap": 33737619456
             },
             {
                 "id": 69639,
@@ -5500,7 +4926,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/M/MNST-8a7562cd.png",
                 "symbol": "MNST",
                 "industry_id": 302010,
-                "market_cap": 75132108800
+                "market_cap": 84418281472
             },
             {
                 "id": 75475,
@@ -5513,7 +4939,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/P/PPL-25156710.png",
                 "symbol": "PPL",
                 "industry_id": 551010,
-                "market_cap": 28671977472
+                "market_cap": 26995845120
             },
             {
                 "id": 82923,
@@ -5526,7 +4952,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/T/TPR-7e0a0ed3.png",
                 "symbol": "TPR",
                 "industry_id": 252030,
-                "market_cap": 29894526976
+                "market_cap": 27029700608
             },
             {
                 "id": 83404,
@@ -5539,7 +4965,7 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/T/TTD-7b0ac828.png",
                 "symbol": "TTD",
                 "industry_id": 502010,
-                "market_cap": 11107060736
+                "market_cap": 10945728512
             },
             {
                 "id": 141269,
@@ -5552,10 +4978,612 @@
                 "logo": "https://cdn.macromicro.me/stocks/logo/S/SATS-bfd33808.png",
                 "symbol": "SATS",
                 "industry_id": 502010,
-                "market_cap": 34979450880
+                "market_cap": 36566941696
+            }
+        ],
+        "2026-05-11": [
+            {
+                "id": 265520,
+                "time": "00:00",
+                "symbol_id": 170,
+                "calendar_year": 2026,
+                "period": "Q1",
+                "company_id": 170,
+                "name": "Montana Technologies",
+                "logo": "0",
+                "symbol": "AIRJ",
+                "industry_id": 201060,
+                "market_cap": 209958672
+            },
+            {
+                "id": 59824,
+                "time": "09:00",
+                "symbol_id": 1946,
+                "calendar_year": 2026,
+                "period": "Q3",
+                "company_id": 1946,
+                "name": "福斯(B股)",
+                "logo": "https://cdn.macromicro.me/stocks/logo/F/FOX-9f2923d3.png",
+                "symbol": "FOX",
+                "industry_id": 502010,
+                "market_cap": 24507799552
+            },
+            {
+                "id": 59834,
+                "time": "09:00",
+                "symbol_id": 1947,
+                "calendar_year": 2026,
+                "period": "Q3",
+                "company_id": 1947,
+                "name": "福斯(A股)",
+                "logo": "https://cdn.macromicro.me/stocks/logo/F/FOXA-3d25248d.png",
+                "symbol": "FOXA",
+                "industry_id": 502010,
+                "market_cap": 27253020672
+            },
+            {
+                "id": 69789,
+                "time": "09:00",
+                "symbol_id": 3232,
+                "calendar_year": 2026,
+                "period": "Q1",
+                "company_id": 3232,
+                "name": "美盛公司",
+                "logo": "https://cdn.macromicro.me/stocks/logo/M/MOS-b8711978.png",
+                "symbol": "MOS",
+                "industry_id": 151010,
+                "market_cap": 6544032768
+            },
+            {
+                "id": 80933,
+                "time": "09:00",
+                "symbol_id": 4673,
+                "calendar_year": 2026,
+                "period": "Q4",
+                "company_id": 4673,
+                "name": "Steris公司",
+                "logo": "https://cdn.macromicro.me/stocks/logo/S/STE-c95eb1a7.png",
+                "symbol": "STE",
+                "industry_id": 351010,
+                "market_cap": 20392335360
+            }
+        ],
+        "2026-05-12": [
+            {
+                "id": 89094,
+                "time": "09:00",
+                "symbol_id": 5538,
+                "calendar_year": 2026,
+                "period": "Q1",
+                "company_id": 5538,
+                "name": "斑馬科技公司",
+                "logo": "0",
+                "symbol": "ZBRA",
+                "industry_id": 452030,
+                "market_cap": 11382805504
+            }
+        ],
+        "2026-05-13": [
+            {
+                "id": 54537,
+                "time": "09:00",
+                "symbol_id": 1279,
+                "calendar_year": 2026,
+                "period": "Q3",
+                "company_id": 1279,
+                "name": "思科",
+                "logo": "https://cdn.macromicro.me/stocks/logo/C/CSCO-b6e1869a.png",
+                "symbol": "CSCO",
+                "industry_id": 452010,
+                "market_cap": 381934338048
+            }
+        ],
+        "2026-05-14": [
+            {
+                "id": 46485,
+                "time": "09:00",
+                "symbol_id": 243,
+                "calendar_year": 2026,
+                "period": "Q2",
+                "company_id": 243,
+                "name": "應用材料",
+                "logo": "https://cdn.macromicro.me/stocks/logo/A/AMAT-5c2693e1.png",
+                "symbol": "AMAT",
+                "industry_id": 453010,
+                "market_cap": 345303908352
+            }
+        ],
+        "2026-05-19": [
+            {
+                "id": 62451,
+                "time": "09:00",
+                "symbol_id": 2288,
+                "calendar_year": 2026,
+                "period": "Q1",
+                "company_id": 2288,
+                "name": "家得寶",
+                "logo": "https://cdn.macromicro.me/stocks/logo/H/HD-0c6acfa3.png",
+                "symbol": "HD",
+                "industry_id": 255040,
+                "market_cap": 315227865088
+            },
+            {
+                "id": 65879,
+                "time": "09:00",
+                "symbol_id": 2733,
+                "calendar_year": 2026,
+                "period": "Q2",
+                "company_id": 2733,
+                "name": "是德科技",
+                "logo": "https://cdn.macromicro.me/stocks/logo/K/KEYS-5d56b4ac.png",
+                "symbol": "KEYS",
+                "industry_id": 452030,
+                "market_cap": 61971599360
+            }
+        ],
+        "2026-05-20": [
+            {
+                "id": 45257,
+                "time": "09:00",
+                "symbol_id": 82,
+                "calendar_year": 2026,
+                "period": "Q2",
+                "company_id": 82,
+                "name": "亞德諾半導體",
+                "logo": "https://cdn.macromicro.me/stocks/logo/A/ADI-6222f953.png",
+                "symbol": "ADI",
+                "industry_id": 453010,
+                "market_cap": 199714799616
+            },
+            {
+                "id": 64646,
+                "time": "09:00",
+                "symbol_id": 2571,
+                "calendar_year": 2026,
+                "period": "Q3",
+                "company_id": 2571,
+                "name": "直覺軟體",
+                "logo": "https://cdn.macromicro.me/stocks/logo/I/INTU-51a01b14.png",
+                "symbol": "INTU",
+                "industry_id": 451030,
+                "market_cap": 110570487808
+            },
+            {
+                "id": 72179,
+                "time": "09:00",
+                "symbol_id": 3557,
+                "calendar_year": 2027,
+                "period": "Q1",
+                "company_id": 3557,
+                "name": "輝達",
+                "logo": "https://cdn.macromicro.me/stocks/logo/N/NVDA-3a77b5d3.png",
+                "symbol": "NVDA",
+                "industry_id": 453010,
+                "market_cap": 5230707081216
+            },
+            {
+                "id": 82254,
+                "time": "09:00",
+                "symbol_id": 4848,
+                "calendar_year": 2026,
+                "period": "Q1",
+                "company_id": 4848,
+                "name": "目標百貨",
+                "logo": "https://cdn.macromicro.me/stocks/logo/T/TGT-cc1a253d.png",
+                "symbol": "TGT",
+                "industry_id": 301010,
+                "market_cap": 56738250752
+            },
+            {
+                "id": 82473,
+                "time": "09:00",
+                "symbol_id": 4876,
+                "calendar_year": 2027,
+                "period": "Q1",
+                "company_id": 4876,
+                "name": "TJX公司",
+                "logo": "https://cdn.macromicro.me/stocks/logo/T/TJX-85c52277.png",
+                "symbol": "TJX",
+                "industry_id": 255040,
+                "market_cap": 172530008064
+            }
+        ],
+        "2026-05-21": [
+            {
+                "id": 55678,
+                "time": "09:00",
+                "symbol_id": 1418,
+                "calendar_year": 2026,
+                "period": "Q2",
+                "company_id": 1418,
+                "name": "美國強鹿公司",
+                "logo": "https://cdn.macromicro.me/stocks/logo/D/DE-043655f7.png",
+                "symbol": "DE",
+                "industry_id": 201060,
+                "market_cap": 155379253248
+            },
+            {
+                "id": 67698,
+                "time": "09:00",
+                "symbol_id": 2960,
+                "calendar_year": 2026,
+                "period": "Q1",
+                "company_id": 2960,
+                "name": "勞氏公司",
+                "logo": "https://cdn.macromicro.me/stocks/logo/L/LOW-ca76d1cf.png",
+                "symbol": "LOW",
+                "industry_id": 255040,
+                "market_cap": 128122798080
+            },
+            {
+                "id": 77381,
+                "time": "09:00",
+                "symbol_id": 4219,
+                "calendar_year": 2026,
+                "period": "Q4",
+                "company_id": 4219,
+                "name": "Ralph Lauren",
+                "logo": "https://cdn.macromicro.me/stocks/logo/R/RL-ce175209.png",
+                "symbol": "RL",
+                "industry_id": 252030,
+                "market_cap": 21901295616
+            },
+            {
+                "id": 83491,
+                "time": "09:00",
+                "symbol_id": 5001,
+                "calendar_year": 2026,
+                "period": "Q4",
+                "company_id": 5001,
+                "name": "Take-Two互動",
+                "logo": "https://cdn.macromicro.me/stocks/logo/T/TTWO-c7003a94.png",
+                "symbol": "TTWO",
+                "industry_id": 502020,
+                "market_cap": 40430530560
+            },
+            {
+                "id": 86383,
+                "time": "09:00",
+                "symbol_id": 5369,
+                "calendar_year": 2027,
+                "period": "Q1",
+                "company_id": 5369,
+                "name": "沃爾瑪",
+                "logo": "https://cdn.macromicro.me/stocks/logo/W/WMT-88e00e9e.png",
+                "symbol": "WMT",
+                "industry_id": 301010,
+                "market_cap": 1039657533440
+            }
+        ],
+        "2026-05-22": [
+            {
+                "id": 55700,
+                "time": "09:00",
+                "symbol_id": 1421,
+                "calendar_year": 2026,
+                "period": "Q4",
+                "company_id": 1421,
+                "name": "德克斯戶外公司",
+                "logo": "https://cdn.macromicro.me/stocks/logo/D/DECK-492909e2.png",
+                "symbol": "DECK",
+                "industry_id": 252030,
+                "market_cap": 14754610176
+            },
+            {
+                "id": 77718,
+                "time": "09:00",
+                "symbol_id": 4263,
+                "calendar_year": 2026,
+                "period": "Q1",
+                "company_id": 4263,
+                "name": "羅斯百貨",
+                "logo": "https://cdn.macromicro.me/stocks/logo/R/ROST-63dfc67c.png",
+                "symbol": "ROST",
+                "industry_id": 255040,
+                "market_cap": 72199397376
+            },
+            {
+                "id": 86586,
+                "time": "09:00",
+                "symbol_id": 5393,
+                "calendar_year": 2026,
+                "period": "Q1",
+                "company_id": 5393,
+                "name": "WILLIAMS-SONOMA INC",
+                "logo": "https://cdn.macromicro.me/stocks/logo/W/WSM-e7e673d1.png",
+                "symbol": "WSM",
+                "industry_id": 255040,
+                "market_cap": 21692116992
+            }
+        ],
+        "2026-05-26": [
+            {
+                "id": 48798,
+                "time": "09:00",
+                "symbol_id": 529,
+                "calendar_year": 2026,
+                "period": "Q3",
+                "company_id": 529,
+                "name": "汽車地帶",
+                "logo": "https://cdn.macromicro.me/stocks/logo/A/AZO-b6cf79c8.png",
+                "symbol": "AZO",
+                "industry_id": 255040,
+                "market_cap": 58218557440
+            }
+        ],
+        "2026-05-27": [
+            {
+                "id": 44636,
+                "time": "09:00",
+                "symbol_id": 1,
+                "calendar_year": 2026,
+                "period": "Q2",
+                "company_id": 1,
+                "name": "安捷倫科技",
+                "logo": "https://cdn.macromicro.me/stocks/logo/A/A-70c625f9.png",
+                "symbol": "A",
+                "industry_id": 352030,
+                "market_cap": 33577949184
+            },
+            {
+                "id": 63113,
+                "time": "09:00",
+                "symbol_id": 2373,
+                "calendar_year": 2026,
+                "period": "Q2",
+                "company_id": 2373,
+                "name": "惠普",
+                "logo": "https://cdn.macromicro.me/stocks/logo/H/HPQ-e650c6c0.png",
+                "symbol": "HPQ",
+                "industry_id": 452020,
+                "market_cap": 21001680896
+            },
+            {
+                "id": 80143,
+                "time": "09:00",
+                "symbol_id": 4568,
+                "calendar_year": 2026,
+                "period": "Q2",
+                "company_id": 4568,
+                "name": "新思科技",
+                "logo": "https://cdn.macromicro.me/stocks/logo/S/SNPS-0853fcad.png",
+                "symbol": "SNPS",
+                "industry_id": 451030,
+                "market_cap": 82726666240
+            }
+        ],
+        "2026-05-28": [
+            {
+                "id": 45332,
+                "time": "09:00",
+                "symbol_id": 92,
+                "calendar_year": 2027,
+                "period": "Q1",
+                "company_id": 92,
+                "name": "歐特克",
+                "logo": "https://cdn.macromicro.me/stocks/logo/A/ADSK-09f3e872.png",
+                "symbol": "ADSK",
+                "industry_id": 451030,
+                "market_cap": 53220478976
+            },
+            {
+                "id": 49196,
+                "time": "09:00",
+                "symbol_id": 578,
+                "calendar_year": 2027,
+                "period": "Q1",
+                "company_id": 578,
+                "name": "百思買",
+                "logo": "https://cdn.macromicro.me/stocks/logo/B/BBY-b995834c.png",
+                "symbol": "BBY",
+                "industry_id": 255040,
+                "market_cap": 12533399552
+            },
+            {
+                "id": 53958,
+                "time": "09:00",
+                "symbol_id": 1205,
+                "calendar_year": 2026,
+                "period": "Q3",
+                "company_id": 1205,
+                "name": "好市多",
+                "logo": "https://cdn.macromicro.me/stocks/logo/C/COST-976a1dc2.png",
+                "symbol": "COST",
+                "industry_id": 301010,
+                "market_cap": 447863422976
+            },
+            {
+                "id": 54352,
+                "time": "09:00",
+                "symbol_id": 1257,
+                "calendar_year": 2027,
+                "period": "Q1",
+                "company_id": 1257,
+                "name": "Salesforce",
+                "logo": "https://cdn.macromicro.me/stocks/logo/C/CRM-d83fa9ea.png",
+                "symbol": "CRM",
+                "industry_id": 451030,
+                "market_cap": 170001694720
+            },
+            {
+                "id": 55719,
+                "time": "09:00",
+                "symbol_id": 1423,
+                "calendar_year": 2027,
+                "period": "Q1",
+                "company_id": 1423,
+                "name": "戴爾科技",
+                "logo": "https://cdn.macromicro.me/stocks/logo/D/DELL-ebfc3333.png",
+                "symbol": "DELL",
+                "industry_id": 452020,
+                "market_cap": 169760489472
+            },
+            {
+                "id": 63173,
+                "time": "09:00",
+                "symbol_id": 2381,
+                "calendar_year": 2026,
+                "period": "Q2",
+                "company_id": 2381,
+                "name": "荷美爾食品",
+                "logo": "https://cdn.macromicro.me/stocks/logo/H/HRL-80ea9786.png",
+                "symbol": "HRL",
+                "industry_id": 302020,
+                "market_cap": 11251749888
+            },
+            {
+                "id": 70943,
+                "time": "09:00",
+                "symbol_id": 3393,
+                "calendar_year": 2026,
+                "period": "Q2",
+                "company_id": 3393,
+                "name": "諾信高科技",
+                "logo": "https://cdn.macromicro.me/stocks/logo/N/NDSN-3971dfcb.png",
+                "symbol": "NDSN",
+                "industry_id": 201060,
+                "market_cap": 15817854976
+            },
+            {
+                "id": 71922,
+                "time": "09:00",
+                "symbol_id": 3523,
+                "calendar_year": 2026,
+                "period": "Q4",
+                "company_id": 3523,
+                "name": "網路器械公司",
+                "logo": "https://cdn.macromicro.me/stocks/logo/N/NTAP-1afa256f.png",
+                "symbol": "NTAP",
+                "industry_id": 452020,
+                "market_cap": 23363999744
+            }
+        ],
+        "2026-05-29": [
+            {
+                "id": 53885,
+                "time": "09:00",
+                "symbol_id": 1196,
+                "calendar_year": 2026,
+                "period": "Q2",
+                "company_id": 1196,
+                "name": "酷柏公司",
+                "logo": "https://cdn.macromicro.me/stocks/logo/C/COO-34e21ebd.png",
+                "symbol": "COO",
+                "industry_id": 351010,
+                "market_cap": 11802000384
+            }
+        ],
+        "2026-06-02": [
+            {
+                "id": 54026,
+                "time": "09:00",
+                "symbol_id": 1213,
+                "calendar_year": 2026,
+                "period": "Q3",
+                "company_id": 1213,
+                "name": "金寶湯公司",
+                "logo": "https://cdn.macromicro.me/stocks/logo/C/CPB-c302537e.png",
+                "symbol": "CPB",
+                "industry_id": 302020,
+                "market_cap": 6210319872
+            },
+            {
+                "id": 55791,
+                "time": "09:00",
+                "symbol_id": 1433,
+                "calendar_year": 2026,
+                "period": "Q1",
+                "company_id": 1433,
+                "name": "Dollar General",
+                "logo": "https://cdn.macromicro.me/stocks/logo/D/DG-279ab25f.png",
+                "symbol": "DG",
+                "industry_id": 301010,
+                "market_cap": 24943286272
+            },
+            {
+                "id": 73925,
+                "time": "09:00",
+                "symbol_id": 3775,
+                "calendar_year": 2026,
+                "period": "Q3",
+                "company_id": 3775,
+                "name": "帕羅奧圖網路",
+                "logo": "https://cdn.macromicro.me/stocks/logo/P/PANW-04e20345.png",
+                "symbol": "PANW",
+                "industry_id": 451030,
+                "market_cap": 144476602368
+            },
+            {
+                "id": 84093,
+                "time": "09:00",
+                "symbol_id": 5077,
+                "calendar_year": 2026,
+                "period": "Q1",
+                "company_id": 5077,
+                "name": "Ulta美妝",
+                "logo": "https://cdn.macromicro.me/stocks/logo/U/ULTA-b30907e1.png",
+                "symbol": "ULTA",
+                "industry_id": 255040,
+                "market_cap": 23388690432
+            }
+        ],
+        "2026-06-03": [
+            {
+                "id": 54499,
+                "time": "09:00",
+                "symbol_id": 1275,
+                "calendar_year": 2027,
+                "period": "Q1",
+                "company_id": 1275,
+                "name": "Crowdstrike",
+                "logo": "https://cdn.macromicro.me/stocks/logo/C/CRWD-77d8f5c7.png",
+                "symbol": "CRWD",
+                "industry_id": 451030,
+                "market_cap": 133296758784
+            },
+            {
+                "id": 63085,
+                "time": "09:00",
+                "symbol_id": 2369,
+                "calendar_year": 2026,
+                "period": "Q2",
+                "company_id": 2369,
+                "name": "慧與科技",
+                "logo": "https://cdn.macromicro.me/stocks/logo/H/HPE-995b0906.png",
+                "symbol": "HPE",
+                "industry_id": 452020,
+                "market_cap": 41820901376
+            },
+            {
+                "id": 68809,
+                "time": "09:00",
+                "symbol_id": 3100,
+                "calendar_year": 2026,
+                "period": "Q4",
+                "company_id": 3100,
+                "name": "美敦力醫療產品",
+                "logo": "https://cdn.macromicro.me/stocks/logo/M/MDT-466fe9a9.png",
+                "symbol": "MDT",
+                "industry_id": 351010,
+                "market_cap": 97631911936
+            }
+        ],
+        "2026-06-05": [
+            {
+                "id": 269000,
+                "time": "09:00",
+                "symbol_id": 1056,
+                "calendar_year": 2026,
+                "period": "Q2",
+                "company_id": 1056,
+                "name": "CIENA CORP",
+                "logo": "https://cdn.macromicro.me/stocks/logo/C/CIEN-06f7cfc9.png",
+                "symbol": "CIEN",
+                "industry_id": 452010,
+                "market_cap": 77654032384
             }
         ]
     },
-    "startDate": "2026-03-22",
-    "endDate": "2026-05-10"
+    "startDate": "2026-04-21",
+    "endDate": "2026-06-10"
 }
