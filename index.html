@@ -636,6 +636,43 @@ async function openMyStockSettings() {
   // 每次開啟都讀取最新的清單
   let editList = loadMyStocksList().map(s => ({ ...s }));
 
+  // ── Autocomplete helpers ──
+  function buildAcDropdown() {
+    const el = document.createElement('div');
+    el.id = 'ac-dropdown';
+    el.style.cssText = `
+      position:fixed; z-index:99999;
+      background:#1a2130; border:1px solid #3a4a5c; border-radius:4px;
+      max-height:220px; overflow-y:auto;
+      font-size:.82rem; font-family:var(--mono);
+      box-shadow:0 4px 16px #00000066;
+      display:none;
+    `;
+    document.body.appendChild(el);
+    return el;
+  }
+
+  function positionDropdown(dropdown, input) {
+    const rect = input.getBoundingClientRect();
+    const popupRect = document.querySelector('.swal2-popup').getBoundingClientRect();
+    dropdown.style.left  = rect.left + 'px';
+    dropdown.style.top   = (rect.bottom + 2) + 'px';
+    dropdown.style.width = (popupRect.right - rect.left - 16) + 'px';
+  }
+
+  function filterTickers(query) {
+    if (!query || !_tickersCache) return [];
+    const q = query.toLowerCase();
+    return _tickersCache
+      .filter(t => t.symbol.toLowerCase().includes(q) || t.name.includes(query))
+      .slice(0, 10);
+  }
+
+  function closeAcDropdown(dropdown) {
+    dropdown.style.display = 'none';
+    dropdown.innerHTML = '';
+  }
+
   // 移動前先把 DOM 當下的輸入值同步回 editList，避免重繪時內容遺失
   function syncFromDom() {
     editList.forEach((_, i) => {
@@ -654,10 +691,11 @@ async function openMyStockSettings() {
       <div id="mystock-row-${i}" style="display:flex; align-items:center; gap:6px; margin-bottom:8px;" class="mystock-row">
         <input
           id="mystock-symbol-${i}"
-          type="number"
+          type="text"
           maxlength="10"
           placeholder="股票代號"
           value="${s.symbol}"
+          autocomplete="off"
           style="width:7em; background:#1a2130; border:1px solid #2e3f52; border-radius:4px; color:#c8d8e8; font-size:.85rem; padding:6px 8px; outline:none; font-family:var(--mono);"
         />
         <input
@@ -749,6 +787,74 @@ async function openMyStockSettings() {
       const firstInput = document.querySelector('.swal2-popup input');
       if (firstInput) firstInput.blur();
       syncAddBtnState();
+
+      // Autocomplete 事件綁定
+      const acDropdown = buildAcDropdown();
+
+      function bindAcToSymbolInputs() {
+        document.querySelectorAll('[id^="mystock-symbol-"]').forEach(input => {
+          if (input._acBound) return;
+          input._acBound = true;
+
+          input.addEventListener('input', () => {
+            const query = input.value.trim();
+            const results = filterTickers(query);
+            if (!query || results.length === 0) {
+              closeAcDropdown(acDropdown);
+              return;
+            }
+            acDropdown.innerHTML = results.map(t => `
+              <div data-symbol="${t.symbol}" data-name="${t.name}"
+                style="padding:8px 12px; cursor:pointer; border-bottom:1px solid #2e3f52;
+                       display:flex; justify-content:space-between; align-items:center; gap:8px;"
+                onmouseover="this.style.background='#2e3f52';"
+                onmouseout="this.style.background='';"
+              >
+                <span style="color:#f0b429; flex-shrink:0;">${t.symbol}</span>
+                <span style="color:#c8d8e8; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${t.name}</span>
+              </div>`).join('');
+            positionDropdown(acDropdown, input);
+            acDropdown.style.display = 'block';
+
+            acDropdown.querySelectorAll('div[data-symbol]').forEach(item => {
+              item.addEventListener('mousedown', e => {
+                e.preventDefault();
+                const idx = input.id.replace('mystock-symbol-', '');
+                const symbolInput = document.getElementById('mystock-symbol-' + idx);
+                const nameInput   = document.getElementById('mystock-name-'   + idx);
+                if (symbolInput) symbolInput.value = item.dataset.symbol;
+                if (nameInput)   nameInput.value   = item.dataset.name;
+                closeAcDropdown(acDropdown);
+              });
+            });
+          });
+
+          input.addEventListener('blur', () => {
+            // 延遲關閉，讓 mousedown 能先觸發
+            setTimeout(() => closeAcDropdown(acDropdown), 150);
+          });
+        });
+      }
+
+      // 初始綁定 + 每次 renderRows 後重新綁定
+      bindAcToSymbolInputs();
+      const acObserver = new MutationObserver(() => bindAcToSymbolInputs());
+      const rowsContainer = document.getElementById('mystock-rows');
+      if (rowsContainer) {
+        acObserver.observe(rowsContainer, { childList: true, subtree: true });
+      }
+
+      // Swal 關閉時清理
+      const popup = document.querySelector('.swal2-popup');
+      if (popup) {
+        new MutationObserver(() => {
+          if (!document.body.contains(popup)) {
+            closeAcDropdown(acDropdown);
+            acDropdown.remove();
+            acObserver.disconnect();
+          }
+        }).observe(document.body, { childList: true });
+      }
     },
     preConfirm: () => {
       // 從 DOM 讀取最新輸入值
@@ -2300,8 +2406,29 @@ async function loadSentiment() {
   setCard('card-sentiment', 0, html);
 }
 
+// Tickers 快取
+let _tickersCache = null;
+
+async function loadTickers() {
+  if (_tickersCache) return _tickersCache;
+  try {
+    const res = await fetch('https://bau720123.github.io/stock/data/tickers.json');
+    const json = await res.json();
+    if (json.success && Array.isArray(json.data)) {
+      // 缺少 name 的資料，預設使用 symbol 值補齊
+      _tickersCache = json.data.map(t => ({ ...t, name: t.name || t.symbol }));
+    } else {
+      _tickersCache = [];
+    }
+  } catch (e) {
+    _tickersCache = [];
+  }
+  return _tickersCache;
+}
+
 // 我的自選股
 async function loadMyStock() {
+  await loadTickers(); // 預先載入 tickers，供 openMyStockSettings autocomplete 使用
   // 平行抓取所有自選股票的相關屬性資訊
   const [quoteResults, volumeResults, historyResults, institutionalResults, smaResults, rsiResults, kdjResults, macdResults, brandsResults] = await Promise.all([
     Promise.all(
