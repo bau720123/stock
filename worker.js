@@ -85,6 +85,7 @@ export default {
       const method = parts[2];
       const symbol = parts[3];
 
+      if (method === "tickers")   return await fetchFugleTickers(env);
       if (method === "quote" && symbol)   return await fetchFugleQuote(symbol, env);
       if (method === "volume" && symbol)   return await fetchFugleVolume(symbol, env);
       if (method === "history" && symbol)   return await fetchFugleHistory(symbol, env);
@@ -919,6 +920,35 @@ async function writeLogs(env, tag, message) {
 async function clearLogs(env) {
   await env.KV.put("logs", JSON.stringify([]));
   return json({ success: true, message: "已清除所有 logs" });
+}
+
+async function fetchFugleTickers(env) {
+  try {
+    const res = await fetchWithTimeout(
+      `https://api.fugle.tw/marketdata/v1.0/stock/intraday/tickers`,
+      {
+        headers: {
+          "X-API-KEY": env.FUGLE_KEY,
+          "Accept": "application/json"
+        }
+      }
+    );
+
+    if (!res.ok) {
+      return json({ success: false, error: `HTTP ${res.status}` });
+    }
+
+    const d = await res.json();
+    const data = d.data;
+
+    return json({
+      success: true,
+      data,
+    });
+  } catch (e) {
+    const errorMsg = e.name === 'AbortError' ? "連線逾時" : e.message;
+    return json({ success: false, error: errorMsg }, 500);
+  }
 }
 
 async function fetchFugleQuote(symbol, env) {
