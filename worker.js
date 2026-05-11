@@ -2236,7 +2236,7 @@ async function handleCron(env) {
     }
   }
 
-  // 台股夜盤是從下午3點開始，午夜12點前結束
+  // 台股夜盤是從下午3點開始，一直到隔天
   if (twHour >= 15 || twHour <= 8) {
     if (taifex_night.success && taifex_night.price >= 0) {
       const sign = taifex_night.updown > 0 ? '▲' : taifex_night.updown < 0 ? '▼' : '';
@@ -2248,8 +2248,8 @@ async function handleCron(env) {
     }
   }
 
-  // 台積電期貨夜盤是從下午5點開始，午夜12點前結束
-  if (twHour >= 17 || twHour <= 8) {
+  // 台積電期貨夜盤是從下午5點25分開始，一直到隔天，不過我們的 cron 是每小時整點，所以實際上是從下午6點開始
+  if (twHour >= 18 || twHour <= 8) {
     if (taifex_tsmc.success && taifex_tsmc.price >= 0) {
       const sign = taifex_tsmc.updown > 0 ? '▲' : taifex_tsmc.updown < 0 ? '▼' : '';
       lines.push(`台積電期貨夜盤：${taifex_tsmc.price.toFixed(0)} (${sign}${Math.abs(taifex_tsmc.updown).toFixed(0)})`);
