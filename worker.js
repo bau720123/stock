@@ -1831,6 +1831,12 @@ function generateCustomEvents(year) {
       const msciAnnounceDate = new Date(year, month, announceDay);
       events.push(createEventObj(msciAnnounceDate, "MSCI公佈", "MSCI 指數審查結果公佈", "#16a085"));
     }
+
+    // E. 費城半導體指數 (SOX) 重組生效日 (通常在 9月、12月第三個星期五)
+    if ([8, 11].includes(month)) { 
+      const soxDate = getNthDay(year, month, 5, 3);
+      events.push(createEventObj(soxDate, "SOX調整", "費半指數重組生效日", "#e67e22"));
+    }
   }
 
   // 自定義事件
