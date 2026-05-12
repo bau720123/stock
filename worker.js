@@ -1783,6 +1783,16 @@ async function fetchAmericaCalendar(env) {
 function generateCustomEvents(year) {
   const events = [];
 
+  // 這裡以 2026 年官方 MSCI 公佈日
+  const msciAnnounceDates = {
+    "2026": {
+      1: 10,  // 2月 10號
+      4: 12,  // 5月 12號
+      7: 12,  // 8月 12號
+      10: 11  // 11月 11號
+    }
+  };
+
   for (let month = 0; month < 12; month++) { // 0 = 1月, 11 = 12月
     const monthStr = String(month + 1).padStart(2, '0');
 
@@ -1810,10 +1820,16 @@ function generateCustomEvents(year) {
       events.push(createEventObj(ftseNov, "富時", "富時羅素指數重組生效日", "#e66767"));
     }
 
-    // D. MSCI 指數調整生效日 (2, 5, 8, 11 月最後一個交易日/平日) 
+    // D. MSCI 相關日期
     if ([1, 4, 7, 10].includes(month)) {
-      const msciDate = getLastWeekday(year, month);
-      events.push(createEventObj(msciDate, "MSCI", "MSCI 指數調整生效日", "#16a085"));
+      // 1. 調整生效日 (2, 5, 8, 11 月最後一個交易日/平日) 
+      const msciEffectiveDate = getLastWeekday(year, month);
+      events.push(createEventObj(msciEffectiveDate, "MSCI生效", "MSCI 指數調整生效日", "#16a085"));
+
+      // 2. 調整公佈日，如果對照表有資料就使用，否則可以用「該月12號」當作估計值
+      let announceDay = msciAnnounceDates[year] ? msciAnnounceDates[year][month] : 12;
+      const msciAnnounceDate = new Date(year, month, announceDay);
+      events.push(createEventObj(msciAnnounceDate, "MSCI公佈", "MSCI 指數審查結果公佈", "#27ae60"));
     }
   }
 
