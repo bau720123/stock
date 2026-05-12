@@ -1829,7 +1829,7 @@ function generateCustomEvents(year) {
       // 2. 調整公佈日，如果對照表有資料就使用，否則可以用「該月12號」當作估計值
       let announceDay = msciAnnounceDates[year] ? msciAnnounceDates[year][month] : 12;
       const msciAnnounceDate = new Date(year, month, announceDay);
-      events.push(createEventObj(msciAnnounceDate, "MSCI公佈", "MSCI 指數審查結果公佈", "#27ae60"));
+      events.push(createEventObj(msciAnnounceDate, "MSCI公佈", "MSCI 指數審查結果公佈", "#16a085"));
     }
   }
 

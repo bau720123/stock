@@ -636,7 +636,7 @@ async function openMyStockSettings() {
   // 每次開啟都讀取最新的清單
   let editList = loadMyStocksList().map(s => ({ ...s }));
 
-  // ── Autocomplete helpers ──
+  // Autocomplete helpers
   function buildAcDropdown() {
     const el = document.createElement('div');
     el.id = 'ac-dropdown';
@@ -660,11 +660,12 @@ async function openMyStockSettings() {
     dropdown.style.width = (popupRect.right - rect.left - 16) + 'px';
   }
 
-  function filterTickers(query) {
+  function filterTickers(query, mode) {
     if (!query || !_tickersCache) return [];
     const q = query.toLowerCase();
     return _tickersCache
-      .filter(t => t.symbol.toLowerCase().includes(q) || t.name.includes(query))
+      .filter(t => t.symbol && t.name)
+      .filter(t => mode === 'name' ? t.name.includes(query) : t.symbol.toLowerCase().includes(q))
       .slice(0, 10);
   }
 
@@ -792,13 +793,17 @@ async function openMyStockSettings() {
       const acDropdown = buildAcDropdown();
 
       function bindAcToSymbolInputs() {
-        document.querySelectorAll('[id^="mystock-symbol-"]').forEach(input => {
+        const inputs = [
+          ...document.querySelectorAll('[id^="mystock-symbol-"]').values().map(el => ({ el, mode: 'symbol' })),
+          ...document.querySelectorAll('[id^="mystock-name-"]').values().map(el => ({ el, mode: 'name' })),
+        ];
+        inputs.forEach(({ el: input, mode }) => {
           if (input._acBound) return;
           input._acBound = true;
 
           input.addEventListener('input', () => {
             const query = input.value.trim();
-            const results = filterTickers(query);
+            const results = filterTickers(query, mode);
             if (!query || results.length === 0) {
               closeAcDropdown(acDropdown);
               return;
@@ -819,7 +824,7 @@ async function openMyStockSettings() {
             acDropdown.querySelectorAll('div[data-symbol]').forEach(item => {
               item.addEventListener('mousedown', e => {
                 e.preventDefault();
-                const idx = input.id.replace('mystock-symbol-', '');
+                const idx = input.id.replace('mystock-symbol-', '').replace('mystock-name-', '');
                 const symbolInput = document.getElementById('mystock-symbol-' + idx);
                 const nameInput   = document.getElementById('mystock-name-'   + idx);
                 if (symbolInput) symbolInput.value = item.dataset.symbol;
