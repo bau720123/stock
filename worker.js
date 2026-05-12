@@ -149,7 +149,7 @@ export default {
 };
 
 async function debugSina() {
-  const res = await fetchWithTimeout("https://hq.sinajs.cn/list=hf_YM,hf_ES,hf_NQ,gb_dji,gb_inx,gb_ixic,gb_sox,gb_tsm,hf_OIL,hf_OIL2606,hf_OIL2607,hf_GC,hf_SI,DINIW,znb_VIX,hf_VX,hf_VX2605,hf_VX2606", {
+  const res = await fetchWithTimeout("https://hq.sinajs.cn/list=hf_YM,hf_ES,hf_NQ,gb_dji,gb_inx,gb_ixic,gb_sox,gb_tsm,hf_OIL,hf_OIL2606,hf_OIL2607,hf_GC,hf_SI,hf_CAD,DINIW,znb_VIX,hf_VX,hf_VX2605,hf_VX2606", {
     headers: {
       "User-Agent": UA,
       "Referer": "https://finance.sina.com.cn/"

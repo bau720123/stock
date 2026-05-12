@@ -576,6 +576,13 @@ const ALERT_CONFIGS = {
       { key: 'silver_low',  label: '價格小於等於此值時通知', placeholder: '例：65',  unit: 'USD' },
     ]
   },
+  copper: {
+    title: '銅 偵測設定',
+    fields: [
+      { key: 'copper_high', label: '價格大於等於此值時通知', placeholder: '例：70', unit: 'USD' },
+      { key: 'copper_low',  label: '價格小於等於此值時通知', placeholder: '例：65',  unit: 'USD' },
+    ]
+  },
   vix: {
     title: 'VIX 恐慌指數 偵測設定',
     fields: [
@@ -2004,10 +2011,11 @@ async function loadAmerica() {
 
 // 原物料市場
 async function loadMaterials() {
-  const [sinaBrent, sinaGold, sinaSilver] = await Promise.all([
+  const [sinaBrent, sinaGold, sinaSilver, sinaCopper] = await Promise.all([
     fetch(WORKER + '/sina/hf_OIL').then(r => r.json()).catch(() => ({ success: false })), // 布蘭特原油
     fetch(WORKER + '/sina/hf_GC').then(r => r.json()).catch(() => ({ success: false })), // 黃金
     fetch(WORKER + '/sina/hf_SI').then(r => r.json()).catch(() => ({ success: false })), // 白銀
+    fetch(WORKER + '/sina/hf_CAD').then(r => r.json()).catch(() => ({ success: false })), // 銅
   ]);
 
   let html = `<div class="card-title">原物料市場</div>`;
@@ -2116,6 +2124,42 @@ async function loadMaterials() {
         '白銀價格警示',
         `價格 ${sinaSilver.price.toFixed(2)} USD，已低於設定門檻 ${silverLow} USD`,
         'https://hk.investing.com/commodities/silver'
+      );
+    }
+  } else {
+    html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
+  }
+
+  // 【銅】
+  html += groupHeader('【銅】', 'copper', '銅是一種重要的工業金屬，廣泛應用於電力、建築和製造業。其價格受全球經濟活動、供需關係和地緣政治因素影響，常以美元計價。');
+  if (sinaCopper.success) {
+    const changeNum = sinaCopper.price - sinaCopper.prev;
+    const cls = changeNum < 0 ? 'down' : 'up';
+    const changePercent = changeNum / sinaCopper.prev * 100;
+    // html += row('前次', sinaCopper.prev.toFixed(2));
+    // html += row('開盤價', sinaCopper.open.toFixed(2));
+    // html += row('最高價', sinaCopper.high.toFixed(2));
+    // html += row('最低價', sinaCopper.low.toFixed(2));
+    html += row('價格', sinaCopper.price.toFixed(2), 'accent');
+    html += row('漲跌', changeNum.toFixed(2), cls);
+    // html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
+    html += row('更新時間', sinaCopper.time);
+
+    // 價格門檻通知（從 localStorage 讀取，未設定則不觸發）
+    const copperHigh = alertGet('copper_high');
+    const copperLow  = alertGet('copper_low');
+    if (copperHigh !== null && sinaCopper.price >= copperHigh) {
+      sendNotification(
+        '銅價格警示',
+        `價格 ${sinaCopper.price.toFixed(2)} USD，已高於設定門檻 ${copperHigh} USD`,
+        'https://hk.investing.com/commodities/copper'
+      );
+    }
+    if (copperLow !== null && sinaCopper.price <= copperLow) {
+      sendNotification(
+        '銅價格警示',
+        `價格 ${sinaCopper.price.toFixed(2)} USD，已低於設定門檻 ${copperLow} USD`,
+        'https://hk.investing.com/commodities/copper'
       );
     }
   } else {
