@@ -125,20 +125,6 @@ export default {
       }
     }
 
-    if (path === "/test-macromicro-json") {
-      try {
-        const events = await generateCustomEventsMacroEarnings();
-        return new Response(JSON.stringify({ success: true, count: events.length, data: events }, null, 2), {
-          headers: { 'Content-Type': 'application/json' }
-        });
-      } catch (e) {
-        return new Response(JSON.stringify({ success: false, error: e.message, stack: e.stack }), {
-          status: 500,
-          headers: { 'Content-Type': 'application/json' }
-        });
-      }
-    }
-
     if (path === "/fear-greed") return await fetchFearAndGreed();
 
     return json({ error: "unknown path" }, 404);
@@ -516,7 +502,7 @@ async function fetchTaifex(objId, contract) {
   }
 }
 
-// ── CNBC（美股四大指數 + TSM ADR + 盤前電子盤）─────────────
+// CNBC（美股四大指數 + TSM ADR + 盤前電子盤）
 async function fetchCnbc() {
   try {
     // 1. 盤前 Fair Value (邏輯保持不變)
@@ -1938,14 +1924,8 @@ function getLastWeekday(year, month) {
   return new Date(date);
 }
 
-async function Finnhub_test(from, to, finnhubKey) {
-  const cleanKey = finnhubKey.trim();
-  const cleanKey_compare = env.FINNHUB_KEY;
-}
-
 async function generateCustomEventsFinnhub(from, to, env) {
   const cleanKey = env.FINNHUB_KEY;
-  // const cleanKey = "d7bjvbpr01qgc9t7m9o0d7bjvbpr01qgc9t7m9og";
   if (!cleanKey) return []; // 如果沒有 Key，回傳空陣列
 
   const url = `https://finnhub.io/api/v1/calendar/earnings?from=${from}&to=${to}&token=${cleanKey}`;
