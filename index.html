@@ -1872,20 +1872,27 @@ function renderInstitutional(data) {
 
 // 美股市場概況
 async function loadAmerica() {
-  const [cnbcPreMarkets, /*yahooNqf, yahooIxic, yahooSox, */yahooBtc, yahooTsm, robinHood] = await Promise.all([
+  const [cnbcPreMarkets, /*yahooNqf, yahooIxic, yahooSox, */yahooBtc, yahooTsm, yahooNvda, yahooAapl, yahooMsft, yahooGoogl, yahooAmzn, yahooMeta, yahooTsla, robinHood] = await Promise.all([
     fetch(WORKER + '/cnbc').then(r => r.json()).catch(() => ({ success: false })), // 美股盤前電子盤
     // fetch(WORKER + '/yahoo-finance/NQ=F').then(r => r.json()).catch(() => ({ success: false })), // 那斯達克 100 期貨期貨
     // fetch(WORKER + '/yahoo-finance/^IXIC').then(r => r.json()).catch(() => ({ success: false })), // 那斯達克指數
     // fetch(WORKER + '/yahoo-finance/^SOX').then(r => r.json()).catch(() => ({ success: false })), // 那斯達克指數
     fetch(WORKER + '/yahoo-finance/BTC-USD').then(r => r.json()).catch(() => ({ success: false })), // 比特幣
     fetch(WORKER + '/yahoo-finance/TSM').then(r => r.json()).catch(() => ({ success: false })), // 台積電 ADR
+    fetch(WORKER + '/yahoo-finance/NVDA').then(r => r.json()).catch(() => ({ success: false })), // 輝達
+    fetch(WORKER + '/yahoo-finance/AAPL').then(r => r.json()).catch(() => ({ success: false })), // 蘋果
+    fetch(WORKER + '/yahoo-finance/MSFT').then(r => r.json()).catch(() => ({ success: false })), // 微軟
+    fetch(WORKER + '/yahoo-finance/GOOGL').then(r => r.json()).catch(() => ({ success: false })), // Google
+    fetch(WORKER + '/yahoo-finance/AMZN').then(r => r.json()).catch(() => ({ success: false })), // 亞馬遜
+    fetch(WORKER + '/yahoo-finance/META').then(r => r.json()).catch(() => ({ success: false })), // Meta
+    fetch(WORKER + '/yahoo-finance/TSLA').then(r => r.json()).catch(() => ({ success: false })), // 特斯拉
     fetch(WORKER + '/rh').then(r => r.json()).catch(() => ({ success: false })), // Robinhood
   ]);
 
   let html = `<div class="card-title">美股市場概況</div>`;
 
-  // 美股盤前電子盤
-  html += groupHeader('【美股盤前電子盤】', '', '美股盤前電子盤（Pre-Market Session）指在正常開盤時間（美東時間 9:30 AM）前，透過電子通訊網路（ECN）進行的股票交易時段，通常為美東時間凌晨 4:00 至 9:30，對應台灣時間晚上 16:00/17:00 後至 21:30。此時段成交量較小但波動大，適合作為盤前財報發布後的策略布局與風險控管。');
+  // 美股期貨電子盤
+  html += groupHeader('【美股期貨電子盤】', '', '美股期貨電子盤（Pre-Market Session）指在正常開盤時間（美東時間 9:30 AM）前，透過電子通訊網路（ECN）進行的股票交易時段，通常為美東時間凌晨 4:00 至 9:30，對應台灣時間晚上 16:00/17:00 後至 21:30。此時段成交量較小但波動大，適合作為盤前財報發布後的策略布局與風險控管。');
   if (cnbcPreMarkets.success) {
     html += row('道瓊期貨', formatChange(cnbcPreMarkets.fairValue.dow), changeClass(cnbcPreMarkets.fairValue.dow));
     html += row('標普500期貨', formatChange(cnbcPreMarkets.fairValue.sp), changeClass(cnbcPreMarkets.fairValue.sp));
@@ -2004,6 +2011,26 @@ async function loadAmerica() {
       html += row('額外資訊', robinHood.tertiaryText, changeClass(robinHood.tertiaryText));
     }
     html += row('更新時間', robinHood.updated_at);
+  }
+
+  // 輝達
+  html += groupHeader('【輝達】', '', '輝達（NVIDIA Corporation，代號：NVDA）是美國的一家科技公司，主要設計和銷售圖形處理器（GPU）和人工智能（AI）計算解決方案。');
+  if (yahooNvda.success) {
+    const changeNum = yahooNvda.close - yahooNvda.prev;
+    const cls = changeNum < 0 ? 'down' : 'up';
+    const changePercent = changeNum / yahooNvda.prev * 100;
+
+    // html += row('前次', yahooNvda.prev.toFixed(2));
+    // html += row('開盤價', yahooNvda.open.toFixed(2));
+    // html += row('最高價', yahooNvda.high.toFixed(2));
+    // html += row('最低價', yahooNvda.low.toFixed(2));
+    html += row('價格', yahooNvda.close.toFixed(2), 'accent');
+    html += row('漲跌', changeNum.toFixed(2), cls);
+    // html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
+    html += row('更新時間', yahooNvda.updateTime);
+    html += row('對應台股：鴻海（2317）、廣達（2382）、緯穎（6669）、奇鋐（3017）');
+  } else {
+    html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
   }
 
   setCard('card-america', 0, html);
