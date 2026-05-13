@@ -1870,29 +1870,74 @@ function renderInstitutional(data) {
     </div>`;
 }
 
+function getMarketStatus() {
+    const now = new Date();
+    // 強制轉化為台北時間 (UTC+8) 以免使用者電腦時區錯誤
+    const taipeiTime = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Taipei"}));
+    
+    const day = taipeiTime.getDay(); // 0: 日, 1: 一, ..., 6: 六
+    const hour = taipeiTime.getHours();
+    const minute = taipeiTime.getMinutes();
+    const currentTime = hour * 100 + minute; // 格式化為 HHMM，例如 16:12 為 1612
+
+    // 判斷是否為夏令時間 (2026年 3/8 ~ 11/1)
+    // 簡單判斷：5月絕對是夏令
+    const isSummerTime = true; 
+
+    // 設定開關盤時間 (夏令)
+    const preMarketStart = 1600;
+    const regularMarketStart = 2130;
+    const regularMarketEnd = 400;  // 04:00 (次日)
+    const futuresPauseStart = 500;  // 05:00
+    const futuresPauseEnd = 600;  // 06:00
+
+    // 1. 判斷【美股期貨電子盤】狀態
+    // 規則：週一 06:00 到 週六 05:00，扣除每天 05:00-06:00 暫停
+    let futuresStatus = "🔴";
+    if (day >= 1 && day <= 5) {
+        if (!(currentTime >= futuresPauseStart && currentTime < futuresPauseEnd)) {
+            futuresStatus = "🟢";
+        }
+    } else if (day === 6 && currentTime < futuresPauseStart) {
+        futuresStatus = "🟢";
+    } else if (day === 0 && currentTime >= 1800) { // 部分期貨週日晚上提前開盤
+        futuresStatus = "🟢";
+    }
+
+    // 2. 判斷【美股四大指數】狀態 (正式開盤)
+    // 規則：週一至週五 21:30 到 次日 04:00
+    let regularStatus = "🔴";
+    // 如果在 21:30 之後 或 04:00 之前 (考慮跨夜)
+    if (day >= 1 && day <= 5) {
+        if (currentTime >= regularMarketStart || currentTime < regularMarketEnd) {
+            // 注意：週五晚上的交易會跨到週六凌晨 04:00
+            regularStatus = "🟢";
+        }
+    } else if (day === 6 && currentTime < regularMarketEnd) {
+        regularStatus = "🟢";
+    }
+
+    return { futuresStatus, regularStatus };
+}
+
 // 美股市場概況
 async function loadAmerica() {
-  const [cnbcPreMarkets, /*yahooNqf, yahooIxic, yahooSox, */yahooBtc, yahooTsm, yahooNvda, yahooAapl, yahooMsft, yahooGoogl, yahooAmzn, yahooMeta, yahooTsla, robinHood] = await Promise.all([
+  const [cnbcPreMarkets, /*yahooNqf, yahooIxic, yahooSox, */yahooBtc, /*yahooTsm, */robinHood] = await Promise.all([
     fetch(WORKER + '/cnbc').then(r => r.json()).catch(() => ({ success: false })), // 美股盤前電子盤
     // fetch(WORKER + '/yahoo-finance/NQ=F').then(r => r.json()).catch(() => ({ success: false })), // 那斯達克 100 期貨期貨
     // fetch(WORKER + '/yahoo-finance/^IXIC').then(r => r.json()).catch(() => ({ success: false })), // 那斯達克指數
     // fetch(WORKER + '/yahoo-finance/^SOX').then(r => r.json()).catch(() => ({ success: false })), // 那斯達克指數
     fetch(WORKER + '/yahoo-finance/BTC-USD').then(r => r.json()).catch(() => ({ success: false })), // 比特幣
-    fetch(WORKER + '/yahoo-finance/TSM').then(r => r.json()).catch(() => ({ success: false })), // 台積電 ADR
-    fetch(WORKER + '/yahoo-finance/NVDA').then(r => r.json()).catch(() => ({ success: false })), // 輝達
-    fetch(WORKER + '/yahoo-finance/AAPL').then(r => r.json()).catch(() => ({ success: false })), // 蘋果
-    fetch(WORKER + '/yahoo-finance/MSFT').then(r => r.json()).catch(() => ({ success: false })), // 微軟
-    fetch(WORKER + '/yahoo-finance/GOOGL').then(r => r.json()).catch(() => ({ success: false })), // Google
-    fetch(WORKER + '/yahoo-finance/AMZN').then(r => r.json()).catch(() => ({ success: false })), // 亞馬遜
-    fetch(WORKER + '/yahoo-finance/META').then(r => r.json()).catch(() => ({ success: false })), // Meta
-    fetch(WORKER + '/yahoo-finance/TSLA').then(r => r.json()).catch(() => ({ success: false })), // 特斯拉
+    // fetch(WORKER + '/yahoo-finance/TSM').then(r => r.json()).catch(() => ({ success: false })), // 台積電 ADR
     fetch(WORKER + '/rh').then(r => r.json()).catch(() => ({ success: false })), // Robinhood
   ]);
 
   let html = `<div class="card-title">美股市場概況</div>`;
 
+  const status = getMarketStatus();
+
   // 美股期貨電子盤
-  html += groupHeader('【美股期貨電子盤】', '', '美股期貨電子盤（Pre-Market Session）指在正常開盤時間（美東時間 9:30 AM）前，透過電子通訊網路（ECN）進行的股票交易時段，通常為美東時間凌晨 4:00 至 9:30，對應台灣時間晚上 16:00/17:00 後至 21:30。此時段成交量較小但波動大，適合作為盤前財報發布後的策略布局與風險控管。');
+  html += groupHeader(`${status.futuresStatus}【美股期貨電子盤】`, '', '美股期貨電子盤（Pre-Market Session）指在正常開盤時間（美東時間 9:30 AM）前，透過電子通訊網路（ECN）進行的股票交易時段，通常為美東時間凌晨 4:00 至 9:30，對應台灣時間晚上 16:00/17:00 後至 21:30。此時段成交量較小但波動大，適合作為盤前財報發布後的策略布局與風險控管。');
   if (cnbcPreMarkets.success) {
     html += row('道瓊期貨', formatChange(cnbcPreMarkets.fairValue.dow), changeClass(cnbcPreMarkets.fairValue.dow));
     html += row('標普500期貨', formatChange(cnbcPreMarkets.fairValue.sp), changeClass(cnbcPreMarkets.fairValue.sp));
@@ -1901,7 +1946,7 @@ async function loadAmerica() {
   }
 
   // 美股四大指數
-  html += groupHeader('【美股四大指數】', '', '美股四大指數（道瓊、標普500、納斯達克、費城半導體）是反映美國股市與經濟動能的核心指標。道瓊代表藍籌龍頭，標普500涵蓋大盤整體，納斯達克側重科技成長，費半則專注半導體產業。這些指數為投資人提供了評估市場漲跌、產業趨勢及全球資金流向的關鍵基準。');
+  html += groupHeader(`${status.regularStatus}【美股四大指數】`, '', '美股四大指數（道瓊、標普500、納斯達克、費城半導體）是反映美國股市與經濟動能的核心指標。道瓊代表藍籌龍頭，標普500涵蓋大盤整體，納斯達克側重科技成長，費半則專注半導體產業。這些指數為投資人提供了評估市場漲跌、產業趨勢及全球資金流向的關鍵基準。');
   if (cnbcPreMarkets.success) {
     html += row('道瓊工業指數', formatChange(cnbcPreMarkets.market.dji), changeClass(cnbcPreMarkets.market.dji));
     html += row('標普500指數', formatChange(cnbcPreMarkets.market.spx), changeClass(cnbcPreMarkets.market.spx));
@@ -1985,52 +2030,94 @@ async function loadAmerica() {
     html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
   }
 
-  // 台積電ADR
+  // Robinhood
+
+  // 台積電 ADR
   html += groupHeader('【台積電 ADR】', '', '台積電 ADR（American Depositary Receipts，美國存託憑證）是台積電在美國發行的股票憑證（代號：TSM），掛牌於紐約證券交易所（NYSE）。它讓美國投資人能用美元直接買賣台積電，代表國際資金對台積電的看法，且 1 單位 ADR 等於 5 股台積電台股（2330）普通股。');
-  if (yahooTsm.success) {
-    const changeNum = yahooTsm.close - yahooTsm.prev;
-    const cls = changeNum < 0 ? 'down' : 'up';
-    const changePercent = changeNum / yahooTsm.prev * 100;
-
-    // html += row('前次', yahooTsm.prev.toFixed(2));
-    // html += row('開盤價', yahooTsm.open.toFixed(2));
-    // html += row('最高價', yahooTsm.high.toFixed(2));
-    // html += row('最低價', yahooTsm.low.toFixed(2));
-    html += row('價格', yahooTsm.close.toFixed(2), 'accent');
-    html += row('漲跌', changeNum.toFixed(2), cls);
-    // html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
-    html += row('更新時間', yahooTsm.updateTime);
-  } else {
-    html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
-  }
-
-  // Robinhood 的數據更新頻率非常高，幾乎是即時的，特別適合追蹤台積電 ADR 在美國市場的即時變動。
-  if (robinHood.success && robinHood.changeText != '') {
-    html += row('即時變動', robinHood.changeText, changeClass(robinHood.changeText));
-    if (robinHood.tertiaryText) {
-      html += row('額外資訊', robinHood.tertiaryText, changeClass(robinHood.tertiaryText));
+  if (robinHood.TSM.success && robinHood.TSM.changeText != '') {
+    html += row('前次', robinHood.TSM.previousClose, 'accent');
+    html += row('即時變動', robinHood.TSM.changeText, changeClass(robinHood.TSM.changeText));
+    if (robinHood.TSM.tertiaryText) {
+      html += row('額外資訊', robinHood.TSM.tertiaryText, changeClass(robinHood.TSM.tertiaryText));
     }
-    html += row('更新時間', robinHood.updated_at);
+    html += row('更新時間', robinHood.TSM.updated_at);
   }
 
   // 輝達
-  html += groupHeader('【輝達】', '', '輝達（NVIDIA Corporation，代號：NVDA）是美國的一家科技公司，主要設計和銷售圖形處理器（GPU）和人工智能（AI）計算解決方案。');
-  if (yahooNvda.success) {
-    const changeNum = yahooNvda.close - yahooNvda.prev;
-    const cls = changeNum < 0 ? 'down' : 'up';
-    const changePercent = changeNum / yahooNvda.prev * 100;
+  html += groupHeader('【輝達】', '', '輝達（NVIDIA Corporation，代號：NVDA）是美國的一家科技公司，專注於設計和銷售圖形處理器（GPU）和人工智能計算解決方案。');
+  if (robinHood.NVDA.success && robinHood.NVDA.changeText != '') {
+    html += row('前次', robinHood.NVDA.previousClose, 'accent');
+    html += row('即時變動', robinHood.NVDA.changeText, changeClass(robinHood.NVDA.changeText));
+    if (robinHood.NVDA.tertiaryText) {
+      html += row('額外資訊', robinHood.NVDA.tertiaryText, changeClass(robinHood.NVDA.tertiaryText));
+    }
+    html += row('更新時間', robinHood.NVDA.updated_at);
+  }
 
-    // html += row('前次', yahooNvda.prev.toFixed(2));
-    // html += row('開盤價', yahooNvda.open.toFixed(2));
-    // html += row('最高價', yahooNvda.high.toFixed(2));
-    // html += row('最低價', yahooNvda.low.toFixed(2));
-    html += row('價格', yahooNvda.close.toFixed(2), 'accent');
-    html += row('漲跌', changeNum.toFixed(2), cls);
-    // html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
-    html += row('更新時間', yahooNvda.updateTime);
-    html += row('對應台股：鴻海（2317）、廣達（2382）、緯穎（6669）、奇鋐（3017）');
-  } else {
-    html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
+  // 蘋果
+  html += groupHeader('【蘋果】', '', '蘋果（Apple Inc.，代號：AAPL）是美國的一家科技公司，專注於設計、開發和銷售消費電子產品、計算機軟件和線上服務。');
+  if (robinHood.AAPL.success && robinHood.AAPL.changeText != '') {
+    html += row('前次', robinHood.AAPL.previousClose, 'accent');
+    html += row('即時變動', robinHood.AAPL.changeText, changeClass(robinHood.AAPL.changeText));
+    if (robinHood.AAPL.tertiaryText) {
+      html += row('額外資訊', robinHood.AAPL.tertiaryText, changeClass(robinHood.AAPL.tertiaryText));
+    }
+    html += row('更新時間', robinHood.AAPL.updated_at);
+  }
+
+  // 微軟
+  html += groupHeader('【微軟】', '', '微軟（Microsoft Corporation，代號：MSFT）是美國的一家科技公司，專注於設計、開發和銷售電腦軟件、計算機硬體和線上服務。');
+  if (robinHood.MSFT.success && robinHood.MSFT.changeText != '') {
+    html += row('前次', robinHood.MSFT.previousClose, 'accent');
+    html += row('即時變動', robinHood.MSFT.changeText, changeClass(robinHood.MSFT.changeText));
+    if (robinHood.MSFT.tertiaryText) {
+      html += row('額外資訊', robinHood.MSFT.tertiaryText, changeClass(robinHood.MSFT.tertiaryText));
+    }
+    html += row('更新時間', robinHood.MSFT.updated_at);
+  }
+
+  // 谷哥
+  html += groupHeader('【谷哥】', '', '谷哥（Google LLC，代號：GOOGL）是美國的一家科技公司，專注於設計、開發和銷售網路搜尋引擎、線上廣告平台、雲端計算服務和消費電子產品。');
+  if (robinHood.GOOGL.success && robinHood.GOOGL.changeText != '') {
+    html += row('前次', robinHood.GOOGL.previousClose, 'accent');
+    html += row('即時變動', robinHood.GOOGL.changeText, changeClass(robinHood.GOOGL.changeText));
+    if (robinHood.GOOGL.tertiaryText) {
+      html += row('額外資訊', robinHood.GOOGL.tertiaryText, changeClass(robinHood.GOOGL.tertiaryText));
+    }
+    html += row('更新時間', robinHood.GOOGL.updated_at);
+  }
+
+  // 亞馬遜
+  html += groupHeader('【亞馬遜】', '', '亞馬遜（Amazon.com, Inc.，代號：AMZN）是美國的一家科技公司，專注於設計、開發和銷售線上零售、雲端計算服務和數位媒體內容。');
+  if (robinHood.AMZN.success && robinHood.AMZN.changeText != '') {
+    html += row('前次', robinHood.AMZN.previousClose, 'accent');
+    html += row('即時變動', robinHood.AMZN.changeText, changeClass(robinHood.AMZN.changeText));
+    if (robinHood.AMZN.tertiaryText) {
+      html += row('額外資訊', robinHood.AMZN.tertiaryText, changeClass(robinHood.AMZN.tertiaryText));
+    }
+    html += row('更新時間', robinHood.AMZN.updated_at);
+  }
+
+  // META
+  html += groupHeader('【META】', '', 'META（Meta Platforms, Inc.，代號：META）是美國的一家科技公司，專注於設計、開發和銷售社交媒體平台、虛擬實境設備和人工智能技術。');
+  if (robinHood.META.success && robinHood.META.changeText != '') {
+    html += row('前次', robinHood.META.previousClose, 'accent');
+    html += row('即時變動', robinHood.META.changeText, changeClass(robinHood.META.changeText));
+    if (robinHood.META.tertiaryText) {
+      html += row('額外資訊', robinHood.META.tertiaryText, changeClass(robinHood.META.tertiaryText));
+    }
+    html += row('更新時間', robinHood.META.updated_at);
+  }
+
+  // 特斯拉
+  html += groupHeader('【特斯拉】', '', '特斯拉（Tesla, Inc.，代號：TSLA）是美國的一家科技公司，專注於設計、開發和銷售電動汽車、能源存儲解決方案和太陽能發電產品。');
+  if (robinHood.TSLA.success && robinHood.TSLA.changeText != '') {
+    html += row('前次', robinHood.TSLA.previousClose, 'accent');
+    html += row('即時變動', robinHood.TSLA.changeText, changeClass(robinHood.TSLA.changeText));
+    if (robinHood.TSLA.tertiaryText) {
+      html += row('額外資訊', robinHood.TSLA.tertiaryText, changeClass(robinHood.TSLA.tertiaryText));
+    }
+    html += row('更新時間', robinHood.TSLA.updated_at);
   }
 
   setCard('card-america', 0, html);

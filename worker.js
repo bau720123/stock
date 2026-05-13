@@ -6,6 +6,18 @@ const CORS = {
   "Access-Control-Allow-Headers": "Content-Type",
 };
 
+const ROBINHOOD_INSTRUMENTS = {
+  TSM:   "ca4821f9-06c3-4c22-bbb8-efe569f23d2b",
+  NVDA:  "a4ecd608-e7b4-4ff3-afa5-f77ae7632dfb",
+  AAPL:  "450dfc6d-5510-4d40-abfb-f633b7d9be3e",
+  MSFT:  "50810c35-d215-4866-9758-0ada4ac79ffa",
+  GOOGL: "54db869e-f7d5-45fb-88f1-8d7072d4c8b2",
+  AMZN:  "c0bb3aec-bd1e-471e-a4f0-ca011cbec711",
+  META:  "ebab2398-028d-4939-9f1d-13bf38f81c50",
+  TSLA:  "e39ed23a-7bd1-4587-b060-71988d9ef483",
+};
+
+
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
@@ -522,7 +534,7 @@ async function fetchCnbc() {
 
     // 2. 四大指數 + 個股 (未來可在 symbols 繼續累加，如 |NVDA|AAPL)
     const qRes = await fetchWithTimeout(
-      "https://quote.cnbc.com/quote-html-webservice/restQuote/symbolType/symbol?symbols=.DJI|.SPX|.IXIC|.SOX|TSM&requestMethod=itv&noform=1&partnerId=2&fund=1&exthrs=1&output=json&events=1",
+      "https://quote.cnbc.com/quote-html-webservice/restQuote/symbolType/symbol?symbols=.DJI|.SPX|.IXIC|.SOX|TSM|NVDA|AAPL|MSFT|GOOGL|AMZN|META|TSLA&requestMethod=itv&noform=1&partnerId=2&fund=1&exthrs=1&output=json&events=1",
       { headers: { "User-Agent": UA } }
     );
     const qData = await qRes.json();
@@ -574,38 +586,52 @@ async function fetchCnbc() {
   }
 }
 
-// RobinHood（TSM ADR 即時）
+// RobinHood
+async function fetchRobinHoodOne(instrumentId) {
+  const res = await fetchWithTimeout(
+    `https://bonfire.robinhood.com/instruments/${instrumentId}/detail-page-live-updating-data/?display_span=day&hide_extended_hours=false`,
+    { headers: { "User-Agent": UA, "Accept": "application/json" } }
+  );
+  const data = await res.json();
+
+  const display = data?.chart_section?.default_display;
+  const changeText   = display?.secondary_value?.main?.value || "";
+  const tertiaryText = display?.tertiary_value?.main?.value  || "";
+
+  const quote = data?.chart_section?.quote;
+  const previousClose     = parseFloat(quote?.previous_close || "").toString();
+  const previousCloseDate = quote?.previous_close_date || "";
+  const updated_at = quote?.updated_at
+    ? new Date(quote.updated_at).toLocaleString("zh-TW", {
+        timeZone: "Asia/Taipei",
+        hour12: false,
+        year: "numeric", month: "2-digit", day: "2-digit",
+        hour: "2-digit", minute: "2-digit", second: "2-digit"
+      }).replace(/\//g, '-')
+    : '-';
+
+  const success = changeText !== "" || tertiaryText !== "" || previousClose !== "" || previousCloseDate !== "" || updated_at !== "";
+  return { success, changeText, tertiaryText, previousClose, previousCloseDate, updated_at };
+}
+
 async function fetchRobinHood() {
   try {
-    const instrumentId = "ca4821f9-06c3-4c22-bbb8-efe569f23d2b";
-    const res = await fetchWithTimeout(
-      `https://bonfire.robinhood.com/instruments/${instrumentId}/detail-page-live-updating-data/?display_span=day&hide_extended_hours=false`,
-      { headers: { "User-Agent": UA, "Accept": "application/json" } }
+    const entries = Object.entries(ROBINHOOD_INSTRUMENTS);
+
+    const results = await Promise.all(
+      entries.map(async ([symbol, instrumentId]) => {
+        try {
+          const data = await fetchRobinHoodOne(instrumentId);
+          return [symbol, data];
+        } catch (e) {
+          const errorMsg = e.name === 'AbortError' ? "連線逾時" : e.message;
+          return [symbol, { success: false, error: errorMsg }];
+        }
+      })
     );
-    const data = await res.json();
 
-    const display = data?.chart_section?.default_display;
-    const changeText   = display?.secondary_value?.main?.value || "";
-    const tertiaryText = display?.tertiary_value?.main?.value  || "";
-
-    const quote = data?.chart_section?.quote;
-    const previousClose = parseFloat(quote?.previous_close || "").toString();
-    const previousCloseDate = quote?.previous_close_date || "";
-    const updated_at = quote?.updated_at
-      ? new Date(quote.updated_at).toLocaleString("zh-TW", {
-          timeZone: "Asia/Taipei",
-          hour12: false,
-          year: "numeric",
-          month: "2-digit",
-          day: "2-digit",
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit"
-        }).replace(/\//g, '-')
-      : '-';
-
-    const success = changeText !== "" || tertiaryText !== "" || previousClose !== "" || previousCloseDate !== "" || updated_at !== "";
-    return json({ success, changeText, tertiaryText, previousClose, previousCloseDate, updated_at });
+    const payload = Object.fromEntries(results);
+    return json(payload);
   } catch (e) {
     const errorMsg = e.name === 'AbortError' ? "連線逾時" : e.message;
     return json({ success: false, error: errorMsg }, 500);
@@ -1834,25 +1860,39 @@ function generateCustomEvents(year) {
     "001"
   ));
   events.push(createEventObj(
-    new Date("2026-05-15"), 
+    new Date("2026-05-13"), 
+    "川習會",
+    "川普專機傍晚抵達北京，展開川習會行程", 
+    "#3498db", 
+    "001"
+  ));
+  events.push(createEventObj(
+    new Date("2026-05-14"), 
+    "TSM",
+    "2026 台積電台灣技術論壇", 
+    "#3498db", 
+    "001"
+  ));
+  events.push(createEventObj(
+    new Date("2026-05-14"), 
     "川習會",
     "川普與習近平見面，討論貿易與地緣政治議題", 
     "#3498db", 
-    "001"
+    "002"
   ));
   events.push(createEventObj(
     new Date("2026-05-15"), 
     "聯準會主席任期屆滿",
     "鮑爾主席任期屆滿、華許接任", 
     "#3498db", 
-    "002"
+    "001"
   ));
   events.push(createEventObj(
-    new Date("2026-05-16"), 
+    new Date("2026-05-15"), 
     "川習會",
     "川普與習近平見面，討論貿易與地緣政治議題", 
     "#3498db", 
-    "001"
+    "002"
   ));
   events.push(createEventObj(
     new Date("2026-05-20"), 
