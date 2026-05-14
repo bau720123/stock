@@ -1556,13 +1556,8 @@ async function translateToZh(text) {
 
 // 新聞 RSS（美伊戰爭消息）
 async function fetchNewsRss(env) {
-  // 關鍵字：至少命中其中一個才納入
-  // const KEYWORDS = ['伊朗', '油價', '荷姆茲', '荷莫茲', '原油', '戰爭', '中東', '美國', '川普', '軍事', '衝突', '制裁', '核子', '核武', '導彈', '攻擊', '防空', '航運', '油輪'];
   const KEYWORDS = [
-    // 中文（原有）
-    '伊朗', '油價', '荷姆茲', '荷莫茲', '原油', '戰爭', '中東', '川普', '軍事', '衝突', '制裁', '核子', '核武', '導彈', '攻擊', '防空', '航運', '油輪', '台積電', 'ADR' 
-    // 英文（新增）
-    // 'Trump', 'Iran', 'Hormuz', 'crude', 'sanction', 'missile', 'ceasefire', 'tariff',
+    '伊朗', '油價', '荷姆茲', '荷莫茲', '原油', '戰爭', '中東', '川普', '軍事', '衝突', '制裁', '核子', '核武', '導彈', '攻擊', '防空', '航運', '油輪', '台積電', 'ADR', '台達電' 
   ];
  
   // RSS 來源清單
@@ -1898,6 +1893,62 @@ function generateCustomEvents(year) {
     new Date("2026-05-20"), 
     "520 總統就職紀念日",
     "520 總統就職紀念日", 
+    "#3498db", 
+    "001"
+  ));
+  events.push(createEventObj(
+    new Date("2026-05-28"), 
+    "TSM",
+    "2026 台積電歐洲技術論壇", 
+    "#3498db", 
+    "001"
+  ));
+  events.push(createEventObj(
+    new Date("2026-06-25"), 
+    "TSM",
+    "2026 台積電中國技術論壇", 
+    "#3498db", 
+    "001"
+  ));
+  events.push(createEventObj(
+    new Date("2026-07-03"), 
+    "TSM",
+    "2026 台積電日本技術論壇", 
+    "#3498db", 
+    "001"
+  ));
+  events.push(createEventObj(
+    new Date("2026-09-23"), 
+    "TSM",
+    "2026 台積電北美技術論壇", 
+    "#3498db", 
+    "001"
+  ));
+  events.push(createEventObj(
+    new Date("2026-11-06"), 
+    "TSM",
+    "2026 台積電日本技術論壇", 
+    "#3498db", 
+    "001"
+  ));
+  events.push(createEventObj(
+    new Date("2026-11-12"), 
+    "TSM",
+    "2026 台積電台灣技術論壇", 
+    "#3498db", 
+    "001"
+  ));
+  events.push(createEventObj(
+    new Date("2026-11-17"), 
+    "TSM",
+    "2026 台積電中國技術論壇", 
+    "#3498db", 
+    "001"
+  ));
+  events.push(createEventObj(
+    new Date("2026-11-24"), 
+    "TSM",
+    "2026 台積電歐洲技術論壇", 
     "#3498db", 
     "001"
   ));
