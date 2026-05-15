@@ -1557,7 +1557,7 @@ async function translateToZh(text) {
 // 新聞 RSS（美伊戰爭消息）
 async function fetchNewsRss(env) {
   const KEYWORDS = [
-    '伊朗', '油價', '荷姆茲', '荷莫茲', '原油', '戰爭', '中東', '川普', '軍事', '衝突', '制裁', '核子', '核武', '導彈', '攻擊', '防空', '航運', '油輪', '台積電', 'ADR', '台達電' 
+    '伊朗', '油價', '荷姆茲', '荷莫茲', '原油', '戰爭', '中東', '川普', '軍事', '衝突', '制裁', '核子', '核武', '導彈', '攻擊', '防空', '航運', '油輪', '台積電', 'ADR', '台達電', '俄羅斯', '烏克蘭' 
   ];
  
   // RSS 來源清單
@@ -1895,6 +1895,13 @@ function generateCustomEvents(year) {
     "520 總統就職紀念日", 
     "#3498db", 
     "001"
+  ));
+  events.push(createEventObj(
+    new Date("2026-05-20"), 
+    "Google 開發者大會",
+    "Google 開發者大會", 
+    "#3498db", 
+    "002"
   ));
   events.push(createEventObj(
     new Date("2026-05-28"), 
