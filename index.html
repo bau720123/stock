@@ -407,6 +407,7 @@ https://cdn.jsdelivr.net/npm/echarts@6.0.0/dist/echarts.min.js
   <ul id="menuList">
     <li><a onclick="closeMenu()" href="?card_type=taiwan-market">📈 台股市場概況</a></li>
     <li><a onclick="closeMenu()" href="?card_type=america-market">🏛️ 美股市場概況</a></li>
+    <li><a onclick="closeMenu()" href="?card_type=asia-market">🏛️ 亞洲市場概況</a></li>
     <li><a onclick="closeMenu()" href="?card_type=materials">🛢️ 原物料市場</a></li>
     <li><a onclick="closeMenu()" href="?card_type=market-sentiment">🌡️ 市場情緒</a></li>
     <li><a onclick="closeMenu()" href="?card_type=my-stock">⭐ 我的自選股</a></li>
@@ -448,6 +449,10 @@ https://cdn.jsdelivr.net/npm/echarts@6.0.0/dist/echarts.min.js
   <div class="card" id="card-america" style="display: none;">
       <div class="card-title">美股市場概況</div>
       <div class="skeleton"></div>
+      <div class="skeleton"></div>
+  </div>
+  <div class="card" id="card-asia" style="display: none;">
+      <div class="card-title">亞洲市場概況</div>
       <div class="skeleton"></div>
   </div>
   <div class="card" id="card-materials" style="display: none;">
@@ -1315,6 +1320,7 @@ async function loadAll() {
   const config = {
     'taiwan-market':    { id: 'card-tw',        fn: loadTw },
     'america-market':   { id: 'card-america',   fn: loadAmerica },
+    'asia-market':      { id: 'card-asia',      fn: loadAsia },
     'materials':        { id: 'card-materials', fn: loadMaterials },
     'market-sentiment': { id: 'card-sentiment', fn: loadSentiment },
     'my-stock':         { id: 'card-mystock',   fn: loadMyStock },
@@ -2131,6 +2137,56 @@ async function loadAmerica() {
   }
 
   setCard('card-america', 0, html);
+}
+
+// 亞洲市場概況
+async function loadAsia() {
+  const [yahooJapan, yahooKorea] = await Promise.all([
+    fetch(WORKER + '/yahoo-finance/%5EN225').then(r => r.json()).catch(() => ({ success: false })), // 日經225指數
+    fetch(WORKER + '/yahoo-finance/%5EKS11').then(r => r.json()).catch(() => ({ success: false })), // 韓國綜合指數
+  ]);
+
+  let html = `<div class="card-title">亞洲市場概況</div>`;
+
+  // 【日經225指數】
+  html += groupHeader('【日經225指數】', '', '日經225指數（Nikkei 225）是日本最具代表性的股票市場指數，由東京證券交易所上市的225家大型企業股票構成，用以反映日本股市的整体表現。');
+  if (yahooJapan.success) {
+    const changeNum = yahooJapan.close - yahooJapan.prev;
+    const cls = changeClass(changeNum, 1);
+    const changePercent = changeNum / yahooJapan.prev * 100;
+
+    // html += row('前次', yahooJapan.prev.toFixed(2));
+    // html += row('開盤價', yahooJapan.open.toFixed(2));
+    // html += row('最高價', yahooJapan.high.toFixed(2));
+    // html += row('最低價', yahooJapan.low.toFixed(2));
+    html += row('價格', yahooJapan.close.toFixed(2), 'accent');
+    html += row('漲跌', changeNum.toFixed(2), cls);
+    // html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
+    html += row('更新時間', yahooJapan.updateTime);
+  } else {
+    html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
+  }
+
+  // 【韓國綜合指數】
+  html += groupHeader('【韓國綜合指數】', '', '韓國綜合指數（KOSPI, Korea Composite Stock Price Index）是韓國最具代表性的股票市場指數，由韓國交易所上市的所有普通股構成，用以反映韓國股市的整体表現。');
+  if (yahooKorea.success) {
+    const changeNum = yahooKorea.close - yahooKorea.prev;
+    const cls = changeClass(changeNum, 1);
+    const changePercent = changeNum / yahooKorea.prev * 100;
+
+    // html += row('前次', yahooKorea.prev.toFixed(2));
+    // html += row('開盤價', yahooKorea.open.toFixed(2));
+    // html += row('最高價', yahooKorea.high.toFixed(2));
+    // html += row('最低價', yahooKorea.low.toFixed(2));
+    html += row('價格', yahooKorea.close.toFixed(2), 'accent');
+    html += row('漲跌', changeNum.toFixed(2), cls);
+    // html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
+    html += row('更新時間', yahooKorea.updateTime);
+  } else {
+    html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
+  }
+
+  setCard('card-asia', 0, html);
 }
 
 // 原物料市場
