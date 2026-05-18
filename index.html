@@ -2139,6 +2139,22 @@ async function loadAmerica() {
   setCard('card-america', 0, html);
 }
 
+function getAsiaMarketEmoji() {
+  const now = new Date();
+  // 轉成台北時間
+  const tpe = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Taipei' }));
+  const h = tpe.getHours();
+  const m = tpe.getMinutes();
+  const hm = h * 100 + m; // 例如 09:37 → 937
+  const day = tpe.getDay(); // 0=週日, 1=週一, ..., 6=週六
+  const isWeekday = day >= 1 && day <= 5;
+
+  const isJapanDaySession    = isWeekday && hm >= 800  && hm <= 1400; // 08:00 ~ 14:00
+  const isKoreaDaySession    = isWeekday && hm >= 800  && hm <= 1430; // 08:00 ~ 14:30
+
+  return { isJapanDaySession, isKoreaDaySession };
+}
+
 // 亞洲市場概況
 async function loadAsia() {
   const [yahooJapan, yahooKorea] = await Promise.all([
@@ -2146,10 +2162,16 @@ async function loadAsia() {
     fetch(WORKER + '/yahoo-finance/%5EKS11').then(r => r.json()).catch(() => ({ success: false })), // 韓國綜合指數
   ]);
 
+  const status = getAsiaMarketEmoji();
+
+  // 各種時間區段標籤
+  const JapanfuturesDay   = `${status.isJapanDaySession ? '🟢' : '🔴'} `;
+  const KoreafuturesDay = `${status.isKoreaDaySession ? '🟢' : '🔴'} `;
+
   let html = `<div class="card-title">亞洲市場概況</div>`;
 
   // 【日經225指數】
-  html += groupHeader('【日經225指數】', '', '日經225指數（Nikkei 225）是日本最具代表性的股票市場指數，由東京證券交易所上市的225家大型企業股票構成，用以反映日本股市的整体表現。');
+  html += groupHeader(JapanfuturesDay + '【日經225指數】', '', '日經225指數（Nikkei 225）是日本最具代表性的股票市場指數，由東京證券交易所上市的225家大型企業股票構成，用以反映日本股市的整体表現。');
   if (yahooJapan.success) {
     const changeNum = yahooJapan.close - yahooJapan.prev;
     const cls = changeClass(changeNum, 1);
@@ -2168,7 +2190,7 @@ async function loadAsia() {
   }
 
   // 【韓國綜合指數】
-  html += groupHeader('【韓國綜合指數】', '', '韓國綜合指數（KOSPI, Korea Composite Stock Price Index）是韓國最具代表性的股票市場指數，由韓國交易所上市的所有普通股構成，用以反映韓國股市的整体表現。');
+  html += groupHeader(KoreafuturesDay + '【韓國綜合指數】', '', '韓國綜合指數（KOSPI, Korea Composite Stock Price Index）是韓國最具代表性的股票市場指數，由韓國交易所上市的所有普通股構成，用以反映韓國股市的整体表現。');
   if (yahooKorea.success) {
     const changeNum = yahooKorea.close - yahooKorea.prev;
     const cls = changeClass(changeNum, 1);
