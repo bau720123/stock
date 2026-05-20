@@ -411,7 +411,7 @@ https://cdn.jsdelivr.net/npm/echarts@6.0.0/dist/echarts.min.js
     <li><a onclick="closeMenu()" href="?card_type=materials">🛢️ 原物料市場</a></li>
     <li><a onclick="closeMenu()" href="?card_type=market-sentiment">🌡️ 市場情緒</a></li>
     <li><a onclick="closeMenu()" href="?card_type=my-stock">⭐ 我的自選股</a></li>
-    <li><a onclick="closeMenu()" href="?card_type=war">🔥 美伊戰爭消息</a></li>
+    <li><a onclick="closeMenu()" href="?card_type=war">🔥 國際政治新聞</a></li>
     <li><a onclick="closeMenu()" href="?card_type=america-calendar">📅 美股行事曆</a></li>
     <li><a onclick="closeMenu()" href="?card_type=all">🌐 全類別顯示</a></li>
     <li><a style="cursor:pointer;" onclick="showInfo('一個以純前端技術為核心，搭配 Cloudflare 無伺服器架構，實現即時金融市場報價、PWA 安裝與主動推播通知的個人投資輔助工具。');">ℹ️ 關於本軟體</a></li>
@@ -469,7 +469,7 @@ https://cdn.jsdelivr.net/npm/echarts@6.0.0/dist/echarts.min.js
       <div class="skeleton"></div>
   </div>
   <div class="card" id="card-war" style="display: none;">
-      <div class="card-title">美伊戰爭消息</div>
+      <div class="card-title">國際政治新聞</div>
       <div class="skeleton"></div>
   </div>
   <div class="card" id="card-america-calendar" style="display: none;">
@@ -4081,9 +4081,9 @@ function warMarkRead(link, source) {
   }
 }
 
-// 美伊戰爭消息
+// 國際政治新聞
 async function loadWar() {
-  let html = `<div class="card-title">美伊戰爭消息</div>`;
+  let html = `<div class="card-title">國際政治新聞</div>`;
 
   try {
     const data = await fetch(WORKER + '/news-rss').then(r => r.json()).catch(() => ({ success: false }));

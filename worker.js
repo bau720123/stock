@@ -1557,7 +1557,7 @@ async function translateToZh(text) {
 // 新聞 RSS（美伊戰爭消息）
 async function fetchNewsRss(env) {
   const KEYWORDS = [
-    '伊朗', '油價', '荷姆茲', '荷莫茲', '原油', '戰爭', '中東', '川普', '軍事', '衝突', '制裁', '核子', '核武', '導彈', '攻擊', '防空', '航運', '油輪', '台積電', 'ADR', '台達電', '俄羅斯', '烏克蘭' 
+    '伊朗', '油價', '荷姆茲', '荷莫茲', '原油', '戰爭', '中東', '川普', '軍事', '衝突', '制裁', '核子', '核武', '導彈', '攻擊', '防空', '航運', '油輪', '台積電', 'ADR', '台達電', '俄羅斯', '烏克蘭', '罷工' 
   ];
  
   // RSS 來源清單
@@ -1570,6 +1570,7 @@ async function fetchNewsRss(env) {
     { url: 'https://news.ltn.com.tw/rss/business.xml',               name: '自由時報財經' },
     // { url: 'https://news.google.com/rss/search?q=when:24h+allinurl:reuters.com+Trump&hl=en-US&gl=US&ceid=US:en', name: 'Reuters-Trump' },
     // { url: 'https://news.google.com/rss/search?q=when:24h+allinurl:reuters.com+Iran+oil&hl=en-US&gl=US&ceid=US:en', name: 'Reuters-Iran' },
+    { url: 'https://cb.yna.co.kr/gate/big5/cn.yna.co.kr/RSS/politics.xml',               name: '韓聯社' },
   ];
  
   // 解析單一 RSS XML，回傳 items 陣列
