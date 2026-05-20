@@ -1554,10 +1554,10 @@ async function translateToZh(text) {
   return data?.responseData?.translatedText || text; // 失敗就回傳原文
 }
 
-// 新聞 RSS（美伊戰爭消息）
+// 新聞 RSS
 async function fetchNewsRss(env) {
   const KEYWORDS = [
-    '伊朗', '油價', '荷姆茲', '荷莫茲', '原油', '戰爭', '中東', '川普', '軍事', '衝突', '制裁', '核子', '核武', '導彈', '攻擊', '防空', '航運', '油輪', '台積電', 'ADR', '台達電', '俄羅斯', '烏克蘭', '罷工' 
+    '伊朗', '油價', '荷姆茲', '荷莫茲', '原油', '戰爭', '中東', '川普', '軍事', '衝突', '制裁', '核子', '核武', '導彈', '攻擊', '防空', '航運', '油輪', '台積電', 'ADR', '台達電', '俄羅斯', '烏克蘭', '三星', '海力士', '談判', '高市'  
   ];
  
   // RSS 來源清單
@@ -1623,7 +1623,13 @@ async function fetchNewsRss(env) {
     const results = await Promise.allSettled(
       SOURCES.map(s =>
         fetchWithTimeout(s.url, { headers: { "User-Agent": UA } }, 5000)
-          .then(r => r.text())
+          .then(r => {
+            // 韓聯社 XML header 宣告 UTF-8 但實際是 Big5，需強制用 Big5 解碼
+            if (s.name === '韓聯社') {
+              return r.arrayBuffer().then(buf => new TextDecoder('big5').decode(buf));
+            }
+            return r.text();
+          })
           .then(xml => parseRss(xml, s.name))
           .catch(() => [])
       )
