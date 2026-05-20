@@ -73,8 +73,8 @@ export default {
     if (path.startsWith("/taifex/")) {
       const parts = path.split("/"); // ["", "taifex", "12", "CDF046"]
       const objId = parts[2];
-      const contract = parts[3];
-      if (objId && contract) return await fetchTaifex(objId, contract);
+      const contractName = decodeURIComponent(parts[3]);
+      if (objId && contractName) return await fetchTaifex(objId, contractName);
     }
 
     if (path === "/cnbc")    return await fetchCnbc();
@@ -473,7 +473,7 @@ async function fetchSina(list) {
 }
 
 // 台灣期貨交易所
-async function fetchTaifex(objId, contract) {
+async function fetchTaifex(objId, contractName) {
   try {
     const res = await fetchWithTimeout("https://www.taifex.com.tw/cht/quotesApi/getQuotes?objId=" + objId, {
       headers: { "User-Agent": UA, "Accept": "application/json" }
@@ -482,11 +482,7 @@ async function fetchTaifex(objId, contract) {
 
     // const item = data.find(d => d.contract === contract);
     let item;
-    if (contract === 'TX046' || contract === 'TX056') {
-      item = data.find(d => d.contractName === '臺股期貨');
-    } else {
-      item = data.find(d => d.contract === contract);
-    }
+    item = data.find(d => d.contractName === contractName);
 
     // 找不到時回傳空資料（資料從缺時正常現象）
     if (!item) {
@@ -2312,9 +2308,9 @@ async function handleCron(env) {
 
   // 第一批：Taifex（容易逾時，先打）
   const [taifexDay, taifexNight, taifexTsmc] = await Promise.all([
-    fetchTaifex(2, "TX046"),
-    fetchTaifex(12, "TX056"),
-    fetchTaifex(12, "CDF056"),
+    fetchTaifex(2, "臺股期貨"),
+    fetchTaifex(12, "臺股期貨"),
+    fetchTaifex(12, "台積電期貨"),
   ]);
 
   // 第二批：其他
