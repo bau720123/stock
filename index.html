@@ -206,10 +206,10 @@ header h1 {
   color: var(--accent);
 }
 .alert-settings-btn.active {
-  /* border-color: var(--up); */
-  /* color: var(--up); */
-  border-color: darkgray;
-  color: ghostwhite;
+  border-color: var(--up);
+  color: var(--up);
+  /*border-color: darkgray;
+  color: ghostwhite;*/
 }
 
 /* ── Section label ── */
@@ -507,22 +507,35 @@ function alertEnabled(key) {
 // settingsKey：若傳入則顯示齒輪按鈕，點擊呼叫 openAlertSettings(settingsKey)
 function groupHeader(label, settingsKey = null, wording = '') {
   const isActive = settingsKey && (alertEnabled(settingsKey + '_high') || alertEnabled(settingsKey + '_low') || alertEnabled(settingsKey));
+
   var descButton = wording ? `
-    <button class="alert-settings-btn" onclick="showInfo('${wording}')" title="內容說明" class="alert-settings-btn active">
+    <button class="alert-settings-btn" onclick="showInfo('${wording}')" title="內容說明">
       ❔
     </button>` : '';
-  
-  var space = '';
-  if (settingsKey != '') {
-    space = '&nbsp;';
+
+  var space = settingsKey != '' ? '&nbsp;' : '';
+
+  const usStocks = ['TSM', 'NVDA', 'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'TSLA'];
+
+  var settingsButton = '';
+  if (settingsKey) {
+    if (usStocks.includes(settingsKey)) {
+      settingsButton = `
+        <button class="alert-settings-btn"
+          title="前往 Robinhood"
+          onclick="window.open('https://robinhood.com/us/en/stocks/${settingsKey}/', '_blank')">
+          📈
+        </button>`;
+    } else {
+      settingsButton = `
+        <button class="alert-settings-btn ${isActive ? 'active' : ''}"
+          title="偵測設定"
+          onclick="openAlertSettings('${settingsKey}')">
+          設定價格提醒
+        </button>`;
+    }
   }
 
-  var settingsButton = settingsKey ? `
-    <button class="alert-settings-btn ${isActive ? 'active' : ''}"
-      title="偵測設定"
-      onclick="openAlertSettings('${settingsKey}')">
-      設定價格提醒
-    </button>` : '';
   return `<span class="group-header"><span class="group-header-title">${label}</span>${descButton}${space}${settingsButton}</span>`;
 }
 
@@ -2051,7 +2064,17 @@ async function loadAmerica() {
     // html += row('開盤價', yahooTnx.open.toFixed(2));
     // html += row('最高價', yahooTnx.high.toFixed(2));
     // html += row('最低價', yahooTnx.low.toFixed(2));
-    html += row('價格', yahooTnx.close.toFixed(2), 'accent');
+    html += row('利率', yahooTnx.close.toFixed(2), 'accent');
+
+    // 警戒區間判斷
+    const tnxRate = yahooTnx.close;
+    if (tnxRate >= 4.65) {
+      html += row('警戒水位', `紅色危險區（${tnxRate >= 5.0 ? '逼近5.0%' : '衝擊資產/引發拋售'}）`);
+    } else if (tnxRate >= 4.50) {
+      html += row('警戒水位', '黃色警戒（開始承壓）');
+    } else {
+      html += row('利率狀態', '正常', 'accent');
+    }
     html += row('漲跌', changeNum.toFixed(2), cls);
     // html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
     html += row('更新時間', yahooTnx.updateTime);
@@ -2070,7 +2093,18 @@ async function loadAmerica() {
     // html += row('開盤價', yahooTxy.open.toFixed(2));
     // html += row('最高價', yahooTxy.high.toFixed(2));
     // html += row('最低價', yahooTxy.low.toFixed(2));
-    html += row('價格', yahooTxy.close.toFixed(2), 'accent');
+    html += row('利率', yahooTxy.close.toFixed(2), 'accent');
+
+    // 警戒區間判斷
+    const txyRate = yahooTxy.close;
+    if (txyRate >= 5.25) {
+      html += row('警戒水位', '紅色危險區（衝擊資產/引發拋售）');
+    } else if (txyRate >= 5.00) {
+      html += row('警戒水位', '黃色警戒（開始承壓）');
+    } else {
+      html += row('利率狀態', '正常', 'accent');
+    }
+
     html += row('漲跌', changeNum.toFixed(2), cls);
     // html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
     html += row('更新時間', yahooTxy.updateTime);
@@ -2083,7 +2117,10 @@ async function loadAmerica() {
   html += `<div class="card-title" style="margin-top: 5%;">驚奇八強</div>`;
 
   // 台積電 ADR
-  html += groupHeader('【台積電 ADR】', '', '台積電 ADR（American Depositary Receipts，美國存託憑證）是台積電在美國發行的股票憑證（代號：TSM），掛牌於紐約證券交易所（NYSE）。它讓美國投資人能用美元直接買賣台積電，代表國際資金對台積電的看法，且 1 單位 ADR 等於 5 股台積電台股（2330）普通股。');
+  html += groupHeader('【台積電 ADR】', 'TSM', '台積電 ADR（American Depositary Receipts，美國存託憑證）是台積電在美國發行的股票憑證（代號：TSM），掛牌於紐約證券交易所（NYSE）。它讓美國投資人能用美元直接買賣台積電，代表國際資金對台積電的看法，且 1 單位 ADR 等於 5 股台積電台股（2330）普通股。');
+  // html += `<button class="alert-settings-btn " title="偵測設定" onclick="openAlertSettings('brent')">
+  //     設定價格提醒
+  //   </button>`;
   if (robinHood.TSM.success && robinHood.TSM.changeText != '') {
     html += row('前次', robinHood.TSM.previousClose, 'accent');
     html += row('今日漲跌', robinHood.TSM.changeText, changeClass(robinHood.TSM.changeText));
@@ -2091,11 +2128,11 @@ async function loadAmerica() {
       html += row('隔夜漲跌', robinHood.TSM.tertiaryText, changeClass(robinHood.TSM.tertiaryText));
     }
     html += row('更新時間', robinHood.TSM.updated_at);
-    html += row('對應台股：台積電(2330)');
+    html += row('對應台股：台積電（2330）');
   }
 
   // 輝達
-  html += groupHeader('【輝達】', '', '輝達（NVIDIA Corporation，代號：NVDA）是美國的一家科技公司，專注於設計和銷售圖形處理器（GPU）和人工智能計算解決方案。');
+  html += groupHeader('【輝達】', 'NVDA', '輝達（NVIDIA Corporation，代號：NVDA）是美國的一家科技公司，專注於設計和銷售圖形處理器（GPU）和人工智能計算解決方案。');
   if (robinHood.NVDA.success && robinHood.NVDA.changeText != '') {
     html += row('前次', robinHood.NVDA.previousClose, 'accent');
     html += row('今日漲跌', robinHood.NVDA.changeText, changeClass(robinHood.NVDA.changeText));
@@ -2103,11 +2140,11 @@ async function loadAmerica() {
       html += row('隔夜漲跌', robinHood.NVDA.tertiaryText, changeClass(robinHood.NVDA.tertiaryText));
     }
     html += row('更新時間', robinHood.NVDA.updated_at);
-    html += row('對應台股：台積電(2330)、鴻海(2317)、廣達(2382)、奇鋐(3017)、緯穎(6669)、日月光(3711)、京元電(2449)');
+    html += row('對應台股：台積電（2330）、鴻海（2317）、廣達（2382）、奇鋐（3017）、緯穎（6669）、日月光（3711）、京元電（2449）');
   }
 
   // 蘋果
-  html += groupHeader('【蘋果】', '', '蘋果（Apple Inc.，代號：AAPL）是美國的一家科技公司，專注於設計、開發和銷售消費電子產品、計算機軟件和線上服務。');
+  html += groupHeader('【蘋果】', 'AAPL', '蘋果（Apple Inc.，代號：AAPL）是美國的一家科技公司，專注於設計、開發和銷售消費電子產品、計算機軟件和線上服務。');
   if (robinHood.AAPL.success && robinHood.AAPL.changeText != '') {
     html += row('前次', robinHood.AAPL.previousClose, 'accent');
     html += row('今日漲跌', robinHood.AAPL.changeText, changeClass(robinHood.AAPL.changeText));
@@ -2115,11 +2152,11 @@ async function loadAmerica() {
       html += row('隔夜漲跌', robinHood.AAPL.tertiaryText, changeClass(robinHood.AAPL.tertiaryText));
     }
     html += row('更新時間', robinHood.AAPL.updated_at);
-    html += row('對應台股：台積電(2330)、鴻海(2317)、大立光(3008)、玉晶光(3406)、新日興(3376)、台光電(2383)');
+    html += row('對應台股：台積電（2330）、鴻海（2317）、大立光（3008）、玉晶光（3406）、新日興（3376）、台光電（2383）');
   }
 
   // 微軟
-  html += groupHeader('【微軟】', '', '微軟（Microsoft Corporation，代號：MSFT）是美國的一家科技公司，專注於設計、開發和銷售電腦軟件、計算機硬體和線上服務。');
+  html += groupHeader('【微軟】', 'MSFT', '微軟（Microsoft Corporation，代號：MSFT）是美國的一家科技公司，專注於設計、開發和銷售電腦軟件、計算機硬體和線上服務。');
   if (robinHood.MSFT.success && robinHood.MSFT.changeText != '') {
     html += row('前次', robinHood.MSFT.previousClose, 'accent');
     html += row('今日漲跌', robinHood.MSFT.changeText, changeClass(robinHood.MSFT.changeText));
@@ -2127,11 +2164,11 @@ async function loadAmerica() {
       html += row('隔夜漲跌', robinHood.MSFT.tertiaryText, changeClass(robinHood.MSFT.tertiaryText));
     }
     html += row('更新時間', robinHood.MSFT.updated_at);
-    html += row('對應台股：緯穎(6669)、廣達(2382)、英業達(2356)、信驊(5274)、智邦(2345)');
+    html += row('對應台股：緯穎（6669）、廣達（2382）、英業達（2356）、信驊（5274）、智邦（2345）');
   }
 
   // 谷哥
-  html += groupHeader('【谷歌】', '', '谷歌（Google LLC，代號：GOOGL）是美國的一家科技公司，專注於設計、開發和銷售網路搜尋引擎、線上廣告平台、雲端計算服務和消費電子產品。');
+  html += groupHeader('【谷歌】', 'GOOGL', '谷歌（Google LLC，代號：GOOGL）是美國的一家科技公司，專注於設計、開發和銷售網路搜尋引擎、線上廣告平台、雲端計算服務和消費電子產品。');
   if (robinHood.GOOGL.success && robinHood.GOOGL.changeText != '') {
     html += row('前次', robinHood.GOOGL.previousClose, 'accent');
     html += row('今日漲跌', robinHood.GOOGL.changeText, changeClass(robinHood.GOOGL.changeText));
@@ -2139,11 +2176,11 @@ async function loadAmerica() {
       html += row('隔夜漲跌', robinHood.GOOGL.tertiaryText, changeClass(robinHood.GOOGL.tertiaryText));
     }
     html += row('更新時間', robinHood.GOOGL.updated_at);
-    html += row('對應台股：廣達(2382)、世芯-KY(3661)、創意(3443)、台達電(2308)、健策(3653)');
+    html += row('對應台股：廣達（2382）、世芯-KY（3661）、創意（3443）、台達電（2308）、健策（3653）');
   }
 
   // 亞馬遜
-  html += groupHeader('【亞馬遜】', '', '亞馬遜（Amazon.com, Inc.，代號：AMZN）是美國的一家科技公司，專注於設計、開發和銷售線上零售、雲端計算服務和數位媒體內容。');
+  html += groupHeader('【亞馬遜】', 'AMZN', '亞馬遜（Amazon.com, Inc.，代號：AMZN）是美國的一家科技公司，專注於設計、開發和銷售線上零售、雲端計算服務和數位媒體內容。');
   if (robinHood.AMZN.success && robinHood.AMZN.changeText != '') {
     html += row('前次', robinHood.AMZN.previousClose, 'accent');
     html += row('今日漲跌', robinHood.AMZN.changeText, changeClass(robinHood.AMZN.changeText));
@@ -2151,11 +2188,11 @@ async function loadAmerica() {
       html += row('隔夜漲跌', robinHood.AMZN.tertiaryText, changeClass(robinHood.AMZN.tertiaryText));
     }
     html += row('更新時間', robinHood.AMZN.updated_at);
-    html += row('對應台股：世芯-KY(3661)、緯穎(6669)、鴻海(2317)、金像電(2368)、川湖(2059)');
+    html += row('對應台股：世芯-KY（3661）、緯穎（6669）、鴻海（2317）、金像電（2368）、川湖（2059）');
   }
 
   // META
-  html += groupHeader('【META】', '', 'META（Meta Platforms, Inc.，代號：META）是美國的一家科技公司，專注於設計、開發和銷售社交媒體平台、虛擬實境設備和人工智能技術。');
+  html += groupHeader('【META】', 'META', 'META（Meta Platforms, Inc.，代號：META）是美國的一家科技公司，專注於設計、開發和銷售社交媒體平台、虛擬實境設備和人工智能技術。');
   if (robinHood.META.success && robinHood.META.changeText != '') {
     html += row('前次', robinHood.META.previousClose, 'accent');
     html += row('今日漲跌', robinHood.META.changeText, changeClass(robinHood.META.changeText));
@@ -2163,11 +2200,11 @@ async function loadAmerica() {
       html += row('隔夜漲跌', robinHood.META.tertiaryText, changeClass(robinHood.META.tertiaryText));
     }
     html += row('更新時間', robinHood.META.updated_at);
-    html += row('對應台股：廣達(2382)、緯穎(6669)、智邦(2345)、欣興(3037)、南電(8046)');
+    html += row('對應台股：廣達（2382）、緯穎（6669）、智邦（2345）、欣興（3037）、南電（8046）');
   }
 
   // 特斯拉
-  html += groupHeader('【特斯拉】', '', '特斯拉（Tesla, Inc.，代號：TSLA）是美國的一家科技公司，專注於設計、開發和銷售電動汽車、能源存儲解決方案和太陽能發電產品。');
+  html += groupHeader('【特斯拉】', 'TSLA', '特斯拉（Tesla, Inc.，代號：TSLA）是美國的一家科技公司，專注於設計、開發和銷售電動汽車、能源存儲解決方案和太陽能發電產品。');
   if (robinHood.TSLA.success && robinHood.TSLA.changeText != '') {
     html += row('前次', robinHood.TSLA.previousClose, 'accent');
     html += row('今日漲跌', robinHood.TSLA.changeText, changeClass(robinHood.TSLA.changeText));
@@ -2175,7 +2212,7 @@ async function loadAmerica() {
       html += row('隔夜漲跌', robinHood.TSLA.tertiaryText, changeClass(robinHood.TSLA.tertiaryText));
     }
     html += row('更新時間', robinHood.TSLA.updated_at);
-    html += row('對應台股：世芯-KY(3661)、台達電(2308)、和碩(4938)、貿聯-KY(3665)、華孚(6235)');
+    html += row('對應台股：世芯-KY（3661）、台達電（2308）、和碩（4938）、貿聯-KY（3665）、華孚（6235）');
   }
 
   setCard('card-america', 0, html);
