@@ -1496,9 +1496,9 @@ async function fetchYahooFinance(symbol, interval = 1, range = 1) {
       return json({ success: false, error: "無資料" });
     }
  
-    const timestamps = result.timestamp || [];
+    const timestamps = result.timestamp ?? (result.meta?.regularMarketTime ? [result.meta.regularMarketTime] : []);
     const quote = result.indicators?.quote?.[0] || {};
-    const closes = quote.close  || [];
+    const closes = quote.close ?? (result.meta?.regularMarketPrice ? [result.meta.regularMarketPrice] : []);
     const opens  = quote.open   || [];
     const highs  = quote.high   || [];
     const lows   = quote.low    || [];

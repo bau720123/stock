@@ -2064,7 +2064,7 @@ async function loadAmerica() {
     // html += row('開盤價', yahooTnx.open.toFixed(2));
     // html += row('最高價', yahooTnx.high.toFixed(2));
     // html += row('最低價', yahooTnx.low.toFixed(2));
-    html += row('利率', yahooTnx.close.toFixed(2), 'accent');
+    html += row('利率', yahooTnx.close, 'accent');
 
     // 警戒區間判斷
     const tnxRate = yahooTnx.close;
@@ -2093,7 +2093,7 @@ async function loadAmerica() {
     // html += row('開盤價', yahooTxy.open.toFixed(2));
     // html += row('最高價', yahooTxy.high.toFixed(2));
     // html += row('最低價', yahooTxy.low.toFixed(2));
-    html += row('利率', yahooTxy.close.toFixed(2), 'accent');
+    html += row('利率', yahooTxy.close, 'accent');
 
     // 警戒區間判斷
     const txyRate = yahooTxy.close;
