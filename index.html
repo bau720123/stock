@@ -2870,7 +2870,8 @@ async function loadMyStock() {
 
 function _renderMyStock({ quoteResults, volumeResults, historyResults, institutionalResults, smaResults, rsiResults, kdjResults, macdResults, brandsResults }) {
   // 銷毀頁面上所有殘留的 ECharts 實例，避免 canvas 尺寸錯誤
-  document.querySelectorAll('[_echarts_instance_]').forEach(el => {
+  // 排除台股市場概況的圖表（tw_foreignnetposition_chart、tw_institutional_chart）
+  document.querySelectorAll('[_echarts_instance_]:not(#tw_foreignnetposition_chart):not(#tw_institutional_chart)').forEach(el => {
     echarts.getInstanceByDom(el)?.dispose();
   });
 
