@@ -389,6 +389,57 @@ header h1 {
   font-size: 0.8rem;
 }
 .calendar-nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ── MyStock Slider ── */
+.mystock-slider-wrapper {
+  position: relative;
+  overflow: hidden;
+}
+.mystock-slider-track {
+  display: flex;
+  transition: transform .35s ease;
+  will-change: transform;
+}
+.stock-slide {
+  min-width: 100%;
+  flex-shrink: 0;
+}
+.mystock-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 14px;
+}
+.mystock-nav-btn {
+  background: none;
+  border: 1px solid var(--muted);
+  color: var(--text);
+  border-radius: 4px;
+  padding: 5px 14px;
+  font-family: var(--mono);
+  font-size: .8rem;
+  cursor: pointer;
+  transition: border-color .2s, color .2s;
+}
+.mystock-nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+.mystock-nav-btn:disabled { opacity: .3; cursor: default; pointer-events: none; }
+.mystock-dots {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.mystock-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--muted);
+  cursor: pointer;
+  transition: background .2s, transform .2s;
+}
+.mystock-dot.active {
+  background: var(--accent);
+  transform: scale(1.3);
+}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <!--<script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>-->
@@ -2064,7 +2115,7 @@ async function loadAmerica() {
     // html += row('開盤價', yahooTnx.open.toFixed(2));
     // html += row('最高價', yahooTnx.high.toFixed(2));
     // html += row('最低價', yahooTnx.low.toFixed(2));
-    html += row('利率', yahooTnx.close, 'accent');
+    html += row('利率', yahooTnx.close.toFixed(2), 'accent');
 
     // 警戒區間判斷
     const tnxRate = yahooTnx.close;
@@ -2093,7 +2144,7 @@ async function loadAmerica() {
     // html += row('開盤價', yahooTxy.open.toFixed(2));
     // html += row('最高價', yahooTxy.high.toFixed(2));
     // html += row('最低價', yahooTxy.low.toFixed(2));
-    html += row('利率', yahooTxy.close, 'accent');
+    html += row('利率', yahooTxy.close.toFixed(2), 'accent');
 
     // 警戒區間判斷
     const txyRate = yahooTxy.close;
@@ -2770,6 +2821,8 @@ async function loadTickers() {
 }
 
 // 我的自選股
+let _mystockApiCache = null; // 快取 API 結果，供 resize 時重繪使用
+
 async function loadMyStock() {
   await loadTickers(); // 預先載入 tickers，供 openMyStockSettings autocomplete 使用
   // 平行抓取所有自選股票的相關屬性資訊
@@ -2803,16 +2856,33 @@ async function loadMyStock() {
     )
   ]);
 
-  let html = `<div class="card-title">
+  // 存入快取
+  _mystockApiCache = { quoteResults, volumeResults, historyResults, institutionalResults, smaResults, rsiResults, kdjResults, macdResults, brandsResults };
+
+  _renderMyStock(_mystockApiCache);
+}
+
+function _renderMyStock({ quoteResults, volumeResults, historyResults, institutionalResults, smaResults, rsiResults, kdjResults, macdResults, brandsResults }) {
+  // 銷毀頁面上所有殘留的 ECharts 實例，避免 canvas 尺寸錯誤
+  document.querySelectorAll('[_echarts_instance_]').forEach(el => {
+    echarts.getInstanceByDom(el)?.dispose();
+  });
+
+  let html = `<div class="card-title" style="margin-bottom: 0px;">
     <span class="card-title-text">我的自選股</span>
     <button class="alert-settings-btn" title="管理股票清單" onclick="openMyStockSettings()">
       ⚙️
     </button>
   </div>`;
 
+  html += `<div style="position:relative;">
+    <div class="mystock-slider-wrapper">
+      <div class="mystock-slider-track" id="mystock-track">`;
+
   const { isDaySession } = getMarketEmoji();
 
   for (let i = 0; i < MY_STOCKS.length; i++) {
+    html += `<div class="stock-slide">`;
     const stock = MY_STOCKS[i];
     const data  = quoteResults[i];
     const settingsKey = `mystock_${stock.symbol}`;
@@ -3098,7 +3168,24 @@ async function loadMyStock() {
     html += `<div class="row">
       ${renderStockChartBrands(brandsResults[i], i)}
     </div>`;
+
+    html += `</div>`; // .stock-slide
   }
+
+  // 導覽列（按鈕 + dots）
+  const dotsHtml = MY_STOCKS.map((s, i) =>
+    `<span class="mystock-dot ${i === 0 ? 'active' : ''}" onclick="gotoMyStockSlide(${i})" title="${s.name}"></span>`
+  ).join('');
+
+  html += `
+      </div><!-- /.mystock-slider-track -->
+    </div><!-- /.mystock-slider-wrapper -->
+  </div><!-- /.mystock-slider-outer -->
+  <div class="mystock-nav">
+    <button class="mystock-nav-btn" id="mystock-prev" onclick="stepMyStockSlide(-1)" ${MY_STOCKS.length <= 1 ? 'style="visibility:hidden"' : ''}>◀ 上一檔</button>
+    <div class="mystock-dots" id="mystock-dots">${dotsHtml}</div>
+    <button class="mystock-nav-btn" id="mystock-next" onclick="stepMyStockSlide(1)" ${MY_STOCKS.length <= 1 ? 'style="visibility:hidden"' : ''}>下一檔 ▶</button>
+  </div>`;
 
   setCard('card-mystock', 0, html, card_type === 'my-stock' ? 'card-wide' : '');
 
@@ -3109,7 +3196,139 @@ async function loadMyStock() {
   StockChartKdj();
   StockChartMacd();
   StockChartBrands();
+
+  initMyStockSlider();
 }
+
+// ── MyStock Slider ──
+let _mystockSlideIndex = 0;
+let _mystockSliderInited = false;
+
+function initMyStockSlider() {
+  // 保留上次停留的頁面（loadAll 重跑時不跳回第 0 頁）
+  // 但如果超出新的股票數量範圍就夾回合法值
+  const total = MY_STOCKS.length;
+  _mystockSlideIndex = Math.max(0, Math.min(total - 1, _mystockSlideIndex));
+  _updateMyStockSlider();
+
+  // Touch / swipe 手勢支援（只綁一次，避免重複堆疊）
+  if (_mystockSliderInited) return;
+  _mystockSliderInited = true;
+
+  const track = document.getElementById('mystock-track');
+  if (!track) return;
+
+  let startX = 0;
+  let isDragging = false;
+
+  track.addEventListener('touchstart', e => {
+    startX = e.touches[0].clientX;
+    isDragging = true;
+  }, { passive: true });
+
+  track.addEventListener('touchend', e => {
+    if (!isDragging) return;
+    isDragging = false;
+    const diff = startX - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 40) {
+      stepMyStockSlide(diff > 0 ? 1 : -1);
+    }
+  }, { passive: true });
+
+  // 轉向或視窗 resize 時：用快取資料重繪整個 card（不打 API），解決 ECharts canvas 尺寸錯誤
+  let _resizeTimer = null;
+  const onResize = () => {
+    clearTimeout(_resizeTimer);
+    _resizeTimer = setTimeout(() => {
+      if (_mystockApiCache) {
+        _renderMyStock(_mystockApiCache);
+      }
+    }, 200);
+  };
+  window.addEventListener('orientationchange', onResize);
+  window.addEventListener('resize', onResize);
+}
+
+function _updateMyStockSlider() {
+  const total = MY_STOCKS.length;
+  const i = _mystockSlideIndex;
+
+  const track = document.getElementById('mystock-track');
+  if (!track) return;
+
+  // 先短暫關閉 transition，避免 resize 時產生動畫滑動
+  track.style.transition = 'none';
+  track.style.transform = `translateX(-${i * 100}%)`;
+  // 下一個 frame 再恢復 transition
+  requestAnimationFrame(() => {
+    track.style.transition = '';
+  });
+
+  // dots
+  document.querySelectorAll('.mystock-dot').forEach((dot, idx) => {
+    dot.classList.toggle('active', idx === i);
+  });
+
+  // 底部按鈕 disabled 狀態
+  const prevBtn = document.getElementById('mystock-prev');
+  const nextBtn = document.getElementById('mystock-next');
+  if (prevBtn) prevBtn.disabled = (i === 0);
+  if (nextBtn) nextBtn.disabled = (i === total - 1);
+}
+
+window.stepMyStockSlide = function(dir) {
+  const total = MY_STOCKS.length;
+  _mystockSlideIndex = Math.max(0, Math.min(total - 1, _mystockSlideIndex + dir));
+  _updateMyStockSlider();
+};
+
+window.gotoMyStockSlide = function(idx) {
+  _mystockSlideIndex = idx;
+  _updateMyStockSlider();
+};
+
+  const pending = window._history_chartPending || {};
+  for (const i in pending) {
+    const el = document.getElementById('stock_history_chart_' + i);
+    if (!el) continue;
+    const sorted = pending[i];
+
+    const chart = LightweightCharts.createChart(el, {
+      width:  el.offsetWidth || 300,
+      height: 260,
+      layout: { background: { color: '#0a0e14' }, textColor: '#5a7080' },
+      grid:   { vertLines: { color: '#1e2736' }, horzLines: { color: '#1e2736' } },
+      crosshair:       { mode: LightweightCharts.CrosshairMode.Normal },
+      rightPriceScale: { borderColor: '#1e2736' },
+      timeScale:       { borderColor: '#1e2736', fixLeftEdge: true, fixRightEdge: true },
+      handleScroll:    { mouseWheel: true },
+      handleScale:     { mouseWheel: true },
+    });
+
+    const candleSeries = chart.addSeries(LightweightCharts.CandlestickSeries, {
+      upColor: '#ff4d6a', downColor: '#00c98a',
+      borderUpColor: '#ff4d6a', borderDownColor: '#00c98a',
+      wickUpColor:   '#ff4d6a', wickDownColor:   '#00c98a',
+    });
+    candleSeries.setData(sorted.map(d => ({
+      time: d.date, open: d.open, high: d.high, low: d.low, close: d.close,
+    })));
+
+    const volSeries = chart.addSeries(LightweightCharts.HistogramSeries, {
+      priceFormat: { type: 'volume' }, priceScaleId: 'vol',
+    });
+    chart.priceScale('vol').applyOptions({
+      scaleMargins: { top: 0.82, bottom: 0 },
+    });
+    volSeries.setData(sorted.map(d => ({
+      time:  d.date,
+      value: Math.round(d.volume / 1000),
+      color: d.change >= 0 ? '#ff4d6a33' : '#00c98a33',
+    })));
+
+    new ResizeObserver(() => chart.applyOptions({ width: el.offsetWidth })).observe(el);
+  }
+  window._history_chartPending = {}; // 清空，避免重複初始化
 
 function StockChartHistory_lightweight_charts() {
   const pending = window._history_chartPending || {};
