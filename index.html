@@ -3211,22 +3211,21 @@ function initMyStockSlider() {
   _mystockSlideIndex = Math.max(0, Math.min(total - 1, _mystockSlideIndex));
   _updateMyStockSlider();
 
-  // Touch / swipe 手勢支援（只綁一次，避免重複堆疊）
+  // Touch / swipe 手勢支援
+  // 用 event delegation 綁在 document，避免 _renderMyStock 重建 DOM 後舊元素的事件失效
   if (_mystockSliderInited) return;
   _mystockSliderInited = true;
-
-  const track = document.getElementById('mystock-track');
-  if (!track) return;
 
   let startX = 0;
   let isDragging = false;
 
-  track.addEventListener('touchstart', e => {
+  document.addEventListener('touchstart', e => {
+    if (!e.target.closest('#mystock-track')) return;
     startX = e.touches[0].clientX;
     isDragging = true;
   }, { passive: true });
 
-  track.addEventListener('touchend', e => {
+  document.addEventListener('touchend', e => {
     if (!isDragging) return;
     isDragging = false;
     const diff = startX - e.changedTouches[0].clientX;
