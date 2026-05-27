@@ -1907,9 +1907,58 @@ function generateCustomEvents(year) {
     "002"
   ));
   events.push(createEventObj(
+    new Date("2026-05-27"), 
+    "NVIDIA",
+    "輝達台灣新總部動土", 
+    "#3498db", 
+    "001"
+  ));
+  events.push(createEventObj(
     new Date("2026-05-28"), 
     "TSM",
     "2026 台積電歐洲技術論壇", 
+    "#3498db", 
+    "001"
+  ));
+  events.push(createEventObj(
+    new Date("2026-05-28"), 
+    "AI",
+    "兆元宴", 
+    "#3498db", 
+    "002"
+  ));
+  events.push(createEventObj(
+    new Date("2026-06-01"), 
+    "NVIDIA",
+    "黃仁勳 台北流行音樂中心演講", 
+    "#3498db", 
+    "001"
+  ));
+  events.push(createEventObj(
+    new Date("2026-06-02"), 
+    "TSM",
+    "2026 COMPUTEX 2026", 
+    "#3498db", 
+    "001"
+  ));
+  events.push(createEventObj(
+    new Date("2026-06-03"), 
+    "TSM",
+    "2026 COMPUTEX 2026", 
+    "#3498db", 
+    "001"
+  ));
+  events.push(createEventObj(
+    new Date("2026-06-04"), 
+    "TSM",
+    "2026 COMPUTEX 2026", 
+    "#3498db", 
+    "001"
+  ));
+  events.push(createEventObj(
+    new Date("2026-06-05"), 
+    "TSM",
+    "2026 COMPUTEX 2026", 
     "#3498db", 
     "001"
   ));
