@@ -2187,7 +2187,7 @@ async function generateCustomEventsMacroEarnings() {
     // calendarItems 結構：{ "2026-04-28": [...], "2026-04-29": [...] }
     for (const [dateStr, items] of Object.entries(calendarItems)) {
       const dateObj = new Date(dateStr);
-      dateObj.setDate(dateObj.getDate() + 1); // 因為是美東時間，所以日期會比台北晚一天，這裡先加一天轉回台北日期
+      // dateObj.setDate(dateObj.getDate() + 1); // 因為是美東時間，所以日期會比台北晚一天，這裡先加一天轉回台北日期
       if (isNaN(dateObj.getTime())) continue;
 
       for (const item of items) {
