@@ -26,12 +26,13 @@
             ├─ 玩股網 (wearn) → 外資期貨淨部位、三大法人買賣、個股法人明細
             ├─ 台灣證券交易所  → 融資餘額
             ├─ 新浪財經       → 布蘭特原油、黃金、白銀、美元指數、VIX
-            ├─ Yahoo Finance  → 美股/ETF 個股行情
+            ├─ Yahoo Finance  → 美股/ETF 個股行情、亞洲市場指數
             ├─ CNBC          → 美股四大指數、盤前 Fair Value、TSM ADR
             ├─ RobinHood     → TSM ADR 即時報價（目前因 TLS 封鎖暫停）
             ├─ CNN           → 恐慌貪婪指數（Fear & Greed Index）
             ├─ MoneyDJ       → 美股重要經濟指標行事曆
-            ├─ Finnhub       → 科技股財報發布日曆（需 API Key）
+            ├─ MacroMicro    → 科技股財報日曆、總體經濟事件（靜態 JSON）
+            ├─ Finnhub       → 科技股財報日曆（需 API Key，路由保留但已停用）
             └─ RSS Feeds     → Yahoo奇摩財經、中央社、自由時報
 ```
 
@@ -81,6 +82,7 @@ fetch("https://histock.tw/stock/module/function.aspx", {
 | `/twn` | HiStock | 富台指即時報價（備援） |
 | `/twncon` | 鉅亨網 | 富台指即時報價（主要） |
 | `/taifex/{objId}/{contract}` | TaiFex 官方 API | 台股/台積電期貨報價（日盤/夜盤） |
+| `/stock/tickers` | Fugle | 全市場 ticker 清單（自選股 Autocomplete 用） |
 | `/stock/quote/{symbol}` | Fugle | 台股個股即時報價（含委買委賣五檔） |
 | `/stock/volume/{symbol}` | Fugle | 台股個股分價量表 |
 | `/stock/history/{symbol}` | Fugle | 台股個股歷史 K 線（近 30 天，日線） |
@@ -90,7 +92,7 @@ fetch("https://histock.tw/stock/module/function.aspx", {
 | `/stock/kdj/{symbol}` | Fugle | KDJ 指標（9/3/3） |
 | `/stock/macd/{symbol}` | Fugle | MACD（12/26/9） |
 | `/stock/brands/{symbol}` | Fugle | 布林通道（BB，20 日） |
-| `/yahoo-finance/{symbol}` | Yahoo Finance | 美股/ETF 個股行情（近 1 日收盤資料） |
+| `/yahoo-finance/{symbol}` | Yahoo Finance | 美股/ETF/指數行情（近 1 日收盤資料） |
 | `/sina/{symbol}` | 新浪財經 | 原物料/指數即時報價（多 symbol 格式） |
 | `/debug-sina` | 新浪財經 | 批次查詢多個 Sina symbol 原始回應（除錯用） |
 | `/cnbc` | CNBC | 美股四大指數 + 盤前 Fair Value + TSM ADR |
@@ -100,8 +102,8 @@ fetch("https://histock.tw/stock/module/function.aspx", {
 | `/institutional` | 玩股網 | 三大法人合計買賣超（日期序列） |
 | `/margin-trading-balance` | 台灣證券交易所 | 全市場融資餘額（億元） |
 | `/news-rss` | Yahoo奇摩/中央社/自由時報 | 關鍵字過濾財經新聞 |
-| `/america-calendar` | MoneyDJ + Finnhub + 自訂 | 美股重要事件行事曆 |
-| `/generateCustomEventsFinnhub/{from}/{to}` | Finnhub | 科技股財報日曆（最多 14 天） |
+| `/america-calendar` | MoneyDJ + MacroMicro + 自訂 | 美股重要事件行事曆 |
+| `/generateCustomEventsFinnhub/{from}/{to}` | Finnhub | 科技股財報日曆（最多 14 天，路由保留供單獨呼叫） |
 | `/subscribe` | — | 接收並儲存裝置推播訂閱資料 |
 | `/push-test` | — | 手動觸發推播測試 |
 | `/read-subs` | — | 查看所有訂閱裝置清單 |
@@ -137,12 +139,13 @@ fetch("https://histock.tw/stock/module/function.aspx", {
 
 ### 4. Fugle 富果 API
 
-**用途：** 台股即時報價、歷史 K 線、技術指標
+**用途：** 台股即時報價、歷史 K 線、技術指標、全市場 Ticker 清單
 
 **API 端點（現有）：**
 
 | 端點類型 | URL 格式 |
 |----------|----------|
+| 全市場 Tickers | `https://api.fugle.tw/marketdata/v1.0/stock/intraday/tickers` |
 | 即時報價 | `https://api.fugle.tw/marketdata/v1.0/stock/intraday/quote/{symbol}` |
 | 分價量表 | `https://api.fugle.tw/marketdata/v1.0/stock/intraday/volumes/{symbol}` |
 | 歷史K線 | `https://api.fugle.tw/marketdata/v1.0/stock/historical/candles/{symbol}?from=...&to=...&timeframe=D` |
@@ -198,7 +201,7 @@ https://www.taifex.com.tw/cht/quotesApi/getQuotes?objId={objId}
 
 ### 7. 新聞 RSS 聚合（/news-rss）
 
-**用途：** 聚合多個台灣財經媒體 RSS，依關鍵字過濾相關新聞
+**用途：** 聚合多個台灣財經媒體 RSS，依關鍵字過濾相關新聞；同一端點也供「國際政治新聞」卡片使用
 
 **RSS 來源：**
 
@@ -228,7 +231,10 @@ https://www.taifex.com.tw/cht/quotesApi/getQuotes?objId={objId}
 **資料來源合併順序：**
 1. MoneyDJ（經濟指標，依關鍵字過濾）
 2. 自訂週期性事件（`generateCustomEvents`）
-3. Finnhub 科技股財報（`generateCustomEventsFinnhub`，僅查未來 14 天）
+3. MacroMicro 靜態 JSON — 科技股財報（`data/macromicro_earnings.json`）
+4. MacroMicro 靜態 JSON — 總體經濟事件（`data/macromicro_macro.json`）
+
+> **注意：** Finnhub 財報來源（`generateCustomEventsFinnhub`）已改以 comment-out 方式停用，由 MacroMicro 靜態 JSON 取代；獨立路由 `/generateCustomEventsFinnhub/{from}/{to}` 仍保留供手動呼叫。若 MacroMicro JSON 超過有效日期範圍，前端會顯示過期警告。
 
 **自動計算的週期性事件：**
 
@@ -239,10 +245,10 @@ https://www.taifex.com.tw/cht/quotesApi/getQuotes?objId={objId}
 | 富時羅素指數重組 | 6 月最後一個星期五、11 月第二個星期五 |
 | MSCI 指數調整 | 2、5、8、11 月最後一個平日 |
 
-**Finnhub 財報追蹤清單（部分）：**
+**MacroMicro 財報追蹤清單（部分）：**
 NVDA、TSM、AAPL、META、MSFT、GOOGL、AMZN、TSLA、AMD、PLTR、AVGO、QCOM、ASML、MU、INTC、NFLX、SMCI、ARM 等 AI/科技股
 
-> **注意：** Finnhub 免費方案日期範圍超過 14 天會靜默截斷結果，查詢時需限制在 14 天內。
+> **Finnhub 備注：** 免費方案日期範圍超過 14 天會靜默截斷結果，不會報錯，若重新啟用需主動限制日期範圍。
 
 ---
 
@@ -492,13 +498,13 @@ VAPID_SUBJECT = "mailto:your@email.com"
 |------|------|
 | 台股市場概況 | 台積電期貨/現貨、台股期貨（FITX）、富台指（TWN/TWNCON）、委買委賣五檔 |
 | 美股市場概況 | 盤前電子盤 Fair Value、道瓊/標普/納斯達克/費城半導體、TSM ADR |
+| 亞洲市場概況 | 日經225指數（^N225）、韓國綜合指數（KOSPI, ^KS11） |
 | 原物料市場 | 布蘭特原油（含評級）、黃金、白銀 |
 | 市場情緒 | 美元指數（DXY）、VIX 恐慌指數（含評級）、CNN 恐慌貪婪指數 |
-| 台積電 ADR | CNBC 盤中/盤前/盤後變動 |
-| 財經新聞 | 關鍵字過濾新聞、已讀/未讀標記 |
+| 國際政治新聞 | 關鍵字過濾新聞（戰爭/地緣政治）、已讀/未讀標記 |
 | 美股行事曆 | 月曆視圖，含經濟指標、財報日、結算日等 |
 | 法人動向 | 三大法人買賣超、外資期貨淨部位、融資餘額 |
-| 自選股 | localStorage 自訂股票清單，支援 `^` 符號（Yahoo Finance 格式） |
+| 自選股 | localStorage 自訂股票清單，支援 `^` 符號（Yahoo Finance 格式），含 Autocomplete 搜尋 |
 
 **Header 功能：**
 - `☰` 漢堡按鈕：開啟左側 Slide Menu
@@ -527,7 +533,11 @@ stock/
 ├── worker.js         # Cloudflare Worker 原始碼
 ├── wrangler.toml     # Wrangler 設定檔
 ├── package.json      # npm scripts 設定
-└── .gitignore        # 排除 node_modules/ .wrangler/
+├── .gitignore        # 排除 node_modules/ .wrangler/
+└── data/
+    ├── tickers.json              # 台股全市場 ticker 清單（Autocomplete 用）
+    ├── macromicro_earnings.json  # MacroMicro 科技股財報靜態資料
+    └── macromicro_macro.json     # MacroMicro 總體經濟事件靜態資料
 ```
 
 ---
@@ -541,6 +551,7 @@ stock/
 | 富台指（TWNCON） | 鉅亨網 | JSON API（主要） |
 | 台股/台積電期貨 | TaiFex 官方 API | JSON API |
 | 台股個股現貨 | Fugle 官方 API | JSON API（需 API Key） |
+| 台股全市場 Tickers | Fugle 官方 API | JSON API（需 API Key，Autocomplete 用） |
 | 技術指標（SMA/RSI/KDJ/MACD/BB） | Fugle 官方 API | JSON API（需 API Key） |
 | 個股法人明細 | 玩股網 (wearn.com) | HTML 爬蟲 |
 | 三大法人合計 | 玩股網 (wearn.com) | HTML 爬蟲 |
@@ -553,11 +564,14 @@ stock/
 | 美股四大指數 + 盤前 | CNBC | 非官方 JSON API |
 | 台積電 ADR（TSM） | CNBC | 非官方 JSON API |
 | 美股/ETF 個股 | Yahoo Finance | 非官方 JSON API |
+| 亞洲市場指數（日經/KOSPI） | Yahoo Finance | 非官方 JSON API |
 | TSM ADR 即時 | RobinHood | 暫停（TLS fingerprint 封鎖） |
 | 恐慌貪婪指數 | CNN | 非官方 JSON API |
-| 科技股財報日 | Finnhub | 官方 API（需 API Key，免費方案限 14 天） |
+| 科技股財報日（主要） | MacroMicro | 靜態 JSON（部署於 GitHub Pages） |
+| 總體經濟事件 | MacroMicro | 靜態 JSON（部署於 GitHub Pages） |
+| 科技股財報日（備用） | Finnhub | 官方 API（需 API Key，免費方案限 14 天，目前停用） |
 | 美股經濟行事曆 | MoneyDJ | 非官方 JSON API |
-| 財經新聞 | Yahoo奇摩/中央社/自由時報 | RSS Feed |
+| 財經新聞 / 國際政治新聞 | Yahoo奇摩/中央社/自由時報 | RSS Feed |
 
 ---
 
@@ -565,7 +579,8 @@ stock/
 
 - 本專案使用的第三方 API（新浪、HiStock、CNBC、MoneyDJ）均為非官方接口，可能隨時變更或中斷
 - RobinHood API 因 CloudFront WAF + TLS fingerprint 驗證，目前從非瀏覽器環境（Workers、curl、Java）無法存取
-- Finnhub 免費方案超過 14 天的查詢會靜默截斷，不會報錯，查詢前需主動限制日期範圍
+- Finnhub 財報來源已由 MacroMicro 靜態 JSON 取代；若 MacroMicro 資料過期，前端會顯示警告提示
+- Finnhub 免費方案超過 14 天的查詢會靜默截斷，不會報錯，若重新啟用需主動限制日期範圍
 - VAPID 私鑰與 Fugle/Finnhub API Key 存放於 Cloudflare Worker Secrets，請勿提交至 Git
 - `node_modules/` 和 `.wrangler/` 已加入 `.gitignore`
 - Cron Trigger 時間為 UTC，台灣時間需加 8 小時換算
