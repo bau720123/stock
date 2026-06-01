@@ -1929,36 +1929,50 @@ function generateCustomEvents(year) {
   ));
   events.push(createEventObj(
     new Date("2026-06-01"), 
-    "NVIDIA",
-    "黃仁勳 台北流行音樂中心演講", 
+    "COMPUTEX",
+    "NVIDIA 黃仁勳 台北流行音樂中心演講（需要注意台積電、聯發科、台光電）", 
+    "#3498db", 
+    "001"
+  ));
+  events.push(createEventObj(
+    new Date("2026-06-01"), 
+    "COMPUTEX",
+    "Qualcomm 執行長 Cristiano Amon 主題演講（需要注意華碩、宏碁、仁寶、廣達）", 
+    "#3498db", 
+    "002"
+  ));
+  events.push(createEventObj(
+    new Date("2026-06-02"), 
+    "COMPUTEX",
+    "Marvell 執行長 Matt Murphy 主題演講（需要注意智原、創意、世芯-KY）", 
     "#3498db", 
     "001"
   ));
   events.push(createEventObj(
     new Date("2026-06-02"), 
-    "TSM",
-    "2026 COMPUTEX 2026", 
+    "COMPUTEX",
+    "Intel 執行長陳立武主題演講（需要注意華碩、宏碁、廣達、仁寶、緯創）", 
     "#3498db", 
-    "001"
+    "002"
   ));
   events.push(createEventObj(
     new Date("2026-06-03"), 
-    "TSM",
-    "2026 COMPUTEX 2026", 
+    "COMPUTEX",
+    "恩智浦 (NXP) 巨頭 Rafael Sotomayor 會在今天發表主題演講（需要注意聯發科、台達電）", 
     "#3498db", 
     "001"
   ));
   events.push(createEventObj(
     new Date("2026-06-04"), 
-    "TSM",
-    "2026 COMPUTEX 2026", 
+    "COMPUTEX",
+    "COMPUTEX 演講已經全部掀牌，國際媒體的報導也開始疲乏，開始要見真章的時候了", 
     "#3498db", 
     "001"
   ));
   events.push(createEventObj(
     new Date("2026-06-05"), 
-    "TSM",
-    "2026 COMPUTEX 2026", 
+    "COMPUTEX",
+    "世貿與南港展覽館首度開放一般民眾購票入場參觀 COMPUTEX 展覽，會場內的氣氛與媒體報導將是重要觀察指標", 
     "#3498db", 
     "001"
   ));
@@ -2220,7 +2234,7 @@ async function generateCustomEventsMacroMacro() {
     '美國聯準會利率決策',
     // '美國聯準會會議紀要',
     // '美國聯準會褐皮書',
-    '美國非農就業', // （美國勞工部）
+    // '美國非農就業', // （美國勞工部）
     // '美國失業率',
     // '美國每小時薪資',
     '美國消費者物價',       // CPI
@@ -2232,15 +2246,15 @@ async function generateCustomEventsMacroMacro() {
     '美國ADP非農就業', // （ADP公司）
     // '美國ISM製造業PMI',
     // '美國ISM非製造業NMI',
-    '美國生產者物價',       // PPI
+    // '美國生產者物價',       // PPI
     // '美國零售銷售',
     // '美國耐久財新訂單',
     // '美國密大消費者信心',
-    '美國消費者信心',
+    // '美國消費者信心',
     // '美國JOLTs職位空缺',
 
     // === 每週固定發布 ===
-    '美國申請失業金人數',
+    // '美國申請失業金人數',
   ]);
 
   try {
