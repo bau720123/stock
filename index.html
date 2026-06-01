@@ -4450,6 +4450,19 @@ async function loadWar() {
 let calendarDataCache = null; // 儲存從 Worker 拿到的所有資料
 let currentCalView = { year: new Date().getFullYear(), month: new Date().getMonth() };
 
+function onCalendarResize() {
+  renderCalendarMode();
+}
+
+function renderCalendarMode() {
+  // 根據目前的螢幕方向決定要渲染哪一種版型
+  if (window.matchMedia('(orientation: portrait)').matches) {
+    renderCalendarList();
+  } else {
+    renderCalendarView();
+  }
+}
+
 async function loadAmericaCalendar() {
   const cardId = 'card-america-calendar';
   const container = document.getElementById(cardId);
@@ -4478,7 +4491,11 @@ async function loadAmericaCalendar() {
     }
   }
 
-  renderCalendarView();
+  renderCalendarMode(); // 剛進入頁面時直接根據當下的螢幕方向渲染適合的版型
+  
+  // 螢幕方向改變時重新渲染
+  window.removeEventListener('resize', onCalendarResize); // 先移除舊的
+  window.addEventListener('resize', onCalendarResize); // 再註冊新的
 }
 
 // 負責渲染特定月份的 HTML
@@ -4538,6 +4555,73 @@ function renderCalendarView() {
   setCard(cardId, 0, html, 'card-wide');
 }
 
+function renderCalendarList() {
+  const { year, month } = currentCalView;
+  const cardId = 'card-america-calendar';
+
+  const todayStr = new Date().toISOString().split('T')[0].replace(/-/g, '');
+
+  // 只取當月資料，依日期排序
+  const monthPrefix = `${year}${String(month + 1).padStart(2, '0')}`;
+  const monthItems = calendarDataCache
+    .filter(item => item.id.substring(0, 6) === monthPrefix)
+    .sort((a, b) => a.id.localeCompare(b.id));
+
+  // 依日期分組
+  const grouped = {};
+  monthItems.forEach(item => {
+    const dateKey = item.id.substring(0, 8);
+    if (!grouped[dateKey]) grouped[dateKey] = [];
+    grouped[dateKey].push(item);
+  });
+
+  let html = `
+    <div class="card-title">美股行事曆</div>
+    <div class="calendar-header">
+      <button class="calendar-nav-btn" onclick="changeMonth(-1)">◀</button>
+      <div style="color:var(--accent);">${year} / ${String(month + 1).padStart(2, '0')}</div>
+      <button class="calendar-nav-btn" onclick="changeMonth(1)">▶</button>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:8px; padding:4px 0;">
+  `;
+
+  const dayNames = ['日', '一', '二', '三', '四', '五', '六'];
+
+  Object.keys(grouped).sort().forEach(dateKey => {
+    const day = parseInt(dateKey.substring(6, 8));
+    const dateObj = new Date(year, month, day);
+    const dayName = dayNames[dateObj.getDay()];
+    const isToday = dateKey === todayStr;
+    const isWeekend = dateObj.getDay() === 0 || dateObj.getDay() === 6;
+
+    html += `
+      <div style="border-left: 3px solid ${isToday ? 'var(--accent)' : 'var(--border)'}; padding: 4px 8px;">
+        <div style="font-size:0.8em; color:${isToday ? 'var(--accent)' : (isWeekend ? '#888' : 'var(--fg)')};
+                    margin-bottom:4px; font-weight:bold;">
+          ${month + 1}/${day}（${dayName}）${isToday ? ' ◀ 今天' : ''}
+        </div>
+        ${grouped[dateKey].map(ev =>
+          ev.indicators.map(ind => `
+            <div class="calendar-event"
+                 style="background:${ev.textColor}15; color:${ev.textColor}; border-left:2px solid ${ev.textColor};
+                        margin-bottom:3px; padding:4px 6px;"
+                 onclick="gotoMoneyDJ('${ind.code}')">
+              ${ev.type === 'market' ? '休 ' : ''}${ind.name}
+            </div>
+          `).join('')
+        ).join('')}
+      </div>
+    `;
+  });
+
+  if (Object.keys(grouped).length === 0) {
+    html += `<div style="color:#888; padding:12px;">本月無事件</div>`;
+  }
+
+  html += `</div>`;
+  setCard(cardId, 0, html, 'card-wide');
+}
+
 // 切換月份函式
 window.changeMonth = function(offset) {
   let newMonth = currentCalView.month + offset;
@@ -4547,7 +4631,7 @@ window.changeMonth = function(offset) {
   else if (newMonth > 11) { newMonth = 0; newYear++; }
 
   currentCalView = { year: newYear, month: newMonth };
-  renderCalendarView();
+  renderCalendarMode(); // 切換月份時直接根據當下的螢幕方向渲染適合的版型
 };
 
 function gotoMoneyDJ(code = '') {
