@@ -563,7 +563,15 @@ function alertEnabled(key) {
 // group-header HTML 產生器（含偵測設定按鈕）
 // settingsKey：若傳入則顯示齒輪按鈕，點擊呼叫 openAlertSettings(settingsKey)
 function groupHeader(label, settingsKey = null, wording = '') {
-  const isActive = settingsKey && (alertEnabled(settingsKey + '_high') || alertEnabled(settingsKey + '_low') || alertEnabled(settingsKey));
+  let isActive;
+  if (settingsKey && settingsKey.startsWith('mystock_')) {
+    isActive = alertEnabled(settingsKey + '_bids_price') ||
+               alertEnabled(settingsKey + '_bids_qty') ||
+               alertEnabled(settingsKey + '_asks_price') ||
+               alertEnabled(settingsKey + '_asks_qty');
+  } else {
+    isActive = settingsKey && (alertEnabled(settingsKey + '_high') || alertEnabled(settingsKey + '_low') || alertEnabled(settingsKey));
+  }
 
   var descButton = wording ? `
     <button class="alert-settings-btn" onclick="showInfo('${wording}')" title="內容說明">
