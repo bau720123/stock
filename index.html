@@ -2837,10 +2837,31 @@ async function loadTickers() {
 // 我的自選股
 let _mystockApiCache = null; // 快取 API 結果，供 resize 時重繪使用
 
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+// 新增一個依序抓取並帶延遲的 Helper
+async function fetchMetricsSequentially(urlSegment, delayMs = 200) {
+  const results = [];
+  for (const stock of MY_STOCKS) {
+    // 只有在抓第二檔（含）以上時才需要 delay
+    if (results.length > 0) {
+      await sleep(delayMs);
+    }
+    
+    const res = await fetch(`${WORKER}/stock/${urlSegment}/${stock.symbol}`)
+      .then(r => r.json())
+      .catch(() => ({ success: false }));
+      
+    results.push(res);
+  }
+  return results;
+}
+
 async function loadMyStock() {
   await loadTickers(); // 預先載入 tickers，供 openMyStockSettings autocomplete 使用
+
   // 平行抓取所有自選股票的相關屬性資訊
-  const [quoteResults, volumeResults, historyResults, institutionalResults, smaResults, rsiResults, kdjResults, macdResults, brandsResults] = await Promise.all([
+  const [quoteResults, volumeResults, historyResults, institutionalResults, smaResults, rsiResults, kdjResults, macdResults, brandsResults] = /*await Promise.all([
     Promise.all(
       MY_STOCKS.map(s => fetch(WORKER + '/stock/quote/' + s.symbol).then(r => r.json()).catch(() => ({ success: false })))
     ),
@@ -2868,6 +2889,16 @@ async function loadMyStock() {
     Promise.all(
       MY_STOCKS.map(s => fetch(WORKER + '/stock/brands/' + s.symbol).then(r => r.json()).catch(() => ({ success: false })))
     )
+  ]);*/await Promise.all([
+    fetchMetricsSequentially('quote', 400),
+    fetchMetricsSequentially('volume', 400),
+    fetchMetricsSequentially('history', 400),
+    fetchMetricsSequentially('institutional', 400),
+    fetchMetricsSequentially('sma', 400),
+    fetchMetricsSequentially('rsi', 400),
+    fetchMetricsSequentially('kdj', 400),
+    fetchMetricsSequentially('macd', 400),
+    fetchMetricsSequentially('brands', 400)
   ]);
 
   // 存入快取
@@ -3032,11 +3063,11 @@ function _renderMyStock({ quoteResults, volumeResults, historyResults, instituti
           }
         ">＋</span>
       </div>`;
-    html += `<div id="stockhistory_${i}" style="display:none;">
+    html += `<div id="stockhistory_${i}" style="display:none;" class="donotswipe">
       ${renderStockHistory(historyResults[i])}
     </div>`;
 
-    html += `<div class="row">
+    html += `<div class="row donotswipe">
       ${renderStockChartHistory(historyResults[i], i)}
     </div>`;
 
@@ -3056,11 +3087,11 @@ function _renderMyStock({ quoteResults, volumeResults, historyResults, instituti
           }
         ">＋</span>
       </div>`;
-    html += `<div id="stockinstitutional_${i}" style="display:none;">
+    html += `<div id="stockinstitutional_${i}" style="display:none;" class="donotswipe">
       ${renderStockInstitutional(institutionalResults[i])}
     </div>`;
 
-    html += `<div class="row">
+    html += `<div class="row donotswipe">
       ${renderStockChartInstitutional(institutionalResults[i], i)}
     </div>`;
 
@@ -3080,11 +3111,11 @@ function _renderMyStock({ quoteResults, volumeResults, historyResults, instituti
           }
         ">＋</span>
       </div>`;
-    html += `<div id="stocksma_${i}" style="display:none;">
+    html += `<div id="stocksma_${i}" style="display:none;" class="donotswipe">
       ${renderStockSma(smaResults[i])}
     </div>`;
 
-    html += `<div class="row">
+    html += `<div class="row donotswipe">
       ${renderStockChartSma(smaResults[i], i)}
     </div>`;
 
@@ -3104,11 +3135,11 @@ function _renderMyStock({ quoteResults, volumeResults, historyResults, instituti
           }
         ">＋</span>
       </div>`;
-    html += `<div id="stockrsi_${i}" style="display:none;">
+    html += `<div id="stockrsi_${i}" style="display:none;" class="donotswipe">
       ${renderStockRsi(rsiResults[i])}
     </div>`;
 
-    html += `<div class="row">
+    html += `<div class="row donotswipe">
       ${renderStockChartRsi(rsiResults[i], i)}
     </div>`;
 
@@ -3128,11 +3159,11 @@ function _renderMyStock({ quoteResults, volumeResults, historyResults, instituti
           }
         ">＋</span>
       </div>`;
-    html += `<div id="stockkdj_${i}" style="display:none;">
+    html += `<div id="stockkdj_${i}" style="display:none;" class="donotswipe">
       ${renderStockKdj(kdjResults[i])}
     </div>`;
 
-    html += `<div class="row">
+    html += `<div class="row donotswipe">
       ${renderStockChartKdj(kdjResults[i], i)}
     </div>`;
 
@@ -3152,11 +3183,11 @@ function _renderMyStock({ quoteResults, volumeResults, historyResults, instituti
           }
         ">＋</span>
       </div>`;
-    html += `<div id="stockmacd_${i}" style="display:none;">
+    html += `<div id="stockmacd_${i}" style="display:none;" class="donotswipe">
       ${renderStockMacd(macdResults[i])}
     </div>`;
 
-    html += `<div class="row">
+    html += `<div class="row donotswipe">
       ${renderStockChartMacd(macdResults[i], i)}
     </div>`;
 
@@ -3176,11 +3207,11 @@ function _renderMyStock({ quoteResults, volumeResults, historyResults, instituti
           }
         ">＋</span>
       </div>`;
-    html += `<div id="stockbrands_${i}" style="display:none;">
+    html += `<div id="stockbrands_${i}" style="display:none;" class="donotswipe">
       ${renderStockBrands(brandsResults[i])}
     </div>`;
 
-    html += `<div class="row">
+    html += `<div class="row donotswipe">
       ${renderStockChartBrands(brandsResults[i], i)}
     </div>`;
 
@@ -3235,6 +3266,7 @@ function initMyStockSlider() {
 
   document.addEventListener('touchstart', e => {
     if (!e.target.closest('#mystock-track')) return;
+    if (e.target.closest('.donotswipe')) return;
     startX = e.touches[0].clientX;
     isDragging = true;
   }, { passive: true });
