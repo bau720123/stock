@@ -2314,10 +2314,18 @@ function getAsiaMarketEmoji() {
 
 // 亞洲市場概況
 async function loadAsia() {
-  const [yahooJapan, yahooKorea] = await Promise.all([
-    fetch(WORKER + '/yahoo-finance/%5EN225').then(r => r.json()).catch(() => ({ success: false })), // 日經225指數
-    fetch(WORKER + '/yahoo-finance/%5EKS11').then(r => r.json()).catch(() => ({ success: false })), // 韓國綜合指數
-  ]);
+  // 1. 抓取日經 225 指數（第一支 API 直接衝，不延遲）
+  const yahooJapan = await fetch(WORKER + '/yahoo-finance/%5EN225')
+    .then(r => r.json())
+    .catch(() => ({ success: false }));
+
+  // 2. 延遲 200 毫秒，錯開對同一網域的連續請求
+  await sleep(400);
+
+  // 3. 抓取 韓國綜合指數
+  const yahooKorea = await fetch(WORKER + '/yahoo-finance/%5EKS11')
+    .then(r => r.json())
+    .catch(() => ({ success: false }));
 
   const status = getAsiaMarketEmoji();
 

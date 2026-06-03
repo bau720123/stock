@@ -1179,36 +1179,40 @@ async function fetchInstitutional() {
 
 async function fetchMarginTradingBalance() {
   try {
-    const res = await fetchWithTimeout("https://www.twse.com.tw/rwd/zh/marginTrading/MI_MARGN?response=html", {
+    // 1. 改請求 JSON 版本的網址，並維持防禦性的 Headers
+    const res = await fetchWithTimeout("https://www.twse.com.tw/rwd/zh/marginTrading/MI_MARGN?response=json", {
       headers: {
         "User-Agent": UA,
         "Referer": "https://www.twse.com.tw/",
-        "Accept": "text/html,application/xhtml+xml",
+        "Accept": "application/json, text/javascript, */*; q=0.01",
+        "Accept-Language": "zh-TW,zh;q=0.9,en-US;q=0.8,en;q=0.7",
       },
     });
 
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-    const html = await res.text();
+    const jsonRes = await res.json();
 
-    // 抓日期：「115年04月16日 信用交易統計」
-    const dateMatch = html.match(/(\d+)年(\d+)月(\d+)日\s*信用交易統計/);
-    if (!dateMatch) throw new Error("Date not found");
-    const date = `${parseInt(dateMatch[1]) + 1911}-${dateMatch[2]}-${dateMatch[3]}`;
+    // 2. 檢查 API 狀態與資料完整性
+    if (jsonRes.stat !== "OK" || !jsonRes.tables || jsonRes.tables.length === 0) {
+      throw new Error(`API response status not OK or tables empty: ${jsonRes.stat || 'Unknown'}`);
+    }
 
-    // 抓 tbody 所有 <tr>
-    const tbodyMatch = html.match(/<tbody>([\s\S]*?)<\/tbody>/i);
-    if (!tbodyMatch) throw new Error("tbody not found");
+    // 3. 解析日期 (從 "20260602" 轉為 "2026-06-02")
+    const rawDate = jsonRes.date; // 確保有拿到日期
+    if (!rawDate || rawDate.length !== 8) throw new Error("Invalid date format from API");
+    const date = `${rawDate.slice(0, 4)}-${rawDate.slice(4, 6)}-${rawDate.slice(6, 8)}`;
 
-    const rows = [...tbodyMatch[1].matchAll(/<tr[^>]*>([\s\S]*?)<\/tr>/gi)];
-    if (rows.length < 3) throw new Error("Row not found");
+    // 4. 定位到信用交易統計表格的 data
+    const tableData = jsonRes.tables[0].data;
+    if (!tableData || tableData.length < 3) throw new Error("Target row (Margin Balance) not found in JSON");
 
-    // 第三列（index 2）是「融資金額(仟元)」，取最後一個 td（今日餘額）
-    const cells = [...rows[2][1].matchAll(/<td[^>]*>([\s\S]*?)<\/td>/gi)];
-    if (cells.length < 6) throw new Error("Cell not found");
+    // 第三列（index 2）是「融資金額(仟元)」，取最後一個元素（index 5）為今日餘額
+    const marginRow = tableData[2];
+    if (marginRow.length < 6) throw new Error("Target cell (Today Balance) not found in JSON");
 
-    const rawValue = stripTags(cells[5][1]).trim(); // 今日餘額，仟元
-    const valueKThousand = parseInt(rawValue.replace(/,/g, ""));
+    const rawValue = marginRow[5].trim(); // "566,970,793"
+    const valueKThousand = parseInt(rawValue.replace(/,/g, ""), 10);
     const valueHundredMillion = (valueKThousand / 100000).toFixed(2); // 仟元 → 億元
 
     return json({
@@ -1219,7 +1223,7 @@ async function fetchMarginTradingBalance() {
     });
 
   } catch (e) {
-    const errorMsg = e.name === 'AbortError' ? "連線逾時" : e.message;
+    const errorMsg = e.name === 'AbortError' ? '連線逾時' : e.message;
     return json({ success: false, error: errorMsg }, 500);
   }
 }
