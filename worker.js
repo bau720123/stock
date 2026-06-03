@@ -1970,6 +1970,13 @@ function generateCustomEvents(year) {
     "001"
   ));
   events.push(createEventObj(
+    new Date("2026-06-04"), 
+    "TSM",
+    "台積電股東會", 
+    "#3498db", 
+    "002"
+  ));
+  events.push(createEventObj(
     new Date("2026-06-05"), 
     "COMPUTEX",
     "世貿與南港展覽館首度開放一般民眾購票入場參觀 COMPUTEX 展覽，會場內的氣氛與媒體報導將是重要觀察指標", 
