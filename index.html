@@ -2293,6 +2293,20 @@ async function loadAmerica() {
     html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
   }
 
+  // 博通
+  html += groupHeader('【博通】', 'AVGO', '博通（Broadcom Inc.，代號：AVGO）是美國的一家科技公司，專注於設計、開發和銷售網路和通信解決方案。');
+  if (robinHood.AVGO.success && robinHood.AVGO.changeText != '') {
+    html += row('前次', robinHood.AVGO.previousClose, 'accent');
+    html += row('今日漲跌', robinHood.AVGO.changeText, changeClass(robinHood.AVGO.changeText));
+    if (robinHood.AVGO.tertiaryText) {
+      html += row('隔夜漲跌', robinHood.AVGO.tertiaryText, changeClass(robinHood.AVGO.tertiaryText));
+    }
+    html += row('更新時間', robinHood.AVGO.updated_at);
+    html += row('對應台股：廣達（2382）、緯穎（6669）、英業達（2356）、信驊（5274）、智邦（2345）');
+  } else {
+    html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
+  }
+
   setCard('card-america', 0, html);
 }
 
