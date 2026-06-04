@@ -2512,7 +2512,8 @@ async function handleCron(env) {
 }
 
 function getBrentStatus(p) {
-  if (p < 100) return '平靜';
+  if (p < 95) return '平靜';
+  if (p < 100) return '警戒';
   if (p < 110) return '留意';
   if (p < 120) return '波動加劇';
   return '恐慌';
