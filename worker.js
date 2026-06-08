@@ -16,6 +16,7 @@ const ROBINHOOD_INSTRUMENTS = {
   META:  "ebab2398-028d-4939-9f1d-13bf38f81c50",
   TSLA:  "e39ed23a-7bd1-4587-b060-71988d9ef483",
   AVGO:  "698f04e6-1710-4f34-b7af-4a88fe5e47b3",
+  SMCI:  "50846aee-ce5f-4bd4-bfbb-cef4414f69bd",
 };
 
 
