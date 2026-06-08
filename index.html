@@ -1723,7 +1723,9 @@ async function loadTw() {
     ${renderChartInstitutional(Institutional)}
   </div>`;
 
-  html += row('融資餘額', MarginTradingBalance.marginBalance + ' 億' + '（' + MarginTradingBalance.date + '）');
+  html += row('融資餘額', MarginTradingBalance.marginBalance + ' 億', 'accent');
+  html += row('增減', MarginTradingBalance.marginBalance_diff, cls);
+  html += row('更新時間', MarginTradingBalance.date);
 
   setCard('card-tw', 0, html, card_type === 'taiwan-market' ? 'card-wide' : '');
 
@@ -2778,7 +2780,7 @@ async function loadSentiment() {
   }
 
   // 【美元指數】
-  html += groupHeader('【美元指數】', 'usdollar', '美元指數（DXY）是顯示美元相對於主要貨幣強弱的指數。此指數由洲際交易所（ICE）計算並公布，由歐元、日圓、英鎊、加拿大元、瑞典克朗、瑞士法郎這6種貨幣構成。當DXY上升時，一般判斷為美元相對於主要貨幣走強（被買入）；相反地，當下跌時則被視為走弱（被賣出）。');
+  html += groupHeader('【美元指數】', 'usdollar', '美元指數（DXY）是顯示美元相對於主要貨幣強弱的指數。當美元指數 > 100 且持續走強，意味著外資（特別是美資）正在全球進行「獲利了結、班師回朝」。');
   if (sinaUsdollar.success) {
     const changeNum = sinaUsdollar.price - sinaUsdollar.prev;
     const cls = changeNum < 0 ? 'down' : 'up';

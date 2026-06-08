@@ -1212,15 +1212,25 @@ async function fetchMarginTradingBalance() {
     const marginRow = tableData[2];
     if (marginRow.length < 6) throw new Error("Target cell (Today Balance) not found in JSON");
 
-    const rawValue = marginRow[5].trim(); // "566,970,793"
+    // 前日餘額
+    const rawValue_1day_before = marginRow[4].trim();
+    const valueKThousand_1day_before = parseInt(rawValue_1day_before.replace(/,/g, ""), 10);
+    const valueHundredMillion_1day_before = parseFloat((valueKThousand_1day_before / 100000).toFixed(2)); // 仟元 → 億元
+
+    // 今日餘額
+    const rawValue = marginRow[5].trim();
     const valueKThousand = parseInt(rawValue.replace(/,/g, ""), 10);
-    const valueHundredMillion = (valueKThousand / 100000).toFixed(2); // 仟元 → 億元
+    const valueHundredMillion = parseFloat((valueKThousand / 100000).toFixed(2)); // 仟元 → 億元
 
     return json({
       success: true,
       date,
-      marginBalance: parseFloat(valueHundredMillion), // 融資餘額（億元）
-      marginBalanceRaw: valueKThousand,               // 原始值（仟元）
+      marginBalanceRaw_1day_before: valueKThousand_1day_before, // 原始值（仟元）
+      marginBalance_1day_before: valueHundredMillion_1day_before, // 融資餘額（億元）
+      marginBalanceRaw: valueKThousand, // 原始值（仟元）
+      marginBalance: valueHundredMillion, // 融資餘額（億元）
+      marginBalance_diff: (valueHundredMillion - valueHundredMillion_1day_before).toFixed(2), // 差異
+
     });
 
   } catch (e) {
