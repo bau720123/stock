@@ -2000,6 +2000,20 @@ function generateCustomEvents(year) {
     "001"
   ));
   events.push(createEventObj(
+    new Date("2026-06-11"), 
+    "FED",
+    "聯準會（Fed）利率決策與點陣圖", 
+    "#3498db", 
+    "001"
+  ));
+  events.push(createEventObj(
+    new Date("2026-06-12"), 
+    "JAPAN",
+    "日本央行（BOJ）利率決策會議", 
+    "#3498db", 
+    "001"
+  ));
+  events.push(createEventObj(
     new Date("2026-06-25"), 
     "TSM",
     "2026 台積電中國技術論壇", 
