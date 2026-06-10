@@ -580,7 +580,7 @@ function groupHeader(label, settingsKey = null, wording = '') {
 
   var space = settingsKey != '' ? '&nbsp;' : '';
 
-  const usStocks = ['TSM', 'NVDA', 'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'TSLA', 'AVGO', 'SMCI'];
+  const usStocks = ['TSM', 'NVDA', 'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'TSLA', 'AVGO', 'SMCI', 'ASML'];
 
   var settingsButton = '';
   if (settingsKey) {
@@ -2022,16 +2022,19 @@ function getMarketStatus() {
 
 // 美股市場概況
 async function loadAmerica() {
-  const [cnbcPreMarkets, /*yahooNqf, yahooIxic, yahooSox, */yahooBtc, yahooTnx, yahooTxy, /*yahooTsm, */robinHood] = await Promise.all([
+  const [cnbcPreMarkets, /*yahooNqf, yahooIxic, yahooSox, */yahooBtc, yahooFvx, yahooTnx, yahooTxy, /*yahooTsm, */robinHood, fugleQuote, yahooUtcTwd] = await Promise.all([
     fetch(WORKER + '/cnbc').then(r => r.json()).catch(() => ({ success: false })), // 美股盤前電子盤
     // fetch(WORKER + '/yahoo-finance/NQ=F').then(r => r.json()).catch(() => ({ success: false })), // 那斯達克 100 期貨期貨
     // fetch(WORKER + '/yahoo-finance/^IXIC').then(r => r.json()).catch(() => ({ success: false })), // 那斯達克指數
     // fetch(WORKER + '/yahoo-finance/^SOX').then(r => r.json()).catch(() => ({ success: false })), // 那斯達克指數
     fetch(WORKER + '/yahoo-finance/BTC-USD').then(r => r.json()).catch(() => ({ success: false })), // 比特幣
+    fetch(WORKER + '/yahoo-finance/^FVX').then(r => r.json()).catch(() => ({ success: false })), // 美國5年期公債殖利率
     fetch(WORKER + '/yahoo-finance/^TNX').then(r => r.json()).catch(() => ({ success: false })), // 美國10年期公債殖利率
     fetch(WORKER + '/yahoo-finance/^TYX').then(r => r.json()).catch(() => ({ success: false })), // 美國30年期公債殖利率
     // fetch(WORKER + '/yahoo-finance/TSM').then(r => r.json()).catch(() => ({ success: false })), // 台積電 ADR
     fetch(WORKER + '/rh').then(r => r.json()).catch(() => ({ success: false })), // Robinhood
+    fetch(WORKER + '/stock/quote/2330').then(r => r.json()), // 台積電現貨日盤股價資訊
+    fetch(WORKER + '/yahoo-finance/USDTWD=X').then(r => r.json()).catch(() => ({ success: false })), // 美金兌換台幣匯率
   ]);
 
   let html = `<div class="card-title">美股市場概況</div>`;
@@ -2134,6 +2137,35 @@ async function loadAmerica() {
 
   html += `<div class="card-title" style="margin-top: 5%;">美國公債殖利率</div>`;
 
+  // 美國5年期公債殖利率
+  html += groupHeader('【5年期公債殖利率】', '', '美國5年期公債殖利率是反映美國5年期國債收益率的重要指標，通常被視為衡量市場利率水平和經濟前景的重要參考。');
+  if (yahooFvx.success) {
+    const changeNum = yahooFvx.close - yahooFvx.prev;
+    const cls = changeNum < 0 ? 'down' : 'up';
+    const changePercent = changeNum / yahooFvx.prev * 100;
+
+    // html += row('前次', yahooFvx.prev.toFixed(2));
+    // html += row('開盤價', yahooFvx.open.toFixed(2));
+    // html += row('最高價', yahooFvx.high.toFixed(2));
+    // html += row('最低價', yahooFvx.low.toFixed(2));
+    html += row('利率', yahooFvx.close.toFixed(2), 'accent');
+
+    // 警戒區間判斷
+    const fvxRate = yahooFvx.close;
+    if (fvxRate >= 4.55) {
+      html += row('警戒水位', `紅色危險區（${fvxRate >= 5.0 ? '逼近5.0%' : '衝擊資產/引發拋售'}）`);
+    } else if (fvxRate >= 4.35) {
+      html += row('警戒水位', '黃色警戒（開始承壓）');
+    } else {
+      html += row('利率狀態', '正常', 'accent');
+    }
+    html += row('漲跌', changeNum.toFixed(2), cls);
+    // html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
+    html += row('更新時間', yahooFvx.updateTime);
+  } else {
+    html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
+  }
+
   // 美國10年期公債殖利率
   html += groupHeader('【10年期公債殖利率】', '', '美國10年期公債殖利率是反映美國10年期國債收益率的重要指標，通常被視為衡量市場利率水平和經濟前景的重要參考。');
   if (yahooTnx.success) {
@@ -2195,7 +2227,7 @@ async function loadAmerica() {
 
   // Robinhood
 
-  html += `<div class="card-title" style="margin-top: 5%;">驚奇八強</div>`;
+  html += `<div class="card-title" style="margin-top: 5%;">重要科技股</div>`;
 
   // 台積電 ADR
   html += groupHeader('【台積電 ADR】', 'TSM', '台積電 ADR（American Depositary Receipts，美國存託憑證）是台積電在美國發行的股票憑證（代號：TSM），掛牌於紐約證券交易所（NYSE）。它讓美國投資人能用美元直接買賣台積電，代表國際資金對台積電的看法，且 1 單位 ADR 等於 5 股台積電台股（2330）普通股。');
@@ -2207,6 +2239,44 @@ async function loadAmerica() {
     }
     html += row('更新時間', robinHood.TSM.updated_at);
     html += row('對應台股：台積電（2330）');
+
+    if (fugleQuote.success && yahooUtcTwd.success) {
+      const twdPrice = parseFloat(fugleQuote.closePrice); // 台積電現股價格
+      const fx = parseFloat(yahooUtcTwd.close);          // 美金兌換台幣匯率
+      const adr = parseFloat(robinHood.TSM.previousClose); // 台積電ADR的收盤價格
+      
+      // 1. 先把美國的 ADR 價格，完美解構還原成「台幣計價的普通股價格」
+      const adrToTwd = (adr / 5) * fx;
+      
+      // 2. 【終極 Bug 修正】溢價率 = (台幣 ADR 價 / 台灣現股價 - 1) * 100
+      const premium = ((adrToTwd / twdPrice) - 1) * 100;
+      
+      let pStatus = '正常';
+      let pCls = 'accent';
+      
+      // 警戒區間 If-Else
+      if (premium > 25.0) {
+          pStatus = '極度過熱（考慮減碼）';
+          pCls = 'danger';
+      } else if (premium > 15.0) {
+          pStatus = '偏高（暫停追高）';
+          pCls = 'warning';
+      } else if (premium > 5.0) {
+          pStatus = '常態穩定';
+          pCls = 'accent';
+      } else if (premium > -5.0) {
+          pStatus = '輕微折價（可留意買點）';
+          pCls = 'accent';
+      } else {
+          pStatus = '明顯折價（分批低接）';
+          pCls = 'success';
+      }
+      
+      html += row('換算台股價', adrToTwd.toFixed(2) + ' 元');
+      html += row('即時溢價率', premium.toFixed(2) + '%', pCls);
+      html += row('溢價警戒狀態', pStatus, pCls);
+      console.log("正式版 adr:", adr, "adrToTwd:", adrToTwd, "premium:", premium);
+    }
   } else {
     html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
   }
@@ -2333,6 +2403,20 @@ async function loadAmerica() {
     }
     html += row('更新時間', robinHood.SMCI.updated_at);
     html += row('對應台股：雙鴻（3324）、奇鋐（3017）、華泰（2329）、台光電（2383）、金像電（2368）、迎廣（6117）、台達電（2308）');
+  } else {
+    html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
+  }
+
+  // 艾斯摩爾
+  html += groupHeader('【艾斯摩爾】', 'ASML', '艾斯摩爾（ASML Holding N.V.，代號：ASML）是荷蘭的一家科技公司，專注於設計、開發和銷售光刻設備，是全球半導體製造業的重要供應商。');
+  if (robinHood.ASML.success && robinHood.ASML.changeText != '') {
+    html += row('前次', robinHood.ASML.previousClose, 'accent');
+    html += row('今日漲跌', robinHood.ASML.changeText, changeClass(robinHood.ASML.changeText));
+    if (robinHood.ASML.tertiaryText) {
+      html += row('隔夜漲跌', robinHood.ASML.tertiaryText, changeClass(robinHood.ASML.tertiaryText));
+    }
+    html += row('更新時間', robinHood.ASML.updated_at);
+    html += row('對應台股：台積電（2330）、聯發科（2454）、和碩（4938）、緯穎（6669）、廣達（2382）');
   } else {
     html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
   }
