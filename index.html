@@ -2275,7 +2275,6 @@ async function loadAmerica() {
       html += row('換算台股價', adrToTwd.toFixed(2) + ' 元');
       html += row('即時溢價率', premium.toFixed(2) + '%', pCls);
       html += row('溢價警戒狀態', pStatus, pCls);
-      console.log("正式版 adr:", adr, "adrToTwd:", adrToTwd, "premium:", premium);
     }
   } else {
     html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
