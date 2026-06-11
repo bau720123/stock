@@ -3254,17 +3254,20 @@ function _renderMyStock({ quoteResults, volumeResults, historyResults, instituti
     html += `
       <div class="row">
         <span class="row-label">歷史股價</span>
-        <span style="cursor:pointer;user-select:none;" onclick="
-          const ob = document.getElementById('stockhistory_${i}');
-          const btn = this;
-          if (ob.style.display === 'none') {
-            ob.style.display = 'block';
-            btn.textContent = '－';
-          } else {
-            ob.style.display = 'none';
-            btn.textContent = '＋';
-          }
-        ">＋</span>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <a style="cursor:pointer; user-select:none; text-decoration:none;" onclick="showInfo('${historyResults[0].result.story}')">❔</a>
+          <span style="cursor:pointer;user-select:none;" onclick="
+            const ob = document.getElementById('stockhistory_${i}');
+            const btn = this;
+            if (ob.style.display === 'none') {
+              ob.style.display = 'block';
+              btn.textContent = '－';
+            } else {
+              ob.style.display = 'none';
+              btn.textContent = '＋';
+            }
+          ">＋</span>
+        </div>
       </div>`;
     html += `<div id="stockhistory_${i}" style="display:none;" class="donotswipe">
       ${renderStockHistory(historyResults[i])}
@@ -3278,17 +3281,20 @@ function _renderMyStock({ quoteResults, volumeResults, historyResults, instituti
     html += `
       <div class="row">
         <span class="row-label">三大法人買賣超</span>
-        <span style="cursor:pointer;user-select:none;" onclick="
-          const ob = document.getElementById('stockinstitutional_${i}');
-          const btn = this;
-          if (ob.style.display === 'none') {
-            ob.style.display = 'block';
-            btn.textContent = '－';
-          } else {
-            ob.style.display = 'none';
-            btn.textContent = '＋';
-          }
-        ">＋</span>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <a style="cursor:pointer; user-select:none; text-decoration:none;" onclick="showInfo('${institutionalResults[0].result.story}')">❔</a>
+          <span style="cursor:pointer;user-select:none;" onclick="
+            const ob = document.getElementById('stockinstitutional_${i}');
+            const btn = this;
+            if (ob.style.display === 'none') {
+              ob.style.display = 'block';
+              btn.textContent = '－';
+            } else {
+              ob.style.display = 'none';
+              btn.textContent = '＋';
+            }
+          ">＋</span>
+        </div>
       </div>`;
     html += `<div id="stockinstitutional_${i}" style="display:none;" class="donotswipe">
       ${renderStockInstitutional(institutionalResults[i])}
@@ -4225,13 +4231,16 @@ function renderVolumeProfile(data, id) {
     <div>
       <div class="row">
         <span class="row-label">分價量表</span>
-        <span style="cursor:pointer;user-select:none;" onclick="
-          const items = document.querySelectorAll('.ordervolume_${id}');
-          const btn = this;
-          const isHidden = items[0].style.display === 'none';
-          items.forEach(el => el.style.display = isHidden ? 'flex' : 'none');
-          btn.textContent = isHidden ? '－' : '＋';
-        ">＋</span>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <a style="cursor:pointer; user-select:none; text-decoration:none;" onclick="showInfo('${data.result.story}')">❔</a>
+          <span style="cursor:pointer;user-select:none;" onclick="
+            const items = document.querySelectorAll('.ordervolume_${id}');
+            const btn = this;
+            const isHidden = items[0].style.display === 'none';
+            items.forEach(el => el.style.display = isHidden ? 'flex' : 'none');
+            btn.textContent = isHidden ? '－' : '＋';
+          ">＋</span>
+        </div>
       </div>
       <div style="overflow-y:auto;max-height:200px;">
       ${rows}

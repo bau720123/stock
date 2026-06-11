@@ -1009,6 +1009,80 @@ async function fetchFugleQuote(symbol, env) {
   }
 }
 
+function analyzeVolumeData(data) {
+  if (!data || data.length <= 2) {
+    return { story: "數據量不足，無法進行區間故事分析。" };
+  }
+
+  // 1. 排序並剔除最高與最低價 (極值去噪)
+  const sortedByPrice = [...data].sort((a, b) => b.price - a.price);
+  const highestPrice = sortedByPrice[0].price;
+  const lowestPrice = sortedByPrice[sortedByPrice.length - 1].price;
+  
+  const filteredData = sortedByPrice.filter(b => b.price !== highestPrice && b.price !== lowestPrice);
+  
+  if (filteredData.length === 0) return { story: "剔除極值後無核心交易數據。" };
+
+  // 2. 計算核心區間的總量與基本統計
+  let totalVolume = 0;
+  let totalBid = 0;
+  let totalAsk = 0;
+  
+  filteredData.forEach(b => {
+    totalVolume += b.volume;
+    totalBid += b.volumeAtBid;
+    totalAsk += b.volumeAtAsk;
+  });
+
+  // 計算未分類成交量 (通常代表開盤集合競價)
+  const unaccountedVolume = totalVolume - totalBid - totalAsk;
+
+  // 3. 找出核心戰場：依據成交量排序，取前三名 (價量三劍客)
+  const sortedByVolume = [...filteredData].sort((a, b) => b.volume - a.volume);
+  const top3 = sortedByVolume.slice(0, 3);
+  const top3VolumeSum = top3.reduce((sum, b) => sum + b.volume, 0);
+  const top3Percentage = ((top3VolumeSum / totalVolume) * 100).toFixed(1);
+
+  // 4. 分析第一大交易量價位 (核心戰場點)
+  const mainBattle = top3[0];
+  const mainBattleBidPct = mainBattle.volume > 0 ? (mainBattle.volumeAtBid / mainBattle.volume * 100) : 0;
+  const mainBattleAskPct = mainBattle.volume > 0 ? (mainBattle.volumeAtAsk / mainBattle.volume * 100) : 0;
+
+  // 5. 判斷是否有開盤爆量區 (未分類量顯著的價位)
+  const openingNode = filteredData.find(b => (b.volume - b.volumeAtBid - b.volumeAtAsk) > (b.volume * 0.3));
+
+  // 6. 動態組裝「故事」文字
+  let stories = [];
+  
+  // 故事一：核心戰場集中度
+  stories.push(`今日核心交火集中在 ${top3.map(b => b.price).join('、')} 元，這三檔合共吃下區間 ${top3Percentage}% 的籌碼，屬於標準的震盪換手格局。`);
+
+  // 故事二：最大量節點的心理戰
+  if (mainBattleBidPct > 65) {
+    stories.push(`關鍵價位 ${mainBattle.price} 元爆出全天最大量（佔核心區間 ${((mainBattle.volume/totalVolume)*100).toFixed(1)}%），其中內盤主動砸盤佔比高達 ${mainBattleBidPct.toFixed(1)}%。若收盤能守住此價位，暗示有長線大戶在此築起護城河被動接單，反之若跌破，則此處將轉為沈重壓力。`);
+  } else if (mainBattleAskPct > 65) {
+    stories.push(`關鍵價位 ${mainBattle.price} 元今日買氣極盛，外盤追高佔比達 ${mainBattleAskPct.toFixed(1)}%，市場多頭主力試圖在此發動軋空狂攻。`);
+  } else {
+    stories.push(`最大量節點位於 ${mainBattle.price} 元，內外盤力道各半（內:${mainBattleBidPct.toFixed(0)}%/外:${mainBattleAskPct.toFixed(0)}%），多空在此達成短暫動態平衡。`);
+  }
+
+  // 故事三：開盤節點追蹤
+  if (openingNode) {
+    stories.push(`偵測到 ${openingNode.price} 元有高達 ${openingNode.volume - openingNode.volumeAtBid - openingNode.volumeAtAsk} 張的未分類成交量，高機率為開盤集合競價之法人對敲起漲點，為今日多頭的初始防線。`);
+  }
+
+  // 7. 回傳結構化的結果
+  return {
+    summary: {
+      coreRange: `${filteredData[filteredData.length - 1].price} - ${filteredData[0].price}`,
+      totalVolume,
+      top3Concentration: `${top3Percentage}%`,
+      unclassifiedVolume: unaccountedVolume
+    },
+    story: stories.join("<br><br>")
+  };
+}
+
 async function fetchFugleVolume(symbol, env) {
   try {
     const res = await fetchWithTimeout(
@@ -1028,16 +1102,106 @@ async function fetchFugleVolume(symbol, env) {
     const d = await res.json();
 
     // 解析分價量表
-    const data = (d.data || []).map(b => ({ price: b.price, volume: b.volume, volumeAtBid: b.volumeAtBid, volumeAtAsk: b.volumeAtAsk }));
+    const data = (d.data || []).map(b => ({ 
+      price: b.price, 
+      volume: b.volume, 
+      volumeAtBid: b.volumeAtBid, 
+      volumeAtAsk: b.volumeAtAsk 
+    }));
+
+    // === 新增：自動化量價故事分析 ===
+    const result = analyzeVolumeData(data)
 
     return json({
       success: true,
       data,
+      result,
     });
   } catch (e) {
     const errorMsg = e.name === 'AbortError' ? "連線逾時" : e.message;
     return json({ success: false, error: errorMsg }, 500);
   }
+}
+
+function analyzeHistoryData(data) {
+  if (!data || data.length === 0) {
+    return { story: "暫無歷史數據可供分析。" };
+  }
+
+  // 由於富果資料是 desc (最新在前)，我們複製一份並反轉成 asc (舊到新)，方便計算均線與趨勢
+  const ascData = [...data].reverse();
+  const totalDays = ascData.length;
+
+  // 1. 基礎數據：區間最高、最低價與日期
+  let maxPrice = -Infinity, minPrice = Infinity;
+  let maxDate = "", minDate = "";
+  let maxVol = -1, maxVolDate = "", maxVolClose = 0;
+
+  ascData.forEach(d => {
+    if (d.high > maxPrice) { maxPrice = d.high; maxDate = d.date; }
+    if (d.low < minPrice) { minPrice = d.low; minDate = d.date; }
+    if (d.volume > maxVol) { maxVol = d.volume; maxVolDate = d.date; maxVolClose = d.close; }
+  });
+
+  // 2. 進階指標：計算最新一天的 5日均線(MA5) 與 20日均線(MA20)
+  const latestClose = data[0].close;
+  
+  let ma5 = null, ma20 = null;
+  if (totalDays >= 5) {
+    const last5 = ascData.slice(-5);
+    ma5 = last5.reduce((sum, d) => sum + d.close, 0) / 5;
+  }
+  if (totalDays >= 20) {
+    const last20 = ascData.slice(-20);
+    ma20 = last20.reduce((sum, d) => sum + d.close, 0) / 20;
+  }
+
+  // 3. 趨勢慣性：計算近 3 天的走勢 (連漲、連跌或震盪)
+  let trendText = "橫盤震盪";
+  if (totalDays >= 3) {
+    const c1 = ascData[totalDays - 1].close; // 今天
+    const c2 = ascData[totalDays - 2].close; // 昨天
+    const c3 = ascData[totalDays - 3].close; // 前天
+    if (c1 < c2 && c2 < c3) trendText = "短線連跌修正";
+    if (c1 > c2 && c2 > c3) trendText = "短線連漲衝刺";
+  }
+
+  // 4. 動態動人故事組裝
+  let stories = [];
+  
+  // 故事一：天花板與地板 (你的初衷)
+  stories.push(`近一個月股價於 ${minPrice} 元（${minDate}）築底成功，並於 ${maxPrice} 元（${maxDate}）觸頂回落。目前最新收盤價 ${latestClose} 元，正處於此區間的${latestClose > (maxPrice + minPrice)/2 ? '中高位階（偏強）' : '中低位階（偏弱）'}。`);
+
+  // 故事二：均線多空角力
+  if (ma5 && ma20) {
+    const ma5Text = `5日線(${ma5.toFixed(1)})`;
+    const ma20Text = `20日線(${ma20.toFixed(1)})`;
+    if (latestClose > ma5 && ma5 > ma20) {
+      stories.push(`指標呈現多頭排列，股價站穩 ${ma5Text} 與 ${ma20Text} 之上，技術面由多方掌控主導權。`);
+    } else if (latestClose < ma5 && ma5 < ma20) {
+      stories.push(`技術面呈現弱勢修正，股價目前壓在 ${ma5Text} 之下，且月線 ${ma20Text} 已轉為上檔實質壓力。`);
+    } else {
+      stories.push(`目前股價夾在 ${ma5Text} 與 ${ma20Text} 之間，短線多空交錯，正處於方向抉擇的十字路口。`);
+    }
+  }
+
+  // 故事三：爆量轉折點的心理學
+  const maxVolWan = (maxVol / 10000).toFixed(0);
+  stories.push(`區間最大失控量發生在 ${maxVolDate}（爆量 ${maxVolWan} 張），當日收盤價為 ${maxVolClose} 元。在技術分析中，此價位匯聚了極高密度的籌碼，若未來回檔不破此爆量Ｋ棒，將會是極強的波段支撐。`);
+
+  return {
+    summary: {
+      rangeHigh: maxPrice,
+      rangeHighDate: maxDate,
+      rangeLow: minPrice,
+      rangeLowDate: minDate,
+      ma5: ma5 ? Number(ma5.toFixed(1)) : null,
+      ma20: ma20 ? Number(ma20.toFixed(1)) : null,
+      maxVolumeDate: maxVolDate,
+      shortTrend: trendText
+    },
+    story: stories.join("<br><br>")
+  };
 }
 
 async function fetchFugleHistory(symbol, env) {
@@ -1059,11 +1223,15 @@ async function fetchFugleHistory(symbol, env) {
     }
 
     const d = await res.json();
-    const data = d.data;
+    const data = d.data || [];
+
+    // === 新增：歷史 K 線動態故事分析 ===
+    const result = analyzeHistoryData(data);
 
     return json({
       success: true,
       data,
+      result
     });
   } catch (e) {
     const errorMsg = e.name === 'AbortError' ? "連線逾時" : e.message;
@@ -1241,6 +1409,89 @@ async function fetchMarginTradingBalance() {
   }
 }
 
+function analyzeInstitutionalData(data) {
+  if (!data || data.length === 0) {
+    return { story: "暫無法人籌碼數據可供分析。" };
+  }
+
+  // 1. 計算外資與投信的「連續買賣超天數」
+  // 因為 data 是 desc (最新在前)，data[0] 就是最新的一天
+  const getConsecutiveDays = (key) => {
+    const firstAction = data[0][key] >= 0 ? "buy" : "sell";
+    let count = 0;
+    
+    for (let i = 0; i < data.length; i++) {
+      const currentAction = data[i][key] >= 0 ? "buy" : "sell";
+      if (currentAction === firstAction) {
+        count++;
+      } else {
+        break;
+      }
+    }
+    return { type: firstAction, days: count };
+  };
+
+  const foreignStreak = getConsecutiveDays("foreign");
+  const trustStreak = getConsecutiveDays("trust");
+
+  // 2. 計算近 5 日的累計買賣超 (張數)
+  const last5Days = data.slice(0, 5);
+  let sumForeign5 = 0;
+  let sumTrust5 = 0;
+  let sumDealer5 = 0;
+  let sumTotal5 = 0;
+
+  last5Days.forEach(d => {
+    sumForeign5 += d.foreign;
+    sumTrust5 += d.trust;
+    sumDealer5 += d.dealer;
+    sumTotal5 += d.total;
+  });
+
+  // 3. 動態組裝「故事」文字
+  let stories = [];
+
+  // 故事一：近期的連續慣性
+  const formatStreak = (streak) => {
+    return streak.type === "buy" ? `連買 ${streak.days} 天` : `連賣 ${streak.days} 天`;
+  };
+  
+  stories.push(`【現況慣性】外資目前呈現 ${formatStreak(foreignStreak)}，投信則呈現 ${formatStreak(trustStreak)}。`);
+
+  // 故事二：5日主力動向與市場對決
+  const foreignWan = (sumForeign5 / 1000).toFixed(1);
+  const trustWan = (sumTrust5 / 1000).toFixed(1);
+  
+  stories.push(`【近5日籌碼統計】外資累計${sumForeign5 >= 0 ? '買' : '賣'}超 ${Math.abs(foreignWan)} 千張，投信累計${sumTrust5 >= 0 ? '買' : '賣'}超 ${Math.abs(trustWan)} 千張。五日總計三大法人共${sumTotal5 >= 0 ? '匯入' : '提款'} ${Math.abs((sumTotal5/1000).toFixed(1))} 千張。`);
+
+  // 故事三：多空心理角力模型 (判斷誰是主角)
+  if (sumForeign5 < 0 && sumTrust5 > 0) {
+    stories.push(`💡 籌碼呈現經典的「外資丟、投信撿」對決格局。外資短線調節壓力沉重，但內資投信進場積極護盤，若此時股價在技術面能守住關鍵支撐，代表內資防守強烈，後市不需過度悲觀。`);
+  } else if (sumForeign5 > 0 && sumTrust5 > 0) {
+    stories.push(`💡 籌碼呈現「土洋同買」的金牌多頭格局。內外資難得達成共識共同做多，這類股票短線動能強勁，通常容易發動波段攻勢。`);
+  } else if (sumForeign5 < 0 && sumTrust5 < 0) {
+    stories.push(`💡 籌碼呈現「土洋雙殺」的弱勢格局。內外資法人同步轉向站在賣方，籌碼面缺乏主流資金支撐，建議操作上需多加注意風險，靜待賣壓竭盡。`);
+  } else if (sumForeign5 > 0 && sumTrust5 < 0) {
+    stories.push(`💡 籌碼呈現「外資買、投信調節」的行情。通常代表波段由外資主導，只要外資買盤沒有中斷，短線仍由多方主控盤面。`);
+  }
+
+  return {
+    summary: {
+      foreignStreakDays: foreignStreak.days,
+      foreignStreakType: foreignStreak.type,
+      trustStreakDays: trustStreak.days,
+      trustStreakType: trustStreak.type,
+      accumulated5Day: {
+        foreign: sumForeign5,
+        trust: sumTrust5,
+        dealer: sumDealer5,
+        total: sumTotal5
+      }
+    },
+    story: stories.join("<br><br>")
+  };
+}
+
 async function fetchFugleInstitutional(symbol) {
   try {
     const url = `https://stock.wearn.com/netbuy.asp?kind=${symbol}`;
@@ -1282,7 +1533,14 @@ async function fetchFugleInstitutional(symbol) {
       return { date, trust, dealer, foreign, total };
     }).filter(Boolean);
 
-    return json({ success: true, data });
+    // === 新增：三大法人籌碼故事分析 ===
+    const result = analyzeInstitutionalData(data);
+
+    return json({ 
+      success: true, 
+      data,
+      result
+    });
   } catch (e) {
     const errorMsg = e.name === 'AbortError' ? "連線逾時" : e.message;
     return json({ success: false, error: errorMsg }, 500);
