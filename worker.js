@@ -1055,20 +1055,20 @@ function analyzeVolumeData(data) {
   let stories = [];
   
   // 故事一：核心戰場集中度
-  stories.push(`今日核心交火集中在 ${top3.map(b => b.price).join('、')} 元，這三檔合共吃下區間 ${top3Percentage}% 的籌碼，屬於標準的震盪換手格局。`);
+  stories.push(`目前核心交火集中在 ${top3.map(b => b.price).join('、')} 元，這三檔合共吃下區間 ${top3Percentage}% 的籌碼，屬於標準的震盪換手格局。`);
 
   // 故事二：最大量節點的心理戰
   if (mainBattleBidPct > 65) {
     stories.push(`關鍵價位 ${mainBattle.price} 元爆出全天最大量（佔核心區間 ${((mainBattle.volume/totalVolume)*100).toFixed(1)}%），其中內盤主動砸盤佔比高達 ${mainBattleBidPct.toFixed(1)}%。若收盤能守住此價位，暗示有長線大戶在此築起護城河被動接單，反之若跌破，則此處將轉為沈重壓力。`);
   } else if (mainBattleAskPct > 65) {
-    stories.push(`關鍵價位 ${mainBattle.price} 元今日買氣極盛，外盤追高佔比達 ${mainBattleAskPct.toFixed(1)}%，市場多頭主力試圖在此發動軋空狂攻。`);
+    stories.push(`關鍵價位 ${mainBattle.price} 元，買氣極盛，外盤追高佔比達 ${mainBattleAskPct.toFixed(1)}%，市場多頭主力試圖在此發動軋空狂攻。`);
   } else {
     stories.push(`最大量節點位於 ${mainBattle.price} 元，內外盤力道各半（內:${mainBattleBidPct.toFixed(0)}%/外:${mainBattleAskPct.toFixed(0)}%），多空在此達成短暫動態平衡。`);
   }
 
   // 故事三：開盤節點追蹤
   if (openingNode) {
-    stories.push(`偵測到 ${openingNode.price} 元有高達 ${openingNode.volume - openingNode.volumeAtBid - openingNode.volumeAtAsk} 張的未分類成交量，高機率為開盤集合競價之法人對敲起漲點，為今日多頭的初始防線。`);
+    stories.push(`偵測到 ${openingNode.price} 元有高達 ${openingNode.volume - openingNode.volumeAtBid - openingNode.volumeAtAsk} 張的未分類成交量，高機率為開盤集合競價之法人對敲起漲點，為目前多頭的初始防線。`);
   }
 
   // 7. 回傳結構化的結果

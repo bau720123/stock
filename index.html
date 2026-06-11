@@ -1982,11 +1982,12 @@ function getMarketStatus() {
 
     // 判斷是否為夏令時間 (2026年 3/8 ~ 11/1)
     // 簡單判斷：5月絕對是夏令
-    const isSummerTime = true; 
+    const estString = new Date().toLocaleString("en-US", {timeZone: "America/New_York", timeZoneName: "short"});
+    const isSummerTime = estString.includes("EDT");
 
     // 設定開關盤時間 (夏令)
     const preMarketStart = 1600;
-    const regularMarketStart = 2130;
+    const regularMarketStart = isSummerTime ? 2130 : 2230;
     const regularMarketEnd = 400;  // 04:00 (次日)
     const futuresPauseStart = 500;  // 05:00
     const futuresPauseEnd = 600;  // 06:00
@@ -3634,7 +3635,10 @@ function StockChartHistory() {
     }));
 
     el.style.width = '100%';
-    const chart = echarts.init(el, null, { height: 300 });
+    let chart = echarts.getInstanceByDom(el);
+    if (!chart) {
+      chart = echarts.init(el, null, { height: 300 });
+    }
     chart.setOption({
       backgroundColor: '#0a0e14',
       tooltip: {
