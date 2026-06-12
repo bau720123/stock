@@ -580,7 +580,7 @@ function groupHeader(label, settingsKey = null, wording = '') {
 
   var space = settingsKey != '' ? '&nbsp;' : '';
 
-  const usStocks = ['TSM', 'NVDA', 'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'TSLA', 'AVGO', 'SMCI', 'ASML'];
+  const usStocks = ['TSM', 'NVDA', 'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'TSLA', 'AVGO', 'SMCI', 'ASML', 'SPCX'];
 
   var settingsButton = '';
   if (settingsKey) {
@@ -2417,6 +2417,20 @@ async function loadAmerica() {
     }
     html += row('更新時間', robinHood.ASML.updated_at);
     html += row('對應台股：台積電（2330）、聯發科（2454）、和碩（4938）、緯穎（6669）、廣達（2382）');
+  } else {
+    html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
+  }
+
+  // SpaceX
+  html += groupHeader('【SpaceX】', 'SPCX', 'SpaceX（Space Exploration Technologies Corp.，代號：SPCX）是美國的一家航天公司，專注於設計、開發和銷售運載火箭和太空飛行器。');
+  if (robinHood.SPCX.success && robinHood.SPCX.changeText != '') {
+    html += row('前次', robinHood.SPCX.previousClose, 'accent');
+    html += row('今日漲跌', robinHood.SPCX.changeText, changeClass(robinHood.SPCX.changeText));
+    if (robinHood.SPCX.tertiaryText) {
+      html += row('隔夜漲跌', robinHood.SPCX.tertiaryText, changeClass(robinHood.SPCX.tertiaryText));
+    }
+    html += row('更新時間', robinHood.SPCX.updated_at);
+    html += row('對應台股：台達電（2308）、和碩（4938）、貿聯-KY（3665）、定穎投控（3715）、華孚（6235）');
   } else {
     html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
   }

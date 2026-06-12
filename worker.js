@@ -18,6 +18,7 @@ const ROBINHOOD_INSTRUMENTS = {
   AVGO:  "698f04e6-1710-4f34-b7af-4a88fe5e47b3",
   SMCI:  "50846aee-ce5f-4bd4-bfbb-cef4414f69bd",
   ASML:  "d083c5f8-e6ca-489d-a96f-93084ca374ac",
+  SPCX:  "ef5d2600-32d1-41f5-bfbe-abacac264d2a",
 };
 
 
@@ -2259,7 +2260,7 @@ function generateCustomEvents(year) {
     "001"
   ));
   events.push(createEventObj(
-    new Date("2026-06-12"), 
+    new Date("2026-06-16"), 
     "JAPAN",
     "日本央行（BOJ）利率決策會議", 
     "#3498db", 
@@ -2472,7 +2473,8 @@ async function generateCustomEventsMacroEarnings() {
     'INTC', // Intel - 晶片與晶圓代工競爭者
     'NFLX', // Netflix - 串流領頭羊，AI 推薦演算法
     'SMCI', // Supermicro - AI 伺服器基礎設施
-    'ARM'   // Arm - AI 晶片架構設計核心
+    'ARM',   // Arm - AI 晶片架構設計核心
+    'SPCX'   // SpaceX - AI 航太與衛星網路 (Starlink)
   ]);
 
   try {
