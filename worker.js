@@ -7,18 +7,19 @@ const CORS = {
 };
 
 const ROBINHOOD_INSTRUMENTS = {
-  TSM:   "ca4821f9-06c3-4c22-bbb8-efe569f23d2b",
-  NVDA:  "a4ecd608-e7b4-4ff3-afa5-f77ae7632dfb",
-  AAPL:  "450dfc6d-5510-4d40-abfb-f633b7d9be3e",
-  MSFT:  "50810c35-d215-4866-9758-0ada4ac79ffa",
-  GOOGL: "54db869e-f7d5-45fb-88f1-8d7072d4c8b2",
-  AMZN:  "c0bb3aec-bd1e-471e-a4f0-ca011cbec711",
-  META:  "ebab2398-028d-4939-9f1d-13bf38f81c50",
-  TSLA:  "e39ed23a-7bd1-4587-b060-71988d9ef483",
-  AVGO:  "698f04e6-1710-4f34-b7af-4a88fe5e47b3",
-  SMCI:  "50846aee-ce5f-4bd4-bfbb-cef4414f69bd",
-  ASML:  "d083c5f8-e6ca-489d-a96f-93084ca374ac",
-  SPCX:  "ef5d2600-32d1-41f5-bfbe-abacac264d2a",
+  TSM:   "ca4821f9-06c3-4c22-bbb8-efe569f23d2b", // 台積電
+  NVDA:  "a4ecd608-e7b4-4ff3-afa5-f77ae7632dfb", // 輝達
+  AAPL:  "450dfc6d-5510-4d40-abfb-f633b7d9be3e", // 蘋果
+  MSFT:  "50810c35-d215-4866-9758-0ada4ac79ffa", // 微軟
+  GOOGL: "54db869e-f7d5-45fb-88f1-8d7072d4c8b2", // Alphabet (Google)
+  AMZN:  "c0bb3aec-bd1e-471e-a4f0-ca011cbec711", // 亞馬遜
+  META:  "ebab2398-028d-4939-9f1d-13bf38f81c50", // Meta (Facebook)
+  TSLA:  "e39ed23a-7bd1-4587-b060-71988d9ef483", // 特斯拉
+  AVGO:  "698f04e6-1710-4f34-b7af-4a88fe5e47b3", // 博通
+  SMCI:  "50846aee-ce5f-4bd4-bfbb-cef4414f69bd", // 美超微
+  ASML:  "d083c5f8-e6ca-489d-a96f-93084ca374ac", // 艾斯摩爾
+  SPCX:  "ef5d2600-32d1-41f5-bfbe-abacac264d2a", // SpaceX
+  AMD:   "940fc3f5-1db5-4fed-b452-f3a2e4562b5f", // 超微
 };
 
 
@@ -2466,15 +2467,16 @@ async function generateCustomEventsMacroEarnings() {
     'NOW',  // ServiceNow - 企業流程 AI
     'SNOW', // Snowflake - 資料倉儲 AI
     'ORCL', // Oracle - 雲端資料庫與 OCI
-    'AVGO', // Broadcom - AI 網通與客製化晶片 (ASIC)
+    'AVGO', // Broadcom - AI 網通與客製化晶片（ASIC）
     'QCOM', // Qualcomm - 行動端邊緣 AI
     'ASML', // ASML - EUV 光刻機 (AI 產能關鍵)
-    'MU',   // Micron - HBM 高頻寬記憶體 (AI 必備)
+    'MU',   // Micron - HBM 高頻寬記憶體 
     'INTC', // Intel - 晶片與晶圓代工競爭者
     'NFLX', // Netflix - 串流領頭羊，AI 推薦演算法
     'SMCI', // Supermicro - AI 伺服器基礎設施
-    'ARM',   // Arm - AI 晶片架構設計核心
-    'SPCX'   // SpaceX - AI 航太與衛星網路 (Starlink)
+    'ARM',  // Arm - AI 晶片架構設計核心
+    'SPCX', // SpaceX - AI 航太與衛星網路（Starlink）
+    'AMD',  // AMD - AI 替代方案與 CPU 大廠
   ]);
 
   try {

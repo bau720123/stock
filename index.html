@@ -580,7 +580,7 @@ function groupHeader(label, settingsKey = null, wording = '') {
 
   var space = settingsKey != '' ? '&nbsp;' : '';
 
-  const usStocks = ['TSM', 'NVDA', 'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'TSLA', 'AVGO', 'SMCI', 'ASML', 'SPCX'];
+  const usStocks = ['TSM', 'NVDA', 'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'TSLA', 'AVGO', 'SMCI', 'ASML', 'SPCX', 'AMD'];
 
   var settingsButton = '';
   if (settingsKey) {
@@ -1481,9 +1481,9 @@ function getMarketEmoji() {
   const day = tpe.getDay(); // 0=週日, 1=週一, ..., 6=週六
   const isWeekday = day >= 1 && day <= 5;
 
-  const isDaySession    = isWeekday && hm >= 830  && hm <= 1330; // 08:30 ~ 13:30
+  const isDaySession    = isWeekday && hm >= 830  && hm <= 1345; // 08:30 ~ 13:45
   const isNightSession  = isWeekday && hm >= 1500 || hm <= 500;  // 15:00 ~ 隔日05:00
-  const isTsmcNight     = isWeekday && hm >= 1725 || hm <= 859;  // 17:25 ~ 隔日08:59
+  const isTsmcNight     = isWeekday && hm >= 1725 || hm <= 500;  // 17:25 ~ 隔日05:00
   const isTwn           = isWeekday;  // 17:25 ~ 隔日08:59
 
   return { isDaySession, isNightSession, isTsmcNight, isTwn };
@@ -2290,7 +2290,30 @@ async function loadAmerica() {
       html += row('隔夜漲跌', robinHood.NVDA.tertiaryText, changeClass(robinHood.NVDA.tertiaryText));
     }
     html += row('更新時間', robinHood.NVDA.updated_at);
-    html += row('對應台股：台積電（2330）、鴻海（2317）、廣達（2382）、緯創（3231）、奇鋐（3017）、雙鴻（3324）、台光電（2383）、日月光（3711）、京元電（2449）、聯發科（2454）');
+
+    html += `
+      <div class="row">
+        <span class="row-label">對應台股如下</span>
+        <span style="cursor:pointer;user-select:none;" onclick="
+          const ob = document.getElementById('NVDA');
+          const btn = this;
+          if (ob.style.display === 'none') {
+            ob.style.display = 'block';
+            btn.textContent = '－';
+          } else {
+            ob.style.display = 'none';
+            btn.textContent = '＋';
+          }
+        ">＋</span>
+      </div>`;
+    html += `<div id="NVDA" style="display:none;">`;
+    html += row('台積電（2330）：獨家先進製程（3奈米/4奈米）代工、CoWoS 先進封裝獨家供應');
+    html += row('鴻海（2317）：Blackwell 伺服器整機與 NVL72 機櫃全球最大代工、主要水冷板供應商');
+    html += row('廣達（2382）：旗下雲達科技（QCT）為全球 AI 伺服器整機設計與系統整合大廠');
+    html += row('台達電（2308）：高階 AI 伺服器電源龍頭、800V 次世代高壓直流電（HVDC）獨家壟斷商');
+    html += row('奇鋐（3017）：3D Vapor Chamber（均熱片）與 Blackwell 水冷機櫃散熱系統核心供應商');
+    html += row('雙鴻（3324）：高階伺服器水冷板、CDU（冷卻分配總成）與快接頭等全套液冷系統大廠');
+    html += `</div>`;
   } else {
     html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
   }
@@ -2304,7 +2327,29 @@ async function loadAmerica() {
       html += row('隔夜漲跌', robinHood.AAPL.tertiaryText, changeClass(robinHood.AAPL.tertiaryText));
     }
     html += row('更新時間', robinHood.AAPL.updated_at);
-    html += row('對應台股：台積電（2330）、鴻海（2317）、大立光（3008）、玉晶光（3406）、新日興（3376）、華通（2313）');
+    html += `
+      <div class="row">
+        <span class="row-label">對應台股如下</span>
+        <span style="cursor:pointer;user-select:none;" onclick="
+          const ob = document.getElementById('AAPL');
+          const btn = this;
+          if (ob.style.display === 'none') {
+            ob.style.display = 'block';
+            btn.textContent = '－';
+          } else {
+            ob.style.display = 'none';
+            btn.textContent = '＋';
+          }
+        ">＋</span>
+      </div>`;
+    html += `<div id="AAPL" style="display:none;">`;
+    html += row('台積電（2330）：iPhone、Mac 全系列 A 與 M 系列處理器全球獨家晶圓代工');
+    html += row('大立光（3008）：高階 iPhone 後置潛望式長焦鏡頭、主鏡頭核心光學設計與製造商');
+    html += row('玉晶光（3406）：iPhone 前置鏡頭、超廣角鏡頭與 Vision Pro 光學模組主要供應商');
+    html += row('鴻海（2317）：高階 iPhone（Pro / Pro Max 系列）全球第一大終極組裝代工廠');
+    html += row('華通（2313）：iPhone 主機板高階 HDI（高密度互連板）與軟硬結合板核心一線供應商');
+    html += row('新日興（3376）：MacBook 與 iPad 全系列精密金屬軸承（Hinge）及中高階機殼機構件');
+    html += `</div>`;
   } else {
     html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
   }
@@ -2318,7 +2363,28 @@ async function loadAmerica() {
       html += row('隔夜漲跌', robinHood.MSFT.tertiaryText, changeClass(robinHood.MSFT.tertiaryText));
     }
     html += row('更新時間', robinHood.MSFT.updated_at);
-    html += row('對應台股：緯穎（6669）、廣達（2382）、英業達（2356）、信驊（5274）、智邦（2345）');
+    html += `
+      <div class="row">
+        <span class="row-label">對應台股如下</span>
+        <span style="cursor:pointer;user-select:none;" onclick="
+          const ob = document.getElementById('MSFT');
+          const btn = this;
+          if (ob.style.display === 'none') {
+            ob.style.display = 'block';
+            btn.textContent = '－';
+          } else {
+            ob.style.display = 'none';
+            btn.textContent = '＋';
+          }
+        ">＋</span>
+      </div>`;
+    html += `<div id="MSFT" style="display:none;">`;
+    html += row('緯穎（6669）：微軟自研雲端與 AI 伺服器最大白牌（ODM Direct）系統整合與製造廠');
+    html += row('廣達（2382）：微軟 Azure 資料中心通用伺服器與高階 AI 伺服器核心組裝夥伴');
+    html += row('鴻海（2317）：供應微軟全球資料中心之高階網通設備、基板（HGX）與關鍵零組件');
+    html += row('信驊（5274）：伺服器遠端管理晶片（BMC）全球壟斷龍頭，微軟機房必備控管晶片');
+    html += row('智邦（2345）：供應微軟超級資料中心專用之 400G / 800G 白牌高階網路交換器');
+    html += `</div>`;
   } else {
     html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
   }
@@ -2332,7 +2398,29 @@ async function loadAmerica() {
       html += row('隔夜漲跌', robinHood.GOOGL.tertiaryText, changeClass(robinHood.GOOGL.tertiaryText));
     }
     html += row('更新時間', robinHood.GOOGL.updated_at);
-    html += row('對應台股：廣達（2382）、鴻海（2317）、世芯-KY（3661）、台達電（2308）、健策（3653）、聯發科（2454）');
+    html += `
+      <div class="row">
+        <span class="row-label">對應台股如下</span>
+        <span style="cursor:pointer;user-select:none;" onclick="
+          const ob = document.getElementById('GOOGL');
+          const btn = this;
+          if (ob.style.display === 'none') {
+            ob.style.display = 'block';
+            btn.textContent = '－';
+          } else {
+            ob.style.display = 'none';
+            btn.textContent = '＋';
+          }
+        ">＋</span>
+      </div>`;
+    html += `<div id="GOOGL" style="display:none;">`;
+    html += row('世芯-KY（3661）：Google 自研 AI 晶片（TPU v5/v6系列）次世代架構 ASIC 核心後端設計服務');
+    html += row('廣達（2382）：Google 全球 TPU 自研 AI 伺服器整機與機櫃最大獨家系統整合廠');
+    html += row('台達電（2308）：Google 北美大型 AI 資料中心之高效能電源供應系統及客製化電力基建');
+    html += row('健策（3653）：Google 自研 TPU 處理器專用高階 ILM（精密均熱片/扣件）獨家供應商');
+    html += row('鴻海（2317）：Google 雲端運算機房之標準伺服器、高速連接器及網通系統代工');
+    html += row('聯發科（2454）：與 Google 合作開發次世代邊緣 AI、平板、智慧物聯網晶片架構設計');
+    html += `</div>`;
   } else {
     html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
   }
@@ -2346,7 +2434,28 @@ async function loadAmerica() {
       html += row('隔夜漲跌', robinHood.AMZN.tertiaryText, changeClass(robinHood.AMZN.tertiaryText));
     }
     html += row('更新時間', robinHood.AMZN.updated_at);
-    html += row('對應台股：世芯-KY（3661）、緯穎（6669）、鴻海（2317）、金像電（2368）、川湖（2059）');
+    html += `
+      <div class="row">
+        <span class="row-label">對應台股如下</span>
+        <span style="cursor:pointer;user-select:none;" onclick="
+          const ob = document.getElementById('AMZN');
+          const btn = this;
+          if (ob.style.display === 'none') {
+            ob.style.display = 'block';
+            btn.textContent = '－';
+          } else {
+            ob.style.display = 'none';
+            btn.textContent = '＋';
+          }
+        ">＋</span>
+      </div>`;
+    html += `<div id="AMZN" style="display:none;">`;
+    html += row('世芯-KY（3661）：亞馬遜 AWS 自研 AI 晶片（Trainium 系列）獨家 ASIC 設計，大客戶亞馬遜更直接參與其私募股權');
+    html += row('緯穎（6669）：近年新斬獲的亞馬遜 AWS 雲端資料中心伺服器第二主力 ODM 代工廠');
+    html += row('鴻海（2317）：亞馬遜北美與歐洲資料中心之大規模高階網通機櫃、儲存設備組裝');
+    html += row('川湖（2059）：亞馬遜高階伺服器與 AI 重量級機櫃專用「高承重精密導軌」獨家大廠');
+    html += row('金像電（2368）：亞馬遜高速雲端伺服器主機板專用「高層數超低損耗 PCB 硬板」一線大廠');
+    html += `</div>`;
   } else {
     html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
   }
@@ -2360,7 +2469,28 @@ async function loadAmerica() {
       html += row('隔夜漲跌', robinHood.META.tertiaryText, changeClass(robinHood.META.tertiaryText));
     }
     html += row('更新時間', robinHood.META.updated_at);
-    html += row('對應台股：廣達（2382）、緯穎（6669）、智邦（2345）、欣興（3037）、南電（8046）');
+    html += `
+      <div class="row">
+        <span class="row-label">對應台股如下</span>
+        <span style="cursor:pointer;user-select:none;" onclick="
+          const ob = document.getElementById('META');
+          const btn = this;
+          if (ob.style.display === 'none') {
+            ob.style.display = 'block';
+            btn.textContent = '－';
+          } else {
+            ob.style.display = 'none';
+            btn.textContent = '＋';
+          }
+        ">＋</span>
+      </div>`;
+    html += `<div id="META" style="display:none;">`;
+    html += row('廣達（2382）：Meta 超級資料中心（Open Compute Project）最主要的 AI 伺服器與硬體設備架構商');
+    html += row('緯穎（6669）：Meta 通用雲端硬體與儲存伺服器之長期核心 ODM 生態系合作夥伴');
+    html += row('智邦（2345）：Meta 資料中心「開放式網通架構」下，800G 交換器最主要的白牌製造商');
+    html += row('欣興（3037）：Meta 自研晶片及 AI 伺服器高階網通晶片專用之 ABF 載板核心供應商');
+    html += row('南電（8046）：提供 Meta 高效能運算（HPC）基礎設施所需的次世代中高階處理器 ABF 載板');
+    html += `</div>`;
   } else {
     html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
   }
@@ -2374,7 +2504,28 @@ async function loadAmerica() {
       html += row('隔夜漲跌', robinHood.TSLA.tertiaryText, changeClass(robinHood.TSLA.tertiaryText));
     }
     html += row('更新時間', robinHood.TSLA.updated_at);
-    html += row('對應台股：台達電（2308）、和碩（4938）、貿聯-KY（3665）、定穎投控（3715）、華孚（6235）');
+    html += `
+      <div class="row">
+        <span class="row-label">對應台股如下</span>
+        <span style="cursor:pointer;user-select:none;" onclick="
+          const ob = document.getElementById('TSLA');
+          const btn = this;
+          if (ob.style.display === 'none') {
+            ob.style.display = 'block';
+            btn.textContent = '－';
+          } else {
+            ob.style.display = 'none';
+            btn.textContent = '＋';
+          }
+        ">＋</span>
+      </div>`;
+    html += `<div id="TSLA" style="display:none;">`;
+    html += row('貿聯-KY（3665）：特斯拉超級工廠（Gigafactory）全車系「高壓電池管理、動力傳輸線束」獨家/首選大廠');
+    html += row('台達電（2308）：特斯拉電動車之馬達驅動器、車載充電器（OBC）及全球超級充電樁電力模組');
+    html += row('華孚（6235）：特斯拉全車系車載大螢幕機構件、安全部件專用「輕量化鎂鋁合金壓鑄件」');
+    html += row('定穎投控（3715）：特斯拉自動駕駛（FSD）核心電腦與車身控制模組專用之「高階高密度車用 PCB 板」');
+    html += row('和碩（4938）：特斯拉北美超級電腦與特定車款之車載中央控制電腦（ECU）核心組裝代工廠');
+    html += `</div>`;
   } else {
     html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
   }
@@ -2388,7 +2539,28 @@ async function loadAmerica() {
       html += row('隔夜漲跌', robinHood.AVGO.tertiaryText, changeClass(robinHood.AVGO.tertiaryText));
     }
     html += row('更新時間', robinHood.AVGO.updated_at);
-    html += row('對應台股：台積電（2330）、智邦（2345）、日月光投控（3711）、京元電子（2449）、聯發科（2454）');
+    html += `
+      <div class="row">
+        <span class="row-label">對應台股如下</span>
+        <span style="cursor:pointer;user-select:none;" onclick="
+          const ob = document.getElementById('AVGO');
+          const btn = this;
+          if (ob.style.display === 'none') {
+            ob.style.display = 'block';
+            btn.textContent = '－';
+          } else {
+            ob.style.display = 'none';
+            btn.textContent = '＋';
+          }
+        ">＋</span>
+      </div>`;
+    html += `<div id="AVGO" style="display:none;">`;
+    html += row('台積電（2330）：博通全球最核心的高階 5奈米/3奈米 網通交換器與客製化 ASIC 晶片獨家代工廠');
+    html += row('智邦（2345）：與博通深度綁定，全面採用博通 Tomahawk 晶片設計自製高階白牌網路交換器');
+    html += row('日月光投控（3711）：博通高階網通晶片、AI 加速器專用之先進系統級封裝（SiP）與 2.5D 封裝大廠');
+    html += row('京元電子（2449）：博通全球高階網通、無線通訊晶片在出廠前最主要的高頻晶圓測試與成品測試基地');
+    html += row('聯發科（2454）：在 Wi-Fi 7 核心技術與物聯網通訊標準上，與博通在全球市場同為領頭羊兼技術競爭/合作對象');
+    html += `</div>`;
   } else {
     html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
   }
@@ -2402,7 +2574,29 @@ async function loadAmerica() {
       html += row('隔夜漲跌', robinHood.SMCI.tertiaryText, changeClass(robinHood.SMCI.tertiaryText));
     }
     html += row('更新時間', robinHood.SMCI.updated_at);
-    html += row('對應台股：雙鴻（3324）、奇鋐（3017）、華泰（2329）、台光電（2383）、金像電（2368）、迎廣（6117）、台達電（2308）');
+    html += `
+      <div class="row">
+        <span class="row-label">對應台股如下</span>
+        <span style="cursor:pointer;user-select:none;" onclick="
+          const ob = document.getElementById('SMCI');
+          const btn = this;
+          if (ob.style.display === 'none') {
+            ob.style.display = 'block';
+            btn.textContent = '－';
+          } else {
+            ob.style.display = 'none';
+            btn.textContent = '＋';
+          }
+        ">＋</span>
+      </div>`;
+    html += `<div id="SMCI" style="display:none;">`;
+    html += row('雙鴻（3324）：美超微液冷機櫃（Liquid Cooling）標準配備中，冷卻板模組與部分 CDU 系統的首選核心盟友');
+    html += row('奇鋐（3017）：供應美超微美、歐、亞各廠區伺服器所需的散熱風扇模組與高階風冷散熱片');
+    html += row('華泰（2329）：美超微最長期的台灣代工夥伴，獨家承接其伺服器主機板 SMT 表面黏著與後段組裝');
+    html += row('台光電（2383）：美超微高階 AI 伺服器主機板專用之「超高頻、超低損耗 CCL（銅箔基板）」');
+    html += row('台達電（2308）：美超微高功率 AI 伺服器（特別是搭配鈦金級/鉑金級效率）之高階鈦金級電源供應器');
+    html += row('迎廣（6117）：美超微高階高密度 AI 伺服器專用「高階金屬機殼與滑軌機構件」重要本土配合廠');
+    html += `</div>`;
   } else {
     html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
   }
@@ -2416,7 +2610,28 @@ async function loadAmerica() {
       html += row('隔夜漲跌', robinHood.ASML.tertiaryText, changeClass(robinHood.ASML.tertiaryText));
     }
     html += row('更新時間', robinHood.ASML.updated_at);
-    html += row('對應台股：台積電（2330）、聯發科（2454）、和碩（4938）、緯穎（6669）、廣達（2382）');
+    html += `
+      <div class="row">
+        <span class="row-label">對應台股如下</span>
+        <span style="cursor:pointer;user-select:none;" onclick="
+          const ob = document.getElementById('ASML');
+          const btn = this;
+          if (ob.style.display === 'none') {
+            ob.style.display = 'block';
+            btn.textContent = '－';
+          } else {
+            ob.style.display = 'none';
+            btn.textContent = '＋';
+          }
+        ">＋</span>
+      </div>`;
+    html += `<div id="ASML" style="display:none;">`;
+    html += row('台積電（2330）：ASML 全球最尖端設備（High-NA EUV 極紫外光光刻機）的最大採購客戶與技術推進夥伴');
+    html += row('家登（3680）：通過 ASML 全球唯一/少數認證，生產先進製程專用之「EUV POD（極紫外光光罩傳送盒）」');
+    html += row('帆宣（6196）：長期承接 ASML 精密精密黃光設備之「精密機台關鍵模組代工組裝」與廠務系統');
+    html += row('弘塑（3131）：ASML 高階檢測設備與台積電先進封裝（CoWoS）濕製程酸洗設備核心供應商');
+    html += row('公準（3178）：ASML 精密光刻機台內高難度「高精密真空精密微結構金屬精密零組件」認證合格製造商');
+    html += `</div>`;
   } else {
     html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
   }
@@ -2430,7 +2645,65 @@ async function loadAmerica() {
       html += row('隔夜漲跌', robinHood.SPCX.tertiaryText, changeClass(robinHood.SPCX.tertiaryText));
     }
     html += row('更新時間', robinHood.SPCX.updated_at);
-    html += row('對應台股：台達電（2308）、和碩（4938）、貿聯-KY（3665）、定穎投控（3715）、華孚（6235）');
+    html += `
+      <div class="row">
+        <span class="row-label">對應台股如下</span>
+        <span style="cursor:pointer;user-select:none;" onclick="
+          const ob = document.getElementById('SPCX');
+          const btn = this;
+          if (ob.style.display === 'none') {
+            ob.style.display = 'block';
+            btn.textContent = '－';
+          } else {
+            ob.style.display = 'none';
+            btn.textContent = '＋';
+          }
+        ">＋</span>
+      </div>`;
+    html += `<div id="SPCX" style="display:none;">`;
+    html += row('華通（2313）：SpaceX Starlink（星鏈計畫）低軌衛星本體、地面接收站專用「Anylayer 高階衛星 PCB 板」全球龍頭');
+    html += row('昇達科（3491）：SpaceX 衛星本體與地面站專用之「高頻微波/毫米波通訊天線元器件」獨家/一線大廠');
+    html += row('啟碁（6285）：SpaceX 使用者端（User Terminal）室內高階 Wi-Fi 路由器與地面通訊網路設備代工廠');
+    html += row('同欣電（6271）：負責 SpaceX 低軌衛星通訊模組之「高階高頻陶瓷基板 RF 封裝與檢測服務」');
+    html += row('事欣科（4916）：提供 SpaceX 運載火箭與太空艙之「國防航太等級高耐規 EMS 封裝與線束組裝」');
+    html += `</div>`;
+  } else {
+    html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
+  }
+
+  // 超微
+  html += groupHeader('【超微】', 'AMD', '超微（Advanced Micro Devices, Inc.，代號：AMD）是美國的一家科技公司，專注於設計、開發和銷售微處理器（CPU）、圖形處理器（GPU）和個人電腦、伺服器晶片組。');
+  if (robinHood.AMD.success && robinHood.AMD.changeText != '') {
+    html += row('前次', robinHood.AMD.previousClose, 'accent');
+    html += row('今日漲跌', robinHood.AMD.changeText, changeClass(robinHood.AMD.changeText));
+    if (robinHood.AMD.tertiaryText) {
+      html += row('隔夜漲跌', robinHood.AMD.tertiaryText, changeClass(robinHood.AMD.tertiaryText));
+    }
+    html += row('更新時間', robinHood.AMD.updated_at);
+    html += `
+      <div class="row">
+        <span class="row-label">對應台股如下</span>
+        <span style="cursor:pointer;user-select:none;" onclick="
+          const ob = document.getElementById('AMD');
+          const btn = this;
+          if (ob.style.display === 'none') {
+            ob.style.display = 'block';
+            btn.textContent = '－';
+          } else {
+            ob.style.display = 'none';
+            btn.textContent = '＋';
+          }
+        ">＋</span>
+      </div>`;
+    html += `<div id="AMD" style="display:none;">`;
+    html += row('台積電（2330）：超微全系列 Zen 架構 CPU、Radeon GPU 及 MI 系列 AI 晶片之先進製程（3奈米/4奈米/5奈米）獨家晶圓代工與 CoWoS 先進封裝');
+    html += row('健策（3653）：超微伺服器處理器（EPYC 系列）與 AI 晶片專用「高階 CPU 均熱片（Heat Spreader）」全球最大核心獨家供應商，純度極高');
+    html += row('穎崴（6515）：超微高階晶片出廠前「晶圓測試、Final Test（成品測試）」專用之高頻高速測試座（Test Socket）核心大廠');
+    html += row('廣達（2382）：超微 MI300X 及次世代 AI 伺服器整機與機櫃之主要 ODM 設計整合與代工廠');
+    html += row('鴻海（2317）：超微 AI 伺服器基板（Substrate）與高效能運算機房之標準網通機櫃代工');
+    html += row('祥碩（5269）：超微桌上型與筆記型電腦主機板晶片組（Chipset）之獨家/核心高速傳輸介面授權與設計夥伴');
+    html += row('欣興（3037）：超微大型資料中心晶片與 AI 晶片封裝專用「超高層數 ABF 載板」核心一線供應商');
+    html += `</div>`;
   } else {
     html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
   }
