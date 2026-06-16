@@ -2721,7 +2721,7 @@ function getAsiaMarketEmoji() {
   const day = tpe.getDay(); // 0=週日, 1=週一, ..., 6=週六
   const isWeekday = day >= 1 && day <= 5;
 
-  const isJapanDaySession    = isWeekday && hm >= 800  && hm <= 1400; // 08:00 ~ 14:00
+  const isJapanDaySession    = isWeekday && hm >= 800  && hm <= 1430; // 08:00 ~ 14:00
   const isKoreaDaySession    = isWeekday && hm >= 800  && hm <= 1430; // 08:00 ~ 14:30
 
   return { isJapanDaySession, isKoreaDaySession };
@@ -2751,7 +2751,7 @@ async function loadAsia() {
   let html = `<div class="card-title">亞洲市場概況</div>`;
 
   // 【日經225指數】
-  html += groupHeader(JapanfuturesDay + '【日經225指數】', '', '日經225指數（Nikkei 225）是日本最具代表性的股票市場指數，由東京證券交易所上市的225家大型企業股票構成，用以反映日本股市的整体表現。');
+  html += groupHeader(JapanfuturesDay + '【日經225指數】', '', '日經225指數（Nikkei 225）是日本最具代表性的股票市場指數，由東京證券交易所上市的225家大型企業股票構成，用以反映日本股市的整体表現。<br><br>交易時間：每週一至週五的上午08:00至下午14:30，其中中午10:30至11:30休市。');
   if (yahooJapan.success) {
     const changeNum = yahooJapan.close - yahooJapan.prev;
     const cls = changeClass(changeNum, 1);
@@ -2770,7 +2770,7 @@ async function loadAsia() {
   }
 
   // 【韓國綜合指數】
-  html += groupHeader(KoreafuturesDay + '【韓國綜合指數】', '', '韓國綜合指數（KOSPI, Korea Composite Stock Price Index）是韓國最具代表性的股票市場指數，由韓國交易所上市的所有普通股構成，用以反映韓國股市的整体表現。');
+  html += groupHeader(KoreafuturesDay + '【韓國綜合指數】', '', '韓國綜合指數（KOSPI, Korea Composite Stock Price Index）是韓國最具代表性的股票市場指數，由韓國交易所上市的所有普通股構成，用以反映韓國股市的整体表現。<br><br>交易時間：每週一至週五的上午08:00至下午14:30。');
   if (yahooKorea.success) {
     const changeNum = yahooKorea.close - yahooKorea.prev;
     const cls = changeClass(changeNum, 1);
