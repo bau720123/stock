@@ -119,6 +119,8 @@ export default {
       if (symbol) return await fetchYahooFinance(symbol, 1, 1);
     }
 
+    if (path === "/fedwatch")  return await fetchFedWatch(env);
+
     if (path === "/news-rss")  return await fetchNewsRss(env);
 
     if (path === "/america-calendar") return await fetchAmericaCalendar(env);
@@ -1825,6 +1827,167 @@ async function translateToZh(text) {
   const res = await fetchWithTimeout(url, { headers: { "User-Agent": UA } });
   const data = await res.json();
   return data?.responseData?.translatedText || text; // 失敗就回傳原文
+}
+
+// 聯準會利率
+async function fetchFedWatch(env) {
+  try {
+    // 同時打三支 API
+    const [investingRes, fredLowRes, fredHighRes] = await Promise.all([
+      fetchWithTimeout("https://www.investing.com/central-banks/fed-rate-monitor", {
+        headers: {
+          "User-Agent": UA,
+          "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+          "Accept-Language": "en-US,en;q=0.9",
+          "Referer": "https://www.investing.com/",
+          "Cache-Control": "no-cache",
+        }
+      }, 10000),
+      fetchWithTimeout(`https://api.stlouisfed.org/fred/series/observations?series_id=DFEDTARL&api_key=${env.FRED_KEY}&file_type=json&limit=1&sort_order=desc`, {
+        headers: { "Accept": "application/json" }
+      }, 8000),
+      fetchWithTimeout(`https://api.stlouisfed.org/fred/series/observations?series_id=DFEDTARU&api_key=${env.FRED_KEY}&file_type=json&limit=1&sort_order=desc`, {
+        headers: { "Accept": "application/json" }
+      }, 8000),
+    ]);
+
+    if (!investingRes.ok) return json({ success: false, error: `investing.com HTTP ${investingRes.status}` });
+
+    const html = await investingRes.text();
+
+    // ── 一、抓第一個 class="infoFed" 區塊，取 Meeting Time ──
+    const infoFedIdx = html.indexOf('class="infoFed"');
+    if (infoFedIdx === -1) return json({ success: false, error: "找不到 infoFed" });
+
+    const infoFedSlice = html.substring(infoFedIdx);
+    const iStart = infoFedSlice.indexOf("<i>");
+    const iEnd   = infoFedSlice.indexOf("</i>", iStart);
+    const meetingTimeRaw = (iStart !== -1 && iEnd !== -1)
+      ? infoFedSlice.substring(iStart + 3, iEnd).trim()
+      : "";
+
+    let meetingTimeTaipei = "";
+    if (meetingTimeRaw) {
+      const rawNoET = meetingTimeRaw.replace(/\s*ET$/, "").trim();
+
+      function parseETtoTaipei(str) {
+        const ampmMatch = str.match(/^(.*?)\s+(\d{1,2}):(\d{2})(AM|PM)$/i);
+        if (!ampmMatch) return "";
+
+        const datePart = ampmMatch[1];
+        let hours      = parseInt(ampmMatch[2], 10);
+        const minutes  = ampmMatch[3];
+        const ampm     = ampmMatch[4].toUpperCase();
+
+        if (ampm === "AM" && hours === 12) hours = 0;
+        if (ampm === "PM" && hours !== 12) hours += 12;
+
+        const time24 = `${String(hours).padStart(2, '0')}:${minutes}`;
+
+        const dtEDT = new Date(`${datePart} ${time24}:00 GMT-0400`);
+        const dtEST = new Date(`${datePart} ${time24}:00 GMT-0500`);
+
+        const month = dtEDT.getUTCMonth() + 1;
+        const dt = (month >= 4 && month <= 10) ? dtEDT : dtEST;
+        if (isNaN(dt)) return "";
+
+        return dt.toLocaleString("zh-TW", {
+          timeZone: "Asia/Taipei",
+          hour12: false,
+          year: "numeric", month: "2-digit", day: "2-digit",
+          hour: "2-digit", minute: "2-digit",
+        }).replace(/\//g, '-');
+      }
+
+      meetingTimeTaipei = parseETtoTaipei(rawNoET);
+    }
+
+    // ── 二、抓 fedRateTbl table ──
+    const tableClass = 'class="genTbl openTbl fedRateTbl"';
+    const tableIdx = html.indexOf(tableClass);
+    if (tableIdx === -1) return json({ success: false, error: "找不到 fedRateTbl" });
+
+    const tableEnd = html.indexOf("</table>", tableIdx);
+    const tableSlice = (tableEnd !== -1)
+      ? html.substring(tableIdx, tableEnd + 8)
+      : html.substring(tableIdx, tableIdx + 8000);
+
+    const tbodyStart = tableSlice.indexOf("<tbody>");
+    const tbodyEnd   = tableSlice.indexOf("</tbody>");
+    if (tbodyStart === -1 || tbodyEnd === -1) return json({ success: false, error: "找不到 tbody" });
+
+    const tbody = tableSlice.substring(tbodyStart + 7, tbodyEnd);
+
+    const rates = [];
+    const trRegex = /<tr[\s\S]*?<\/tr>/g;
+    let trMatch;
+    while ((trMatch = trRegex.exec(tbody)) !== null) {
+      const row = trMatch[0];
+      const tdRegex = /<td[^>]*>([\s\S]*?)<\/td>/g;
+      const cells = [];
+      let tdMatch;
+      while ((tdMatch = tdRegex.exec(row)) !== null) {
+        const text = tdMatch[1].replace(/<[^>]+>/g, "").trim();
+        cells.push(text);
+      }
+      if (cells.length < 4) continue;
+
+      const parseProb = (s) => {
+        if (!s || s === "—" || s === "-") return null;
+        return toFloat(s.replace("%", ""));
+      };
+
+      rates.push({
+        targetRate:   cells[0].replace(/\s+/g, " ").trim(),
+        currentProb:  parseProb(cells[1]),
+        prevDayProb:  parseProb(cells[2]),
+        prevWeekProb: parseProb(cells[3]),
+      });
+    }
+
+    // ── 三、FRED 當前基準利率 ──
+    let currentRateLow  = null;
+    let currentRateHigh = null;
+
+    try {
+      const fredLow  = await fredLowRes.json();
+      const fredHigh = await fredHighRes.json();
+      currentRateLow  = toFloat(fredLow?.observations?.[0]?.value);
+      currentRateHigh = toFloat(fredHigh?.observations?.[0]?.value);
+    } catch (_) {
+      // FRED 失敗不影響主資料，currentRate 留 null
+    }
+
+    // ── 四、推導每筆 targetRate 的 action ──
+    rates.forEach(r => {
+      if (currentRateLow === null || currentRateHigh === null) {
+        r.action = null;
+        return;
+      }
+
+      // targetRate 格式："3.50 - 3.75"，取下界比較
+      const targetLow = toFloat(r.targetRate.split('-')[0]);
+      const diff = Math.round((targetLow - currentRateLow) * 100); // 單位：bp
+
+      if (diff === 0)     r.action = '維持利率';
+      else if (diff < 0)  r.action = `降息 ${Math.abs(diff / 25)} 碼`;
+      else                r.action = `升息 ${diff / 25} 碼`;
+    });
+
+    return json({
+      success:          true,
+      meetingTimeET:    meetingTimeRaw,
+      meetingTimeTW:    meetingTimeTaipei,
+      currentRate:      (currentRateLow !== null && currentRateHigh !== null)
+                          ? `${currentRateLow} - ${currentRateHigh}`
+                          : null,
+      rates,
+    });
+
+  } catch (e) {
+    const errorMsg = e.name === 'AbortError' ? "連線逾時" : e.message;
+    return json({ success: false, error: errorMsg }, 500);
+  }
 }
 
 // 新聞 RSS

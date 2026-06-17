@@ -449,10 +449,10 @@ header h1 {
 </style>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <!--<script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>-->
-</head>
 <script src="
 https://cdn.jsdelivr.net/npm/echarts@6.0.0/dist/echarts.min.js
 "></script>
+</head>
 <body>
 
 <!-- Overlay 背景遮罩 -->
@@ -468,7 +468,7 @@ https://cdn.jsdelivr.net/npm/echarts@6.0.0/dist/echarts.min.js
     <li><a onclick="closeMenu()" href="?card_type=materials">🛢️ 原物料市場</a></li>
     <li><a onclick="closeMenu()" href="?card_type=market-sentiment">🌡️ 市場情緒</a></li>
     <li><a onclick="closeMenu()" href="?card_type=my-stock">⭐ 我的自選股</a></li>
-    <li><a onclick="closeMenu()" href="?card_type=war">🔥 國際政治新聞</a></li>
+    <li><a onclick="closeMenu()" href="?card_type=news">🔥 國際政治新聞</a></li>
     <li><a onclick="closeMenu()" href="?card_type=america-calendar">📅 美股行事曆</a></li>
     <li><a onclick="closeMenu()" href="?card_type=all">🌐 全類別顯示</a></li>
     <li><a style="cursor:pointer;" onclick="showInfo('一個以純前端技術為核心，搭配 Cloudflare 無伺服器架構，實現即時金融市場報價、PWA 安裝與主動推播通知的個人投資輔助工具。');">ℹ️ 關於本軟體</a></li>
@@ -525,7 +525,7 @@ https://cdn.jsdelivr.net/npm/echarts@6.0.0/dist/echarts.min.js
       <div class="skeleton"></div>
       <div class="skeleton"></div>
   </div>
-  <div class="card" id="card-war" style="display: none;">
+  <div class="card" id="card-news" style="display: none;">
       <div class="card-title">國際政治新聞</div>
       <div class="skeleton"></div>
   </div>
@@ -1416,7 +1416,7 @@ async function loadAll() {
     'materials':        { id: 'card-materials', fn: loadMaterials },
     'market-sentiment': { id: 'card-sentiment', fn: loadSentiment },
     'my-stock':         { id: 'card-mystock',   fn: loadMyStock },
-    'war':              { id: 'card-war',       fn: loadWar },
+    'news':             { id: 'card-news',       fn: loadNews },
     'america-calendar': { id: 'card-america-calendar',   fn: loadAmericaCalendar },
   };
 
@@ -3075,13 +3075,14 @@ async function loadMaterials() {
 
 // 市場情緒
 async function loadSentiment() {
-  const [/*sinaVix, */sinaVixFutures, fearGreed, sinaUsdollar, yahooUtcTwd, yahooUtcJpy] = await Promise.all([
+  const [/*sinaVix, */sinaVixFutures, fearGreed, sinaUsdollar, yahooUtcTwd, yahooUtcJpy, fedwatch] = await Promise.all([
     // fetch(WORKER + '/sina/znb_VIX').then(r => r.json()).catch(() => ({ success: false })), // VIX 恐慌指數
     fetch(WORKER + '/sina/hf_VX').then(r => r.json()).catch(() => ({ success: false })), // VIX 恐慌指數期貨
     fetch(WORKER + '/fear-greed').then(r => r.json()).catch(() => ({ success: false })), // CNN Fear & Greed Index
     fetch(WORKER + '/sina/DINIW').then(r => r.json()).catch(() => ({ success: false })), // 美元指數
     fetch(WORKER + '/yahoo-finance/USDTWD=X').then(r => r.json()).catch(() => ({ success: false })), // 美金兌換台幣匯率
     fetch(WORKER + '/yahoo-finance/USDJPY=X').then(r => r.json()).catch(() => ({ success: false })), // 美金兌換日幣匯率
+    fetch(WORKER + '/fedwatch').then(r => r.json()).catch(() => ({ success: false })), // 聯準會利率
   ]);
 
   let html = `<div class="card-title">市場情緒</div>`;
@@ -3290,7 +3291,129 @@ async function loadSentiment() {
     html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
   }
 
+  // 【聯準會利率】
+  html += groupHeader('【聯準會利率】', '', '聯準會利率（Fed Funds Rate）由美國聯邦公開市場委員會（FOMC）決議，是美國貨幣政策的核心工具，直接影響借貸成本、匯率走勢與全球資金流向。此處顯示 CME FedWatch 對本次 FOMC 會議各目標利率區間的市場預期概率。');
+  if (fedwatch.success) {
+    html += row('下次會議', fedwatch.meetingTimeTW || fedwatch.meetingTimeET);
+
+    fedwatch.rates.forEach(r => {
+      const curr = r.currentProb;
+      const isDominant = curr !== null && fedwatch.rates.every(x => (x.currentProb ?? 0) <= curr);
+      const fmtProb = (v) => v !== null ? v.toFixed(1) + '%' : '—';
+
+      html += groupHeader(`目標利率：${r.targetRate}%（${r.action}）`);
+      html += row('目前概率', fmtProb(curr), isDominant ? 'accent' : '');
+      html += row('前日概率', fmtProb(r.prevDayProb));
+      html += row('前週概率', fmtProb(r.prevWeekProb));
+    });
+
+    html += `<div class="row">${renderChartFedWatch(fedwatch)}</div>`;
+
+  } else {
+    html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
+  }
+
   setCard('card-sentiment', 0, html);
+
+  ChartFedWatch();
+}
+
+function renderChartFedWatch(data) {
+  if (!data || !data.success || !data.rates || !data.rates.length) return '';
+
+  // window._fedwatch_chartPending = data;
+
+  // 過濾掉 0 的資料，避免圖表顯示過多無意義的項目
+  window._fedwatch_chartPending = {
+    ...data,
+    rates: data.rates.filter(r => r.currentProb !== null && r.currentProb !== 0),
+  };
+
+  return `<div id="fedwatch_chart" style="height:260px;"></div>`;
+}
+
+function ChartFedWatch() {
+  const data = window._fedwatch_chartPending;
+  const el = document.getElementById('fedwatch_chart');
+  if (!el || !data) return;
+
+  // 只取 currentProb 有值的項目
+  // const validRates = data.rates.filter(r => r.currentProb !== null);
+  const validRates = data.rates;
+
+  // 圓餅圖資料：label 顯示 targetRate + action
+  const pieData = validRates.map(r => {
+    const label = r.action
+      ? `${r.targetRate}（${r.action}）`
+      : r.targetRate;
+    return { name: label, value: r.currentProb };
+  });
+
+  // 主色系：維持利率用綠，降息用藍，升息用紅
+  const colorMap = (action) => {
+    if (!action || action === '維持利率') return '#00c98a';
+    if (action.startsWith('降息'))       return '#5a9eff';
+    if (action.startsWith('升息'))       return '#ff4d6a';
+    return '#c8d8e8';
+  };
+  const colors = validRates.map(r => colorMap(r.action));
+
+  const meetingDate = data.meetingTimeTW
+    ? data.meetingTimeTW.split(' ')[0]
+    : data.meetingTimeET;
+
+  el.style.width = '100%';
+  const chart = echarts.init(el, null, { height: 260 });
+  chart.setOption({
+    backgroundColor: '#0a0e14',
+    title: {
+      text: `聯準會利率期貨隱含機率 - ${meetingDate}`,
+      left: 'center',
+      top: 8,
+      textStyle: { color: '#c8d8e8', fontSize: 12, fontWeight: 'normal' },
+    },
+    tooltip: {
+      trigger: 'item',
+      backgroundColor: '#1e2736',
+      borderColor: '#3a4a5c',
+      textStyle: { color: '#c8d8e8', fontSize: 11 },
+      formatter: params =>
+        `<div style="font-family:monospace;font-size:11px;line-height:1.8">
+          <b style="color:#c8d8e8">${params.name}</b><br>
+          目前概率 <span style="color:${params.color}">${params.value.toFixed(1)}%</span>
+        </div>`,
+    },
+    legend: {
+      orient: 'vertical',
+      bottom: 0,
+      left: 'left'
+    },
+    /*legend: {
+      top: '5%',
+      left: 'center'
+    },*/
+    series: [
+      {
+        type: 'pie',
+        radius: '50%',
+        data: pieData,
+        label: {
+          color: '#c8d8e8',
+          fontSize: 10,
+          // formatter: params => `${params.name}\n${params.value.toFixed(1)}%`,
+        },
+        emphasis: {
+          itemStyle: {
+            shadowBlur: 10,
+            shadowOffsetX: 0,
+            shadowColor: 'rgba(0, 0, 0, 0.5)'
+          }
+        }
+      }
+    ]
+  });
+
+  new ResizeObserver(() => chart.resize()).observe(el);
 }
 
 // Tickers 快取
@@ -3389,7 +3512,7 @@ async function loadMyStock() {
 function _renderMyStock({ quoteResults, volumeResults, historyResults, institutionalResults, smaResults, rsiResults, kdjResults, macdResults, brandsResults }) {
   // 銷毀頁面上所有殘留的 ECharts 實例，避免 canvas 尺寸錯誤
   // 排除台股市場概況的圖表（tw_foreignnetposition_chart、tw_institutional_chart）
-  document.querySelectorAll('[_echarts_instance_]:not(#tw_foreignnetposition_chart):not(#tw_institutional_chart)').forEach(el => {
+  document.querySelectorAll('[_echarts_instance_]:not(#tw_foreignnetposition_chart):not(#tw_institutional_chart):not(#fedwatch_chart)').forEach(el => {
     echarts.getInstanceByDom(el)?.dispose();
   });
 
@@ -4889,7 +5012,7 @@ function warMarkRead(link, source) {
 }
 
 // 國際政治新聞
-async function loadWar() {
+async function loadNews() {
   let html = `<div class="card-title">國際政治新聞</div>`;
 
   try {
@@ -4968,7 +5091,7 @@ async function loadWar() {
     html += `<div class="error-text">載入失敗：${e.message}</div>`;
   }
 
-  setCard('card-war', 0, html, 'card-wide');
+  setCard('card-news', 0, html, 'card-wide');
 }
 
 // 美股行事曆
@@ -5227,6 +5350,142 @@ function closeMenu() {
   // document.getElementById("slideMenu").style.width = "0px";
   // document.getElementById("header").style.marginLeft = "0px";
   // document.getElementById("grid").style.marginLeft = "0px";
+}
+</script>
+
+<!--教學導覽-->
+<script src="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.js.iife.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.css"/>
+<style>
+  .driver-popover-title {
+    background: transparent !important;
+    /*color: #f0f0f0 !important;*/
+    font-size: 15px !important;
+    padding: 0 0 6px 0 !important;
+    border-bottom: 1px solid rgba(255,255,255,0.15);
+    margin-bottom: 6px;
+  }
+</style>
+<script>
+if (card_type == 'all') {
+  function waitForElements(selectors, timeout = 10000) {
+    return new Promise((resolve, reject) => {
+      const interval = setInterval(() => {
+        const allFound = selectors.every(sel => document.querySelector(sel));
+        if (allFound) {
+          clearInterval(interval);
+          resolve();
+        }
+      }, 200);
+
+      setTimeout(() => {
+        clearInterval(interval);
+        reject(new Error('Tour elements not found in time'));
+      }, timeout);
+    });
+  }
+
+  const tourSelectors = [
+    '#card-tw', '#card-america', '#card-asia',
+    '#card-materials', '#card-sentiment', '#card-mystock',
+    '#card-news', '#card-america-calendar',
+  ];
+
+  waitForElements(tourSelectors).then(() => {
+    if (localStorage.getItem('tourDone')) return;
+
+    const driver = window.driver.js.driver;
+
+    const driverObj = driver({
+      animate: true,
+      showProgress: true,
+      allowClose: true,
+      nextBtnText: '下一步 →',
+      prevBtnText: '← 上一步',
+      doneBtnText: '完成 ✓',
+      progressText: '{{current}} / {{total}}',
+
+      // 關閉自動 scroll
+      smoothScroll: false,
+      
+      // 每次切換步驟前，手動 scroll 到目標元素
+      onHighlightStarted: (element) => {
+        if (!element) return;
+
+        setTimeout(() => {
+          location.hash = '#' + element.id;
+        }, 100);
+      },
+
+      onDestroyStarted: () => {
+        localStorage.setItem('tourDone', '1');
+        driverObj.destroy();
+      },
+      steps: [
+        {
+          element: '#card-tw',
+          popover: {
+            title: '台股市場概況',
+            description: '針對台股市場的整體狀況進行分析，包含重要指數、外資買賣超與空單數等資訊',
+          }
+        },
+        {
+          element: '#card-america',
+          popover: {
+            title: '美股市場概況',
+            description: '針對美股市場的整體狀況進行分析，包含重要指數、殖利率、重要科技股等資訊',
+          }
+        },
+        {
+          element: '#card-asia',
+          popover: {
+            title: '亞洲市場概況',
+            description: '針對亞洲市場的整體狀況進行分析，包含日經225指數、韓國綜合指數等資訊',
+          }
+        },
+        {
+          element: '#card-materials',
+          popover: {
+            title: '原物料市場',
+            description: '針對原物料市場的整體狀況進行分析，包含布蘭特原油、黃金、白銀、銅等資訊',
+          }
+        },
+        {
+          element: '#card-sentiment',
+          popover: {
+            title: '市場情緒',
+            description: '針對市場情緒的整體狀況進行分析，包含恐慌指數、美元指數、匯率、聯準會利率等資訊',
+          }
+        },
+        {
+          element: '#card-mystock',
+          popover: {
+            title: '我的自選股',
+            description: '針對我的自選股的整體狀況進行分析，包含股價、成交量、技術指標等資訊',
+          }
+        },
+        {
+          element: '#card-news',
+          popover: {
+            title: '國際政治新聞',
+            description: '列出即時最新國際新聞、經濟動向等資訊',
+          }
+        },
+        {
+          element: '#card-america-calendar',
+          popover: {
+            title: '美股行事曆',
+            description: '列出美股行事曆中相關的重要經濟事件、財報發布日等資訊',
+          }
+        },
+      ]
+    });
+
+    driverObj.drive();
+
+  }).catch(err => {
+    showInfo('教學導覽略過：', err.message);
+  });
 }
 </script>
 </body>
