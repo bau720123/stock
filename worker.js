@@ -106,7 +106,7 @@ export default {
       if (method === "quote" && symbol)   return await fetchFugleQuote(symbol, env);
       if (method === "volume" && symbol)   return await fetchFugleVolume(symbol, env);
       if (method === "history" && symbol)   return await fetchFugleHistory(symbol, env);
-      if (method === "institutional" && symbol)   return await fetchStockWearnInstitutional(symbol);
+      if (method === "institutional" && symbol)   return await fetchHiStockInstitutional(symbol);
       if (method === "sma" && symbol)   return await fetchFugleSma(symbol, env);
       if (method === "rsi" && symbol)   return await fetchFugleRsi(symbol, env);
       if (method === "kdj" && symbol)   return await fetchFugleKdj(symbol, env);
@@ -1243,7 +1243,7 @@ async function fetchFugleHistory(symbol, env) {
   }
 }
 
-async function fetchForeignNetPosition() {
+async function fetchForeignNetPosition_old() {
   try {
     const url = `https://stock.wearn.com/taifexphoto.asp`;
     const res = await fetchWithTimeout(url, {
@@ -1288,6 +1288,50 @@ async function fetchForeignNetPosition() {
   }
 }
 
+async function fetchForeignNetPosition() {
+  try {
+    const url = `https://histock.tw/stock/three.aspx`;
+    const res = await fetchWithTimeout(url, {
+      headers: {
+        "User-Agent": UA,
+        "Referer": "https://histock.tw/",
+        "Accept": "text/html,application/xhtml+xml",
+      },
+    });
+
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    const html = await res.text();
+
+    // 找第一個 class 只為 "gvTB" 的 table（精確比對，排除 class 含其他值的）
+    const tableMatch = html.match(/<table[^>]*class="gvTB"[^>]*>([\s\S]*?)<\/table>/i);
+    if (!tableMatch) throw new Error("Table not found");
+
+    const tableHtml = tableMatch[1];
+
+    // 抓所有 <tr>，跳過第一列（標題列 <th>）
+    const rows = [...tableHtml.matchAll(/<tr[^>]*>([\s\S]*?)<\/tr>/gi)].slice(1);
+
+    const data = rows.map(row => {
+      const cells = [...row[1].matchAll(/<td[^>]*>([\s\S]*?)<\/td>/gi)];
+      if (cells.length < 5) return null;
+
+      const rawDate = stripTags(cells[0][1]).trim(); // "2025/04/15"
+      const foreign  = parseNumber(cells[1][1]);     // 外資
+      const trust    = parseNumber(cells[2][1]);     // 投信
+      const dealer   = parseNumber(cells[3][1]);     // 自營
+      const total    = parseNumber(cells[4][1]);     // 總計
+
+      return { date: rawDate, foreign, trust, dealer, total };
+    }).filter(Boolean);
+
+    return json({ success: true, data });
+  } catch (e) {
+    const errorMsg = e.name === 'AbortError' ? "連線逾時" : e.message;
+    return json({ success: false, error: errorMsg }, 500);
+  }
+}
+
 function formatValue(str) {
   if (!str) return 0; // 防止 stripTags 噴出 null 或 undefined
 
@@ -1302,7 +1346,7 @@ function formatValue(str) {
   return isNaN(num) ? 0 : num;
 }
 
-async function fetchInstitutional() {
+async function fetchInstitutional_old() {
   try {
     const url = `https://stock.wearn.com/fundthree.asp`;
     const res = await fetchWithTimeout(url, {
@@ -1343,6 +1387,69 @@ async function fetchInstitutional() {
       const date = `${parseInt(y) + 1911}-${m}-${d}`;
 
       return { date, trust, dealer, foreign, total: totalNum.toFixed(2) };
+    }).filter(Boolean);
+
+    return json({ success: true, data });
+  } catch (e) {
+    const errorMsg = e.name === 'AbortError' ? "連線逾時" : e.message;
+    return json({ success: false, error: errorMsg }, 500);
+  }
+}
+
+async function fetchInstitutional() {
+  try {
+    const url = `https://histock.tw/stock/three.aspx`;
+    const res = await fetchWithTimeout(url, {
+      headers: {
+        "User-Agent": UA,
+        "Referer": "https://histock.tw/",
+        "Accept": "text/html,application/xhtml+xml",
+      },
+    });
+
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    const html = await res.text();
+
+    // 精確比對 class="gvTB gvTB_TWSE"（完全符合，順序與內容一致）
+    const tableMatch = html.match(/<table[^>]*class="gvTB gvTB_TWSE"[^>]*>([\s\S]*?)<\/table>/i);
+    if (!tableMatch) throw new Error("Table not found");
+
+    const tableHtml = tableMatch[1];
+
+    // 抓所有 <tr>，跳過第一列（標題列 <th>）
+    const rows = [...tableHtml.matchAll(/<tr[^>]*>([\s\S]*?)<\/tr>/gi)].slice(1);
+
+    const data = rows.map(row => {
+      const cells = [...row[1].matchAll(/<td[^>]*>([\s\S]*?)<\/td>/gi)];
+      if (cells.length < 7) return null;
+
+      // 日期格式為 "06/18"，補上當年西元年
+      const rawDate  = stripTags(cells[0][1]).trim();           // "06/18"
+      const foreign  = formatValue(stripTags(cells[1][1]));     // 外資
+      const trust    = formatValue(stripTags(cells[2][1]));     // 投信
+      const dealer   = formatValue(stripTags(cells[3][1]));     // 自營(總)
+      const dealerSelf  = formatValue(stripTags(cells[4][1])); // 自營自買
+      const dealerHedge = formatValue(stripTags(cells[5][1])); // 自營避險
+      const total    = formatValue(stripTags(cells[6][1]));     // 總計
+
+      // 自營商合計 = 自營(總) + 自營自買 + 自營避險
+      // const dealerTotal = dealer + dealerSelf + dealerHedge;
+
+      // 日期補上西元年（頁面只顯示 MM/DD，取當前台北時間的年份）
+      const taipeiYear = new Date().toLocaleString("en-US", { timeZone: "Asia/Taipei", year: "numeric" }).split(",")[0];
+      const [m, d] = rawDate.split("/");
+      const date = `${taipeiYear}-${m}-${d}`;
+
+      return {
+        date,
+        foreign,
+        trust,
+        dealer: parseFloat(dealer.toFixed(2)),
+        dealerSelf,
+        dealerHedge,
+        total,
+      };
     }).filter(Boolean);
 
     return json({ success: true, data });
@@ -1542,6 +1649,61 @@ async function fetchStockWearnInstitutional(symbol) {
 
     return json({ 
       success: true, 
+      data,
+      result
+    });
+  } catch (e) {
+    const errorMsg = e.name === 'AbortError' ? "連線逾時" : e.message;
+    return json({ success: false, error: errorMsg }, 500);
+  }
+}
+
+async function fetchHiStockInstitutional(symbol) {
+  try {
+    const url = `https://histock.tw/stock/chips.aspx?no=${symbol}`;
+    const res = await fetchWithTimeout(url, {
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        "Referer": "https://histock.tw/",
+        "Accept": "text/html,application/xhtml+xml",
+      },
+    });
+
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    const html = await res.text();
+
+    // 精確比對 class="tb-stock tbChip w50p pr0"（完全符合，順序與內容一致）
+    const tableMatch = html.match(/<table[^>]*class="tb-stock tbChip w50p pr0"[^>]*>([\s\S]*?)<\/table>/i);
+    if (!tableMatch) throw new Error("Table not found");
+
+    const tableHtml = tableMatch[1];
+
+    // 抓所有 <tr>，跳過第一列（標題列 <th>）
+    const rows = [...tableHtml.matchAll(/<tr[^>]*>([\s\S]*?)<\/tr>/gi)].slice(1);
+
+    const data = rows.map(row => {
+      const cells = [...row[1].matchAll(/<td[^>]*>([\s\S]*?)<\/td>/gi)];
+      if (cells.length < 6) return null;
+
+      const date        = stripTags(cells[0][1]).trim();        // "2026/06/18"，已是西元年
+      const foreign     = parseNumber(cells[1][1]);             // 外資
+      const trust       = parseNumber(cells[2][1]);             // 投信
+      const dealerSelf  = parseNumber(cells[3][1]);             // 自營(自買)
+      const dealerHedge = parseNumber(cells[4][1]);             // 自營(避險)
+      const total       = parseNumber(cells[5][1]);             // 總計
+
+      // 自營商 = 自營(自買) + 自營(避險)
+      const dealer = dealerSelf + dealerHedge;
+
+      return { date, foreign, trust, dealer, dealerSelf, dealerHedge, total };
+    }).filter(Boolean);
+
+    // 三大法人籌碼故事分析（與原函式一致）
+    const result = analyzeInstitutionalData(data);
+
+    return json({
+      success: true,
       data,
       result
     });
