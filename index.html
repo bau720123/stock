@@ -1457,7 +1457,7 @@ async function loadAll() {
       try {
         await target.fn();
       } catch (e) {
-        console.error(`載入 ${card_type} 資料失敗:`, e);
+        console.error(`載入 ${card_type} 資料失敗：`, e);
       }
     } else {
       console.warn(`未知的 card_type: ${card_type}`);
@@ -3693,7 +3693,7 @@ function _renderMyStock({ quoteResults, volumeResults, historyResults, instituti
       <div class="row">
         <span class="row-label">三大法人買賣超</span>
         <div style="display: flex; gap: 8px; align-items: center;">
-          <a style="cursor:pointer; user-select:none; text-decoration:none;" onclick="showInfo('${institutionalResults[0].result.story}')">❔</a>
+          <a style="cursor:pointer; user-select:none; text-decoration:none;" onclick="showInfo('${institutionalResults?.[i]?.result?.story ?? '無三大法人買賣超資料'}')">❔</a>
           <span style="cursor:pointer;user-select:none;" onclick="
             const ob = document.getElementById('stockinstitutional_${i}');
             const btn = this;

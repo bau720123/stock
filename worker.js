@@ -106,7 +106,7 @@ export default {
       if (method === "quote" && symbol)   return await fetchFugleQuote(symbol, env);
       if (method === "volume" && symbol)   return await fetchFugleVolume(symbol, env);
       if (method === "history" && symbol)   return await fetchFugleHistory(symbol, env);
-      if (method === "institutional" && symbol)   return await fetchFugleInstitutional(symbol);
+      if (method === "institutional" && symbol)   return await fetchStockWearnInstitutional(symbol);
       if (method === "sma" && symbol)   return await fetchFugleSma(symbol, env);
       if (method === "rsi" && symbol)   return await fetchFugleRsi(symbol, env);
       if (method === "kdj" && symbol)   return await fetchFugleKdj(symbol, env);
@@ -1496,7 +1496,7 @@ function analyzeInstitutionalData(data) {
   };
 }
 
-async function fetchFugleInstitutional(symbol) {
+async function fetchStockWearnInstitutional(symbol) {
   try {
     const url = `https://stock.wearn.com/netbuy.asp?kind=${symbol}`;
     const res = await fetchWithTimeout(url, {
