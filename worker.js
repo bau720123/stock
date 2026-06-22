@@ -107,6 +107,7 @@ export default {
       if (method === "volume" && symbol)   return await fetchFugleVolume(symbol, env);
       if (method === "history" && symbol)   return await fetchFugleHistory(symbol, env);
       if (method === "institutional" && symbol)   return await fetchHiStockInstitutional(symbol);
+      if (method === "margintradingbalance" && symbol)   return await fetchHiStockMarginTradingBalance(symbol);
       if (method === "sma" && symbol)   return await fetchFugleSma(symbol, env);
       if (method === "rsi" && symbol)   return await fetchFugleRsi(symbol, env);
       if (method === "kdj" && symbol)   return await fetchFugleKdj(symbol, env);
@@ -1229,7 +1230,7 @@ async function fetchFugleHistory(symbol, env) {
     const d = await res.json();
     const data = d.data || [];
 
-    // === 新增：歷史 K 線動態故事分析 ===
+    // 歷史 K 線動態故事分析
     const result = analyzeHistoryData(data);
 
     return json({
@@ -1248,7 +1249,7 @@ async function fetchForeignNetPosition_old() {
     const url = `https://stock.wearn.com/taifexphoto.asp`;
     const res = await fetchWithTimeout(url, {
       headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        "User-Agent": UA,
         "Referer": "https://stock.wearn.com/",
         "Accept": "text/html,application/xhtml+xml",
       },
@@ -1316,11 +1317,11 @@ async function fetchForeignNetPosition() {
       const cells = [...row[1].matchAll(/<td[^>]*>([\s\S]*?)<\/td>/gi)];
       if (cells.length < 5) return null;
 
-      const rawDate = stripTags(cells[0][1]).trim(); // "2025/04/15"
-      const foreign  = parseNumber(cells[1][1]);     // 外資
-      const trust    = parseNumber(cells[2][1]);     // 投信
-      const dealer   = parseNumber(cells[3][1]);     // 自營
-      const total    = parseNumber(cells[4][1]);     // 總計
+      const rawDate  = stripTags(cells[0][1]).trim(); // "2025/04/15"
+      const foreign  = parseNumber(cells[1][1]);      // 外資
+      const trust    = parseNumber(cells[2][1]);      // 投信
+      const dealer   = parseNumber(cells[3][1]);      // 自營
+      const total    = parseNumber(cells[4][1]);      // 總計
 
       return { date: rawDate, foreign, trust, dealer, total };
     }).filter(Boolean);
@@ -1351,7 +1352,7 @@ async function fetchInstitutional_old() {
     const url = `https://stock.wearn.com/fundthree.asp`;
     const res = await fetchWithTimeout(url, {
       headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        "User-Agent": UA,
         "Referer": "https://stock.wearn.com/",
         "Accept": "text/html,application/xhtml+xml",
       },
@@ -1608,7 +1609,7 @@ async function fetchStockWearnInstitutional(symbol) {
     const url = `https://stock.wearn.com/netbuy.asp?kind=${symbol}`;
     const res = await fetchWithTimeout(url, {
       headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        "User-Agent": UA,
         "Referer": "https://stock.wearn.com/",
         "Accept": "text/html,application/xhtml+xml",
       },
@@ -1663,7 +1664,7 @@ async function fetchHiStockInstitutional(symbol) {
     const url = `https://histock.tw/stock/chips.aspx?no=${symbol}`;
     const res = await fetchWithTimeout(url, {
       headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        "User-Agent": UA,
         "Referer": "https://histock.tw/",
         "Accept": "text/html,application/xhtml+xml",
       },
@@ -1686,12 +1687,12 @@ async function fetchHiStockInstitutional(symbol) {
       const cells = [...row[1].matchAll(/<td[^>]*>([\s\S]*?)<\/td>/gi)];
       if (cells.length < 6) return null;
 
-      const date        = stripTags(cells[0][1]).trim();        // "2026/06/18"，已是西元年
-      const foreign     = parseNumber(cells[1][1]);             // 外資
-      const trust       = parseNumber(cells[2][1]);             // 投信
-      const dealerSelf  = parseNumber(cells[3][1]);             // 自營(自買)
-      const dealerHedge = parseNumber(cells[4][1]);             // 自營(避險)
-      const total       = parseNumber(cells[5][1]);             // 總計
+      const date        = stripTags(cells[0][1]).trim(); // 日期
+      const foreign     = parseNumber(cells[1][1]); // 外資
+      const trust       = parseNumber(cells[2][1]); // 投信
+      const dealerSelf  = parseNumber(cells[3][1]); // 自營(自買)
+      const dealerHedge = parseNumber(cells[4][1]); // 自營(避險)
+      const total       = parseNumber(cells[5][1]); // 總計
 
       // 自營商 = 自營(自買) + 自營(避險)
       const dealer = dealerSelf + dealerHedge;
@@ -1699,7 +1700,7 @@ async function fetchHiStockInstitutional(symbol) {
       return { date, foreign, trust, dealer, dealerSelf, dealerHedge, total };
     }).filter(Boolean);
 
-    // 三大法人籌碼故事分析（與原函式一致）
+    // 三大法人籌碼故事分析
     const result = analyzeInstitutionalData(data);
 
     return json({
@@ -1711,6 +1712,264 @@ async function fetchHiStockInstitutional(symbol) {
     const errorMsg = e.name === 'AbortError' ? "連線逾時" : e.message;
     return json({ success: false, error: errorMsg }, 500);
   }
+}
+
+function analyzeMarginTradingBalanceData(data) {
+  if (!data || data.length === 0) {
+    return { story: "暫無融資餘額數據可供分析。" };
+  }
+
+  // 1. 融資增減連續方向
+  const firstAction = data[0].financing >= 0 ? "buy" : "sell";
+  let streakDays = 0;
+  for (let i = 0; i < data.length; i++) {
+    const currentAction = data[i].financing >= 0 ? "buy" : "sell";
+    if (currentAction === firstAction) streakDays++;
+    else break;
+  }
+  const financingStreak = { type: firstAction, days: streakDays };
+
+  // 2. 近 5 日累計統計
+  const last5Days = data.slice(0, 5);
+  let sumFinancing5 = 0;
+  let sumShorting5  = 0;
+  let sumVolume5    = 0;
+  last5Days.forEach(d => {
+    sumFinancing5 += d.financing  ?? 0;
+    sumShorting5  += d.shorting   ?? 0;
+    sumVolume5    += d.volume     ?? 0;
+  });
+
+  // 3. 最新一日數據
+  const latest             = data[0];
+  const latestPrice        = latest.price        ?? 0;
+  const latestFinRatio     = latest.financingRatio ?? 0;
+  const latestFinBalance   = latest.financingBalance ?? 0;
+
+  // 4. 近 5 日股價首尾比對
+  const oldest5Price = last5Days[last5Days.length - 1]?.price ?? 0;
+  const priceChange5 = latestPrice - oldest5Price;
+
+  // 5. 融資水位警戒（使用率）
+  let finRatioWarning = "";
+  if (latestFinRatio >= 20) {
+    finRatioWarning = `⚠️ 融資使用率已達 ${latestFinRatio}%，籌碼槓桿偏高，注意系統性回檔時的斷頭賣壓風險。`;
+  } else if (latestFinRatio >= 10) {
+    finRatioWarning = `融資使用率 ${latestFinRatio}%，目前處於中等水位，持續觀察。`;
+  }
+
+  // 6. 融券對決：軋空潛力判斷
+  let shortSqueezeNote = "";
+  if (sumShorting5 < 0 && sumFinancing5 > 0) {
+    shortSqueezeNote = `💡 近5日融券同步減少（回補）、融資增加，空方陸續撤退、多方持續進場，具備短線軋空潛力。`;
+  } else if (sumShorting5 > 0 && sumFinancing5 < 0) {
+    shortSqueezeNote = `💡 近5日融券增加、融資減少，多空力道出現消長，空方正在加碼佈局，留意下檔壓力。`;
+  }
+
+  // 7. 量能輔助判斷
+  const avgVolume5 = sumVolume5 / last5Days.length;
+  let volumeNote = "";
+  if (latest.volume > avgVolume5 * 1.5) {
+    volumeNote = `今日成交量 ${latest.volume.toLocaleString()} 張，明顯放量（超過近5日均量 ${Math.round(avgVolume5).toLocaleString()} 張的 1.5 倍），變盤訊號需留意。`;
+  } else if (latest.volume < avgVolume5 * 0.5) {
+    volumeNote = `今日成交量 ${latest.volume.toLocaleString()} 張，明顯縮量（不足近5日均量 ${Math.round(avgVolume5).toLocaleString()} 張的一半），觀望氣氛濃厚。`;
+  }
+
+  // 8. 組裝故事文字
+  const stories = [];
+
+  // 故事一：現況慣性
+  const streakLabel = financingStreak.type === "buy"
+    ? `連續增加 ${financingStreak.days} 天`
+    : `連續減少 ${financingStreak.days} 天`;
+  stories.push(`【現況慣性】融資增減目前呈現 ${streakLabel}，融資餘額 ${latestFinBalance.toLocaleString()} 張，使用率 ${latestFinRatio}%。`);
+
+  // 故事二：近 5 日統計
+  const abs5  = Math.abs(sumFinancing5).toLocaleString();
+  const dir5  = sumFinancing5 >= 0 ? "淨增加" : "淨減少";
+  const priceDir = priceChange5 >= 0 ? "上漲" : "下跌";
+  stories.push(`【近5日籌碼統計】融資餘額近5日累計 ${dir5} ${abs5} 張，期間股價 ${priceDir} ${Math.abs(priceChange5).toFixed(0)} 元。`);
+
+  // 故事三：融資 × 股價共振判斷
+  if (sumFinancing5 > 0 && priceChange5 > 0) {
+    stories.push(`💡 融資持續擴張且股價同步上漲，呈現「融資價格共振向上」格局。散戶信心偏多，短線動能充足，但需留意若融資增幅持續擴大，過熱風險也隨之提升。`);
+  } else if (sumFinancing5 > 0 && priceChange5 < 0) {
+    stories.push(`💡 融資持續增加但股價卻下跌，出現「融資逆勢攤平」訊號。散戶傾向越跌越買，然而籌碼沉澱風險正在累積，若股價未能止跌回升，後續恐有融資斷頭賣壓。`);
+  } else if (sumFinancing5 < 0 && priceChange5 > 0) {
+    stories.push(`💡 融資持續減少但股價卻上漲，呈現「去槓桿上漲」的健康格局。籌碼結構逐步轉乾淨，此類行情往往由主力或法人主導，後市相對穩健。`);
+  } else if (sumFinancing5 < 0 && priceChange5 < 0) {
+    stories.push(`💡 融資減少且股價同步下跌，呈現「融資價格共振向下」的弱勢格局。持有者在虧損中持續出場，若跌勢無量則籌碼漸趨穩定，但短線仍需謹慎操作。`);
+  }
+
+  // 故事四：融資水位 / 融券對決 / 量能（有內容才加入）
+  if (finRatioWarning)  stories.push(finRatioWarning);
+  if (shortSqueezeNote) stories.push(shortSqueezeNote);
+  if (volumeNote)       stories.push(volumeNote);
+
+  return {
+    summary: {
+      financingStreakDays:  financingStreak.days,
+      financingStreakType:  financingStreak.type,
+      latestFinancingRatio: latestFinRatio,
+      latestFinancingBalance: latestFinBalance,
+      accumulated5Day: {
+        financing:   sumFinancing5,
+        shorting:    sumShorting5,
+        volume:      sumVolume5,
+        priceChange: parseFloat(priceChange5.toFixed(0)),
+      }
+    },
+    story: stories.join("<br><br>")
+  };
+}
+
+async function fetchHiStockMarginTradingBalance(symbol) {
+  try {
+    const url = `https://histock.tw/stock/chips.aspx?no=${symbol}&m=mg`;
+    const res = await fetchWithTimeout(url, {
+      headers: {
+        "User-Agent": UA,
+        "Referer": "https://histock.tw/",
+        "Accept": "text/html,application/xhtml+xml",
+      },
+    });
+
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    const html = await res.text();
+
+    // 精確比對 class="tb-stock tbChip nofade"（完全符合，順序與內容一致）
+    const tableMatch = html.match(/<table[^>]*class="tb-stock tbChip nofade"[^>]*>([\s\S]*?)<\/table>/i);
+    if (!tableMatch) throw new Error("Table not found");
+
+    const tableHtml = tableMatch[1];
+
+    // 抓所有 <tr>，跳過第一列（標題列 <th>）
+    const rows = [...tableHtml.matchAll(/<tr[^>]*>([\s\S]*?)<\/tr>/gi)].slice(1);
+
+    const data = rows.map(row => {
+      const cells = [...row[1].matchAll(/<td[^>]*>([\s\S]*?)<\/td>/gi)];
+      if (cells.length < 13) return null;
+
+      const date             = stripTags(cells[0][1]).trim();  // 日期
+      const financing        = parseNumber(cells[1][1]);        // 融資增減
+      const financingBalance = parseNumber(cells[2][1]);        // 融資餘額
+      const financingRatio   = stripTags(cells[3][1]);        // 融資使用率%
+      const shorting         = parseNumber(cells[4][1]);        // 融券增減
+      const shortingRatio    = stripTags(cells[6][1]);        // 融券使用率%
+      const price            = parseNumber(cells[10][1]);       // 收盤價
+      const priceChange      = parseNumber(cells[11][1]);       // 漲跌幅%
+      const volume           = parseNumber(cells[12][1]);       // 成交量
+
+      return { date, financing, financingBalance, financingRatio, shorting, shortingRatio, price, priceChange, volume };
+    }).filter(Boolean);
+
+    // 融資餘額與收盤價故事分析
+    const result = analyzeMarginTradingBalanceData(data);
+
+    return json({
+      success: true,
+      data,
+      result
+    });
+  } catch (e) {
+    const errorMsg = e.name === 'AbortError' ? "連線逾時" : e.message;
+    return json({ success: false, error: errorMsg }, 500);
+  }
+}
+
+function analyzeLargeData(data) {
+  if (!data || data.length === 0) {
+    return { story: "暫無籌碼集中度數據可供分析。" };
+  }
+
+  // 百分比字串轉數字，例如 "82.75%" → 82.75
+  function pct(str) {
+    return parseFloat((str ?? '0').replace('%', '')) || 0;
+  }
+
+  const latest  = data[0];
+  const last5   = data.slice(0, 5);
+  const last10  = data.slice(0, 10);
+
+  const latestConc    = pct(latest.chipConcentration);
+  const latestForeign = pct(latest.foreignCapital);
+  const latestBig     = pct(latest.bigPlayerChips);
+  const latestDir     = pct(latest.DirectorsChips);
+
+  // 1. 近 5 日籌碼集中度趨勢（首尾比對）
+  const oldest5Conc   = pct(last5[last5.length - 1]?.chipConcentration);
+  const concChange5   = latestConc - oldest5Conc;
+
+  // 2. 近 10 日外資籌碼趨勢
+  const oldest10Foreign = pct(last10[last10.length - 1]?.foreignCapital);
+  const foreignChange10 = latestForeign - oldest10Foreign;
+
+  // 3. 大戶籌碼近 5 日趨勢
+  const oldest5Big  = pct(last5[last5.length - 1]?.bigPlayerChips);
+  const bigChange5  = latestBig - oldest5Big;
+
+  // 4. 籌碼集中度水位評級
+  let concLevel = '';
+  if (latestConc >= 80)      concLevel = '極高（主力高度控盤）';
+  else if (latestConc >= 60) concLevel = '偏高（籌碼相對集中）';
+  else if (latestConc >= 40) concLevel = '中等（多空拉鋸）';
+  else                       concLevel = '偏低（籌碼分散）';
+
+  // 5. 外資 × 大戶共振判斷
+  let synergy = '';
+  if (foreignChange10 > 0 && bigChange5 > 0) {
+    synergy = `💡 外資與大戶籌碼近期同步增加，呈現「法人大戶共振做多」格局，籌碼結構偏強，上漲動能相對可期。`;
+  } else if (foreignChange10 < 0 && bigChange5 < 0) {
+    synergy = `💡 外資與大戶籌碼近期同步減少，呈現「法人大戶共同撤退」格局，籌碼結構轉弱，需留意下檔風險。`;
+  } else if (foreignChange10 > 0 && bigChange5 < 0) {
+    synergy = `💡 外資持續加碼，但大戶籌碼卻在減少，多空力道出現分歧，後市需觀察外資是否持續主導。`;
+  } else if (foreignChange10 < 0 && bigChange5 > 0) {
+    synergy = `💡 大戶籌碼逆勢增加，但外資同步減少，內外資方向相左，可能存在主力低接機會，但需謹慎觀察後續發展。`;
+  }
+
+  // 6. 董監持股水位提示
+  let dirNote = '';
+  if (latestDir >= 30) {
+    dirNote = `董監持股達 ${latestDir}%，內部人持股比例高，流通籌碼相對偏少，股價較易受單一大單影響。`;
+  } else if (latestDir <= 5) {
+    dirNote = `董監持股僅 ${latestDir}%，內部人持股偏低，需留意經營層對公司前景的信心程度。`;
+  }
+
+  // 7. 組裝故事文字
+  const stories = [];
+
+  // 故事一：現況水位
+  stories.push(`【籌碼現況】籌碼集中度 ${latestConc}%（${concLevel}），外資持股 ${latestForeign}%，大戶持股 ${latestBig}%，董監持股 ${latestDir}%。`);
+
+  // 故事二：近期趨勢
+  const concDir  = concChange5  >= 0 ? `上升 ${concChange5.toFixed(2)}%`  : `下降 ${Math.abs(concChange5).toFixed(2)}%`;
+  const bigDir   = bigChange5   >= 0 ? `增加 ${bigChange5.toFixed(2)}%`   : `減少 ${Math.abs(bigChange5).toFixed(2)}%`;
+  const foreignDir = foreignChange10 >= 0 ? `增加 ${foreignChange10.toFixed(2)}%` : `減少 ${Math.abs(foreignChange10).toFixed(2)}%`;
+  stories.push(`【近期趨勢】籌碼集中度近5日 ${concDir}，大戶籌碼近5日 ${bigDir}，外資籌碼近10日 ${foreignDir}。`);
+
+  // 故事三：共振判斷
+  if (synergy) stories.push(synergy);
+
+  // 故事四：董監提示（有內容才加）
+  if (dirNote) stories.push(dirNote);
+
+  return {
+    summary: {
+      latest: {
+        chipConcentration: latestConc,
+        foreignCapital:    latestForeign,
+        bigPlayerChips:    latestBig,
+        DirectorsChips:    latestDir,
+      },
+      change: {
+        concChange5Days:      parseFloat(concChange5.toFixed(2)),
+        foreignChange10Days:  parseFloat(foreignChange10.toFixed(2)),
+        bigChange5Days:       parseFloat(bigChange5.toFixed(2)),
+      }
+    },
+    story: stories.join("<br><br>")
+  };
 }
 
 // 去除 HTML tags

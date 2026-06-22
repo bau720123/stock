@@ -3463,7 +3463,7 @@ async function loadMyStock() {
   await loadTickers(); // 預先載入 tickers，供 openMyStockSettings autocomplete 使用
 
   // 平行抓取所有自選股票的相關屬性資訊
-  const [quoteResults, volumeResults, historyResults, institutionalResults, smaResults, rsiResults, kdjResults, macdResults, brandsResults] = /*await Promise.all([
+  const [quoteResults, volumeResults, historyResults, institutionalResults, margintradingbalanceResults, smaResults, rsiResults, kdjResults, macdResults, brandsResults] = /*await Promise.all([
     Promise.all(
       MY_STOCKS.map(s => fetch(WORKER + '/stock/quote/' + s.symbol).then(r => r.json()).catch(() => ({ success: false })))
     ),
@@ -3496,6 +3496,7 @@ async function loadMyStock() {
     fetchMetricsSequentially('volume', 400),
     fetchMetricsSequentially('history', 400),
     fetchMetricsSequentially('institutional', 400),
+    fetchMetricsSequentially('margintradingbalance', 400),
     fetchMetricsSequentially('sma', 400),
     fetchMetricsSequentially('rsi', 400),
     fetchMetricsSequentially('kdj', 400),
@@ -3504,12 +3505,12 @@ async function loadMyStock() {
   ]);
 
   // 存入快取
-  _mystockApiCache = { quoteResults, volumeResults, historyResults, institutionalResults, smaResults, rsiResults, kdjResults, macdResults, brandsResults };
+  _mystockApiCache = { quoteResults, volumeResults, historyResults, institutionalResults, margintradingbalanceResults, smaResults, rsiResults, kdjResults, macdResults, brandsResults };
 
   _renderMyStock(_mystockApiCache);
 }
 
-function _renderMyStock({ quoteResults, volumeResults, historyResults, institutionalResults, smaResults, rsiResults, kdjResults, macdResults, brandsResults }) {
+function _renderMyStock({ quoteResults, volumeResults, historyResults, institutionalResults, margintradingbalanceResults, smaResults, rsiResults, kdjResults, macdResults, brandsResults }) {
   // 銷毀頁面上所有殘留的 ECharts 實例，避免 canvas 尺寸錯誤
   // 排除台股市場概況的圖表（tw_foreignnetposition_chart、tw_institutional_chart）
   document.querySelectorAll('[_echarts_instance_]:not(#tw_foreignnetposition_chart):not(#tw_institutional_chart):not(#fedwatch_chart)').forEach(el => {
@@ -3715,6 +3716,33 @@ function _renderMyStock({ quoteResults, volumeResults, historyResults, instituti
       ${renderStockChartInstitutional(institutionalResults[i], i)}
     </div>`;
 
+    // 融資餘額增減
+    html += `
+      <div class="row">
+        <span class="row-label">融資餘額增減</span>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <a style="cursor:pointer; user-select:none; text-decoration:none;" onclick="showInfo('${margintradingbalanceResults?.[i]?.result?.story ?? '無融資餘額增減資料'}')">❔</a>
+          <span style="cursor:pointer;user-select:none;" onclick="
+            const ob = document.getElementById('stockmargintradingbalance_${i}');
+            const btn = this;
+            if (ob.style.display === 'none') {
+              ob.style.display = 'block';
+              btn.textContent = '－';
+            } else {
+              ob.style.display = 'none';
+              btn.textContent = '＋';
+            }
+          ">＋</span>
+        </div>
+      </div>`;
+    html += `<div id="stockmargintradingbalance_${i}" style="display:none;" class="donotswipe">
+      ${renderStockMarginTradingBalance(margintradingbalanceResults[i])}
+    </div>`;
+
+    html += `<div class="row donotswipe">
+      ${renderStockChartMarginTradingBalance(margintradingbalanceResults[i], i)}
+    </div>`;
+
     // 簡單移動平均線
     html += `
       <div class="row">
@@ -3846,6 +3874,7 @@ function _renderMyStock({ quoteResults, volumeResults, historyResults, instituti
 
   StockChartHistory();
   StockChartInstitutional();
+  StockChartMarginTradingBalance();
   StockChartSma();
   StockChartRsi();
   StockChartKdj();
@@ -4183,6 +4212,134 @@ function StockChartInstitutional() {
   window._institutional_chartPending = {};
 }
 
+function StockChartMarginTradingBalance() {
+  const pending = window._margintradingbalance_chartPending || {};
+  for (const i in pending) {
+    const el = document.getElementById('stock_margintradingbalance_chart_' + i);
+    if (!el) continue;
+    const sorted = pending[i];
+
+    const dates            = sorted.map(d => d.date);
+    const financing        = sorted.map(d => d.financing        ?? 0);
+    const financingBalance = sorted.map(d => d.financingBalance ?? 0);
+    const price            = sorted.map(d => d.price            ?? 0);
+    const volume           = sorted.map(d => d.volume           ?? 0);
+
+    const financingBars = financing.map(v => ({
+      value: v,
+      itemStyle: { color: v >= 0 ? '#ff4d6a' : '#00c98a' }
+    }));
+
+    const volumeBars = sorted.map(d => ({
+      value: d.volume ?? 0,
+      itemStyle: { color: (d.price ?? 0) >= (d.prevPrice ?? d.price ?? 0) ? '#ff4d6a55' : '#00c98a55' }
+    }));
+
+    el.style.width = '100%';
+    let chart = echarts.getInstanceByDom(el);
+    if (!chart) {
+      chart = echarts.init(el, null, { height: 260 });
+    }
+
+    // 根據容器寬度動態計算 legend 是否會換行，並調整 grid top
+    function buildOption() {
+      const isNarrow = el.offsetWidth < 400;
+      const legendRows = isNarrow ? 2 : 1;       // 窄螢幕 legend 會換成兩行
+      const legendHeight = legendRows * 22;       // 每行約 22px
+      const gridTop = legendHeight + 16;          // legend 高度 + 間距
+      const gridBottom2Top = gridTop + 155;       // 下方成交量區塊起點
+
+      return {
+        backgroundColor: '#0a0e14',
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: { type: 'cross' },
+          backgroundColor: '#1e2736',
+          borderColor: '#3a4a5c',
+          textStyle: { color: '#c8d8e8', fontSize: 11 },
+          formatter(params) {
+            const date = params[0]?.name ?? '';
+            let html = `<div style="font-family:monospace;font-size:11px;line-height:1.8"><b style="color:#c8d8e8">${date}</b><br>`;
+            params.forEach(p => {
+              const color = p.color?.colorStops?.[0]?.color ?? p.color ?? '#c8d8e8';
+              const val = typeof p.value === 'number' ? p.value.toLocaleString() : p.value;
+              html += `<span style="color:${color}">●</span> ${p.seriesName}：${val}<br>`;
+            });
+            html += '</div>';
+            return html;
+          }
+        },
+        axisPointer: { link: [{ xAxisIndex: 'all' }] },
+        legend: {
+          data: ['融資餘額' /*, '融資增減'*/ ,'收盤價', '成交量'],
+          textStyle: { color: '#5a7080', fontSize: 11 },
+          top: 4,
+        },
+        grid: [
+          { left: 65, right: 55, top: gridTop,       bottom: 100 },
+          { left: 65, right: 55, top: gridBottom2Top, bottom: 30  },
+        ],
+        xAxis: [
+          { type: 'category', data: dates, gridIndex: 0,
+            axisLine:  { lineStyle: { color: '#1e2736' } },
+            axisLabel: { show: false },
+            splitLine: { show: false } },
+          { type: 'category', data: dates, gridIndex: 1,
+            axisLine:  { lineStyle: { color: '#1e2736' } },
+            axisLabel: { color: '#5a7080', fontSize: 10 },
+            splitLine: { show: false } },
+        ],
+        yAxis: [
+          { scale: true, gridIndex: 0,
+            axisLine:  { lineStyle: { color: '#1e2736' } },
+            axisLabel: { color: '#5a7080', fontSize: 10 },
+            splitLine: { lineStyle: { color: '#1e2736' } },
+            /*name: '餘額(張)', */nameTextStyle: { color: '#5a7080', fontSize: 9 } },
+          { scale: true, gridIndex: 0,
+            axisLine:  { lineStyle: { color: '#1e2736' } },
+            axisLabel: { color: '#f0b42988', fontSize: 10 },
+            splitLine: { show: false },
+            /*name: '股價(元)', */nameTextStyle: { color: '#f0b42988', fontSize: 9 } },
+          { scale: true, gridIndex: 1,
+            axisLine:  { lineStyle: { color: '#1e2736' } },
+            axisLabel: { color: '#5a7080', fontSize: 9 },
+            splitLine: { show: false } },
+        ],
+        dataZoom: [
+          { type: 'inside', xAxisIndex: [0, 1], start: 0, end: 100 },
+          { type: 'slider', xAxisIndex: [0, 1], bottom: 0, height: 20,
+            borderColor: '#3a4a5c', backgroundColor: '#0a0e14',
+            fillerColor: '#1e273680',
+            handleStyle: { color: '#5a9eff' },
+            textStyle: { color: '#5a7080', fontSize: 10 } },
+        ],
+        series: [
+          { name: '融資餘額', type: 'line', xAxisIndex: 0, yAxisIndex: 0,
+            data: financingBalance, symbol: 'none',
+            lineStyle: { color: '#5a9eff', width: 2 },
+            areaStyle: { color: '#5a9eff18' } },
+          /*{ name: '融資增減', type: 'bar', xAxisIndex: 0, yAxisIndex: 0,
+            data: financingBars, barMaxWidth: 6 },*/
+          { name: '收盤價', type: 'line', xAxisIndex: 0, yAxisIndex: 1,
+            data: price, symbol: 'none',
+            lineStyle: { color: '#f0b429', width: 1.5, type: 'dashed' } },
+          { name: '成交量', type: 'bar', xAxisIndex: 1, yAxisIndex: 2,
+            data: volumeBars, barMaxWidth: 8 },
+        ],
+      };
+    }
+
+    chart.setOption(buildOption());
+
+    // ResizeObserver：resize 同時重算 option，解決直向 legend 換行蓋圖問題
+    new ResizeObserver(() => {
+      chart.resize();
+      chart.setOption(buildOption());
+    }).observe(el);
+  }
+  window._margintradingbalance_chartPending = {};
+}
+
 function StockChartSma() {
   const pending = window._sma_chartPending || {};
   for (const i in pending) {
@@ -4448,7 +4605,7 @@ function StockChartMacd() {
         textStyle: { color: '#c8d8e8', fontSize: 11 },
       },
       legend: {
-        data: ['MACD', '信號線', '差離值'],
+        data: ['MACD', '信號線'],
         icon: 'rect',  // 設為矩形
         itemWidth: 20,  // 線段長度
         itemHeight: 2,  // 線段粗細（看起來就是一條線）
@@ -4493,11 +4650,6 @@ function StockChartMacd() {
           smooth: true, symbol: 'none', lineStyle: { color: '#ff4d6a', width: 1.5 }, itemStyle: { color: '#ff4d6a' } },
         { name: '信號線', type: 'line', data: signalLine, xAxisIndex: 0, yAxisIndex: 0,
           smooth: true, symbol: 'none', lineStyle: { color: '#5a9eff', width: 1.5 }, itemStyle: { color: '#5a9eff' } },
-        { name: '差離值', type: 'bar',  data: histogram,  xAxisIndex: 1, yAxisIndex: 1,
-          barMaxWidth: 8,
-          itemStyle: {
-            color: '#00c98a99'
-          } },
       ],
     });
 
@@ -4759,6 +4911,50 @@ function renderStockChartInstitutional(data, i) {
   return `<div id="stock_institutional_chart_${i}" style="height:260px;"></div>`;
 }
 
+function renderStockMarginTradingBalance(data) {
+  if (!data || !data.success || !data.data.length) return '<p>無融資融券增減資料</p>';
+
+  const headerRow = `
+    <tr>
+      <th style="position:sticky;left:0;top:0;z-index:3;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);">日期</th>
+      <th style="position:sticky;top:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">融資增加</th>
+      <th style="position:sticky;top:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">融資餘額</th>
+      <th style="position:sticky;top:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">收盤價</th>
+      <th style="position:sticky;top:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">成交量</th>
+    </tr>`;
+
+  const bodyRows = data.data.map(d => `
+    <tr style="border-bottom:1px solid var(--border);">
+      <td style="position:sticky;left:0;z-index:1;background:#1a2332;padding:6px 10px;white-space:nowrap;text-align:center;font-size:12px;">${d.date}</td>
+      <td style="padding:6px 10px;text-align:center;font-size:12px;">${d.financing  ?? '-'}</td>
+      <td style="padding:6px 10px;text-align:center;font-size:12px;">${d.financingBalance ?? '-'}</td>
+      <td style="padding:6px 10px;text-align:center;font-size:12px;">${d.price ?? '-'}</td>
+      <td style="padding:6px 10px;text-align:center;font-size:12px;">${d.volume ?? '-'}</td>
+    </tr>`
+  ).join('');
+
+  return `
+    <div style="overflow-x:auto;overflow-y:auto;max-height:180px;">
+      <table style="border-collapse:collapse;font-family:var(--mono);width:100%;">
+        <thead>${headerRow}</thead>
+        <tbody>${bodyRows}</tbody>
+      </table>
+    </div>`;
+}
+
+function renderStockChartMarginTradingBalance(data, i) {
+  if (!data || !data.success || !data.data || !data.data.length) return '<p>無融資餘額增減資料</p>';
+
+  const sorted = [...data.data].sort((a, b) => a.date.localeCompare(b.date));
+
+  // 把資料暫存到 window，等 DOM 就緒後取用
+  window._margintradingbalance_chartPending = window._margintradingbalance_chartPending || {};
+  window._margintradingbalance_chartPending[i] = sorted;
+
+  // 回傳容器，圖表由 setTimeout 在 DOM 就緒後掛入
+  return `<div id="stock_margintradingbalance_chart_${i}" style="height:260px;"></div>`;
+}
+
 function renderStockSma(data) {
   if (!data || !data.success || !data.data.length) return '<p>無簡單移動平均線資料</p>';
 
@@ -4897,7 +5093,6 @@ function renderStockMacd(data) {
       <th style="position:sticky;left:0;top:0;z-index:3;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);">日期</th>
       <th style="position:sticky;top:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">MACD 線</th>
       <th style="position:sticky;top:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">信號線</th>
-      <th style="position:sticky;top:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">差離值</th>
     </tr>`;
 
   const bodyRows = data.data.map(d => `
