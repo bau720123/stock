@@ -2602,49 +2602,56 @@ function generateCustomEvents(year) {
   events.push(createEventObj(
     new Date("2026-06-25"), 
     "TSM",
-    "2026 台積電中國技術論壇", 
+    "台積電中國技術論壇", 
     "#3498db", 
     "001"
   ));
   events.push(createEventObj(
     new Date("2026-07-03"), 
     "TSM",
-    "2026 台積電日本技術論壇", 
+    "台積電日本技術論壇", 
+    "#3498db", 
+    "001"
+  ));
+  events.push(createEventObj(
+    new Date("2026-07-16"), 
+    "TSM",
+    "台積電法說會", 
     "#3498db", 
     "001"
   ));
   events.push(createEventObj(
     new Date("2026-09-23"), 
     "TSM",
-    "2026 台積電北美技術論壇", 
+    "台積電北美技術論壇", 
     "#3498db", 
     "001"
   ));
   events.push(createEventObj(
     new Date("2026-11-06"), 
     "TSM",
-    "2026 台積電日本技術論壇", 
+    "台積電日本技術論壇", 
     "#3498db", 
     "001"
   ));
   events.push(createEventObj(
     new Date("2026-11-12"), 
     "TSM",
-    "2026 台積電台灣技術論壇", 
+    "台積電台灣技術論壇", 
     "#3498db", 
     "001"
   ));
   events.push(createEventObj(
     new Date("2026-11-17"), 
     "TSM",
-    "2026 台積電中國技術論壇", 
+    "台積電中國技術論壇", 
     "#3498db", 
     "001"
   ));
   events.push(createEventObj(
     new Date("2026-11-24"), 
     "TSM",
-    "2026 台積電歐洲技術論壇", 
+    "台積電歐洲技術論壇", 
     "#3498db", 
     "001"
   ));
