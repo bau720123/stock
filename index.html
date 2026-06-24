@@ -1527,7 +1527,7 @@ async function loadTw() {
     html += row('現價', taifexNight.price.toFixed(1), 'accent');
     html += row('漲跌', sign + Math.abs(taifexNight.updown).toFixed(0), cls);
   } else {
-    html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
+    html += `<div class="error-text">暫時無法取得資料，請於 15:00 之後再進行嘗試</div>`;
   }
 
   // 【台股期貨日盤】
@@ -1539,7 +1539,7 @@ async function loadTw() {
     html += row('現價', taifexDay.price.toFixed(1), 'accent');
     html += row('漲跌', sign + Math.abs(taifexDay.updown).toFixed(0), cls);
   } else {
-    html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
+    html += `<div class="error-text">暫時無法取得資料，請於 09:00 之後再進行嘗試</div>`;
   }
 
   // 【富台指】

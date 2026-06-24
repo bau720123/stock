@@ -1280,7 +1280,7 @@ async function fetchForeignNetPosition_old() {
       const date = `${parseInt(y) + 1911}-${m}-${d}`;
 
       return { date, foreign };
-    }).filter(Boolean);
+    }).filter(row => row && !(row.foreign === 0));
 
     return json({ success: true, data });
   } catch (e) {
@@ -1324,7 +1324,7 @@ async function fetchForeignNetPosition() {
       const total    = parseNumber(cells[4][1]);      // 總計
 
       return { date: rawDate, foreign, trust, dealer, total };
-    }).filter(Boolean);
+    }).filter(row => row && !(row.foreign === 0 && row.trust === 0 && row.dealer === 0 && row.total === 0));
 
     return json({ success: true, data });
   } catch (e) {
