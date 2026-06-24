@@ -2880,9 +2880,23 @@ function generateCustomEvents(year) {
     "001"
   ));
   events.push(createEventObj(
+    new Date("2026-07-30"), 
+    "DELTA",
+    "台達電法說會", 
+    "#3498db", 
+    "001"
+  ));
+  events.push(createEventObj(
     new Date("2026-09-23"), 
     "TSM",
     "台積電北美技術論壇", 
+    "#3498db", 
+    "001"
+  ));
+  events.push(createEventObj(
+    new Date("2026-10-29"), 
+    "DELTA",
+    "台達電法說會", 
     "#3498db", 
     "001"
   ));
