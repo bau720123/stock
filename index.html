@@ -3753,6 +3753,24 @@ function _renderMyStock({ quoteResults, volumeResults, historyResults, instituti
         </div>
       </div>`;
 
+    // 券商分點買賣
+    html += `
+      <div class="row">
+        <span class="row-label">券商分點買賣</span>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <a style="cursor:pointer; user-select:none; text-decoration:none;" onclick="gotoHistock('branch', '${stock.symbol}')">📈</a>
+        </div>
+      </div>`;
+
+    // 集保戶股權分散表
+    html += `
+      <div class="row">
+        <span class="row-label">集保戶股權分散表</span>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <a style="cursor:pointer; user-select:none; text-decoration:none;" onclick="gotoHistock('equity', '${stock.symbol}')">📈</a>
+        </div>
+      </div>`;
+
     // 簡單移動平均線
     html += `
       <div class="row">
@@ -5110,7 +5128,6 @@ function renderStockMacd(data) {
       <td style="position:sticky;left:0;z-index:1;background:#1a2332;padding:6px 10px;white-space:nowrap;text-align:center;font-size:12px;">${d.date}</td>
       <td style="padding:6px 10px;text-align:center;font-size:12px;">${d.macdLine  ?? '-'}</td>
       <td style="padding:6px 10px;text-align:center;font-size:12px;">${d.signalLine ?? '-'}</td>
-      <td style="padding:6px 10px;text-align:center;font-size:12px;">${d.histogram ?? '-'}</td>
     </tr>`
   ).join('');
 
@@ -5541,13 +5558,9 @@ function showSweetAlert(icon = 'info', title = '', text = '') {
 
 function gotoHistock(behavior, symbol) {
   var link = 'https://histock.tw/stock/';
-  var href = '';
-  if (behavior == 'large') {
-    href = 'large.aspx';
-  }
     Swal.fire({
       grow: "fullscreen",
-      html: '<iframe src="' + link + href + '?no=' + symbol +'" frameborder="0" style="width:100%; height:80vh; display:block;"></iframe>',
+      html: '<iframe src="' + link + behavior + '.aspx?no=' + symbol +'" frameborder="0" style="width:100%; height:80vh; display:block;"></iframe>',
       showCloseButton: true,
       showConfirmButton: false,
     });
