@@ -3333,6 +3333,20 @@ function generateCustomEvents(year) {
     "001"
   ));
   events.push(createEventObj(
+    new Date("2026-07-09"),
+    "DELTA",
+    "台達電公佈5月份業績",
+    "#3498db",
+    "001"
+  ));
+  events.push(createEventObj(
+    new Date("2026-07-10"),
+    "TSM",
+    "台積電公佈5月份業績",
+    "#3498db",
+    "001"
+  ));
+  events.push(createEventObj(
     new Date("2026-07-16"),
     "TSM",
     "台積電法說會",
@@ -3552,7 +3566,7 @@ async function generateCustomEventsMacroEarnings() {
   ]);
 
   try {
-    const res = await fetch('https://bau720123.github.io/stock/data/macromicro_earnings.json?v=20260610');
+    const res = await fetch('https://bau720123.github.io/stock/data/macromicro_earnings.json?v=20260701');
     if (!res.ok) {
       console.error(`MacroMicro JSON 讀取失敗 (${res.status})`);
       return {
@@ -3614,35 +3628,19 @@ async function generateCustomEventsMacroEarnings() {
 // MacroMicro 靜態 JSON 總體經濟事件
 async function generateCustomEventsMacroMacro() {
   const US_MACRO_EVENTS = new Set([
-    // === 絕對要的（直接影響市場）===
     '美國聯準會利率決策',
     // '美國聯準會會議紀要',
     // '美國聯準會褐皮書',
     // '美國非農就業', // （美國勞工部）
-    // '美國失業率',
-    // '美國每小時薪資',
     '美國消費者物價', // CPI
-    // '美國PCE物價指數',
-    // '美國GDP',
-    // '美國EIA原油庫存',
-
-    // === 次要、可選的 ===
     '美國ADP非農就業', // （ADP公司）
-    // '美國ISM製造業PMI',
-    // '美國ISM非製造業NMI',
     // '美國生產者物價',  // PPI
-    // '美國零售銷售',
-    // '美國耐久財新訂單',
-    // '美國密大消費者信心',
     // '美國消費者信心',
-    // '美國JOLTs職位空缺',
-
-    // === 每週固定發布 ===
     // '美國申請失業金人數',
   ]);
 
   try {
-    const res = await fetch('https://bau720123.github.io/stock/data/macromicro_macro.json?v=20260610');
+    const res = await fetch('https://bau720123.github.io/stock/data/macromicro_macro.json?v=20260701');
     if (!res.ok) {
       console.error(`MacroMicro Macro JSON 讀取失敗 (${res.status})`);
       return {
