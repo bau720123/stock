@@ -7,26 +7,28 @@ const CORS = {
 };
 
 const ROBINHOOD_INSTRUMENTS = {
-  TSM:   "ca4821f9-06c3-4c22-bbb8-efe569f23d2b", // 台積電
-  NVDA:  "a4ecd608-e7b4-4ff3-afa5-f77ae7632dfb", // 輝達
-  AAPL:  "450dfc6d-5510-4d40-abfb-f633b7d9be3e", // 蘋果
-  MSFT:  "50810c35-d215-4866-9758-0ada4ac79ffa", // 微軟
+  TSM: "ca4821f9-06c3-4c22-bbb8-efe569f23d2b", // 台積電
+  NVDA: "a4ecd608-e7b4-4ff3-afa5-f77ae7632dfb", // 輝達
+  AAPL: "450dfc6d-5510-4d40-abfb-f633b7d9be3e", // 蘋果
+  MSFT: "50810c35-d215-4866-9758-0ada4ac79ffa", // 微軟
   GOOGL: "54db869e-f7d5-45fb-88f1-8d7072d4c8b2", // Alphabet (Google)
-  AMZN:  "c0bb3aec-bd1e-471e-a4f0-ca011cbec711", // 亞馬遜
-  META:  "ebab2398-028d-4939-9f1d-13bf38f81c50", // Meta (Facebook)
-  TSLA:  "e39ed23a-7bd1-4587-b060-71988d9ef483", // 特斯拉
-  AVGO:  "698f04e6-1710-4f34-b7af-4a88fe5e47b3", // 博通
-  SMCI:  "50846aee-ce5f-4bd4-bfbb-cef4414f69bd", // 美超微
-  ASML:  "d083c5f8-e6ca-489d-a96f-93084ca374ac", // 艾斯摩爾
-  SPCX:  "ef5d2600-32d1-41f5-bfbe-abacac264d2a", // SpaceX
-  AMD:   "940fc3f5-1db5-4fed-b452-f3a2e4562b5f", // 超微
+  AMZN: "c0bb3aec-bd1e-471e-a4f0-ca011cbec711", // 亞馬遜
+  META: "ebab2398-028d-4939-9f1d-13bf38f81c50", // Meta (Facebook)
+  TSLA: "e39ed23a-7bd1-4587-b060-71988d9ef483", // 特斯拉
+  AVGO: "698f04e6-1710-4f34-b7af-4a88fe5e47b3", // 博通
+  SMCI: "50846aee-ce5f-4bd4-bfbb-cef4414f69bd", // 美超微
+  ASML: "d083c5f8-e6ca-489d-a96f-93084ca374ac", // 艾斯摩爾
+  SPCX: "ef5d2600-32d1-41f5-bfbe-abacac264d2a", // SpaceX
+  AMD: "940fc3f5-1db5-4fed-b452-f3a2e4562b5f", // 超微
 };
-
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: { ...CORS, "Content-Type": "application/json" }
+    headers: {
+      ...CORS,
+      "Content-Type": "application/json"
+    }
   });
 }
 
@@ -52,17 +54,19 @@ export default {
   async fetch(request, env) {
     // 呼叫網址：https://billowing-queen-4a58.bau720123.workers.dev/path
 
-    if (request.method === "OPTIONS") return new Response(null, { headers: CORS });
+    if (request.method === "OPTIONS") return new Response(null, {
+      headers: CORS
+    });
 
     const path = new URL(request.url).pathname;
 
-    if (path === "/fitx")    return await fetchHiStock("stocktop2017", "FITX", "指數", "成交量(口)"); // 台指近
-    if (path === "/twn")     return await fetchHiStock("stocktop2017", "TWN", "指數", "成交量(口)"); // 富台指
+    if (path === "/fitx") return await fetchHiStock("stocktop2017", "FITX", "指數", "成交量(口)"); // 台指近
+    if (path === "/twn") return await fetchHiStock("stocktop2017", "TWN", "指數", "成交量(口)"); // 富台指
 
     // https://invest.cnyes.com/futures/GF/TWNCON
-    if (path === "/twncon")     return await fetchCnyesTwn(); // 富台指
+    if (path === "/twncon") return await fetchCnyesTwn(); // 富台指
 
-    // if (path === "/brent")    return await fetchHiStock("stocktop2017_Global", "BRENTOIL", "股價", "成交量");
+    // if (path === "/brent")  return await fetchHiStock("stocktop2017_Global", "BRENTOIL", "股價", "成交量");
     // if (path === "/brent_stockq")   return await fetchBrent();
 
     // 新浪網
@@ -82,13 +86,13 @@ export default {
       if (objId && contractName) return await fetchTaifex(objId, contractName);
     }
 
-    if (path === "/cnbc")    return await fetchCnbc();
-    if (path === "/rh")      return await fetchRobinHood();
+    if (path === "/cnbc") return await fetchCnbc();
+    if (path === "/rh") return await fetchRobinHood();
 
-    if (path === "/foreign-net-position")      return await fetchForeignNetPosition();
-    if (path === "/institutional")      return await fetchInstitutional();
-    if (path === "/margin-trading-balance")      return await fetchMarginTradingBalance();
-  
+    if (path === "/foreign-net-position") return await fetchForeignNetPosition();
+    if (path === "/institutional") return await fetchInstitutional();
+    if (path === "/margin-trading-balance") return await fetchMarginTradingBalance();
+
     if (path === "/subscribe") return await handleSubscribe(request, env);
     if (path === "/push-test") return await handlePushTest(env);
     if (path === "/read-subs") return await readSubs(env);
@@ -102,17 +106,17 @@ export default {
       const method = parts[2];
       const symbol = parts[3];
 
-      if (method === "tickers")   return await fetchFugleTickers(env);
-      if (method === "quote" && symbol)   return await fetchFugleQuote(symbol, env);
-      if (method === "volume" && symbol)   return await fetchFugleVolume(symbol, env);
-      if (method === "history" && symbol)   return await fetchFugleHistory(symbol, env);
-      if (method === "institutional" && symbol)   return await fetchHiStockInstitutional(symbol);
-      if (method === "margintradingbalance" && symbol)   return await fetchHiStockMarginTradingBalance(symbol);
-      if (method === "sma" && symbol)   return await fetchFugleSma(symbol, env);
-      if (method === "rsi" && symbol)   return await fetchFugleRsi(symbol, env);
-      if (method === "kdj" && symbol)   return await fetchFugleKdj(symbol, env);
-      if (method === "macd" && symbol)   return await fetchFugleMacd(symbol, env);
-      if (method === "brands" && symbol)   return await fetchFugleBrands(symbol, env);
+      if (method === "tickers") return await fetchFugleTickers(env);
+      if (method === "quote" && symbol) return await fetchFugleQuote(symbol, env);
+      if (method === "volume" && symbol) return await fetchFugleVolume(symbol, env);
+      if (method === "history" && symbol) return await fetchFugleHistory(symbol, env);
+      if (method === "institutional" && symbol) return await fetchHiStockInstitutional(symbol);
+      if (method === "margintradingbalance" && symbol) return await fetchHiStockMarginTradingBalance(symbol);
+      if (method === "sma" && symbol) return await fetchFugleSma(symbol, env);
+      if (method === "rsi" && symbol) return await fetchFugleRsi(symbol, env);
+      if (method === "kdj" && symbol) return await fetchFugleKdj(symbol, env);
+      if (method === "macd" && symbol) return await fetchFugleMacd(symbol, env);
+      if (method === "brands" && symbol) return await fetchFugleBrands(symbol, env);
     }
 
     if (path.startsWith("/yahoo-finance/")) {
@@ -120,9 +124,9 @@ export default {
       if (symbol) return await fetchYahooFinance(symbol, 1, 1);
     }
 
-    if (path === "/fedwatch")  return await fetchFedWatch(env);
+    if (path === "/fedwatch") return await fetchFedWatch(env);
 
-    if (path === "/news-rss")  return await fetchNewsRss(env);
+    if (path === "/news-rss") return await fetchNewsRss(env);
 
     if (path === "/america-calendar") return await fetchAmericaCalendar(env);
 
@@ -131,23 +135,39 @@ export default {
         const parts = path.split("/").filter(Boolean);
         const today = new Date().toISOString().split('T')[0];
         const from = parts[1] || today;
-        const to   = parts[2] || today;
+        const to = parts[2] || today;
 
         const result = await generateCustomEventsFinnhub(from, to, env);
-        return new Response(JSON.stringify({ success: true, from, to, count: result.length, data: result }), {
-          headers: { "Content-Type": "application/json" }
+        return new Response(JSON.stringify({
+          success: true,
+          from,
+          to,
+          count: result.length,
+          data: result
+        }), {
+          headers: {
+            "Content-Type": "application/json"
+          }
         });
       } catch (e) {
-        return new Response(JSON.stringify({ success: false, error: e.message, stack: e.stack }), {
+        return new Response(JSON.stringify({
+          success: false,
+          error: e.message,
+          stack: e.stack
+        }), {
           status: 500,
-          headers: { "Content-Type": "application/json" }
+          headers: {
+            "Content-Type": "application/json"
+          }
         });
       }
     }
 
     if (path === "/fear-greed") return await fetchFearAndGreed();
 
-    return json({ error: "unknown path" }, 404);
+    return json({
+      error: "unknown path"
+    }, 404);
   },
   async scheduled(event, env, ctx) {
     ctx.waitUntil(handleCron(env));
@@ -170,11 +190,11 @@ async function debugSina() {
   const text = decoder.decode(buffer);
 
   // 3. 回傳時強制指定 charset=utf-8，讓你的瀏覽器/App 能正確顯示
-  return new Response(text, { 
-    headers: { 
-      ...CORS, 
-      "Content-Type": "text/plain; charset=utf-8" 
-    } 
+  return new Response(text, {
+    headers: {
+      ...CORS,
+      "Content-Type": "text/plain; charset=utf-8"
+    }
   });
 }
 
@@ -189,7 +209,10 @@ async function fetchHiStock(m, no, current_title, volume_title) {
         "Referer": "https://histock.tw/",
         "Content-Type": "application/x-www-form-urlencoded",
       },
-      body: new URLSearchParams({ m, no })
+      body: new URLSearchParams({
+        m,
+        no
+      })
     });
 
     const html = await res.text();
@@ -207,17 +230,20 @@ async function fetchHiStock(m, no, current_title, volume_title) {
 
     return json({
       success: Object.keys(data).length > 0,
-      open:       toFloat(data["開盤"]),
-      high:       toFloat(data["最高"]),
-      low:        toFloat(data["最低"]),
+      open: toFloat(data["開盤"]),
+      high: toFloat(data["最高"]),
+      low: toFloat(data["最低"]),
       changeText: data["漲跌"] || "",
-      current:    toFloat(data[current_title]),
-      volume:     toInt(data[volume_title]),
+      current: toFloat(data[current_title]),
+      volume: toInt(data[volume_title]),
       updateTime: timeMatch ? timeMatch[1].trim() : "未知",
     });
   } catch (e) {
     const errorMsg = e.name === 'AbortError' ? "連線逾時" : e.message;
-    return json({ success: false, error: errorMsg }, 500);
+    return json({
+      success: false,
+      error: errorMsg
+    }, 500);
   }
 }
 
@@ -225,8 +251,7 @@ async function fetchHiStock(m, no, current_title, volume_title) {
 async function fetchCnyesTwn() {
   try {
     const res = await fetchWithTimeout(
-      "https://ws.api.cnyes.com/ws/api/v1/quote/quotes/GF:TWNCON:FUTURES?column=G,QUOTES",
-      {
+      "https://ws.api.cnyes.com/ws/api/v1/quote/quotes/GF:TWNCON:FUTURES?column=G,QUOTES", {
         headers: {
           "User-Agent": UA,
           "Referer": "https://invest.cnyes.com/",
@@ -236,28 +261,34 @@ async function fetchCnyesTwn() {
     );
 
     const json_data = await res.json();
-    const item = json_data?.data?.[0];
-    if (!item) return json({ success: false, error: "no data" });
+    const item = json_data?.data?. [0];
+    if (!item) return json({
+      success: false,
+      error: "no data"
+    });
 
     const ts = item["200007"];
-    const updateTime = ts
-      ? new Date((ts + 8 * 3600) * 1000).toISOString().replace('T', ' ').substring(0, 19)
-      : "未知";
+    const updateTime = ts ?
+      new Date((ts + 8 * 3600) * 1000).toISOString().replace('T', ' ').substring(0, 19) :
+      "未知";
 
     return json({
       success: true,
-      name:       item["200009"] || "近月富台指",
-      price:      toFloat(item["6"]),
-      updown:     toFloat(item["11"]),
-      high:       toFloat(item["12"]),
-      low:        toFloat(item["13"]),
-      open:       toFloat(item["19"]),
-      volume:     toInt(item["800001"]),
+      name: item["200009"] || "近月富台指",
+      price: toFloat(item["6"]),
+      updown: toFloat(item["11"]),
+      high: toFloat(item["12"]),
+      low: toFloat(item["13"]),
+      open: toFloat(item["19"]),
+      volume: toInt(item["800001"]),
       updateTime,
     });
   } catch (e) {
     const errorMsg = e.name === 'AbortError' ? "連線逾時" : e.message;
-    return json({ success: false, error: errorMsg }, 500);
+    return json({
+      success: false,
+      error: errorMsg
+    }, 500);
   }
 }
 
@@ -265,87 +296,102 @@ async function fetchCnyesTwn() {
 async function fetchBrent() {
   try {
     const res = await fetchWithTimeout("https://www.stockq.org/commodity/FUTRBOIL.php", {
-      headers: { "User-Agent": UA }
+      headers: {
+        "User-Agent": UA
+      }
     });
     const html = await res.text();
 
     // 找 class='row2' 的位置，然後找後面第一個 <td...> 到 </td>
     const row2Idx = html.indexOf("class='row2'");
-    if (row2Idx === -1) return json({ success: false, error: "找不到 row2" });
+    if (row2Idx === -1) return json({
+      success: false,
+      error: "找不到 row2"
+    });
 
     const afterRow2 = html.substring(row2Idx);
     const tdStart = afterRow2.indexOf("<td");
-    const tdEnd   = afterRow2.indexOf("</td>");
-    if (tdStart === -1 || tdEnd === -1) return json({ success: false, error: "找不到 td" });
+    const tdEnd = afterRow2.indexOf("</td>");
+    if (tdStart === -1 || tdEnd === -1) return json({
+      success: false,
+      error: "找不到 td"
+    });
 
     const tdContent = afterRow2.substring(tdStart, tdEnd);
     const priceText = tdContent.replace(/<[^>]+>/g, "").trim();
     const price = toFloat(priceText);
 
-    return json({ success: true, price, priceText });
+    return json({
+      success: true,
+      price,
+      priceText
+    });
   } catch (e) {
     const errorMsg = e.name === 'AbortError' ? "連線逾時" : e.message;
-    return json({ success: false, error: errorMsg }, 500);
+    return json({
+      success: false,
+      error: errorMsg
+    }, 500);
   }
 }
 
 // 新浪網的布蘭特原油代碼是 hf_OIL，但它是近月合約，會隨著時間推移而變動，所以我們需要動態計算出正確的合約代碼
 function getOilSymbol() {
-    const now = new Date();
-    let year = now.getFullYear();
-    let month = now.getMonth() + 1 + 2; // getMonth() 從0開始，+1轉為實際月份，+2為往後兩個月
+  const now = new Date();
+  let year = now.getFullYear();
+  let month = now.getMonth() + 1 + 2; // getMonth() 從0開始，+1轉為實際月份，+2為往後兩個月
 
-    if (month > 12) {
-        month -= 12;
-        year += 1;
-    }
+  if (month > 12) {
+    month -= 12;
+    year += 1;
+  }
 
-    const yy = String(year).slice(-2);         // 取年份後兩碼
-    const mm = String(month).padStart(2, '0'); // 月份補零
+  const yy = String(year).slice(-2); // 取年份後兩碼
+  const mm = String(month).padStart(2, '0'); // 月份補零
 
-    return `hf_OIL${yy}${mm}`;
+  return `hf_OIL${yy}${mm}`;
 }
 
 function getVixSymbol() {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = now.getMonth(); // 0-11
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth(); // 0-11
 
-    // 1. 找出本月第 3 個禮拜五
-    function getThirdFriday(y, m) {
-        let count = 0;
-        let date = new Date(y, m, 1);
-        while (count < 3) {
-            if (date.getDay() === 5) count++; // 5 是禮拜五
-            if (count < 3) date.setDate(date.getDate() + 1);
-        }
-        return date;
+  // 1. 找出本月第 3 個禮拜五
+  function getThirdFriday(y, m) {
+    let count = 0;
+    let date = new Date(y, m, 1);
+    while (count < 3) {
+      if (date.getDay() === 5) count++; // 5 是禮拜五
+      if (count < 3) date.setDate(date.getDate() + 1);
     }
+    return date;
+  }
 
-    const thirdFriday = getThirdFriday(year, month);
-    
-    // 2. 結算日通常是第三個禮拜五的前兩天 (禮拜三)
-    const settleDate = new Date(thirdFriday);
-    settleDate.setDate(thirdFriday.getDate() - 2);
+  const thirdFriday = getThirdFriday(year, month);
 
-    // 3. 判斷今天要抓哪個月
-    let targetYear = year;
-    let targetMonth = month + 1; // 轉為 1-12
+  // 2. 結算日通常是第三個禮拜五的前兩天 (禮拜三)
+  const settleDate = new Date(thirdFriday);
+  settleDate.setDate(thirdFriday.getDate() - 2);
 
-    if (now > settleDate) {
-        targetMonth += 1;
-    }
+  // 3. 判斷今天要抓哪個月
+  let targetYear = year;
+  let targetMonth = month + 1; // 轉為 1-12
 
-    // 4. 處理跨年問題
-    if (targetMonth > 12) {
-        targetMonth -= 12;
-        targetYear += 1;
-    }
+  if (now > settleDate) {
+    targetMonth += 1;
+  }
 
-    const yy = String(targetYear).slice(-2);
-    const mm = String(targetMonth).padStart(2, '0');
+  // 4. 處理跨年問題
+  if (targetMonth > 12) {
+    targetMonth -= 12;
+    targetYear += 1;
+  }
 
-    return `hf_VX${yy}${mm}`;
+  const yy = String(targetYear).slice(-2);
+  const mm = String(targetMonth).padStart(2, '0');
+
+  return `hf_VX${yy}${mm}`;
 }
 
 // 新浪網
@@ -356,8 +402,8 @@ async function fetchSina(list) {
 
   // 定義動態代碼的計算函數映射
   const symbolMap = {
-      'hf_OIL': getOilSymbol,
-      'hf_VX': getVixSymbol
+    'hf_OIL': getOilSymbol,
+    'hf_VX': getVixSymbol
   };
 
   // 如果 list 在映射表中，執行對應函數；否則直接使用原始 list
@@ -380,7 +426,10 @@ async function fetchSina(list) {
     const text = decoder.decode(buffer);
 
     const match = text.match(/"([^"]+)"/);
-    if (!match) return json({ success: false, error: "解析失敗" });
+    if (!match) return json({
+      success: false,
+      error: "解析失敗"
+    });
 
     const parts = match[1].split(",");
 
@@ -388,26 +437,26 @@ async function fetchSina(list) {
       // 美元指數
       return json({
         success: true,
-        title:  parts[9],
-        time:   parts[10] + " " + parts[0] || "",
-        price:  toFloat(parts[1]),
-        open:   toFloat(parts[3]),
-        low:    toFloat(parts[5]),
-        high:   toFloat(parts[6]),
-        prev:   toFloat(parts[7]),
+        title: parts[9],
+        time: parts[10] + " " + parts[0] || "",
+        price: toFloat(parts[1]),
+        open: toFloat(parts[3]),
+        low: toFloat(parts[5]),
+        high: toFloat(parts[6]),
+        prev: toFloat(parts[7]),
       });
     } else if (list.startsWith('znb_')) {
       const price = toFloat(parts[1]);
 
       const result = {
         success: true,
-        title:  parts[0],
-        time:   parts[6] + " " + parts[7] || "",
-        price:  price,
-        open:   toFloat(parts[8]),
-        low:    toFloat(parts[11]),
-        high:   toFloat(parts[10]),
-        prev:   toFloat(parts[9]),
+        title: parts[0],
+        time: parts[6] + " " + parts[7] || "",
+        price: price,
+        open: toFloat(parts[8]),
+        low: toFloat(parts[11]),
+        high: toFloat(parts[10]),
+        prev: toFloat(parts[9]),
       };
 
       // znb_VIX 恐慌指數
@@ -424,13 +473,13 @@ async function fetchSina(list) {
       // gb_tsm 台積電 ADR
       return json({
         success: true,
-        title:  parts[0],
-        time:   parts[3] || "",
-        price:  toFloat(parts[1]),
-        open:   toFloat(parts[5]),
-        low:    toFloat(parts[7]),
-        high:   toFloat(parts[6]),
-        prev:   toFloat(parts[26]),
+        title: parts[0],
+        time: parts[3] || "",
+        price: toFloat(parts[1]),
+        open: toFloat(parts[5]),
+        low: toFloat(parts[7]),
+        high: toFloat(parts[6]),
+        prev: toFloat(parts[26]),
       });
     } else if (list.startsWith('hf_')) {
       // hf_YM	道瓊期貨
@@ -445,13 +494,13 @@ async function fetchSina(list) {
 
       const result = {
         success: true,
-        title:  parts[13],
-        price:  price,
-        open:   toFloat(parts[8]),
-        high:   toFloat(parts[4]),
-        low:    toFloat(parts[5]),
-        time:   parts[12] + " " + parts[6] || "",
-        prev:   toFloat(parts[7]),
+        title: parts[13],
+        price: price,
+        open: toFloat(parts[8]),
+        high: toFloat(parts[4]),
+        low: toFloat(parts[5]),
+        time: parts[12] + " " + parts[6] || "",
+        prev: toFloat(parts[7]),
       };
 
       if (list === 'hf_OIL') {
@@ -466,17 +515,20 @@ async function fetchSina(list) {
       return json({
         success: true,
         title: '',
-        price:  0,
-        open:   0,
-        high:   0,
-        low:    0,
-        time:   0,
-        prev:   0,
+        price: 0,
+        open: 0,
+        high: 0,
+        low: 0,
+        time: 0,
+        prev: 0,
       });
     }
   } catch (e) {
     const errorMsg = e.name === 'AbortError' ? "連線逾時" : e.message;
-    return json({ success: false, error: errorMsg }, 500);
+    return json({
+      success: false,
+      error: errorMsg
+    }, 500);
   }
 }
 
@@ -484,7 +536,10 @@ async function fetchSina(list) {
 async function fetchTaifex(objId, contractName) {
   try {
     const res = await fetchWithTimeout("https://www.taifex.com.tw/cht/quotesApi/getQuotes?objId=" + objId, {
-      headers: { "User-Agent": UA, "Accept": "application/json" }
+      headers: {
+        "User-Agent": UA,
+        "Accept": "application/json"
+      }
     }, 8000);
     const data = await res.json();
 
@@ -506,15 +561,18 @@ async function fetchTaifex(objId, contractName) {
 
     return json({
       success: true,
-      contract:     item.contract || "",
+      contract: item.contract || "",
       contractName: item.contractName || "",
-      price:        toFloat(item.price),
-      updown:       toFloat(item.updown),
-      ttlvol:       toInt(item.ttlvol),
+      price: toFloat(item.price),
+      updown: toFloat(item.updown),
+      ttlvol: toInt(item.ttlvol),
     });
   } catch (e) {
     const errorMsg = e.name === 'AbortError' ? "連線逾時" : e.message;
-    return json({ success: false, error: errorMsg }, 500);
+    return json({
+      success: false,
+      error: errorMsg
+    }, 500);
   }
 }
 
@@ -524,13 +582,22 @@ async function fetchCnbc() {
     // 1. 盤前 Fair Value (邏輯保持不變)
     // https://www.cnbc.com/pre-markets/
     const fvRes = await fetchWithTimeout(
-      "https://quote.cnbc.com/quote-html-webservice/fvquote.htm?requestMethod=quick&noform=0&realtime=0&client=fairValue&output=json&symbols=DJ|SP|ND|TF",
-      { headers: { "User-Agent": UA } }
+      "https://quote.cnbc.com/quote-html-webservice/fvquote.htm?requestMethod=quick&noform=0&realtime=0&client=fairValue&output=json&symbols=DJ|SP|ND|TF", {
+        headers: {
+          "User-Agent": UA
+        }
+      }
     );
     const fvData = await fvRes.json();
     const fvQuotes = fvData?.FairValueQuoteResult?.FairValueQuote || [];
 
-    const fv = { DJ: 0, SP: 0, ND: 0, TF: 0, updateTime: "未知" };
+    const fv = {
+      DJ: 0,
+      SP: 0,
+      ND: 0,
+      TF: 0,
+      updateTime: "未知"
+    };
     for (const q of fvQuotes) {
       if (q.symbol in fv) fv[q.symbol] = q.fmt_change || 0;
       if (fv.updateTime === "未知" && q.last_timedate) fv.updateTime = q.last_timedate;
@@ -538,15 +605,23 @@ async function fetchCnbc() {
 
     // 2. 四大指數 + 個股 (未來可在 symbols 繼續累加，如 |NVDA|AAPL)
     const qRes = await fetchWithTimeout(
-      "https://quote.cnbc.com/quote-html-webservice/restQuote/symbolType/symbol?symbols=.DJI|.SPX|.IXIC|.SOX|TSM|NVDA|AAPL|MSFT|GOOGL|AMZN|META|TSLA&requestMethod=itv&noform=1&partnerId=2&fund=1&exthrs=1&output=json&events=1",
-      { headers: { "User-Agent": UA } }
+      "https://quote.cnbc.com/quote-html-webservice/restQuote/symbolType/symbol?symbols=.DJI|.SPX|.IXIC|.SOX|TSM|NVDA|AAPL|MSFT|GOOGL|AMZN|META|TSLA&requestMethod=itv&noform=1&partnerId=2&fund=1&exthrs=1&output=json&events=1", {
+        headers: {
+          "User-Agent": UA
+        }
+      }
     );
     const qData = await qRes.json();
     const quotes = qData?.FormattedQuoteResult?.FormattedQuote || [];
 
     // 初始化回應容器
-    const market = { dji: "N/A", spx: "N/A", ixic: "N/A", sox: "N/A" };
-    const stock = {}; 
+    const market = {
+      dji: "N/A",
+      spx: "N/A",
+      ixic: "N/A",
+      sox: "N/A"
+    };
+    const stock = {};
 
     // 指數與代碼的映射表
     const indexMap = {
@@ -566,8 +641,8 @@ async function fetchCnbc() {
         // 如果不是指數 (代表是個股)，則放入分門別類的 stock 物件中
         stock[sym] = {
           regular: q.change || "N/A",
-          type:    q.ExtendedMktQuote?.type || "",
-          market:  q.ExtendedMktQuote?.change || "N/A"
+          type: q.ExtendedMktQuote?.type || "",
+          market: q.ExtendedMktQuote?.change || "N/A"
         };
       }
     }
@@ -575,9 +650,9 @@ async function fetchCnbc() {
     return json({
       success: true,
       fairValue: {
-        dow:     fv.DJ,
-        sp:      fv.SP,
-        nasdaq:  fv.ND,
+        dow: fv.DJ,
+        sp: fv.SP,
+        nasdaq: fv.ND,
         russell: fv.TF,
         updateTime: fv.updateTime,
       },
@@ -586,36 +661,54 @@ async function fetchCnbc() {
     });
   } catch (e) {
     const errorMsg = e.name === 'AbortError' ? "連線逾時" : e.message;
-    return json({ success: false, error: errorMsg }, 500);
+    return json({
+      success: false,
+      error: errorMsg
+    }, 500);
   }
 }
 
 // RobinHood
 async function fetchRobinHoodOne(instrumentId) {
   const res = await fetchWithTimeout(
-    `https://bonfire.robinhood.com/instruments/${instrumentId}/detail-page-live-updating-data/?display_span=day&hide_extended_hours=false`,
-    { headers: { "User-Agent": UA, "Accept": "application/json" } }
+    `https://bonfire.robinhood.com/instruments/${instrumentId}/detail-page-live-updating-data/?display_span=day&hide_extended_hours=false`, {
+      headers: {
+        "User-Agent": UA,
+        "Accept": "application/json"
+      }
+    }
   );
   const data = await res.json();
 
   const display = data?.chart_section?.default_display;
-  const changeText   = display?.secondary_value?.main?.value || "";
-  const tertiaryText = display?.tertiary_value?.main?.value  || "";
+  const changeText = display?.secondary_value?.main?.value || "";
+  const tertiaryText = display?.tertiary_value?.main?.value || "";
 
   const quote = data?.chart_section?.quote;
-  const previousClose     = parseFloat(quote?.previous_close || "").toString();
+  const previousClose = parseFloat(quote?.previous_close || "").toString();
   const previousCloseDate = quote?.previous_close_date || "";
-  const updated_at = quote?.updated_at
-    ? new Date(quote.updated_at).toLocaleString("zh-TW", {
-        timeZone: "Asia/Taipei",
-        hour12: false,
-        year: "numeric", month: "2-digit", day: "2-digit",
-        hour: "2-digit", minute: "2-digit", second: "2-digit"
-      }).replace(/\//g, '-')
-    : '-';
+  const updated_at = quote?.updated_at ?
+    new Date(quote.updated_at).toLocaleString("zh-TW", {
+      timeZone: "Asia/Taipei",
+      hour12: false,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit"
+    }).replace(/\//g, '-') :
+    '-';
 
   const success = changeText !== "" || tertiaryText !== "" || previousClose !== "" || previousCloseDate !== "" || updated_at !== "";
-  return { success, changeText, tertiaryText, previousClose, previousCloseDate, updated_at };
+  return {
+    success,
+    changeText,
+    tertiaryText,
+    previousClose,
+    previousCloseDate,
+    updated_at
+  };
 }
 
 async function fetchRobinHood() {
@@ -629,7 +722,10 @@ async function fetchRobinHood() {
           return [symbol, data];
         } catch (e) {
           const errorMsg = e.name === 'AbortError' ? "連線逾時" : e.message;
-          return [symbol, { success: false, error: errorMsg }];
+          return [symbol, {
+            success: false,
+            error: errorMsg
+          }];
         }
       })
     );
@@ -638,14 +734,20 @@ async function fetchRobinHood() {
     return json(payload);
   } catch (e) {
     const errorMsg = e.name === 'AbortError' ? "連線逾時" : e.message;
-    return json({ success: false, error: errorMsg }, 500);
+    return json({
+      success: false,
+      error: errorMsg
+    }, 500);
   }
 }
 
 async function handleSubscribe(request, env) {
   try {
     const body = await request.json();
-    const { userAgent, ...subscription } = body;
+    const {
+      userAgent,
+      ...subscription
+    } = body;
 
     // 記錄完整 userAgent
     const platform = userAgent || 'unknown';
@@ -658,17 +760,26 @@ async function handleSubscribe(request, env) {
     // 讀取現有的 subscriptions
     const existing = await env.KV.get("subscriptions");
     const list = existing ? JSON.parse(existing) : [];
-  
+
     // 避免重複儲存同一個 endpoint
     const isDuplicate = list.some(s => s.endpoint === subscription.endpoint);
     if (!isDuplicate) {
-      list.push({ ...subscription, platform, time });
+      list.push({
+        ...subscription,
+        platform,
+        time
+      });
       await env.KV.put("subscriptions", JSON.stringify(list));
     }
 
-    return json({ success: true });
+    return json({
+      success: true
+    });
   } catch (e) {
-    return json({ success: false, error: e.message }, 500);
+    return json({
+      success: false,
+      error: e.message
+    }, 500);
   }
 }
 
@@ -676,7 +787,10 @@ async function handleSubscribe(request, env) {
 async function handlePushTest(env) {
   try {
     const existing = await env.KV.get("subscriptions");
-    if (!existing) return json({ success: false, error: "沒有訂閱資料" });
+    if (!existing) return json({
+      success: false,
+      error: "沒有訂閱資料"
+    });
 
     const list = JSON.parse(existing);
     const results = await Promise.all(
@@ -684,28 +798,41 @@ async function handlePushTest(env) {
         title: '測試推播',
         body: '這是來自 Cloudflare Worker 的真實推播！',
         url: '/stock/index.html',
-      // image: '/stock/banner.png',
-      actions: (isAndroidPlatform(sub.platform) || isApplePlatform(sub.platform)) ? [] : [
-        { action: 'view',    title: '查看詳情', icon: '/stock/icon-192.png' },
-        { action: 'dismiss', title: '忽略',     icon: '/stock/icon-192.png' },
-      ]
+        // image: '/stock/banner.png',
+        actions: (isAndroidPlatform(sub.platform) || isApplePlatform(sub.platform)) ? [] : [{
+            action: 'view',
+            title: '查看詳情',
+            icon: '/stock/icon-192.png'
+          },
+          {
+            action: 'dismiss',
+            title: '忽略',
+            icon: '/stock/icon-192.png'
+          },
+        ]
       }, env))
     );
 
-    return json({ success: true, results });
+    return json({
+      success: true,
+      results
+    });
   } catch (e) {
-    return json({ success: false, error: e.message }, 500);
+    return json({
+      success: false,
+      error: e.message
+    }, 500);
   }
 }
 
 async function sendWebPush(subscription, payload, env) {
   try {
-    const endpoint  = subscription.endpoint;
-    const p256dh    = subscription.keys.p256dh;
-    const auth      = subscription.keys.auth;
+    const endpoint = subscription.endpoint;
+    const p256dh = subscription.keys.p256dh;
+    const auth = subscription.keys.auth;
     const publicKey = env.VAPID_PUBLIC_KEY;
     const privateKey = env.VAPID_PRIVATE_KEY;
-    const subject   = env.VAPID_SUBJECT;
+    const subject = env.VAPID_SUBJECT;
 
     // 1. 建立 VAPID JWT
     const jwt = await buildVapidJwt(endpoint, subject, publicKey, privateKey);
@@ -737,33 +864,51 @@ async function sendWebPush(subscription, payload, env) {
 
     // 顯示錯誤訊息
     const resText = await res.text();
-    return { endpoint, status: res.status, responseBody: resText };
+    return {
+      endpoint,
+      status: res.status,
+      responseBody: resText
+    };
   } catch (e) {
-    return { endpoint: subscription.endpoint, error: e.message };
+    return {
+      endpoint: subscription.endpoint,
+      error: e.message
+    };
   }
 }
 
 // VAPID JWT 建立
 async function buildVapidJwt(endpoint, subject, publicKeyB64, privateKeyB64) {
-  const now    = Math.floor(Date.now() / 1000);
+  const now = Math.floor(Date.now() / 1000);
   const origin = new URL(endpoint).origin;
 
-  const header  = b64url(JSON.stringify({ typ: 'JWT', alg: 'ES256' }));
-  const payload = b64url(JSON.stringify({ aud: origin, exp: now + 43200, sub: subject }));
-  const input   = `${header}.${payload}`;
+  const header = b64url(JSON.stringify({
+    typ: 'JWT',
+    alg: 'ES256'
+  }));
+  const payload = b64url(JSON.stringify({
+    aud: origin,
+    exp: now + 43200,
+    sub: subject
+  }));
+  const input = `${header}.${payload}`;
 
   // raw 32 bytes → PKCS8 格式（加上 EC 私鑰的 ASN.1 header）
   const rawKey = base64UrlDecode(privateKeyB64);
-  const pkcs8  = buildPkcs8(rawKey);
+  const pkcs8 = buildPkcs8(rawKey);
 
   const cryptoKey = await crypto.subtle.importKey(
-    'pkcs8', pkcs8,
-    { name: 'ECDSA', namedCurve: 'P-256' },
+    'pkcs8', pkcs8, {
+      name: 'ECDSA',
+      namedCurve: 'P-256'
+    },
     false, ['sign']
   );
 
-  const sig = await crypto.subtle.sign(
-    { name: 'ECDSA', hash: 'SHA-256' },
+  const sig = await crypto.subtle.sign({
+      name: 'ECDSA',
+      hash: 'SHA-256'
+    },
     cryptoKey,
     new TextEncoder().encode(input)
   );
@@ -778,39 +923,44 @@ function buildPkcs8(rawKey) {
     0x30, 0x41, // SEQUENCE
     0x02, 0x01, 0x00, // INTEGER 0 (version)
     0x30, 0x13, // SEQUENCE (algorithmIdentifier)
-      0x06, 0x07, 0x2a, 0x86, 0x48, 0xce, 0x3d, 0x02, 0x01, // OID ecPublicKey
-      0x06, 0x08, 0x2a, 0x86, 0x48, 0xce, 0x3d, 0x03, 0x01, 0x07, // OID P-256
+    0x06, 0x07, 0x2a, 0x86, 0x48, 0xce, 0x3d, 0x02, 0x01, // OID ecPublicKey
+    0x06, 0x08, 0x2a, 0x86, 0x48, 0xce, 0x3d, 0x03, 0x01, 0x07, // OID P-256
     0x04, 0x27, // OCTET STRING
-      0x30, 0x25, // SEQUENCE
-        0x02, 0x01, 0x01, // INTEGER 1
-        0x04, 0x20, // OCTET STRING (32 bytes)
+    0x30, 0x25, // SEQUENCE
+    0x02, 0x01, 0x01, // INTEGER 1
+    0x04, 0x20, // OCTET STRING (32 bytes)
   ]);
   return concat(header, rawKey);
 }
 
 // aes128gcm 加密
 async function encryptPayload(plaintext, p256dhB64, authB64) {
-  const encoder       = new TextEncoder();
-  const clientPublic  = base64UrlDecode(p256dhB64);
-  const authSecret    = base64UrlDecode(authB64);
+  const encoder = new TextEncoder();
+  const clientPublic = base64UrlDecode(p256dhB64);
+  const authSecret = base64UrlDecode(authB64);
 
   // 產生伺服器端 ECDH 金鑰對
-  const serverKeyPair = await crypto.subtle.generateKey(
-    { name: 'ECDH', namedCurve: 'P-256' }, true, ['deriveBits']
-  );
+  const serverKeyPair = await crypto.subtle.generateKey({
+    name: 'ECDH',
+    namedCurve: 'P-256'
+  }, true, ['deriveBits']);
 
   const serverPublicRaw = await crypto.subtle.exportKey('raw', serverKeyPair.publicKey);
 
   // 匯入客戶端公鑰
   const clientKey = await crypto.subtle.importKey(
-    'raw', clientPublic,
-    { name: 'ECDH', namedCurve: 'P-256' },
+    'raw', clientPublic, {
+      name: 'ECDH',
+      namedCurve: 'P-256'
+    },
     false, []
   );
 
   // ECDH 共享秘密
-  const sharedBits = await crypto.subtle.deriveBits(
-    { name: 'ECDH', public: clientKey },
+  const sharedBits = await crypto.subtle.deriveBits({
+      name: 'ECDH',
+      public: clientKey
+    },
     serverKeyPair.privateKey, 256
   );
 
@@ -825,15 +975,18 @@ async function encryptPayload(plaintext, p256dhB64, authB64) {
   );
 
   // 建立 CEK 和 nonce
-  const cek   = await hkdf(ikm, salt, encoder.encode('Content-Encoding: aes128gcm\x00'), 16);
+  const cek = await hkdf(ikm, salt, encoder.encode('Content-Encoding: aes128gcm\x00'), 16);
   const nonce = await hkdf(ikm, salt, encoder.encode('Content-Encoding: nonce\x00'), 12);
 
   // 匯入 AES-GCM 金鑰
   const aesKey = await crypto.subtle.importKey('raw', cek, 'AES-GCM', false, ['encrypt']);
 
   // 加密（加上 padding delimiter \x02）
-  const data      = concat(encoder.encode(plaintext), new Uint8Array([2]));
-  const encrypted = await crypto.subtle.encrypt({ name: 'AES-GCM', iv: nonce }, aesKey, data);
+  const data = concat(encoder.encode(plaintext), new Uint8Array([2]));
+  const encrypted = await crypto.subtle.encrypt({
+    name: 'AES-GCM',
+    iv: nonce
+  }, aesKey, data);
 
   // 組合 aes128gcm 格式：salt(16) + rs(4) + keyid_len(1) + keyid + ciphertext
   const serverPubArray = new Uint8Array(serverPublicRaw);
@@ -846,8 +999,12 @@ async function encryptPayload(plaintext, p256dhB64, authB64) {
 // HKDF
 async function hkdf(ikm, salt, info, length) {
   const key = await crypto.subtle.importKey('raw', ikm, 'HKDF', false, ['deriveBits']);
-  const bits = await crypto.subtle.deriveBits(
-    { name: 'HKDF', hash: 'SHA-256', salt, info },
+  const bits = await crypto.subtle.deriveBits({
+      name: 'HKDF',
+      hash: 'SHA-256',
+      salt,
+      info
+    },
     key, length * 8
   );
   return new Uint8Array(bits);
@@ -881,34 +1038,51 @@ function concat(...arrays) {
 
 async function readSubs(env) {
   const existing = await env.KV.get("subscriptions");
-  if (!existing) return json({ count: 0, list: [] });
+  if (!existing) return json({
+    count: 0,
+    list: []
+  });
   const list = JSON.parse(existing);
   const summary = list.map(s => ({
     endpoint: s.endpoint.substring(0, 60) + '...', // 不顯示完整金鑰
     platform: s.platform || 'unknown',
     time: s.time || 'unknown',
   }));
-  return json({ count: list.length, list: summary.reverse() }); // 最新的在前
+  return json({
+    count: list.length,
+    list: summary.reverse()
+  }); // 最新的在前
 }
 
 async function clearSubs(env) {
   await env.KV.put("subscriptions", JSON.stringify([]));
-  return json({ success: true, message: "已清除所有 subscriptions" });
+  return json({
+    success: true,
+    message: "已清除所有 subscriptions"
+  });
 }
 
 async function readLogs(env) {
   const existing = await env.KV.get("logs");
   const logs = existing ? JSON.parse(existing) : [];
-  return json({ count: logs.length, logs: logs.reverse() }); // 最新的在前
+  return json({
+    count: logs.length,
+    logs: logs.reverse()
+  }); // 最新的在前
 }
 
 async function handleWriteLogs(request, env) {
   try {
     const body = await request.json();
     await writeLogs(env, body.tag || 'INFO', body.message || '');
-    return json({ success: true });
+    return json({
+      success: true
+    });
   } catch (e) {
-    return json({ success: false, error: e.message });
+    return json({
+      success: false,
+      error: e.message
+    });
   }
 }
 
@@ -922,7 +1096,11 @@ async function writeLogs(env, tag, message) {
     const twTime = new Date(now.getTime() + 8 * 60 * 60 * 1000);
     const time = twTime.toISOString().replace('T', ' ').substring(0, 19);
 
-    logs.push({ tag, message, time });
+    logs.push({
+      tag,
+      message,
+      time
+    });
 
     // 只保留最新 100 筆，避免 KV 無限增長
     if (logs.length > 100) logs.splice(0, logs.length - 100);
@@ -935,14 +1113,16 @@ async function writeLogs(env, tag, message) {
 
 async function clearLogs(env) {
   await env.KV.put("logs", JSON.stringify([]));
-  return json({ success: true, message: "已清除所有 logs" });
+  return json({
+    success: true,
+    message: "已清除所有 logs"
+  });
 }
 
 async function fetchFugleTickers(env) {
   try {
     const res = await fetchWithTimeout(
-      `https://api.fugle.tw/marketdata/v1.0/stock/intraday/tickers`,
-      {
+      `https://api.fugle.tw/marketdata/v1.0/stock/intraday/tickers`, {
         headers: {
           "X-API-KEY": env.FUGLE_KEY,
           "Accept": "application/json"
@@ -951,7 +1131,10 @@ async function fetchFugleTickers(env) {
     );
 
     if (!res.ok) {
-      return json({ success: false, error: `HTTP ${res.status}` });
+      return json({
+        success: false,
+        error: `HTTP ${res.status}`
+      });
     }
 
     const d = await res.json();
@@ -963,15 +1146,17 @@ async function fetchFugleTickers(env) {
     });
   } catch (e) {
     const errorMsg = e.name === 'AbortError' ? "連線逾時" : e.message;
-    return json({ success: false, error: errorMsg }, 500);
+    return json({
+      success: false,
+      error: errorMsg
+    }, 500);
   }
 }
 
 async function fetchFugleQuote(symbol, env) {
   try {
     const res = await fetchWithTimeout(
-      `https://api.fugle.tw/marketdata/v1.0/stock/intraday/quote/${symbol}`,
-      {
+      `https://api.fugle.tw/marketdata/v1.0/stock/intraday/quote/${symbol}`, {
         headers: {
           "X-API-KEY": env.FUGLE_KEY,
           "Accept": "application/json"
@@ -980,59 +1165,75 @@ async function fetchFugleQuote(symbol, env) {
     );
 
     if (!res.ok) {
-      return json({ success: false, error: `HTTP ${res.status}` });
+      return json({
+        success: false,
+        error: `HTTP ${res.status}`
+      });
     }
 
     const d = await res.json();
 
     // 解析委買委賣
-    const bids = (d.bids || []).map(b => ({ price: b.price, size: b.size }));
-    const asks = (d.asks || []).map(a => ({ price: a.price, size: a.size }));
+    const bids = (d.bids || []).map(b => ({
+      price: b.price,
+      size: b.size
+    }));
+    const asks = (d.asks || []).map(a => ({
+      price: a.price,
+      size: a.size
+    }));
 
     return json({
       success: true,
-      symbol:        d.symbol        || "",
-      name:          d.name          || "",
+      symbol: d.symbol || "",
+      name: d.name || "",
       previousClose: d.previousClose || 0,
-      openPrice:     d.openPrice     || 0,
-      highPrice:     d.highPrice     || 0,
-      lowPrice:      d.lowPrice      || 0,
-      closePrice:    d.closePrice    || 0,
-      avgPrice:      d.avgPrice      || 0,
-      change:        d.change        || 0,
+      openPrice: d.openPrice || 0,
+      highPrice: d.highPrice || 0,
+      lowPrice: d.lowPrice || 0,
+      closePrice: d.closePrice || 0,
+      avgPrice: d.avgPrice || 0,
+      change: d.change || 0,
       changePercent: d.changePercent || 0,
       bids,
       asks,
-      tradeVolume:       d.total?.tradeVolume       || 0,
-      tradeVolumeAtBid:  d.total?.tradeVolumeAtBid  || 0,
-      tradeVolumeAtAsk:  d.total?.tradeVolumeAtAsk  || 0,
-      transaction:       d.total?.transaction        || 0,
+      tradeVolume: d.total?.tradeVolume || 0,
+      tradeVolumeAtBid: d.total?.tradeVolumeAtBid || 0,
+      tradeVolumeAtAsk: d.total?.tradeVolumeAtAsk || 0,
+      transaction: d.total?.transaction || 0,
     });
   } catch (e) {
     const errorMsg = e.name === 'AbortError' ? "連線逾時" : e.message;
-    return json({ success: false, error: errorMsg }, 500);
+    return json({
+      success: false,
+      error: errorMsg
+    }, 500);
   }
 }
 
 function analyzeVolumeData(data) {
   if (!data || data.length <= 2) {
-    return { story: "數據量不足，無法進行區間故事分析。" };
+    return {
+      story: "數據量不足，無法進行區間故事分析。"
+    };
   }
 
   // 1. 排序並剔除最高與最低價 (極值去噪)
   const sortedByPrice = [...data].sort((a, b) => b.price - a.price);
   const highestPrice = sortedByPrice[0].price;
   const lowestPrice = sortedByPrice[sortedByPrice.length - 1].price;
-  
+
   const filteredData = sortedByPrice.filter(b => b.price !== highestPrice && b.price !== lowestPrice);
-  
-  if (filteredData.length === 0) return { story: "剔除極值後無核心交易數據。" };
+
+  if (filteredData.length === 0) return {
+    story: "剔除極值後無核心交易數據。"
+  };
 
   // 2. 計算核心區間的總量與基本統計
   let totalVolume = 0;
   let totalBid = 0;
   let totalAsk = 0;
-  
+
   filteredData.forEach(b => {
     totalVolume += b.volume;
     totalBid += b.volumeAtBid;
@@ -1058,7 +1259,7 @@ function analyzeVolumeData(data) {
 
   // 6. 動態組裝「故事」文字
   let stories = [];
-  
+
   // 故事一：核心戰場集中度
   stories.push(`目前核心交火集中在 ${top3.map(b => b.price).join('、')} 元，這三檔合共吃下區間 ${top3Percentage}% 的籌碼，屬於標準的震盪換手格局。`);
 
@@ -1091,8 +1292,7 @@ function analyzeVolumeData(data) {
 async function fetchFugleVolume(symbol, env) {
   try {
     const res = await fetchWithTimeout(
-      `https://api.fugle.tw/marketdata/v1.0/stock/intraday/volumes/${symbol}`,
-      {
+      `https://api.fugle.tw/marketdata/v1.0/stock/intraday/volumes/${symbol}`, {
         headers: {
           "X-API-KEY": env.FUGLE_KEY,
           "Accept": "application/json"
@@ -1101,17 +1301,20 @@ async function fetchFugleVolume(symbol, env) {
     );
 
     if (!res.ok) {
-      return json({ success: false, error: `HTTP ${res.status}` });
+      return json({
+        success: false,
+        error: `HTTP ${res.status}`
+      });
     }
 
     const d = await res.json();
 
     // 解析分價量表
-    const data = (d.data || []).map(b => ({ 
-      price: b.price, 
-      volume: b.volume, 
-      volumeAtBid: b.volumeAtBid, 
-      volumeAtAsk: b.volumeAtAsk 
+    const data = (d.data || []).map(b => ({
+      price: b.price,
+      volume: b.volume,
+      volumeAtBid: b.volumeAtBid,
+      volumeAtAsk: b.volumeAtAsk
     }));
 
     // === 新增：自動化量價故事分析 ===
@@ -1124,13 +1327,18 @@ async function fetchFugleVolume(symbol, env) {
     });
   } catch (e) {
     const errorMsg = e.name === 'AbortError' ? "連線逾時" : e.message;
-    return json({ success: false, error: errorMsg }, 500);
+    return json({
+      success: false,
+      error: errorMsg
+    }, 500);
   }
 }
 
 function analyzeHistoryData(data) {
   if (!data || data.length === 0) {
-    return { story: "暫無歷史數據可供分析。" };
+    return {
+      story: "暫無歷史數據可供分析。"
+    };
   }
 
   // 由於富果資料是 desc (最新在前)，我們複製一份並反轉成 asc (舊到新)，方便計算均線與趨勢
@@ -1138,19 +1346,33 @@ function analyzeHistoryData(data) {
   const totalDays = ascData.length;
 
   // 1. 基礎數據：區間最高、最低價與日期
-  let maxPrice = -Infinity, minPrice = Infinity;
-  let maxDate = "", minDate = "";
-  let maxVol = -1, maxVolDate = "", maxVolClose = 0;
+  let maxPrice = -Infinity,
+    minPrice = Infinity;
+  let maxDate = "",
+    minDate = "";
+  let maxVol = -1,
+    maxVolDate = "",
+    maxVolClose = 0;
 
   ascData.forEach(d => {
-    if (d.high > maxPrice) { maxPrice = d.high; maxDate = d.date; }
-    if (d.low < minPrice) { minPrice = d.low; minDate = d.date; }
-    if (d.volume > maxVol) { maxVol = d.volume; maxVolDate = d.date; maxVolClose = d.close; }
+    if (d.high > maxPrice) {
+      maxPrice = d.high;
+      maxDate = d.date;
+    }
+    if (d.low < minPrice) {
+      minPrice = d.low;
+      minDate = d.date;
+    }
+    if (d.volume > maxVol) {
+      maxVol = d.volume;
+      maxVolDate = d.date;
+      maxVolClose = d.close;
+    }
   });
 
   // 2. 進階指標：計算最新一天的 5日均線(MA5) 與 20日均線(MA20)
   const latestClose = data[0].close;
-  
+
   let ma5 = null, ma20 = null;
   if (totalDays >= 5) {
     const last5 = ascData.slice(-5);
@@ -1173,7 +1395,7 @@ function analyzeHistoryData(data) {
 
   // 4. 動態動人故事組裝
   let stories = [];
-  
+
   // 故事一：天花板與地板 (你的初衷)
   stories.push(`近一個月股價於 ${minPrice} 元（${minDate}）築底成功，並於 ${maxPrice} 元（${maxDate}）觸頂回落。目前最新收盤價 ${latestClose} 元，正處於此區間的${latestClose > (maxPrice + minPrice)/2 ? '中高位階（偏強）' : '中低位階（偏弱）'}。`);
 
@@ -1211,11 +1433,10 @@ function analyzeHistoryData(data) {
 
 async function fetchFugleHistory(symbol, env) {
   try {
-    const to   = new Date().toISOString().slice(0, 10);
+    const to = new Date().toISOString().slice(0, 10);
     const from = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
     const res = await fetchWithTimeout(
-      `https://api.fugle.tw/marketdata/v1.0/stock/historical/candles/${symbol}?from=${from}&to=${to}&timeframe=D&fields=open,high,low,close,volume,turnover,change&sort=desc`,
-      {
+      `https://api.fugle.tw/marketdata/v1.0/stock/historical/candles/${symbol}?from=${from}&to=${to}&timeframe=D&fields=open,high,low,close,volume,turnover,change&sort=desc`, {
         headers: {
           "X-API-KEY": env.FUGLE_KEY,
           "Accept": "application/json"
@@ -1224,7 +1445,10 @@ async function fetchFugleHistory(symbol, env) {
     );
 
     if (!res.ok) {
-      return json({ success: false, error: `HTTP ${res.status}` });
+      return json({
+        success: false,
+        error: `HTTP ${res.status}`
+      });
     }
 
     const d = await res.json();
@@ -1240,7 +1464,10 @@ async function fetchFugleHistory(symbol, env) {
     });
   } catch (e) {
     const errorMsg = e.name === 'AbortError' ? "連線逾時" : e.message;
-    return json({ success: false, error: errorMsg }, 500);
+    return json({
+      success: false,
+      error: errorMsg
+    }, 500);
   }
 }
 
@@ -1273,19 +1500,28 @@ async function fetchForeignNetPosition_old() {
       if (cells.length < 4) return null;
 
       const rawDate = stripTags(cells[0][1]).trim(); // "115/04/15"
-      const foreign  = parseNumber(cells[5][1]);     // 外資
+      const foreign = parseNumber(cells[5][1]); // 外資
 
       // 民國年轉西元
       const [y, m, d] = rawDate.split("/");
       const date = `${parseInt(y) + 1911}-${m}-${d}`;
 
-      return { date, foreign };
+      return {
+        date,
+        foreign
+      };
     }).filter(row => row && !(row.foreign === 0));
 
-    return json({ success: true, data });
+    return json({
+      success: true,
+      data
+    });
   } catch (e) {
     const errorMsg = e.name === 'AbortError' ? "連線逾時" : e.message;
-    return json({ success: false, error: errorMsg }, 500);
+    return json({
+      success: false,
+      error: errorMsg
+    }, 500);
   }
 }
 
@@ -1317,19 +1553,31 @@ async function fetchForeignNetPosition() {
       const cells = [...row[1].matchAll(/<td[^>]*>([\s\S]*?)<\/td>/gi)];
       if (cells.length < 5) return null;
 
-      const rawDate  = stripTags(cells[0][1]).trim(); // "2025/04/15"
-      const foreign  = parseNumber(cells[1][1]);      // 外資
-      const trust    = parseNumber(cells[2][1]);      // 投信
-      const dealer   = parseNumber(cells[3][1]);      // 自營
-      const total    = parseNumber(cells[4][1]);      // 總計
+      const rawDate = stripTags(cells[0][1]).trim(); // "2025/04/15"
+      const foreign = parseNumber(cells[1][1]); // 外資
+      const trust = parseNumber(cells[2][1]); // 投信
+      const dealer = parseNumber(cells[3][1]); // 自營
+      const total = parseNumber(cells[4][1]); // 總計
 
-      return { date: rawDate, foreign, trust, dealer, total };
+      return {
+        date: rawDate,
+        foreign,
+        trust,
+        dealer,
+        total
+      };
     }).filter(row => row && !(row.foreign === 0 && row.trust === 0 && row.dealer === 0 && row.total === 0));
 
-    return json({ success: true, data });
+    return json({
+      success: true,
+      data
+    });
   } catch (e) {
     const errorMsg = e.name === 'AbortError' ? "連線逾時" : e.message;
-    return json({ success: false, error: errorMsg }, 500);
+    return json({
+      success: false,
+      error: errorMsg
+    }, 500);
   }
 }
 
@@ -1337,12 +1585,12 @@ function formatValue(str) {
   if (!str) return 0; // 防止 stripTags 噴出 null 或 undefined
 
   const cleanStr = str
-    .replace(/\s+/g, '')    // 1. 移除所有空白 (包含 - 1,208 中的空格)
-    .replace(/,/g, '')      // 2. 移除千分位逗號 (把 1,208 變成 1208)
-    .replace(/^\+/, '');    // 3. 移除開頭的正號
+    .replace(/\s+/g, '') // 1. 移除所有空白 (包含 - 1,208 中的空格)
+    .replace(/,/g, '') // 2. 移除千分位逗號 (把 1,208 變成 1208)
+    .replace(/^\+/, ''); // 3. 移除開頭的正號
 
   const num = Number(cleanStr);
-  
+
   // 檢查轉換是否成功，失敗則回傳 0，避免讓 total 變成 NaN
   return isNaN(num) ? 0 : num;
 }
@@ -1376,9 +1624,9 @@ async function fetchInstitutional_old() {
       if (cells.length < 4) return null;
 
       const rawDate = stripTags(cells[0][1]).trim(); // "115/04/15"
-      const trust    = formatValue(stripTags(cells[1][1]));     // 投信
-      const dealer   = formatValue(stripTags(cells[2][1]));     // 自營商
-      const foreign  = formatValue(stripTags(cells[3][1]));     // 外資
+      const trust = formatValue(stripTags(cells[1][1])); // 投信
+      const dealer = formatValue(stripTags(cells[2][1])); // 自營商
+      const foreign = formatValue(stripTags(cells[3][1])); // 外資
 
       // 現在這三個變數都是純數字了
       const totalNum = trust + dealer + foreign;
@@ -1387,13 +1635,25 @@ async function fetchInstitutional_old() {
       const [y, m, d] = rawDate.split("/");
       const date = `${parseInt(y) + 1911}-${m}-${d}`;
 
-      return { date, trust, dealer, foreign, total: totalNum.toFixed(2) };
+      return {
+        date,
+        trust,
+        dealer,
+        foreign,
+        total: totalNum.toFixed(2)
+      };
     }).filter(Boolean);
 
-    return json({ success: true, data });
+    return json({
+      success: true,
+      data
+    });
   } catch (e) {
     const errorMsg = e.name === 'AbortError' ? "連線逾時" : e.message;
-    return json({ success: false, error: errorMsg }, 500);
+    return json({
+      success: false,
+      error: errorMsg
+    }, 500);
   }
 }
 
@@ -1426,19 +1686,22 @@ async function fetchInstitutional() {
       if (cells.length < 7) return null;
 
       // 日期格式為 "06/18"，補上當年西元年
-      const rawDate  = stripTags(cells[0][1]).trim();           // "06/18"
-      const foreign  = formatValue(stripTags(cells[1][1]));     // 外資
-      const trust    = formatValue(stripTags(cells[2][1]));     // 投信
-      const dealer   = formatValue(stripTags(cells[3][1]));     // 自營(總)
-      const dealerSelf  = formatValue(stripTags(cells[4][1])); // 自營自買
+      const rawDate = stripTags(cells[0][1]).trim(); // "06/18"
+      const foreign = formatValue(stripTags(cells[1][1])); // 外資
+      const trust = formatValue(stripTags(cells[2][1])); // 投信
+      const dealer = formatValue(stripTags(cells[3][1])); // 自營(總)
+      const dealerSelf = formatValue(stripTags(cells[4][1])); // 自營自買
       const dealerHedge = formatValue(stripTags(cells[5][1])); // 自營避險
-      const total    = formatValue(stripTags(cells[6][1]));     // 總計
+      const total = formatValue(stripTags(cells[6][1])); // 總計
 
       // 自營商合計 = 自營(總) + 自營自買 + 自營避險
       // const dealerTotal = dealer + dealerSelf + dealerHedge;
 
       // 日期補上西元年（頁面只顯示 MM/DD，取當前台北時間的年份）
-      const taipeiYear = new Date().toLocaleString("en-US", { timeZone: "Asia/Taipei", year: "numeric" }).split(",")[0];
+      const taipeiYear = new Date().toLocaleString("en-US", {
+        timeZone: "Asia/Taipei",
+        year: "numeric"
+      }).split(",")[0];
       const [m, d] = rawDate.split("/");
       const date = `${taipeiYear}-${m}-${d}`;
 
@@ -1453,10 +1716,16 @@ async function fetchInstitutional() {
       };
     }).filter(Boolean);
 
-    return json({ success: true, data });
+    return json({
+      success: true,
+      data
+    });
   } catch (e) {
     const errorMsg = e.name === 'AbortError' ? "連線逾時" : e.message;
-    return json({ success: false, error: errorMsg }, 500);
+    return json({
+      success: false,
+      error: errorMsg
+    }, 500);
   }
 }
 
@@ -1517,13 +1786,18 @@ async function fetchMarginTradingBalance() {
 
   } catch (e) {
     const errorMsg = e.name === 'AbortError' ? '連線逾時' : e.message;
-    return json({ success: false, error: errorMsg }, 500);
+    return json({
+      success: false,
+      error: errorMsg
+    }, 500);
   }
 }
 
 function analyzeInstitutionalData(data) {
   if (!data || data.length === 0) {
-    return { story: "暫無法人籌碼數據可供分析。" };
+    return {
+      story: "暫無法人籌碼數據可供分析。"
+    };
   }
 
   // 1. 計算外資與投信的「連續買賣超天數」
@@ -1531,7 +1805,7 @@ function analyzeInstitutionalData(data) {
   const getConsecutiveDays = (key) => {
     const firstAction = data[0][key] >= 0 ? "buy" : "sell";
     let count = 0;
-    
+
     for (let i = 0; i < data.length; i++) {
       const currentAction = data[i][key] >= 0 ? "buy" : "sell";
       if (currentAction === firstAction) {
@@ -1540,7 +1814,10 @@ function analyzeInstitutionalData(data) {
         break;
       }
     }
-    return { type: firstAction, days: count };
+    return {
+      type: firstAction,
+      days: count
+    };
   };
 
   const foreignStreak = getConsecutiveDays("foreign");
@@ -1567,13 +1844,13 @@ function analyzeInstitutionalData(data) {
   const formatStreak = (streak) => {
     return streak.type === "buy" ? `連買 ${streak.days} 天` : `連賣 ${streak.days} 天`;
   };
-  
+
   stories.push(`【現況慣性】外資目前呈現 ${formatStreak(foreignStreak)}，投信則呈現 ${formatStreak(trustStreak)}。`);
 
   // 故事二：5日主力動向與市場對決
   const foreignWan = (sumForeign5 / 1000).toFixed(1);
   const trustWan = (sumTrust5 / 1000).toFixed(1);
-  
+
   stories.push(`【近5日籌碼統計】外資累計${sumForeign5 >= 0 ? '買' : '賣'}超 ${Math.abs(foreignWan)} 千張，投信累計${sumTrust5 >= 0 ? '買' : '賣'}超 ${Math.abs(trustWan)} 千張。五日總計三大法人共${sumTotal5 >= 0 ? '匯入' : '提款'} ${Math.abs((sumTotal5/1000).toFixed(1))} 千張。`);
 
   // 故事三：多空心理角力模型 (判斷誰是主角)
@@ -1633,29 +1910,38 @@ async function fetchStockWearnInstitutional(symbol) {
       if (cells.length < 4) return null;
 
       const rawDate = stripTags(cells[0][1]).trim(); // "115/04/15"
-      const trust    = parseNumber(cells[1][1]);     // 投信
-      const dealer   = parseNumber(cells[2][1]);     // 自營商
-      const foreign  = parseNumber(cells[3][1]);     // 外資
-      const total  = trust + dealer + foreign;       // 合計
+      const trust = parseNumber(cells[1][1]); // 投信
+      const dealer = parseNumber(cells[2][1]); // 自營商
+      const foreign = parseNumber(cells[3][1]); // 外資
+      const total = trust + dealer + foreign; // 合計
 
       // 民國年轉西元
       const [y, m, d] = rawDate.split("/");
       const date = `${parseInt(y) + 1911}-${m}-${d}`;
 
-      return { date, trust, dealer, foreign, total };
+      return {
+        date,
+        trust,
+        dealer,
+        foreign,
+        total
+      };
     }).filter(Boolean);
 
     // === 新增：三大法人籌碼故事分析 ===
     const result = analyzeInstitutionalData(data);
 
-    return json({ 
-      success: true, 
+    return json({
+      success: true,
       data,
       result
     });
   } catch (e) {
     const errorMsg = e.name === 'AbortError' ? "連線逾時" : e.message;
-    return json({ success: false, error: errorMsg }, 500);
+    return json({
+      success: false,
+      error: errorMsg
+    }, 500);
   }
 }
 
@@ -1687,17 +1973,25 @@ async function fetchHiStockInstitutional(symbol) {
       const cells = [...row[1].matchAll(/<td[^>]*>([\s\S]*?)<\/td>/gi)];
       if (cells.length < 6) return null;
 
-      const date        = stripTags(cells[0][1]).trim(); // 日期
-      const foreign     = parseNumber(cells[1][1]); // 外資
-      const trust       = parseNumber(cells[2][1]); // 投信
-      const dealerSelf  = parseNumber(cells[3][1]); // 自營(自買)
+      const date = stripTags(cells[0][1]).trim(); // 日期
+      const foreign = parseNumber(cells[1][1]); // 外資
+      const trust = parseNumber(cells[2][1]); // 投信
+      const dealerSelf = parseNumber(cells[3][1]); // 自營(自買)
       const dealerHedge = parseNumber(cells[4][1]); // 自營(避險)
-      const total       = parseNumber(cells[5][1]); // 總計
+      const total = parseNumber(cells[5][1]); // 總計
 
       // 自營商 = 自營(自買) + 自營(避險)
       const dealer = dealerSelf + dealerHedge;
 
-      return { date, foreign, trust, dealer, dealerSelf, dealerHedge, total };
+      return {
+        date,
+        foreign,
+        trust,
+        dealer,
+        dealerSelf,
+        dealerHedge,
+        total
+      };
     }).filter(Boolean);
 
     // 三大法人籌碼故事分析
@@ -1710,13 +2004,18 @@ async function fetchHiStockInstitutional(symbol) {
     });
   } catch (e) {
     const errorMsg = e.name === 'AbortError' ? "連線逾時" : e.message;
-    return json({ success: false, error: errorMsg }, 500);
+    return json({
+      success: false,
+      error: errorMsg
+    }, 500);
   }
 }
 
 function analyzeMarginTradingBalanceData(data) {
   if (!data || data.length === 0) {
-    return { story: "暫無融資餘額數據可供分析。" };
+    return {
+      story: "暫無融資餘額數據可供分析。"
+    };
   }
 
   // 1. 融資增減連續方向
@@ -1727,24 +2026,27 @@ function analyzeMarginTradingBalanceData(data) {
     if (currentAction === firstAction) streakDays++;
     else break;
   }
-  const financingStreak = { type: firstAction, days: streakDays };
+  const financingStreak = {
+    type: firstAction,
+    days: streakDays
+  };
 
   // 2. 近 5 日累計統計
   const last5Days = data.slice(0, 5);
   let sumFinancing5 = 0;
-  let sumShorting5  = 0;
-  let sumVolume5    = 0;
+  let sumShorting5 = 0;
+  let sumVolume5 = 0;
   last5Days.forEach(d => {
-    sumFinancing5 += d.financing  ?? 0;
-    sumShorting5  += d.shorting   ?? 0;
-    sumVolume5    += d.volume     ?? 0;
+    sumFinancing5 += d.financing ?? 0;
+    sumShorting5 += d.shorting ?? 0;
+    sumVolume5 += d.volume ?? 0;
   });
 
   // 3. 最新一日數據
-  const latest             = data[0];
-  const latestPrice        = latest.price        ?? 0;
-  const latestFinRatio     = latest.financingRatio ?? 0;
-  const latestFinBalance   = latest.financingBalance ?? 0;
+  const latest = data[0];
+  const latestPrice = latest.price ?? 0;
+  const latestFinRatio = latest.financingRatio ?? 0;
+  const latestFinBalance = latest.financingBalance ?? 0;
 
   // 4. 近 5 日股價首尾比對
   const oldest5Price = last5Days[last5Days.length - 1]?.price ?? 0;
@@ -1779,14 +2081,14 @@ function analyzeMarginTradingBalanceData(data) {
   const stories = [];
 
   // 故事一：現況慣性
-  const streakLabel = financingStreak.type === "buy"
-    ? `連續增加 ${financingStreak.days} 天`
-    : `連續減少 ${financingStreak.days} 天`;
+  const streakLabel = financingStreak.type === "buy" ?
+    `連續增加 ${financingStreak.days} 天` :
+    `連續減少 ${financingStreak.days} 天`;
   stories.push(`【現況慣性】融資增減目前呈現 ${streakLabel}，融資餘額 ${latestFinBalance.toLocaleString()} 張，使用率 ${latestFinRatio}%。`);
 
   // 故事二：近 5 日統計
-  const abs5  = Math.abs(sumFinancing5).toLocaleString();
-  const dir5  = sumFinancing5 >= 0 ? "淨增加" : "淨減少";
+  const abs5 = Math.abs(sumFinancing5).toLocaleString();
+  const dir5 = sumFinancing5 >= 0 ? "淨增加" : "淨減少";
   const priceDir = priceChange5 >= 0 ? "上漲" : "下跌";
   stories.push(`【近5日籌碼統計】融資餘額近5日累計 ${dir5} ${abs5} 張，期間股價 ${priceDir} ${Math.abs(priceChange5).toFixed(0)} 元。`);
 
@@ -1802,20 +2104,20 @@ function analyzeMarginTradingBalanceData(data) {
   }
 
   // 故事四：融資水位 / 融券對決 / 量能（有內容才加入）
-  if (finRatioWarning)  stories.push(finRatioWarning);
+  if (finRatioWarning) stories.push(finRatioWarning);
   if (shortSqueezeNote) stories.push(shortSqueezeNote);
-  if (volumeNote)       stories.push(volumeNote);
+  if (volumeNote) stories.push(volumeNote);
 
   return {
     summary: {
-      financingStreakDays:  financingStreak.days,
-      financingStreakType:  financingStreak.type,
+      financingStreakDays: financingStreak.days,
+      financingStreakType: financingStreak.type,
       latestFinancingRatio: latestFinRatio,
       latestFinancingBalance: latestFinBalance,
       accumulated5Day: {
-        financing:   sumFinancing5,
-        shorting:    sumShorting5,
-        volume:      sumVolume5,
+        financing: sumFinancing5,
+        shorting: sumShorting5,
+        volume: sumVolume5,
         priceChange: parseFloat(priceChange5.toFixed(0)),
       }
     },
@@ -1851,17 +2153,27 @@ async function fetchHiStockMarginTradingBalance(symbol) {
       const cells = [...row[1].matchAll(/<td[^>]*>([\s\S]*?)<\/td>/gi)];
       if (cells.length < 13) return null;
 
-      const date             = stripTags(cells[0][1]).trim();  // 日期
-      const financing        = parseNumber(cells[1][1]);        // 融資增減
-      const financingBalance = parseNumber(cells[2][1]);        // 融資餘額
-      const financingRatio   = stripTags(cells[3][1]);        // 融資使用率%
-      const shorting         = parseNumber(cells[4][1]);        // 融券增減
-      const shortingRatio    = stripTags(cells[6][1]);        // 融券使用率%
-      const price            = parseNumber(cells[10][1]);       // 收盤價
-      const priceChange      = parseNumber(cells[11][1]);       // 漲跌幅%
-      const volume           = parseNumber(cells[12][1]);       // 成交量
+      const date = stripTags(cells[0][1]).trim(); // 日期
+      const financing = parseNumber(cells[1][1]); // 融資增減
+      const financingBalance = parseNumber(cells[2][1]); // 融資餘額
+      const financingRatio = stripTags(cells[3][1]); // 融資使用率%
+      const shorting = parseNumber(cells[4][1]); // 融券增減
+      const shortingRatio = stripTags(cells[6][1]); // 融券使用率%
+      const price = parseNumber(cells[10][1]); // 收盤價
+      const priceChange = parseNumber(cells[11][1]); // 漲跌幅%
+      const volume = parseNumber(cells[12][1]); // 成交量
 
-      return { date, financing, financingBalance, financingRatio, shorting, shortingRatio, price, priceChange, volume };
+      return {
+        date,
+        financing,
+        financingBalance,
+        financingRatio,
+        shorting,
+        shortingRatio,
+        price,
+        priceChange,
+        volume
+      };
     }).filter(Boolean);
 
     // 融資餘額與收盤價故事分析
@@ -1874,13 +2186,18 @@ async function fetchHiStockMarginTradingBalance(symbol) {
     });
   } catch (e) {
     const errorMsg = e.name === 'AbortError' ? "連線逾時" : e.message;
-    return json({ success: false, error: errorMsg }, 500);
+    return json({
+      success: false,
+      error: errorMsg
+    }, 500);
   }
 }
 
 function analyzeLargeData(data) {
   if (!data || data.length === 0) {
-    return { story: "暫無籌碼集中度數據可供分析。" };
+    return {
+      story: "暫無籌碼集中度數據可供分析。"
+    };
   }
 
   // 百分比字串轉數字，例如 "82.75%" → 82.75
@@ -1888,33 +2205,33 @@ function analyzeLargeData(data) {
     return parseFloat((str ?? '0').replace('%', '')) || 0;
   }
 
-  const latest  = data[0];
-  const last5   = data.slice(0, 5);
-  const last10  = data.slice(0, 10);
+  const latest = data[0];
+  const last5 = data.slice(0, 5);
+  const last10 = data.slice(0, 10);
 
-  const latestConc    = pct(latest.chipConcentration);
+  const latestConc = pct(latest.chipConcentration);
   const latestForeign = pct(latest.foreignCapital);
-  const latestBig     = pct(latest.bigPlayerChips);
-  const latestDir     = pct(latest.DirectorsChips);
+  const latestBig = pct(latest.bigPlayerChips);
+  const latestDir = pct(latest.DirectorsChips);
 
   // 1. 近 5 日籌碼集中度趨勢（首尾比對）
-  const oldest5Conc   = pct(last5[last5.length - 1]?.chipConcentration);
-  const concChange5   = latestConc - oldest5Conc;
+  const oldest5Conc = pct(last5[last5.length - 1]?.chipConcentration);
+  const concChange5 = latestConc - oldest5Conc;
 
   // 2. 近 10 日外資籌碼趨勢
   const oldest10Foreign = pct(last10[last10.length - 1]?.foreignCapital);
   const foreignChange10 = latestForeign - oldest10Foreign;
 
   // 3. 大戶籌碼近 5 日趨勢
-  const oldest5Big  = pct(last5[last5.length - 1]?.bigPlayerChips);
-  const bigChange5  = latestBig - oldest5Big;
+  const oldest5Big = pct(last5[last5.length - 1]?.bigPlayerChips);
+  const bigChange5 = latestBig - oldest5Big;
 
   // 4. 籌碼集中度水位評級
   let concLevel = '';
-  if (latestConc >= 80)      concLevel = '極高（主力高度控盤）';
+  if (latestConc >= 80) concLevel = '極高（主力高度控盤）';
   else if (latestConc >= 60) concLevel = '偏高（籌碼相對集中）';
   else if (latestConc >= 40) concLevel = '中等（多空拉鋸）';
-  else                       concLevel = '偏低（籌碼分散）';
+  else concLevel = '偏低（籌碼分散）';
 
   // 5. 外資 × 大戶共振判斷
   let synergy = '';
@@ -1943,8 +2260,8 @@ function analyzeLargeData(data) {
   stories.push(`【籌碼現況】籌碼集中度 ${latestConc}%（${concLevel}），外資持股 ${latestForeign}%，大戶持股 ${latestBig}%，董監持股 ${latestDir}%。`);
 
   // 故事二：近期趨勢
-  const concDir  = concChange5  >= 0 ? `上升 ${concChange5.toFixed(2)}%`  : `下降 ${Math.abs(concChange5).toFixed(2)}%`;
-  const bigDir   = bigChange5   >= 0 ? `增加 ${bigChange5.toFixed(2)}%`   : `減少 ${Math.abs(bigChange5).toFixed(2)}%`;
+  const concDir = concChange5 >= 0 ? `上升 ${concChange5.toFixed(2)}%` : `下降 ${Math.abs(concChange5).toFixed(2)}%`;
+  const bigDir = bigChange5 >= 0 ? `增加 ${bigChange5.toFixed(2)}%` : `減少 ${Math.abs(bigChange5).toFixed(2)}%`;
   const foreignDir = foreignChange10 >= 0 ? `增加 ${foreignChange10.toFixed(2)}%` : `減少 ${Math.abs(foreignChange10).toFixed(2)}%`;
   stories.push(`【近期趨勢】籌碼集中度近5日 ${concDir}，大戶籌碼近5日 ${bigDir}，外資籌碼近10日 ${foreignDir}。`);
 
@@ -1958,14 +2275,14 @@ function analyzeLargeData(data) {
     summary: {
       latest: {
         chipConcentration: latestConc,
-        foreignCapital:    latestForeign,
-        bigPlayerChips:    latestBig,
-        DirectorsChips:    latestDir,
+        foreignCapital: latestForeign,
+        bigPlayerChips: latestBig,
+        DirectorsChips: latestDir,
       },
       change: {
-        concChange5Days:      parseFloat(concChange5.toFixed(2)),
-        foreignChange10Days:  parseFloat(foreignChange10.toFixed(2)),
-        bigChange5Days:       parseFloat(bigChange5.toFixed(2)),
+        concChange5Days: parseFloat(concChange5.toFixed(2)),
+        foreignChange10Days: parseFloat(foreignChange10.toFixed(2)),
+        bigChange5Days: parseFloat(bigChange5.toFixed(2)),
       }
     },
     story: stories.join("<br><br>")
@@ -1986,7 +2303,7 @@ function parseNumber(html) {
 
 async function fetchFugleSma(symbol, env) {
   try {
-    const to   = new Date().toISOString().slice(0, 10);
+    const to = new Date().toISOString().slice(0, 10);
     const from = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10); // 60MA需要更長區間
     const periods = [5, 10, 20, 60];
 
@@ -1994,8 +2311,12 @@ async function fetchFugleSma(symbol, env) {
     const results = await Promise.all(
       periods.map(period =>
         fetchWithTimeout(
-          `https://api.fugle.tw/marketdata/v1.0/stock/technical/sma/${symbol}?from=${from}&to=${to}&timeframe=D&period=${period}`,
-          { headers: { "X-API-KEY": env.FUGLE_KEY, "Accept": "application/json" } }
+          `https://api.fugle.tw/marketdata/v1.0/stock/technical/sma/${symbol}?from=${from}&to=${to}&timeframe=D&period=${period}`, {
+            headers: {
+              "X-API-KEY": env.FUGLE_KEY,
+              "Accept": "application/json"
+            }
+          }
         ).then(r => r.json())
       )
     );
@@ -2005,7 +2326,9 @@ async function fetchFugleSma(symbol, env) {
     periods.forEach((period, i) => {
       const rows = results[i]?.data || [];
       rows.forEach(row => {
-        if (!merged[row.date]) merged[row.date] = { date: row.date };
+        if (!merged[row.date]) merged[row.date] = {
+          date: row.date
+        };
         merged[row.date][`sma_${period}`] = parseFloat(row.sma.toFixed(2));
       });
     });
@@ -2013,15 +2336,21 @@ async function fetchFugleSma(symbol, env) {
     // 轉回陣列並依日期遞減排序
     const data = Object.values(merged).sort((b, a) => a.date.localeCompare(b.date));
 
-    return json({ success: true, data });
+    return json({
+      success: true,
+      data
+    });
   } catch (e) {
-    return json({ success: false, error: e.message }, 500);
+    return json({
+      success: false,
+      error: e.message
+    }, 500);
   }
 }
 
 async function fetchFugleRsi(symbol, env) {
   try {
-    const to   = new Date().toISOString().slice(0, 10);
+    const to = new Date().toISOString().slice(0, 10);
     const from = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
     const periods = [6, 9, 14, 20];
 
@@ -2029,8 +2358,12 @@ async function fetchFugleRsi(symbol, env) {
     const results = await Promise.all(
       periods.map(period =>
         fetchWithTimeout(
-          `https://api.fugle.tw/marketdata/v1.0/stock/technical/rsi/${symbol}?from=${from}&to=${to}&timeframe=D&period=${period}`,
-          { headers: { "X-API-KEY": env.FUGLE_KEY, "Accept": "application/json" } }
+          `https://api.fugle.tw/marketdata/v1.0/stock/technical/rsi/${symbol}?from=${from}&to=${to}&timeframe=D&period=${period}`, {
+            headers: {
+              "X-API-KEY": env.FUGLE_KEY,
+              "Accept": "application/json"
+            }
+          }
         ).then(r => r.json())
       )
     );
@@ -2040,7 +2373,9 @@ async function fetchFugleRsi(symbol, env) {
     periods.forEach((period, i) => {
       const rows = results[i]?.data || [];
       rows.forEach(row => {
-        if (!merged[row.date]) merged[row.date] = { date: row.date };
+        if (!merged[row.date]) merged[row.date] = {
+          date: row.date
+        };
         merged[row.date][`rsi_${period}`] = parseFloat(row.rsi.toFixed(2));
       });
     });
@@ -2048,19 +2383,24 @@ async function fetchFugleRsi(symbol, env) {
     // 轉回陣列並依日期遞減排序
     const data = Object.values(merged).sort((b, a) => a.date.localeCompare(b.date));
 
-    return json({ success: true, data });
+    return json({
+      success: true,
+      data
+    });
   } catch (e) {
-    return json({ success: false, error: e.message }, 500);
+    return json({
+      success: false,
+      error: e.message
+    }, 500);
   }
 }
 
 async function fetchFugleKdj(symbol, env) {
   try {
-    const to   = new Date().toISOString().slice(0, 10);
+    const to = new Date().toISOString().slice(0, 10);
     const from = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
     const res = await fetchWithTimeout(
-      `https://api.fugle.tw/marketdata/v1.0/stock/technical/kdj/${symbol}?from=${from}&to=${to}&timeframe=D&rPeriod=9&kPeriod=3&dPeriod=3`,
-      {
+      `https://api.fugle.tw/marketdata/v1.0/stock/technical/kdj/${symbol}?from=${from}&to=${to}&timeframe=D&rPeriod=9&kPeriod=3&dPeriod=3`, {
         headers: {
           "X-API-KEY": env.FUGLE_KEY,
           "Accept": "application/json"
@@ -2069,7 +2409,10 @@ async function fetchFugleKdj(symbol, env) {
     );
 
     if (!res.ok) {
-      return json({ success: false, error: `HTTP ${res.status}` });
+      return json({
+        success: false,
+        error: `HTTP ${res.status}`
+      });
     }
 
     const d = await res.json();
@@ -2088,17 +2431,19 @@ async function fetchFugleKdj(symbol, env) {
     });
   } catch (e) {
     const errorMsg = e.name === 'AbortError' ? "連線逾時" : e.message;
-    return json({ success: false, error: errorMsg }, 500);
+    return json({
+      success: false,
+      error: errorMsg
+    }, 500);
   }
 }
 
 async function fetchFugleMacd(symbol, env) {
   try {
-    const to   = new Date().toISOString().slice(0, 10);
+    const to = new Date().toISOString().slice(0, 10);
     const from = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
     const res = await fetchWithTimeout(
-      `https://api.fugle.tw/marketdata/v1.0/stock/technical/macd/${symbol}?from=${from}&to=${to}&timeframe=D&fast=12&slow=26&signal=9`,
-      {
+      `https://api.fugle.tw/marketdata/v1.0/stock/technical/macd/${symbol}?from=${from}&to=${to}&timeframe=D&fast=12&slow=26&signal=9`, {
         headers: {
           "X-API-KEY": env.FUGLE_KEY,
           "Accept": "application/json"
@@ -2107,7 +2452,10 @@ async function fetchFugleMacd(symbol, env) {
     );
 
     if (!res.ok) {
-      return json({ success: false, error: `HTTP ${res.status}` });
+      return json({
+        success: false,
+        error: `HTTP ${res.status}`
+      });
     }
 
     const d = await res.json();
@@ -2126,31 +2474,48 @@ async function fetchFugleMacd(symbol, env) {
     });
   } catch (e) {
     const errorMsg = e.name === 'AbortError' ? "連線逾時" : e.message;
-    return json({ success: false, error: errorMsg }, 500);
+    return json({
+      success: false,
+      error: errorMsg
+    }, 500);
   }
 }
 
 async function fetchFugleBrands(symbol, env) {
   try {
-    const to   = new Date().toISOString().slice(0, 10);
+    const to = new Date().toISOString().slice(0, 10);
     const from = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
 
     // 同時打兩支 API
     const [bbRes, histRes] = await Promise.all([
       fetchWithTimeout(
-        `https://api.fugle.tw/marketdata/v1.0/stock/technical/bb/${symbol}?from=${from}&to=${to}&timeframe=D&period=20`,
-        { headers: { "X-API-KEY": env.FUGLE_KEY, "Accept": "application/json" } }
+        `https://api.fugle.tw/marketdata/v1.0/stock/technical/bb/${symbol}?from=${from}&to=${to}&timeframe=D&period=20`, {
+          headers: {
+            "X-API-KEY": env.FUGLE_KEY,
+            "Accept": "application/json"
+          }
+        }
       ),
       fetchWithTimeout(
-        `https://api.fugle.tw/marketdata/v1.0/stock/historical/candles/${symbol}?from=${from}&to=${to}&timeframe=D&fields=close&sort=desc`,
-        { headers: { "X-API-KEY": env.FUGLE_KEY, "Accept": "application/json" } }
+        `https://api.fugle.tw/marketdata/v1.0/stock/historical/candles/${symbol}?from=${from}&to=${to}&timeframe=D&fields=close&sort=desc`, {
+          headers: {
+            "X-API-KEY": env.FUGLE_KEY,
+            "Accept": "application/json"
+          }
+        }
       ),
     ]);
 
-    if (!bbRes.ok)   return json({ success: false, error: `BB HTTP ${bbRes.status}` });
-    if (!histRes.ok) return json({ success: false, error: `Hist HTTP ${histRes.status}` });
+    if (!bbRes.ok) return json({
+      success: false,
+      error: `BB HTTP ${bbRes.status}`
+    });
+    if (!histRes.ok) return json({
+      success: false,
+      error: `Hist HTTP ${histRes.status}`
+    });
 
-    const bbData   = await bbRes.json();
+    const bbData = await bbRes.json();
     const histData = await histRes.json();
 
     // 用 date 建立 close price 的查找 Map
@@ -2161,18 +2526,24 @@ async function fetchFugleBrands(symbol, env) {
     const data = bbData.data
       .sort((a, b) => b.date.localeCompare(a.date))
       .map(row => ({
-        date:        row.date,
-        upper:       parseFloat(row.upper.toFixed(2)),
-        middle:      parseFloat(row.middle.toFixed(2)),
-        lower:       parseFloat(row.lower.toFixed(2)),
-        price: priceMap.get(row.date) ?? null,  // ← 新增，找不到日期就給 null
+        date: row.date,
+        upper: parseFloat(row.upper.toFixed(2)),
+        middle: parseFloat(row.middle.toFixed(2)),
+        lower: parseFloat(row.lower.toFixed(2)),
+        price: priceMap.get(row.date) ?? null, // ← 新增，找不到日期就給 null
       }));
 
-    return json({ success: true, data });
+    return json({
+      success: true,
+      data
+    });
 
   } catch (e) {
     const errorMsg = e.name === 'AbortError' ? "連線逾時" : e.message;
-    return json({ success: false, error: errorMsg }, 500);
+    return json({
+      success: false,
+      error: errorMsg
+    }, 500);
   }
 }
 
@@ -2185,30 +2556,39 @@ async function fetchYahooFinance(symbol, interval = 1, range = 1) {
         "Accept": "application/json",
       }
     });
- 
+
     if (!res.ok) {
-      return json({ success: false, error: `HTTP ${res.status}` }, res.status);
+      return json({
+        success: false,
+        error: `HTTP ${res.status}`
+      }, res.status);
     }
- 
+
     const data = await res.json();
-    const result = data?.chart?.result?.[0];
+    const result = data?.chart?.result?. [0];
     if (!result) {
-      return json({ success: false, error: "無資料" });
+      return json({
+        success: false,
+        error: "無資料"
+      });
     }
- 
+
     const timestamps = result.timestamp ?? (result.meta?.regularMarketTime ? [result.meta.regularMarketTime] : []);
-    const quote = result.indicators?.quote?.[0] || {};
+    const quote = result.indicators?.quote?. [0] || {};
     const closes = quote.close ?? (result.meta?.regularMarketPrice ? [result.meta.regularMarketPrice] : []);
-    const opens  = quote.open   || [];
-    const highs  = quote.high   || [];
-    const lows   = quote.low    || [];
- 
+    const opens = quote.open || [];
+    const highs = quote.high || [];
+    const lows = quote.low || [];
+
     // 取最後一筆（最新）
     const lastIdx = timestamps.length - 1;
     if (lastIdx < 0) {
-      return json({ success: false, error: "timestamp 為空" });
+      return json({
+        success: false,
+        error: "timestamp 為空"
+      });
     }
- 
+
     const regularMarketTime = result.meta?.regularMarketTime;
     const updateTime = new Date(regularMarketTime * 1000).toLocaleString("zh-TW", {
       timeZone: "Asia/Taipei",
@@ -2220,20 +2600,23 @@ async function fetchYahooFinance(symbol, interval = 1, range = 1) {
       minute: "2-digit",
       second: "2-digit"
     }).replace(/\//g, '-');
- 
+
     return json({
-      success:    true,
-      prev:       toFloat(result.meta?.chartPreviousClose),
-      open:       toFloat(opens[lastIdx]),
-      high:       toFloat(highs[lastIdx]),
-      low:        toFloat(lows[lastIdx]),
-      close:      toFloat(closes[lastIdx]),
+      success: true,
+      prev: toFloat(result.meta?.chartPreviousClose),
+      open: toFloat(opens[lastIdx]),
+      high: toFloat(highs[lastIdx]),
+      low: toFloat(lows[lastIdx]),
+      close: toFloat(closes[lastIdx]),
       regularMarketTime,
       updateTime
     });
   } catch (e) {
     const errorMsg = e.name === 'AbortError' ? "連線逾時" : e.message;
-    return json({ success: false, error: errorMsg }, 500);
+    return json({
+      success: false,
+      error: errorMsg
+    }, 500);
   }
 }
 
@@ -2245,7 +2628,11 @@ function isNeedTranslate(str) {
 // 呼叫 MyMemory 翻譯單一字串
 async function translateToZh(text) {
   const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|zh-TW&de=bau720123@gmail.com`;
-  const res = await fetchWithTimeout(url, { headers: { "User-Agent": UA } });
+  const res = await fetchWithTimeout(url, {
+    headers: {
+      "User-Agent": UA
+    }
+  });
   const data = await res.json();
   return data?.responseData?.translatedText || text; // 失敗就回傳原文
 }
@@ -2265,27 +2652,37 @@ async function fetchFedWatch(env) {
         }
       }, 10000),
       fetchWithTimeout(`https://api.stlouisfed.org/fred/series/observations?series_id=DFEDTARL&api_key=${env.FRED_KEY}&file_type=json&limit=1&sort_order=desc`, {
-        headers: { "Accept": "application/json" }
+        headers: {
+          "Accept": "application/json"
+        }
       }, 8000),
       fetchWithTimeout(`https://api.stlouisfed.org/fred/series/observations?series_id=DFEDTARU&api_key=${env.FRED_KEY}&file_type=json&limit=1&sort_order=desc`, {
-        headers: { "Accept": "application/json" }
+        headers: {
+          "Accept": "application/json"
+        }
       }, 8000),
     ]);
 
-    if (!investingRes.ok) return json({ success: false, error: `investing.com HTTP ${investingRes.status}` });
+    if (!investingRes.ok) return json({
+      success: false,
+      error: `investing.com HTTP ${investingRes.status}`
+    });
 
     const html = await investingRes.text();
 
     // ── 一、抓第一個 class="infoFed" 區塊，取 Meeting Time ──
     const infoFedIdx = html.indexOf('class="infoFed"');
-    if (infoFedIdx === -1) return json({ success: false, error: "找不到 infoFed" });
+    if (infoFedIdx === -1) return json({
+      success: false,
+      error: "找不到 infoFed"
+    });
 
     const infoFedSlice = html.substring(infoFedIdx);
     const iStart = infoFedSlice.indexOf("<i>");
-    const iEnd   = infoFedSlice.indexOf("</i>", iStart);
-    const meetingTimeRaw = (iStart !== -1 && iEnd !== -1)
-      ? infoFedSlice.substring(iStart + 3, iEnd).trim()
-      : "";
+    const iEnd = infoFedSlice.indexOf("</i>", iStart);
+    const meetingTimeRaw = (iStart !== -1 && iEnd !== -1) ?
+      infoFedSlice.substring(iStart + 3, iEnd).trim() :
+      "";
 
     let meetingTimeTaipei = "";
     if (meetingTimeRaw) {
@@ -2296,9 +2693,9 @@ async function fetchFedWatch(env) {
         if (!ampmMatch) return "";
 
         const datePart = ampmMatch[1];
-        let hours      = parseInt(ampmMatch[2], 10);
-        const minutes  = ampmMatch[3];
-        const ampm     = ampmMatch[4].toUpperCase();
+        let hours = parseInt(ampmMatch[2], 10);
+        const minutes = ampmMatch[3];
+        const ampm = ampmMatch[4].toUpperCase();
 
         if (ampm === "AM" && hours === 12) hours = 0;
         if (ampm === "PM" && hours !== 12) hours += 12;
@@ -2315,8 +2712,11 @@ async function fetchFedWatch(env) {
         return dt.toLocaleString("zh-TW", {
           timeZone: "Asia/Taipei",
           hour12: false,
-          year: "numeric", month: "2-digit", day: "2-digit",
-          hour: "2-digit", minute: "2-digit",
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
         }).replace(/\//g, '-');
       }
 
@@ -2326,16 +2726,22 @@ async function fetchFedWatch(env) {
     // ── 二、抓 fedRateTbl table ──
     const tableClass = 'class="genTbl openTbl fedRateTbl"';
     const tableIdx = html.indexOf(tableClass);
-    if (tableIdx === -1) return json({ success: false, error: "找不到 fedRateTbl" });
+    if (tableIdx === -1) return json({
+      success: false,
+      error: "找不到 fedRateTbl"
+    });
 
     const tableEnd = html.indexOf("</table>", tableIdx);
-    const tableSlice = (tableEnd !== -1)
-      ? html.substring(tableIdx, tableEnd + 8)
-      : html.substring(tableIdx, tableIdx + 8000);
+    const tableSlice = (tableEnd !== -1) ?
+      html.substring(tableIdx, tableEnd + 8) :
+      html.substring(tableIdx, tableIdx + 8000);
 
     const tbodyStart = tableSlice.indexOf("<tbody>");
-    const tbodyEnd   = tableSlice.indexOf("</tbody>");
-    if (tbodyStart === -1 || tbodyEnd === -1) return json({ success: false, error: "找不到 tbody" });
+    const tbodyEnd = tableSlice.indexOf("</tbody>");
+    if (tbodyStart === -1 || tbodyEnd === -1) return json({
+      success: false,
+      error: "找不到 tbody"
+    });
 
     const tbody = tableSlice.substring(tbodyStart + 7, tbodyEnd);
 
@@ -2359,22 +2765,22 @@ async function fetchFedWatch(env) {
       };
 
       rates.push({
-        targetRate:   cells[0].replace(/\s+/g, " ").trim(),
-        currentProb:  parseProb(cells[1]),
-        prevDayProb:  parseProb(cells[2]),
+        targetRate: cells[0].replace(/\s+/g, " ").trim(),
+        currentProb: parseProb(cells[1]),
+        prevDayProb: parseProb(cells[2]),
         prevWeekProb: parseProb(cells[3]),
       });
     }
 
     // ── 三、FRED 當前基準利率 ──
-    let currentRateLow  = null;
+    let currentRateLow = null;
     let currentRateHigh = null;
 
     try {
-      const fredLow  = await fredLowRes.json();
+      const fredLow = await fredLowRes.json();
       const fredHigh = await fredHighRes.json();
-      currentRateLow  = toFloat(fredLow?.observations?.[0]?.value);
-      currentRateHigh = toFloat(fredHigh?.observations?.[0]?.value);
+      currentRateLow = toFloat(fredLow?.observations?. [0]?.value);
+      currentRateHigh = toFloat(fredHigh?.observations?. [0]?.value);
     } catch (_) {
       // FRED 失敗不影響主資料，currentRate 留 null
     }
@@ -2390,24 +2796,27 @@ async function fetchFedWatch(env) {
       const targetLow = toFloat(r.targetRate.split('-')[0]);
       const diff = Math.round((targetLow - currentRateLow) * 100); // 單位：bp
 
-      if (diff === 0)     r.action = '維持利率';
-      else if (diff < 0)  r.action = `降息 ${Math.abs(diff / 25)} 碼`;
-      else                r.action = `升息 ${diff / 25} 碼`;
+      if (diff === 0) r.action = '維持利率';
+      else if (diff < 0) r.action = `降息 ${Math.abs(diff / 25)} 碼`;
+      else r.action = `升息 ${diff / 25} 碼`;
     });
 
     return json({
-      success:          true,
-      meetingTimeET:    meetingTimeRaw,
-      meetingTimeTW:    meetingTimeTaipei,
-      currentRate:      (currentRateLow !== null && currentRateHigh !== null)
-                          ? `${currentRateLow} - ${currentRateHigh}`
-                          : null,
+      success: true,
+      meetingTimeET: meetingTimeRaw,
+      meetingTimeTW: meetingTimeTaipei,
+      currentRate: (currentRateLow !== null && currentRateHigh !== null) ?
+        `${currentRateLow} - ${currentRateHigh}` :
+        null,
       rates,
     });
 
   } catch (e) {
     const errorMsg = e.name === 'AbortError' ? "連線逾時" : e.message;
-    return json({ success: false, error: errorMsg }, 500);
+    return json({
+      success: false,
+      error: errorMsg
+    }, 500);
   }
 }
 
@@ -2416,20 +2825,40 @@ async function fetchNewsRss(env) {
   const KEYWORDS = [
     '伊朗', '油價', '荷姆茲', '荷莫茲', '原油', '戰爭', '中東', '川普', '軍事', '衝突', '制裁', '核子', '核武', '導彈', '攻擊', '防空', '航運', '油輪', '台積電', 'ADR', '台達電', '俄羅斯', '烏克蘭', '三星', '海力士', '談判', '高市', '輝達', 'AMD', '超微'
   ];
- 
+
   // RSS 來源清單
-  const SOURCES = [
-    { url: 'https://tw.news.yahoo.com/rss/finance',                  name: 'Yahoo奇摩財經' },
-    { url: 'https://feeds.feedburner.com/rsscna/intworld',           name: '中央社國際' },
-    { url: 'https://feeds.feedburner.com/rsscna/finance',            name: '中央社產經' },
-    { url: 'https://feeds.feedburner.com/rsscna/politics',           name: '中央社政治' },
-    { url: 'https://news.ltn.com.tw/rss/world.xml',                  name: '自由時報國際' },
-    { url: 'https://news.ltn.com.tw/rss/business.xml',               name: '自由時報財經' },
+  const SOURCES = [{
+      url: 'https://tw.news.yahoo.com/rss/finance',
+      name: 'Yahoo奇摩財經'
+    },
+    {
+      url: 'https://feeds.feedburner.com/rsscna/intworld',
+      name: '中央社國際'
+    },
+    {
+      url: 'https://feeds.feedburner.com/rsscna/finance',
+      name: '中央社產經'
+    },
+    {
+      url: 'https://feeds.feedburner.com/rsscna/politics',
+      name: '中央社政治'
+    },
+    {
+      url: 'https://news.ltn.com.tw/rss/world.xml',
+      name: '自由時報國際'
+    },
+    {
+      url: 'https://news.ltn.com.tw/rss/business.xml',
+      name: '自由時報財經'
+    },
     // { url: 'https://news.google.com/rss/search?q=when:24h+allinurl:reuters.com+Trump&hl=en-US&gl=US&ceid=US:en', name: 'Reuters-Trump' },
     // { url: 'https://news.google.com/rss/search?q=when:24h+allinurl:reuters.com+Iran+oil&hl=en-US&gl=US&ceid=US:en', name: 'Reuters-Iran' },
-    { url: 'https://cb.yna.co.kr/gate/big5/cn.yna.co.kr/RSS/politics.xml',               name: '韓聯社' },
+    {
+      url: 'https://cb.yna.co.kr/gate/big5/cn.yna.co.kr/RSS/politics.xml',
+      name: '韓聯社'
+    },
   ];
- 
+
   // 解析單一 RSS XML，回傳 items 陣列
   function parseRss(xml, sourceName) {
     const items = [];
@@ -2437,79 +2866,83 @@ async function fetchNewsRss(env) {
     let m;
     while ((m = itemRegex.exec(xml)) !== null) {
       const block = m[1];
- 
+
       // title：支援 CDATA 與純文字
-      const titleMatch = block.match(/<title><!\[CDATA\[([\s\S]*?)\]\]><\/title>/)
-                      || block.match(/<title>([\s\S]*?)<\/title>/);
+      const titleMatch = block.match(/<title><!\[CDATA\[([\s\S]*?)\]\]><\/title>/) ||
+        block.match(/<title>([\s\S]*?)<\/title>/);
       // link：
       //   中央社：<link>https://...</link>（有內容，優先）
       //   Yahoo ：<link/>（自閉合空標籤），URL 改放在 <guid>
-      const linkMatch  = block.match(/<link>(https?:\/\/[^\s<]+)<\/link>/)
-                      || block.match(/<link><!\[CDATA\[([\s\S]*?)\]\]><\/link>/)
-                      || block.match(/<guid[^>]*>(https?:\/\/[^\s<]+)<\/guid>/);
-      const pubMatch   = block.match(/<pubDate>([\s\S]*?)<\/pubDate>/);
-      const srcMatch   = block.match(/<source[^>]*>([\s\S]*?)<\/source>/);
+      const linkMatch = block.match(/<link>(https?:\/\/[^\s<]+)<\/link>/) ||
+        block.match(/<link><!\[CDATA\[([\s\S]*?)\]\]><\/link>/) ||
+        block.match(/<guid[^>]*>(https?:\/\/[^\s<]+)<\/guid>/);
+      const pubMatch = block.match(/<pubDate>([\s\S]*?)<\/pubDate>/);
+      const srcMatch = block.match(/<source[^>]*>([\s\S]*?)<\/source>/);
 
       // description：支援 CDATA 與純文字，去除 HTML tag 後截斷
-      const descMatch  = block.match(/<description><!\[CDATA\[([\s\S]*?)\]\]><\/description>/)
-                      || block.match(/<description>([\s\S]*?)<\/description>/);
-      const descRaw    = descMatch ? descMatch[1].replace(/<[^>]+>/g, '').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&nbsp;/g,' ').trim() : '';
+      const descMatch = block.match(/<description><!\[CDATA\[([\s\S]*?)\]\]><\/description>/) ||
+        block.match(/<description>([\s\S]*?)<\/description>/);
+      const descRaw = descMatch ? descMatch[1].replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&nbsp;/g, ' ').trim() : '';
 
       // 若原始資料已含 … 摘要符號，代表來源已自行截斷，直接清理使用；否則自行截斷至 120 字
       const hasEllipsis = descRaw.includes('…');
-      const descClean   = descRaw.replace(/…/g, '').trimEnd();
+      const descClean = descRaw.replace(/…/g, '').trimEnd();
       const isGoogleNews = sourceName.startsWith('Reuters');
       const desc = isGoogleNews ? '' : (hasEllipsis ? descClean : (descRaw.length > 120 ? descRaw.slice(0, 120) + '…' : descRaw));
- 
-      const title = titleMatch ? titleMatch[1].replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').trim() : '';
+
+      const title = titleMatch ? titleMatch[1].replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').trim() : '';
       if (!title) continue;
- 
+
       items.push({
         title,
-        link:    linkMatch  ? linkMatch[1].trim()  : '',
-        pubDate: pubMatch   ? pubMatch[1].trim()   : '',
-        source:  srcMatch   ? srcMatch[1].trim()   : sourceName,
+        link: linkMatch ? linkMatch[1].trim() : '',
+        pubDate: pubMatch ? pubMatch[1].trim() : '',
+        source: srcMatch ? srcMatch[1].trim() : sourceName,
         desc,
       });
     }
     return items;
   }
- 
+
   try {
     // 平行抓取所有 RSS 來源
     const results = await Promise.allSettled(
       SOURCES.map(s =>
-        fetchWithTimeout(s.url, { headers: { "User-Agent": UA } }, 5000)
-          .then(r => {
-            // 韓聯社 XML header 宣告 UTF-8 但實際是 Big5，需強制用 Big5 解碼
-            if (s.name === '韓聯社') {
-              return r.arrayBuffer().then(buf => new TextDecoder('big5').decode(buf));
-            }
-            return r.text();
-          })
-          .then(xml => parseRss(xml, s.name))
-          .catch(() => [])
+        fetchWithTimeout(s.url, {
+          headers: {
+            "User-Agent": UA
+          }
+        }, 5000)
+        .then(r => {
+          // 韓聯社 XML header 宣告 UTF-8 但實際是 Big5，需強制用 Big5 解碼
+          if (s.name === '韓聯社') {
+            return r.arrayBuffer().then(buf => new TextDecoder('big5').decode(buf));
+          }
+          return r.text();
+        })
+        .then(xml => parseRss(xml, s.name))
+        .catch(() => [])
       )
     );
- 
+
     // 合併所有來源
     let allItems = [];
     results.forEach(r => {
       if (r.status === 'fulfilled') allItems = allItems.concat(r.value);
     });
- 
+
     // 關鍵字過濾
     const filtered = allItems.filter(item =>
       KEYWORDS.some(kw => item.title.includes(kw))
     );
- 
+
     // 依 pubDate 降冪排序（最新在前）
     filtered.sort((a, b) => {
       const da = a.pubDate ? new Date(a.pubDate).getTime() : 0;
       const db = b.pubDate ? new Date(b.pubDate).getTime() : 0;
       return db - da;
     });
- 
+
     // 去重（相同標題只保留第一筆）
     const seen = new Set();
     const unique = filtered.filter(item => {
@@ -2519,35 +2952,35 @@ async function fetchNewsRss(env) {
     });
 
     let ai_suggest = null;
-//     const top10Titles = unique.slice(0, 10).map((item, i) => `${i + 1}. ${item.title}`).join('\n'); // 抓取前十則標題的資料
-//     try {
-//       const geminiRes = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent', {
-//         method: 'POST',
-//         headers: {
-//           'Content-Type': 'application/json',
-//           'X-goog-api-key': env.GEMINI_KEY,
-//         },
-//         body: JSON.stringify({
-//           system_instruction: { parts: { text: '你是一位專業的金融市場分析師，專注於地緣政治對能源與股票市場的影響。' } },
-//           contents: [{ parts: [{ text: `以下是最新新聞標題，請站在「台灣散戶投資人」的角度，分析這些新聞對美股與台股的整體影響。
+    //   const top10Titles = unique.slice(0, 10).map((item, i) => `${i + 1}. ${item.title}`).join('\n'); // 抓取前十則標題的資料
+    //   try {
+    //     const geminiRes = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent', {
+    //     method: 'POST',
+    //     headers: {
+    //       'Content-Type': 'application/json',
+    //       'X-goog-api-key': env.GEMINI_KEY,
+    //     },
+    //     body: JSON.stringify({
+    //       system_instruction: { parts: { text: '你是一位專業的金融市場分析師，專注於地緣政治對能源與股票市場的影響。' } },
+    //       contents: [{ parts: [{ text: `以下是最新新聞標題，請站在「台灣散戶投資人」的角度，分析這些新聞對美股與台股的整體影響。
 
-// ${top10Titles}
+    // ${top10Titles}
 
-// 判斷標準：
-// - 看多：對股市有正面影響，適合進場或持股
-// - 看空：對股市有負面影響，建議減碼或觀望
-// - 中性：影響不明確，建議持觀望態度
+    // 判斷標準：
+    // - 看多：對股市有正面影響，適合進場或持股
+    // - 看空：對股市有負面影響，建議減碼或觀望
+    // - 中性：影響不明確，建議持觀望態度
 
-// 請用以下 JSON 格式回答，不要有任何其他文字或 markdown：
-// {"signal":"看多/看空/中性","reason":"50字以內原因，以股市角度說明","risk":"高/中/低"}` }] }],
-//         }),
-//       });
-//       const geminiData = await geminiRes.json();
-//       const text = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text || '';
-//       ai_suggest = JSON.parse(text.replace(/```json|```/g, '').trim());
-//     } catch (e) {
-//       ai_suggest = { error: e.message };
-//     }
+    // 請用以下 JSON 格式回答，不要有任何其他文字或 markdown：
+    // {"signal":"看多/看空/中性","reason":"50字以內原因，以股市角度說明","risk":"高/中/低"}` }] }],
+    //     }),
+    //     });
+    //     const geminiData = await geminiRes.json();
+    //     const text = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    //     ai_suggest = JSON.parse(text.replace(/```json|```/g, '').trim());
+    //   } catch (e) {
+    //     ai_suggest = { error: e.message };
+    //   }
 
     // 去重後，統一翻譯英文標題
     const translated = await Promise.all(
@@ -2558,13 +2991,23 @@ async function fetchNewsRss(env) {
         return item;
       })
     );
- 
-    return new Response(JSON.stringify({ success: true, items: translated.slice(0, 30), ai_suggest }), {
-      headers: { ...CORS, "Content-Type": "application/json; charset=utf-8" }
+
+    return new Response(JSON.stringify({
+      success: true,
+      items: translated.slice(0, 30),
+      ai_suggest
+    }), {
+      headers: {
+        ...CORS,
+        "Content-Type": "application/json; charset=utf-8"
+      }
     });
   } catch (e) {
     const errorMsg = e.name === 'AbortError' ? "連線逾時" : e.message;
-    return json({ success: false, error: errorMsg }, 500);
+    return json({
+      success: false,
+      error: errorMsg
+    }, 500);
   }
 }
 
@@ -2574,14 +3017,17 @@ async function fetchAmericaCalendar(env) {
     const now = new Date();
     const twTime = new Date(now.getTime() + 8 * 3600 * 1000);
     const currentYear = twTime.getFullYear();
-    
+
     // 固定抓取當月 1 號開始到年底
     const from = `${currentYear}-${String(twTime.getMonth() + 1).padStart(2, '0')}-01`;
     const to = `${currentYear}-12-31`;
-    
+
     // 1. 抓取 MoneyDJ 資料
     const res = await fetchWithTimeout(`https://www.moneydj.com/us/rest/eventlist?from=${from}&to=${to}`, {
-      headers: { "User-Agent": UA, "Referer": "https://www.moneydj.com/us/home" }
+      headers: {
+        "User-Agent": UA,
+        "Referer": "https://www.moneydj.com/us/home"
+      }
     });
     const data = await res.json();
 
@@ -2604,14 +3050,17 @@ async function fetchAmericaCalendar(env) {
         shouldInclude = true;
         filteredIndicators = indicatorList;
       } else if (item.type === 'index') {
-        filteredIndicators = indicatorList.filter(ind => 
+        filteredIndicators = indicatorList.filter(ind =>
           keywords.some(kw => ind.name.includes(kw) || ind.code.includes(kw))
         );
         if (filteredIndicators.length > 0) shouldInclude = true;
       }
 
       if (shouldInclude) {
-        acc.push({ ...item, indicators: filteredIndicators });
+        acc.push({
+          ...item,
+          indicators: filteredIndicators
+        });
       }
       return acc;
     }, []);
@@ -2625,10 +3074,18 @@ async function fetchAmericaCalendar(env) {
     // const earningsEvents = await generateCustomEventsFinnhub(finnhubFrom, finnhubTo, env);
 
     // 5. 取得 MacroMicro 靜態 JSON 財報資料（earnings）
-    const { events: macroEarningsEvents, expired: macroEarningsExpired, endDate: macroEarningsEndDate } = await generateCustomEventsMacroEarnings();
+    const {
+      events: macroEarningsEvents,
+      expired: macroEarningsExpired,
+      endDate: macroEarningsEndDate
+    } = await generateCustomEventsMacroEarnings();
 
     // 6. 取得 MacroMicro 靜態 JSON 總體經濟事件（macro）
-    const { events: macroMacroEvents, expired: macroMacroExpired, endDate: macroMacroEndDate } = await generateCustomEventsMacroMacro();
+    const {
+      events: macroMacroEvents,
+      expired: macroMacroExpired,
+      endDate: macroMacroEndDate
+    } = await generateCustomEventsMacroMacro();
 
     // 7. 合併所有來源並排序 (依日期 ID)：MoneyDJ + 週期性事件 + 手動事件 + MacroMicro財報 + MacroMicro總經
     const finalData = [...processed, ...customEvents, /*...earningsEvents,*/ ...macroEarningsEvents, ...macroMacroEvents]
@@ -2644,7 +3101,10 @@ async function fetchAmericaCalendar(env) {
     });
   } catch (e) {
     const errorMsg = e.name === 'AbortError' ? "連線逾時" : e.message;
-    return json({ success: false, error: errorMsg }, 500);
+    return json({
+      success: false,
+      error: errorMsg
+    }, 500);
   }
 }
 
@@ -2657,10 +3117,10 @@ function generateCustomEvents(year) {
   // 這裡以 2026 年官方 MSCI 公佈日
   const msciAnnounceDates = {
     "2026": {
-      1: 10,  // 2月 10號
-      4: 12,  // 5月 12號
-      7: 12,  // 8月 12號
-      10: 11  // 11月 11號
+      1: 10, // 2月 10號
+      4: 12, // 5月 12號
+      7: 12, // 8月 12號
+      10: 11 // 11月 11號
     }
   };
 
@@ -2704,7 +3164,7 @@ function generateCustomEvents(year) {
     }
 
     // E. 費城半導體指數 (SOX) 重組生效日 (通常在 9月、12月第三個星期五)
-    if ([8, 11].includes(month)) { 
+    if ([8, 11].includes(month)) {
       const soxDate = getNthDay(year, month, 5, 3);
       events.push(createEventObj(soxDate, "SOX調整", "費半指數重組生效日", "#e67e22"));
     }
@@ -2712,220 +3172,220 @@ function generateCustomEvents(year) {
 
   // 自定義事件
   events.push(createEventObj(
-    new Date("2026-05-08"), 
+    new Date("2026-05-08"),
     "TSM",
-    "台積電下午1點半公布4月份業績", 
-    "#3498db", 
+    "台積電下午1點半公布4月份業績",
+    "#3498db",
     "001"
   ));
   events.push(createEventObj(
-    new Date("2026-05-13"), 
+    new Date("2026-05-13"),
     "川習會",
-    "川普專機傍晚抵達北京，展開川習會行程", 
-    "#3498db", 
+    "川普專機傍晚抵達北京，展開川習會行程",
+    "#3498db",
     "001"
   ));
   events.push(createEventObj(
-    new Date("2026-05-14"), 
+    new Date("2026-05-14"),
     "TSM",
-    "2026 台積電台灣技術論壇", 
-    "#3498db", 
+    "2026 台積電台灣技術論壇",
+    "#3498db",
     "001"
   ));
   events.push(createEventObj(
-    new Date("2026-05-14"), 
+    new Date("2026-05-14"),
     "川習會",
-    "川普與習近平見面，討論貿易與地緣政治議題", 
-    "#3498db", 
+    "川普與習近平見面，討論貿易與地緣政治議題",
+    "#3498db",
     "002"
   ));
   events.push(createEventObj(
-    new Date("2026-05-15"), 
+    new Date("2026-05-15"),
     "聯準會主席任期屆滿",
-    "鮑爾主席任期屆滿、華許接任", 
-    "#3498db", 
+    "鮑爾主席任期屆滿、華許接任",
+    "#3498db",
     "001"
   ));
   events.push(createEventObj(
-    new Date("2026-05-15"), 
+    new Date("2026-05-15"),
     "川習會",
-    "川普與習近平見面，討論貿易與地緣政治議題", 
-    "#3498db", 
+    "川普與習近平見面，討論貿易與地緣政治議題",
+    "#3498db",
     "002"
   ));
   events.push(createEventObj(
-    new Date("2026-05-20"), 
+    new Date("2026-05-20"),
     "520 總統就職紀念日",
-    "520 總統就職紀念日", 
-    "#3498db", 
+    "520 總統就職紀念日",
+    "#3498db",
     "001"
   ));
   events.push(createEventObj(
-    new Date("2026-05-20"), 
+    new Date("2026-05-20"),
     "Google 開發者大會",
-    "Google 開發者大會", 
-    "#3498db", 
+    "Google 開發者大會",
+    "#3498db",
     "002"
   ));
   events.push(createEventObj(
-    new Date("2026-05-27"), 
+    new Date("2026-05-27"),
     "NVIDIA",
-    "輝達台灣新總部動土", 
-    "#3498db", 
+    "輝達台灣新總部動土",
+    "#3498db",
     "001"
   ));
   events.push(createEventObj(
-    new Date("2026-05-28"), 
+    new Date("2026-05-28"),
     "TSM",
-    "2026 台積電歐洲技術論壇", 
-    "#3498db", 
+    "2026 台積電歐洲技術論壇",
+    "#3498db",
     "001"
   ));
   events.push(createEventObj(
-    new Date("2026-05-28"), 
+    new Date("2026-05-28"),
     "AI",
-    "兆元宴", 
-    "#3498db", 
+    "兆元宴",
+    "#3498db",
     "002"
   ));
   events.push(createEventObj(
-    new Date("2026-06-01"), 
+    new Date("2026-06-01"),
     "COMPUTEX",
-    "NVIDIA 黃仁勳 台北流行音樂中心演講（需要注意台積電、聯發科、台光電）", 
-    "#3498db", 
+    "NVIDIA 黃仁勳 台北流行音樂中心演講（需要注意台積電、聯發科、台光電）",
+    "#3498db",
     "001"
   ));
   events.push(createEventObj(
-    new Date("2026-06-01"), 
+    new Date("2026-06-01"),
     "COMPUTEX",
-    "Qualcomm 執行長 Cristiano Amon 主題演講（需要注意華碩、宏碁、仁寶、廣達）", 
-    "#3498db", 
+    "Qualcomm 執行長 Cristiano Amon 主題演講（需要注意華碩、宏碁、仁寶、廣達）",
+    "#3498db",
     "002"
   ));
   events.push(createEventObj(
-    new Date("2026-06-02"), 
+    new Date("2026-06-02"),
     "COMPUTEX",
-    "Marvell 執行長 Matt Murphy 主題演講（需要注意智原、創意、世芯-KY）", 
-    "#3498db", 
+    "Marvell 執行長 Matt Murphy 主題演講（需要注意智原、創意、世芯-KY）",
+    "#3498db",
     "001"
   ));
   events.push(createEventObj(
-    new Date("2026-06-02"), 
+    new Date("2026-06-02"),
     "COMPUTEX",
-    "Intel 執行長陳立武主題演講（需要注意華碩、宏碁、廣達、仁寶、緯創）", 
-    "#3498db", 
+    "Intel 執行長陳立武主題演講（需要注意華碩、宏碁、廣達、仁寶、緯創）",
+    "#3498db",
     "002"
   ));
   events.push(createEventObj(
-    new Date("2026-06-03"), 
+    new Date("2026-06-03"),
     "COMPUTEX",
-    "恩智浦 (NXP) 巨頭 Rafael Sotomayor 會在今天發表主題演講（需要注意聯發科、台達電）", 
-    "#3498db", 
+    "恩智浦 (NXP) 巨頭 Rafael Sotomayor 會在今天發表主題演講（需要注意聯發科、台達電）",
+    "#3498db",
     "001"
   ));
   events.push(createEventObj(
-    new Date("2026-06-04"), 
+    new Date("2026-06-04"),
     "COMPUTEX",
-    "COMPUTEX 演講已經全部掀牌，國際媒體的報導也開始疲乏，開始要見真章的時候了", 
-    "#3498db", 
+    "COMPUTEX 演講已經全部掀牌，國際媒體的報導也開始疲乏，開始要見真章的時候了",
+    "#3498db",
     "001"
   ));
   events.push(createEventObj(
-    new Date("2026-06-04"), 
+    new Date("2026-06-04"),
     "TSM",
-    "台積電股東會", 
-    "#3498db", 
+    "台積電股東會",
+    "#3498db",
     "002"
   ));
   events.push(createEventObj(
-    new Date("2026-06-05"), 
+    new Date("2026-06-05"),
     "COMPUTEX",
-    "世貿與南港展覽館首度開放一般民眾購票入場參觀 COMPUTEX 展覽，會場內的氣氛與媒體報導將是重要觀察指標", 
-    "#3498db", 
+    "世貿與南港展覽館首度開放一般民眾購票入場參觀 COMPUTEX 展覽，會場內的氣氛與媒體報導將是重要觀察指標",
+    "#3498db",
     "001"
   ));
   events.push(createEventObj(
-    new Date("2026-06-16"), 
+    new Date("2026-06-16"),
     "JAPAN",
-    "日本央行（BOJ）利率決策會議", 
-    "#3498db", 
+    "日本央行（BOJ）利率決策會議",
+    "#3498db",
     "001"
   ));
   events.push(createEventObj(
-    new Date("2026-06-18"), 
+    new Date("2026-06-18"),
     "FED",
-    "聯準會（Fed）利率決策與點陣圖", 
-    "#3498db", 
+    "聯準會（Fed）利率決策與點陣圖",
+    "#3498db",
     "001"
   ));
   events.push(createEventObj(
-    new Date("2026-06-25"), 
+    new Date("2026-06-25"),
     "TSM",
-    "台積電中國技術論壇", 
-    "#3498db", 
+    "台積電中國技術論壇",
+    "#3498db",
     "001"
   ));
   events.push(createEventObj(
-    new Date("2026-07-03"), 
+    new Date("2026-07-03"),
     "TSM",
-    "台積電日本技術論壇", 
-    "#3498db", 
+    "台積電日本技術論壇",
+    "#3498db",
     "001"
   ));
   events.push(createEventObj(
-    new Date("2026-07-16"), 
+    new Date("2026-07-16"),
     "TSM",
-    "台積電法說會", 
-    "#3498db", 
+    "台積電法說會",
+    "#3498db",
     "001"
   ));
   events.push(createEventObj(
-    new Date("2026-07-30"), 
+    new Date("2026-07-30"),
     "DELTA",
-    "台達電法說會", 
-    "#3498db", 
+    "台達電法說會",
+    "#3498db",
     "001"
   ));
   events.push(createEventObj(
-    new Date("2026-09-23"), 
+    new Date("2026-09-23"),
     "TSM",
-    "台積電北美技術論壇", 
-    "#3498db", 
+    "台積電北美技術論壇",
+    "#3498db",
     "001"
   ));
   events.push(createEventObj(
-    new Date("2026-10-29"), 
+    new Date("2026-10-29"),
     "DELTA",
-    "台達電法說會", 
-    "#3498db", 
+    "台達電法說會",
+    "#3498db",
     "001"
   ));
   events.push(createEventObj(
-    new Date("2026-11-06"), 
+    new Date("2026-11-06"),
     "TSM",
-    "台積電日本技術論壇", 
-    "#3498db", 
+    "台積電日本技術論壇",
+    "#3498db",
     "001"
   ));
   events.push(createEventObj(
-    new Date("2026-11-12"), 
+    new Date("2026-11-12"),
     "TSM",
-    "台積電台灣技術論壇", 
-    "#3498db", 
+    "台積電台灣技術論壇",
+    "#3498db",
     "001"
   ));
   events.push(createEventObj(
-    new Date("2026-11-17"), 
+    new Date("2026-11-17"),
     "TSM",
-    "台積電中國技術論壇", 
-    "#3498db", 
+    "台積電中國技術論壇",
+    "#3498db",
     "001"
   ));
   events.push(createEventObj(
-    new Date("2026-11-24"), 
+    new Date("2026-11-24"),
     "TSM",
-    "台積電歐洲技術論壇", 
-    "#3498db", 
+    "台積電歐洲技術論壇",
+    "#3498db",
     "001"
   ));
 
@@ -2950,7 +3410,10 @@ function createEventObj(dateObj, shortText, fullName, color, id_series = '999') 
     "text": shortText,
     "type": "index",
     "details": `:${fullName}`,
-    "indicators": [{ "code": "", "name": fullName }]
+    "indicators": [{
+      "code": "",
+      "name": fullName
+    }]
   };
 }
 
@@ -2996,44 +3459,48 @@ async function generateCustomEventsFinnhub(from, to, env) {
   if (!cleanKey) return []; // 如果沒有 Key，回傳空陣列
 
   const url = `https://finnhub.io/api/v1/calendar/earnings?from=${from}&to=${to}&token=${cleanKey}`;
-  
+
   try {
-    const res = await fetchWithTimeout(url, { headers: { "User-Agent": UA } });
+    const res = await fetchWithTimeout(url, {
+      headers: {
+        "User-Agent": UA
+      }
+    });
 
     // 如果 API 報錯 (如 401)，記錄錯誤並回傳空陣列，避免主程式壞掉
     if (!res.ok) {
       const errorDetail = await res.text();
       console.error(`Finnhub API Error (${res.status}): ${errorDetail}`);
-      return []; 
+      return [];
     }
 
     const data = await res.json();
     const earnings = data.earningsCalendar || [];
 
-     // 這裡是你原本預計要過濾的股票清單
+    // 這裡是你原本預計要過濾的股票清單
     const AI_TECH_SYMBOLS = new Set([
       'NVDA', // NVIDIA - AI 晶片龍頭
-      'TSM',  // 台積電 - 半導體代工龍頭
+      'TSM', // 台積電 - 半導體代工龍頭
       'AAPL', // Apple - AI 手機與生態整合
       'META', // Meta - 生成式 AI 廣告與模型
       'MSFT', // Microsoft - Azure AI 與 OpenAI 合作
-      'GOOGL',// Alphabet - Google AI 搜尋與雲端
+      'GOOGL', // Alphabet - Google AI 搜尋與雲端
       'AMZN', // Amazon - AWS AI 雲端服務
       'TSLA', // Tesla - 自動駕駛與機器人 AI
-      'AMD',  // AMD - AI 替代方案與 CPU 大廠
+      'AMD', // AMD - AI 替代方案與 CPU 大廠
       'PLTR', // Palantir - AI 數據分析平台
-      'CRM',  // Salesforce - 企業級 AI CRM
-      'NOW',  // ServiceNow - 企業流程 AI
+      'CRM', // Salesforce - 企業級 AI CRM
+      'NOW', // ServiceNow - 企業流程 AI
       'SNOW', // Snowflake - 資料倉儲 AI
       'ORCL', // Oracle - 雲端資料庫與 OCI
       'AVGO', // Broadcom - AI 網通與客製化晶片 (ASIC)
       'QCOM', // Qualcomm - 行動端邊緣 AI
       'ASML', // ASML - EUV 光刻機 (AI 產能關鍵)
-      'MU',   // Micron - HBM 高頻寬記憶體 (AI 必備)
+      'MU', // Micron - HBM 高頻寬記憶體 (AI 必備)
       'INTC', // Intel - 晶片與晶圓代工競爭者
       'NFLX', // Netflix - 串流領頭羊，AI 推薦演算法
       'SMCI', // Supermicro - AI 伺服器基礎設施
-      'ARM'   // Arm - AI 晶片架構設計核心
+      'ARM' // Arm - AI 晶片架構設計核心
     ]);
 
     // 直接回傳處理後的 events 陣列
@@ -3059,36 +3526,40 @@ async function generateCustomEventsFinnhub(from, to, env) {
 async function generateCustomEventsMacroEarnings() {
   const AI_TECH_SYMBOLS = new Set([
     'NVDA', // NVIDIA - AI 晶片龍頭
-    'TSM',  // 台積電 - 半導體代工龍頭
+    'TSM', // 台積電 - 半導體代工龍頭
     'AAPL', // Apple - AI 手機與生態整合
     'META', // Meta - 生成式 AI 廣告與模型
     'MSFT', // Microsoft - Azure AI 與 OpenAI 合作
-    'GOOGL',// Alphabet - Google AI 搜尋與雲端
+    'GOOGL', // Alphabet - Google AI 搜尋與雲端
     'AMZN', // Amazon - AWS AI 雲端服務
     'TSLA', // Tesla - 自動駕駛與機器人 AI
-    'AMD',  // AMD - AI 替代方案與 CPU 大廠
+    'AMD', // AMD - AI 替代方案與 CPU 大廠
     'PLTR', // Palantir - AI 數據分析平台
-    'CRM',  // Salesforce - 企業級 AI CRM
-    'NOW',  // ServiceNow - 企業流程 AI
+    'CRM', // Salesforce - 企業級 AI CRM
+    'NOW', // ServiceNow - 企業流程 AI
     'SNOW', // Snowflake - 資料倉儲 AI
     'ORCL', // Oracle - 雲端資料庫與 OCI
     'AVGO', // Broadcom - AI 網通與客製化晶片（ASIC）
     'QCOM', // Qualcomm - 行動端邊緣 AI
     'ASML', // ASML - EUV 光刻機 (AI 產能關鍵)
-    'MU',   // Micron - HBM 高頻寬記憶體 
+    'MU', // Micron - HBM 高頻寬記憶體 
     'INTC', // Intel - 晶片與晶圓代工競爭者
     'NFLX', // Netflix - 串流領頭羊，AI 推薦演算法
     'SMCI', // Supermicro - AI 伺服器基礎設施
-    'ARM',  // Arm - AI 晶片架構設計核心
+    'ARM', // Arm - AI 晶片架構設計核心
     'SPCX', // SpaceX - AI 航太與衛星網路（Starlink）
-    'AMD',  // AMD - AI 替代方案與 CPU 大廠
+    'AMD', // AMD - AI 替代方案與 CPU 大廠
   ]);
 
   try {
     const res = await fetch('https://bau720123.github.io/stock/data/macromicro_earnings.json?v=20260610');
     if (!res.ok) {
       console.error(`MacroMicro JSON 讀取失敗 (${res.status})`);
-      return { events: [], expired: false, endDate: null };
+      return {
+        events: [],
+        expired: false,
+        endDate: null
+      };
     }
 
     const data = await res.json();
@@ -3124,11 +3595,19 @@ async function generateCustomEventsMacroEarnings() {
       }
     }
 
-    return { events, expired, endDate };
+    return {
+      events,
+      expired,
+      endDate
+    };
 
   } catch (e) {
     console.error('MacroMicro 靜態 JSON 執行失敗：', e.message);
-    return { events: [], expired: false, endDate: null };
+    return {
+      events: [],
+      expired: false,
+      endDate: null
+    };
   }
 }
 
@@ -3142,7 +3621,7 @@ async function generateCustomEventsMacroMacro() {
     // '美國非農就業', // （美國勞工部）
     // '美國失業率',
     // '美國每小時薪資',
-    '美國消費者物價',       // CPI
+    '美國消費者物價', // CPI
     // '美國PCE物價指數',
     // '美國GDP',
     // '美國EIA原油庫存',
@@ -3151,7 +3630,7 @@ async function generateCustomEventsMacroMacro() {
     '美國ADP非農就業', // （ADP公司）
     // '美國ISM製造業PMI',
     // '美國ISM非製造業NMI',
-    // '美國生產者物價',       // PPI
+    // '美國生產者物價',  // PPI
     // '美國零售銷售',
     // '美國耐久財新訂單',
     // '美國密大消費者信心',
@@ -3166,16 +3645,20 @@ async function generateCustomEventsMacroMacro() {
     const res = await fetch('https://bau720123.github.io/stock/data/macromicro_macro.json?v=20260610');
     if (!res.ok) {
       console.error(`MacroMicro Macro JSON 讀取失敗 (${res.status})`);
-      return { events: [], expired: false, endDate: null };
+      return {
+        events: [],
+        expired: false,
+        endDate: null
+      };
     }
 
     const data = await res.json();
     const items = data.calendarItems || [];
 
     // 過期判斷：endTs 轉台北日期
-    const endDate = data.endTs
-      ? new Date((data.endTs * 1000) + 8 * 3600 * 1000).toISOString().split('T')[0]
-      : null;
+    const endDate = data.endTs ?
+      new Date((data.endTs * 1000) + 8 * 3600 * 1000).toISOString().split('T')[0] :
+      null;
     const twTodayDash = new Date(Date.now() + 8 * 3600 * 1000).toISOString().split('T')[0];
     const expired = endDate ? twTodayDash > endDate : false;
 
@@ -3194,17 +3677,25 @@ async function generateCustomEventsMacroMacro() {
         dateObj,
         item.name,
         `${item.name}（MacroMicro 總經）`,
-        '#e67e22',                              // 橘色，與財報綠色區分
-        `62${String(index).padStart(3, '0')}`   // 62xxx，與財報 61xxx 不衝突
+        '#e67e22', // 橘色，與財報綠色區分
+        `62${String(index).padStart(3, '0')}` // 62xxx，與財報 61xxx 不衝突
       ));
       index++;
     }
 
-    return { events, expired, endDate };
+    return {
+      events,
+      expired,
+      endDate
+    };
 
   } catch (e) {
     console.error('MacroMicro Macro 靜態 JSON 執行失敗：', e.message);
-    return { events: [], expired: false, endDate: null };
+    return {
+      events: [],
+      expired: false,
+      endDate: null
+    };
   }
 }
 
@@ -3219,39 +3710,53 @@ async function fetchFearAndGreed() {
       }
     });
 
-    if (!res.ok) return json({ success: false, error: `HTTP ${res.status}` });
+    if (!res.ok) return json({
+      success: false,
+      error: `HTTP ${res.status}`
+    });
 
     const data = await res.json();
     const fg = data?.fear_and_greed;
-    if (!fg) return json({ success: false, error: "無資料" });
+    if (!fg) return json({
+      success: false,
+      error: "無資料"
+    });
 
     const ratingMap = {
       "extreme fear": "極度恐慌",
-      "fear":         "恐慌",
-      "neutral":      "中性",
-      "greed":        "貪婪",
-      "extreme greed":"極度貪婪",
+      "fear": "恐慌",
+      "neutral": "中性",
+      "greed": "貪婪",
+      "extreme greed": "極度貪婪",
     };
 
     return json({
-      success:        true,
-      score:          fg.score,
-      rating:         fg.rating,
-      ratingZh:       ratingMap[fg.rating] ?? fg.rating,
-      updateTime:     new Date(fg.timestamp).toLocaleString("zh-TW", {
-                        timeZone: "Asia/Taipei", hour12: false,
-                        year: "numeric", month: "2-digit", day: "2-digit",
-                        hour: "2-digit", minute: "2-digit", second: "2-digit"
-                      }).replace(/\//g, '-'),
-      prevClose:      fg.previous_close,
-      prev1Week:      fg.previous_1_week,
-      prev1Month:     fg.previous_1_month,
-      prev1Year:      fg.previous_1_year,
+      success: true,
+      score: fg.score,
+      rating: fg.rating,
+      ratingZh: ratingMap[fg.rating] ?? fg.rating,
+      updateTime: new Date(fg.timestamp).toLocaleString("zh-TW", {
+        timeZone: "Asia/Taipei",
+        hour12: false,
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit"
+      }).replace(/\//g, '-'),
+      prevClose: fg.previous_close,
+      prev1Week: fg.previous_1_week,
+      prev1Month: fg.previous_1_month,
+      prev1Year: fg.previous_1_year,
     });
 
   } catch (e) {
     const errorMsg = e.name === 'AbortError' ? "連線逾時" : e.message;
-    return json({ success: false, error: errorMsg });
+    return json({
+      success: false,
+      error: errorMsg
+    });
   }
 }
 
@@ -3265,7 +3770,7 @@ async function handleCron(env) {
 
   // 週一(1)至週五(5)，05:00～23:59
   if (twDay === 0 || twDay === 6) return; // 週六、週日不執行
-  if (twHour < 5) return;                 // 00:00～04:59 不執行
+  if (twHour < 5) return; // 00:00～04:59 不執行
 
   const existing = await env.KV.get("subscriptions");
   if (!existing) return;
@@ -3282,7 +3787,7 @@ async function handleCron(env) {
   ]);
 
   // 第二批：其他
-  const [twnRes, /*twnConRes, */brentRes, vixRes, tsmcStock] = await Promise.all([
+  const [twnRes, /*twnConRes, */ brentRes, vixRes, tsmcStock] = await Promise.all([
     fetchHiStock("stocktop2017", "TWN", "指數", "成交量(口)"),
     // fetchCnyesTwn(), // 富台指
     fetchSina("hf_OIL"),
@@ -3293,11 +3798,11 @@ async function handleCron(env) {
   const taifex_day = await taifexDay.json();
   const taifex_night = await taifexNight.json();
   const taifex_tsmc = await taifexTsmc.json();
-  const twn    = await twnRes.json();
-  // const twncon    = await twnConRes.json();
-  const brent  = await brentRes.json();
-  const vix    = await vixRes.json();
-  const tsmc   = await tsmcStock.json();
+  const twn = await twnRes.json();
+  // const twncon  = await twnConRes.json();
+  const brent = await brentRes.json();
+  const vix = await vixRes.json();
+  const tsmc = await tsmcStock.json();
 
   // 組合摘要文案
   const lines = [];
@@ -3309,14 +3814,14 @@ async function handleCron(env) {
 
   // if (todaysEvents.length > 0) {
   //   todaysEvents.forEach(ev => {
-  //     lines.push(`今日特殊事件：${ev.indicators[0].name}`);
+  //   lines.push(`今日特殊事件：${ev.indicators[0].name}`);
   //   }); 
   // }
   if (todaysEvents.length > 0) {
     // 提取所有事件名稱
     // 使用 "、" 串接
     const eventNames = todaysEvents.map(ev => ev.indicators[0].name).join('、');
-    
+
     lines.push(`🚨 今日特殊事件：${eventNames}`);
   }
 
@@ -3397,9 +3902,16 @@ async function handleCron(env) {
       body,
       url: '/stock/index.html',
       // image: '/stock/banner.png',
-      actions: (isAndroidPlatform(sub.platform) || isApplePlatform(sub.platform)) ? [] : [
-        { action: 'view',    title: '查看詳情', icon: '/stock/icon-192.png' },
-        { action: 'dismiss', title: '忽略',     icon: '/stock/icon-192.png' },
+      actions: (isAndroidPlatform(sub.platform) || isApplePlatform(sub.platform)) ? [] : [{
+          action: 'view',
+          title: '查看詳情',
+          icon: '/stock/icon-192.png'
+        },
+        {
+          action: 'dismiss',
+          title: '忽略',
+          icon: '/stock/icon-192.png'
+        },
       ]
     }, env))
   );
