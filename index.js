@@ -764,7 +764,7 @@ async function openAlertSettings(configKey) {
   });
 }
 
-async function sendNotification(title, body, url = '/stock/index.html', sound = 'alert_alert') {
+async function sendNotification(title, body, url = '../stock/index.html', sound = 'alert_alert') {
   // 發出 alert
   // showSweetAlert('warning', title + "：" + body);
   showInfo(body, title);
