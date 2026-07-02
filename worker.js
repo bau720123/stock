@@ -1334,7 +1334,190 @@ async function fetchFugleVolume(symbol, env) {
   }
 }
 
-function analyzeHistoryData(data) {
+/**
+ * 尋找轉折高低點 (Swing Pivots)
+ * 若某日高點在前後 leftBars/rightBars 天內皆為區間最高，視為「轉折高點」
+ * 若某日低點在前後 leftBars/rightBars 天內皆為區間最低，視為「轉折低點」
+ * 注意：轉折點須有「未來」rightBars 天的資料才能確認，
+ * 因此資料尾端最近 rightBars 天不會產生新的轉折點（這是正常現象，非 bug）
+ */
+function findSwingPivots(ascData, leftBars = 2, rightBars = 2) {
+  const pivotHighs = [];
+  const pivotLows = [];
+
+  for (let i = leftBars; i < ascData.length - rightBars; i++) {
+    const cur = ascData[i];
+    let isHigh = true;
+    let isLow = true;
+
+    for (let j = i - leftBars; j <= i + rightBars; j++) {
+      if (j === i) continue;
+      if (ascData[j].high >= cur.high) isHigh = false;
+      if (ascData[j].low <= cur.low) isLow = false;
+      if (!isHigh && !isLow) break;
+    }
+
+    if (isHigh) pivotHighs.push({ index: i, date: cur.date, price: cur.high });
+    if (isLow) pivotLows.push({ index: i, date: cur.date, price: cur.low });
+  }
+
+  return { pivotHighs, pivotLows };
+}
+
+/**
+ * 三日不破前低 / 前高 判斷
+ * 定義：取「最近3個交易日」以外區間的最低/最高價作為「前低 / 前高」參考基準，
+ * 再檢查最近3日的最低/最高價是否曾經跌破 / 漲破該基準。
+ * 若使用者想改成「以轉折點作為前低/前高」，可改用 findSwingPivots 的結果替換 refLow/refHigh。
+ */
+/**
+ * X日不破前低 / 前高 判斷
+ * 定義：近X個交易日，逐日和「前一天」比較（今天vs昨天、昨天vs前天...），
+ * 只要有任何一天的低點跌破前一天低點，就算「跌破」；高點同理。
+ * 不使用窗口內極值，單純日對日比較，找出第一次出現跌破/突破的那一天。
+ * @param {number} recentDays 「近X日」的X（預設3）
+ */
+function analyzeThreeDayBreakout(ascData, recentDays = 3) {
+  const totalDays = ascData.length;
+  if (totalDays < recentDays + 1) {
+    return { available: false };
+  }
+
+  // 取「近X日 + 前一天」共 recentDays+1 天，逐日和前一天比較
+  const window = ascData.slice(-(recentDays + 1));
+
+  let noBreakLow = true;
+  let noBreakHigh = true;
+  let breakLowDay = null;
+  let breakHighDay = null;
+
+  for (let i = 1; i < window.length; i++) {
+    const cur = window[i];
+    const prev = window[i - 1];
+
+    if (cur.low < prev.low) {
+      noBreakLow = false;
+      if (!breakLowDay) {
+        breakLowDay = { date: cur.date, low: cur.low, prevDate: prev.date, prevLow: prev.low };
+      }
+    }
+    if (cur.high > prev.high) {
+      noBreakHigh = false;
+      if (!breakHighDay) {
+        breakHighDay = { date: cur.date, high: cur.high, prevDate: prev.date, prevHigh: prev.high };
+      }
+    }
+  }
+
+  return {
+    available: true,
+    recentDays,
+    noBreakLow, noBreakHigh,
+    breakLowDay, breakHighDay
+  };
+}
+
+/**
+ * 趨勢結構判斷：頭頭高、底底高 (多頭) ／ 頭頭低、底底低 (空頭)
+ * 利用轉折高低點序列，比較最近兩個轉折高點、最近兩個轉折低點的相對高低
+ * @param {number} pivotLeftBars  轉折點左側比較天數
+ * @param {number} pivotRightBars 轉折點右側確認天數（越大越可靠，但越晚才能確認出最新轉折點，這是方法論天生的延遲）
+ */
+function analyzeTrendStructure(ascData, pivotLeftBars = 2, pivotRightBars = 2) {
+  const { pivotHighs, pivotLows } = findSwingPivots(ascData, pivotLeftBars, pivotRightBars);
+
+  if (pivotHighs.length < 2 || pivotLows.length < 2) {
+    return { available: false, pivotHighs, pivotLows };
+  }
+
+  const lastTwoHighs = pivotHighs.slice(-2);
+  const lastTwoLows = pivotLows.slice(-2);
+
+  const higherHigh = lastTwoHighs[1].price > lastTwoHighs[0].price;
+  const higherLow = lastTwoLows[1].price > lastTwoLows[0].price;
+  const lowerHigh = lastTwoHighs[1].price < lastTwoHighs[0].price;
+  const lowerLow = lastTwoLows[1].price < lastTwoLows[0].price;
+
+  let trendType = "整理"; // 盤整：高低點結構未同步同向
+  if (higherHigh && higherLow) trendType = "多頭";
+  else if (lowerHigh && lowerLow) trendType = "空頭";
+
+  return {
+    available: true,
+    trendType,
+    pivotHighs: lastTwoHighs,
+    pivotLows: lastTwoLows
+  };
+}
+
+/**
+ * 量價關係判斷
+ * @param {number} volRecentDays 量能比較的「近X日」均量天數（預設3）
+ * @param {number} volPriorDays  量能比較的「前X日」均量天數（預設3）
+ * 價格方向固定採「今日 vs 昨日」單日比較，確保跟資料的 change 欄位、K線顏色一致
+ */
+function analyzeVolumePriceRelation(ascData, volRecentDays = 3, volPriorDays = 3) {
+  const totalDays = ascData.length;
+  if (totalDays < 2) {
+    return { available: false };
+  }
+
+  const today = ascData[totalDays - 1];
+  const yest = ascData[totalDays - 2];
+  const priceUp = today.close > yest.close;
+
+  if (totalDays < volRecentDays + volPriorDays) {
+    // 資料不足以取多日均量，量能同樣退回今日 vs 昨日比較
+    return buildVolPriceResult(today.volume > yest.volume, priceUp, false);
+  }
+
+  const recentVolSlice = ascData.slice(-volRecentDays);
+  const priorVolSlice = ascData.slice(-(volRecentDays + volPriorDays), -volRecentDays);
+  const recentVolAvg = recentVolSlice.reduce((sum, d) => sum + d.volume, 0) / volRecentDays;
+  const priorVolAvg = priorVolSlice.reduce((sum, d) => sum + d.volume, 0) / volPriorDays;
+  const volUp = recentVolAvg > priorVolAvg;
+
+  return buildVolPriceResult(volUp, priceUp, true, recentVolAvg, priorVolAvg, volRecentDays, volPriorDays);
+}
+
+function buildVolPriceResult(volUp, priceUp, isAvg, recentVolAvg, priorVolAvg, volRecentDays, volPriorDays) {
+  let type, label;
+  if (volUp && priceUp) {
+    type = "vol_up_price_up";
+    label = "量增價漲（多頭健康）";
+  } else if (volUp && !priceUp) {
+    type = "vol_up_price_down";
+    label = "量增價跌（恐慌或出貨）";
+  } else if (!volUp && priceUp) {
+    type = "vol_down_price_up";
+    label = "量縮價漲（籌碼鎖定或散戶行情）";
+  } else {
+    type = "vol_down_price_down";
+    label = "量縮價跌（正常回檔）";
+  }
+
+  return { available: true, type, label, volUp, priceUp, isAvg, recentVolAvg, priorVolAvg, volRecentDays, volPriorDays };
+}
+
+/**
+ * @param {Array} data 富果 API 回傳的歷史K線 (desc，最新在前)
+ * @param {Object} [config] 可選，覆寫各項分析的天數設定，不傳則使用預設值
+ * @param {number} [config.breakoutRecentDays=3]   X日不破前高低：「近X日」的X（逐日跟前一天比較）
+ * @param {number} [config.pivotLeftBars=2]        趨勢結構：轉折點左側比較天數
+ * @param {number} [config.pivotRightBars=2]       趨勢結構：轉折點右側確認天數（越大越慢但越可靠）
+ * @param {number} [config.volRecentDays=3]        量價關係：近X日均量的X
+ * @param {number} [config.volPriorDays=3]         量價關係：前X日均量的X
+ */
+function analyzeHistoryData(data, config = {}) {
+  const cfg = {
+    breakoutRecentDays: 3,
+    pivotLeftBars: 2,
+    pivotRightBars: 2,
+    volRecentDays: 3,
+    volPriorDays: 3,
+    ...config
+  };
+
   if (!data || data.length === 0) {
     return {
       story: "暫無歷史數據可供分析。"
@@ -1401,8 +1584,8 @@ function analyzeHistoryData(data) {
 
   // 故事二：均線多空角力
   if (ma5 && ma20) {
-    const ma5Text = `5日線(${ma5.toFixed(1)})`;
-    const ma20Text = `20日線(${ma20.toFixed(1)})`;
+    const ma5Text = `5日線（${ma5.toFixed(1)}）`;
+    const ma20Text = `20日線（${ma20.toFixed(1)}）`;
     if (latestClose > ma5 && ma5 > ma20) {
       stories.push(`指標呈現多頭排列，股價站穩 ${ma5Text} 與 ${ma20Text} 之上，技術面由多方掌控主導權。`);
     } else if (latestClose < ma5 && ma5 < ma20) {
@@ -1416,6 +1599,41 @@ function analyzeHistoryData(data) {
   const maxVolWan = (maxVol / 10000).toFixed(0);
   stories.push(`區間最大失控量發生在 ${maxVolDate}（爆量 ${maxVolWan} 張），當日收盤價為 ${maxVolClose} 元。在技術分析中，此價位匯聚了極高密度的籌碼，若未來回檔不破此爆量Ｋ棒，將會是極強的波段支撐。`);
 
+  // 故事四：X日不破前高／前低（逐日跟前一天比較，支撐壓力測試）
+  const breakoutInfo = analyzeThreeDayBreakout(ascData, cfg.breakoutRecentDays);
+  if (breakoutInfo.available) {
+    if (breakoutInfo.noBreakLow) {
+      stories.push(`近${breakoutInfo.recentDays}個交易日，股價每日低點皆未跌破前一日低點，逐日比較未創新低，短線支撐穩固。`);
+    } else {
+      stories.push(`近${breakoutInfo.recentDays}個交易日內，${breakoutInfo.breakLowDay.date}（低點 ${breakoutInfo.breakLowDay.low} 元）曾跌破前一日 ${breakoutInfo.breakLowDay.prevDate}（低點 ${breakoutInfo.breakLowDay.prevLow} 元），短線支撐一度鬆動。`);
+    }
+    if (breakoutInfo.noBreakHigh) {
+      stories.push(`近${breakoutInfo.recentDays}個交易日，股價每日高點皆未突破前一日高點，逐日比較未創新高，追價動能仍待觀察。`);
+    } else {
+      stories.push(`近${breakoutInfo.recentDays}個交易日內，${breakoutInfo.breakHighDay.date}（高點 ${breakoutInfo.breakHighDay.high} 元）曾突破前一日 ${breakoutInfo.breakHighDay.prevDate}（高點 ${breakoutInfo.breakHighDay.prevHigh} 元），顯示曾有較積極的買盤出現。`);
+    }
+  }
+
+  // 故事五：頭頭高/底底高（多頭）或頭頭低/底底低（空頭）的趨勢結構
+  // 註：轉折點需未來 pivotRightBars 天資料才能確認，因此顯示的日期會落後最新交易日，這是方法論的正常現象
+  // const trendInfo = analyzeTrendStructure(ascData, cfg.pivotLeftBars, cfg.pivotRightBars);
+  // if (trendInfo.available) {
+  //   if (trendInfo.trendType === "多頭") {
+  //     stories.push(`從轉折點結構觀察（最新轉折點須經 ${cfg.pivotRightBars} 個交易日確認，故日期會略滯後於今日），股價呈現「頭頭高、底底高」的多頭排列：最新高點 ${trendInfo.pivotHighs[1].price} 元（${trendInfo.pivotHighs[1].date}）高於前次高點 ${trendInfo.pivotHighs[0].price} 元，低點亦同步墊高至 ${trendInfo.pivotLows[1].price} 元（${trendInfo.pivotLows[1].date}），趨勢結構偏多。`);
+  //   } else if (trendInfo.trendType === "空頭") {
+  //     stories.push(`從轉折點結構觀察（最新轉折點須經 ${cfg.pivotRightBars} 個交易日確認，故日期會略滯後於今日），股價呈現「頭頭低、底底低」的空頭排列：最新低點 ${trendInfo.pivotLows[1].price} 元（${trendInfo.pivotLows[1].date}）低於前次低點 ${trendInfo.pivotLows[0].price}（${trendInfo.pivotLows[0].date}） 元，高點亦同步走低至 ${trendInfo.pivotHighs[1].price} 元（${trendInfo.pivotHighs[1].date}），趨勢結構偏空。`);
+  //   } else {
+  //     stories.push(`從轉折點結構觀察，近期高低點交錯，尚未形成一致方向的多頭或空頭排列，市場暫處於盤整格局。`);
+  //   }
+  // }
+
+  // 故事六：量價關係（量增價漲／量增價跌／量縮價漲／量縮價跌）
+  const volPriceInfo = analyzeVolumePriceRelation(ascData, cfg.volRecentDays, cfg.volPriorDays);
+  if (volPriceInfo.available) {
+    const volBasis = volPriceInfo.isAvg ? `近${volPriceInfo.volRecentDays}日均量相較前${volPriceInfo.volPriorDays}日均量` : "今日成交量相較昨日";
+    stories.push(`${volBasis}${volPriceInfo.volUp ? "放大" : "縮減"}，今日收盤價較昨日${volPriceInfo.priceUp ? "上漲" : "下跌"}，屬於「${volPriceInfo.label}」格局。`);
+  }
+
   return {
     summary: {
       rangeHigh: maxPrice,
@@ -1425,7 +1643,19 @@ function analyzeHistoryData(data) {
       ma5: ma5 ? Number(ma5.toFixed(1)) : null,
       ma20: ma20 ? Number(ma20.toFixed(1)) : null,
       maxVolumeDate: maxVolDate,
-      shortTrend: trendText
+      shortTrend: trendText,
+      threeDayBreakout: breakoutInfo.available ? {
+        recentDays: breakoutInfo.recentDays,
+        noBreakLow: breakoutInfo.noBreakLow,
+        noBreakHigh: breakoutInfo.noBreakHigh,
+        breakLowDay: breakoutInfo.breakLowDay,
+        breakHighDay: breakoutInfo.breakHighDay
+      } : null,
+      // trendStructure: trendInfo.available ? trendInfo.trendType : "資料不足",
+      volumePriceRelation: volPriceInfo.available ? {
+        type: volPriceInfo.type,
+        label: volPriceInfo.label
+      } : null
     },
     story: stories.join("<br><br>")
   };
