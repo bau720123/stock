@@ -98,7 +98,8 @@ let MY_STOCKS = loadMyStocksList();
 const ALERT_CONFIGS = {
   tsmc: {
     title: '台積電 偵測設定',
-    fields: [{
+    fields: [
+      {
         key: 'tsmc_high',
         label: '價格大於等於此值時通知',
         placeholder: '例：2000',
@@ -114,7 +115,8 @@ const ALERT_CONFIGS = {
   },
   brent: {
     title: '布蘭特原油 偵測設定',
-    fields: [{
+    fields: [
+      {
         key: 'brent_high',
         label: '價格大於等於此值時通知',
         placeholder: '例：100',
@@ -130,7 +132,8 @@ const ALERT_CONFIGS = {
   },
   gold: {
     title: '黃金 偵測設定',
-    fields: [{
+    fields: [
+      {
         key: 'gold_high',
         label: '價格大於等於此值時通知',
         placeholder: '例：4000',
@@ -146,7 +149,8 @@ const ALERT_CONFIGS = {
   },
   silver: {
     title: '白銀 偵測設定',
-    fields: [{
+    fields: [
+      {
         key: 'silver_high',
         label: '價格大於等於此值時通知',
         placeholder: '例：70',
@@ -162,7 +166,8 @@ const ALERT_CONFIGS = {
   },
   copper: {
     title: '銅 偵測設定',
-    fields: [{
+    fields: [
+      {
         key: 'copper_high',
         label: '價格大於等於此值時通知',
         placeholder: '例：70',
@@ -178,7 +183,8 @@ const ALERT_CONFIGS = {
   },
   vix: {
     title: 'VIX 恐慌指數 偵測設定',
-    fields: [{
+    fields: [
+      {
         key: 'vix_high',
         label: '指數高於此值時通知',
         placeholder: '例：30',
@@ -194,7 +200,8 @@ const ALERT_CONFIGS = {
   },
   vix_futures: {
     title: 'VIX 恐慌指數期貨 偵測設定',
-    fields: [{
+    fields: [
+      {
         key: 'vix_futures_high',
         label: '指數高於此值時通知',
         placeholder: '例：30',
@@ -210,7 +217,8 @@ const ALERT_CONFIGS = {
   },
   usdollar: {
     title: '美元指數 偵測設定',
-    fields: [{
+    fields: [
+      {
         key: 'usdollar_high',
         label: '價格大於等於此值時通知',
         placeholder: '例：100',
@@ -226,7 +234,8 @@ const ALERT_CONFIGS = {
   },
   utctwd: {
     title: '美金兌換台幣匯率 偵測設定',
-    fields: [{
+    fields: [
+      {
         key: 'utctwd_high',
         label: '價格大於等於此值時通知',
         placeholder: '例：30',
@@ -242,7 +251,8 @@ const ALERT_CONFIGS = {
   },
   utcjpy: {
     title: '美元兌日圓匯率 偵測設定',
-    fields: [{
+    fields: [
+      {
         key: 'utcjpy_high',
         label: '價格大於等於此值時通知',
         placeholder: '例：100',
@@ -1489,7 +1499,8 @@ function ChartForeignNetPosition() {
         }
       },
     },
-    dataZoom: [{
+    dataZoom: [
+      {
         type: 'inside',
         start: 0,
         end: 100
@@ -1510,7 +1521,8 @@ function ChartForeignNetPosition() {
         }
       },
     ],
-    series: [{
+    series: [
+      {
       type: 'line',
       data: foreign,
       smooth: true,
@@ -1526,7 +1538,8 @@ function ChartForeignNetPosition() {
           y: 0,
           x2: 0,
           y2: 1,
-          colorStops: [{
+          colorStops: [
+            {
               offset: 0,
               color: '#5a9eff33'
             },
@@ -1540,14 +1553,17 @@ function ChartForeignNetPosition() {
       markLine: {
         silent: true,
         symbol: 'none',
-        data: [{
+        data: [
+          {
           yAxis: 0,
-          lineStyle: {
-            color: '#5a7080',
-            type: 'dashed',
-            width: 1
+          lineStyle: 
+            {
+              color: '#5a7080',
+              type: 'dashed',
+              width: 1
+            }
           }
-        }]
+        ]
       }
     }, ],
   });
@@ -1644,7 +1660,8 @@ function ChartInstitutional() {
           }
         },
       },
-      dataZoom: [{
+      dataZoom: [
+        {
           type: 'inside',
           start: 0,
           end: 100
@@ -1665,7 +1682,8 @@ function ChartInstitutional() {
           }
         }
       ],
-      series: [{
+      series: [
+        {
           name: '投信',
           type: 'bar',
           data: trust,
@@ -3239,7 +3257,8 @@ function ChartFedWatch() {
       top: '5%',
       left: 'center'
     },*/
-    series: [{
+    series: [
+      {
       type: 'pie',
       radius: '50%',
       data: pieData,
@@ -4100,11 +4119,14 @@ function StockChartHistory() {
         }
       },
       axisPointer: {
-        link: [{
+        link: [
+          {
           xAxisIndex: 'all'
-        }]
+          }
+        ]
       },
-      grid: [{
+      grid: [
+        {
           left: 55,
           right: 10,
           top: 8,
@@ -4117,7 +4139,8 @@ function StockChartHistory() {
           bottom: 30
         },
       ],
-      xAxis: [{
+      xAxis: [
+        {
           type: 'category',
           data: dates,
           gridIndex: 0,
@@ -4151,7 +4174,8 @@ function StockChartHistory() {
           }
         },
       ],
-      yAxis: [{
+      yAxis: [
+        {
           scale: true,
           gridIndex: 0,
           axisLine: {
@@ -4186,7 +4210,8 @@ function StockChartHistory() {
           }
         },
       ],
-      dataZoom: [{
+      dataZoom: [
+        {
           type: 'inside',
           xAxisIndex: [0, 1],
           start: 0,
@@ -4209,7 +4234,8 @@ function StockChartHistory() {
           }
         },
       ],
-      series: [{
+      series: [
+        {
           type: 'candlestick',
           name: 'K線',
           xAxisIndex: 0,
@@ -4313,7 +4339,8 @@ function StockChartInstitutional() {
           }
         },
       },
-      dataZoom: [{
+      dataZoom: [
+        {
           type: 'inside',
           start: 0,
           end: 100
@@ -4334,7 +4361,8 @@ function StockChartInstitutional() {
           }
         }
       ],
-      series: [{
+      series: [
+        {
           name: '投信',
           type: 'bar',
           data: trust,
@@ -4438,9 +4466,11 @@ function StockChartMarginTradingBalance() {
           }
         },
         axisPointer: {
-          link: [{
+          link: [
+            {
             xAxisIndex: 'all'
-          }]
+            }
+          ]
         },
         legend: {
           data: ['融資餘額' /*, '融資增減'*/ , '收盤價', '成交量'],
@@ -4450,7 +4480,8 @@ function StockChartMarginTradingBalance() {
           },
           top: 4,
         },
-        grid: [{
+        grid: [
+          {
             left: 65,
             right: 55,
             top: gridTop,
@@ -4463,7 +4494,8 @@ function StockChartMarginTradingBalance() {
             bottom: 30
           },
         ],
-        xAxis: [{
+        xAxis: [
+          {
             type: 'category',
             data: dates,
             gridIndex: 0,
@@ -4497,7 +4529,8 @@ function StockChartMarginTradingBalance() {
             }
           },
         ],
-        yAxis: [{
+        yAxis: [
+          {
             scale: true,
             gridIndex: 0,
             axisLine: {
@@ -4558,7 +4591,8 @@ function StockChartMarginTradingBalance() {
             }
           },
         ],
-        dataZoom: [{
+        dataZoom: [
+          {
             type: 'inside',
             xAxisIndex: [0, 1],
             start: 0,
@@ -4581,7 +4615,8 @@ function StockChartMarginTradingBalance() {
             }
           },
         ],
-        series: [{
+        series: [
+          {
             name: '融資餘額',
             type: 'line',
             xAxisIndex: 0,
@@ -4723,7 +4758,8 @@ function StockChartSma() {
           }
         },
       },
-      dataZoom: [{
+      dataZoom: [
+        {
           type: 'inside',
           start: 0,
           end: 100
@@ -4744,7 +4780,8 @@ function StockChartSma() {
           }
         }
       ],
-      series: [{
+      series: [
+        {
           name: 'SMA5',
           type: 'line',
           data: sma5,
@@ -4915,7 +4952,8 @@ function StockChartRsi() {
           silent: true
         },
       },
-      dataZoom: [{
+      dataZoom: [
+        {
           type: 'inside',
           start: 0,
           end: 100
@@ -4936,7 +4974,8 @@ function StockChartRsi() {
           }
         }
       ],
-      series: [{
+      series: [
+        {
           name: 'RSI6',
           type: 'line',
           data: rsi6,
@@ -5095,7 +5134,8 @@ function StockChartKdj() {
           }
         },
       },
-      dataZoom: [{
+      dataZoom: [
+        {
           type: 'inside',
           start: 0,
           end: 100
@@ -5116,7 +5156,8 @@ function StockChartKdj() {
           }
         }
       ],
-      series: [{
+      series: [
+        {
           name: 'K',
           type: 'line',
           data: kLine,
@@ -5207,11 +5248,14 @@ function StockChartMacd() {
         top: 4,
       },
       axisPointer: {
-        link: [{
+        link: [
+          {
           xAxisIndex: 'all'
-        }]
+          }
+        ]
       },
-      grid: [{
+      grid: [
+        {
           left: 55,
           right: 10,
           top: 32,
@@ -5224,7 +5268,8 @@ function StockChartMacd() {
           bottom: 40
         },
       ],
-      xAxis: [{
+      xAxis: [
+        {
           type: 'category',
           data: dates,
           gridIndex: 0,
@@ -5259,7 +5304,8 @@ function StockChartMacd() {
           }
         },
       ],
-      yAxis: [{
+      yAxis: [
+        {
           scale: true,
           gridIndex: 0,
           axisLine: {
@@ -5294,7 +5340,8 @@ function StockChartMacd() {
           }
         },
       ],
-      dataZoom: [{
+      dataZoom: [
+        {
           type: 'inside',
           xAxisIndex: [0, 1],
           start: 0,
@@ -5317,7 +5364,8 @@ function StockChartMacd() {
           }
         },
       ],
-      series: [{
+      series: [
+        {
           name: 'MACD',
           type: 'line',
           data: macdLine,
@@ -5436,7 +5484,8 @@ function StockChartBrands() {
           }
         },
       },
-      dataZoom: [{
+      dataZoom: [
+        {
           type: 'inside',
           start: 0,
           end: 100
@@ -5457,7 +5506,8 @@ function StockChartBrands() {
           }
         },
       ],
-      series: [{
+      series: [
+        {
           name: '上軌',
           type: 'line',
           data: upper,
@@ -6433,7 +6483,8 @@ if (card_type == 'all') {
         localStorage.setItem('tourDone', '1');
         driverObj.destroy();
       },
-      steps: [{
+      steps: [
+        {
           element: '#card-tw',
           popover: {
             title: '台股市場概況',
