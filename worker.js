@@ -2537,18 +2537,33 @@ async function fetchFugleSma(symbol, env) {
     const from = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10); // 60MA需要更長區間
     const periods = [5, 10, 20, 60];
 
-    // 平行打四支API
-    const results = await Promise.all(
-      periods.map(period =>
-        fetchWithTimeout(
-          `https://api.fugle.tw/marketdata/v1.0/stock/technical/sma/${symbol}?from=${from}&to=${to}&timeframe=D&period=${period}`, {
-            headers: {
-              "X-API-KEY": env.FUGLE_KEY,
-              "Accept": "application/json"
+    // 平行打四支 SMA API + 一支歷史K線 API
+    const [results, histRes] = await Promise.all([
+      Promise.all(
+        periods.map(period =>
+          fetchWithTimeout(
+            `https://api.fugle.tw/marketdata/v1.0/stock/technical/sma/${symbol}?from=${from}&to=${to}&timeframe=D&period=${period}`, {
+              headers: {
+                "X-API-KEY": env.FUGLE_KEY,
+                "Accept": "application/json"
+              }
             }
+          ).then(r => r.json())
+        )
+      ),
+      fetchWithTimeout(
+        `https://api.fugle.tw/marketdata/v1.0/stock/historical/candles/${symbol}?from=${from}&to=${to}&timeframe=D&fields=close&sort=desc`, {
+          headers: {
+            "X-API-KEY": env.FUGLE_KEY,
+            "Accept": "application/json"
           }
-        ).then(r => r.json())
-      )
+        }
+      ).then(r => r.json()),
+    ]);
+
+    // 用 date 建立 close price 的查找 Map
+    const priceMap = new Map(
+      (histRes.data || []).map(row => [row.date, row.close])
     );
 
     // 以 date 為 key 合併資料
@@ -2561,6 +2576,11 @@ async function fetchFugleSma(symbol, env) {
         };
         merged[row.date][`sma_${period}`] = parseFloat(row.sma.toFixed(2));
       });
+    });
+
+    // 合併 price（找不到日期就給 null）
+    Object.values(merged).forEach(row => {
+      row.price = priceMap.get(row.date) ?? null;
     });
 
     // 轉回陣列並依日期遞減排序

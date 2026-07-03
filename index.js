@@ -4636,6 +4636,14 @@ function StockChartMarginTradingBalance() {
 
 function StockChartSma() {
   const pending = window._sma_chartPending || {};
+
+  // 依容器寬度判斷 legend 是否會換行成兩行，回傳對應的 grid.top
+  function getGridTop(el) {
+    const w = el.clientWidth;
+    // 5 個 legend 項目（SMA5/10/20/60 + 股價），窄於此寬度時通常會換行
+    return w < 420 ? 56 : 32;
+  }
+
   for (const i in pending) {
     const el = document.getElementById('stock_sma_chart_' + i);
     if (!el) continue;
@@ -4646,6 +4654,7 @@ function StockChartSma() {
     const sma10 = sorted.map(d => d.sma_10 ?? null);
     const sma20 = sorted.map(d => d.sma_20 ?? null);
     const sma60 = sorted.map(d => d.sma_60 ?? null);
+    const price = sorted.map(d => d.price ?? null);
 
     el.style.width = '100%';
     const chart = echarts.init(el, null, {
@@ -4663,7 +4672,7 @@ function StockChartSma() {
         },
       },
       legend: {
-        data: ['SMA5', 'SMA10', 'SMA20', 'SMA60'],
+        data: ['SMA5', 'SMA10', 'SMA20', 'SMA60', '股價'],
         icon: 'rect', // 設為矩形
         itemWidth: 20, // 線段長度
         itemHeight: 2, // 線段粗細（看起來就是一條線）
@@ -4676,7 +4685,7 @@ function StockChartSma() {
       grid: {
         left: 55,
         right: 10,
-        top: 32,
+        top: getGridTop(el), // 改成動態計算
         bottom: 40
       },
       xAxis: {
@@ -4791,10 +4800,33 @@ function StockChartSma() {
             color: '#00c98a'
           }
         },
+        {
+          name: '股價',
+          type: 'line',
+          data: price,
+          smooth: true,
+          symbol: 'none',
+          lineStyle: {
+            color: '#12d623',
+            width: 1.5
+          },
+          itemStyle: {
+            color: '#12d623'
+          }
+        },
       ],
     });
 
-    new ResizeObserver(() => chart.resize()).observe(el);
+    // resize 時同步更新 grid.top，避免視窗縮放後 legend 換行卻沒補高度
+    let lastTop = getGridTop(el);
+    new ResizeObserver(() => {
+      chart.resize();
+      const newTop = getGridTop(el);
+      if (newTop !== lastTop) {
+        lastTop = newTop;
+        chart.setOption({ grid: { top: newTop } });
+      }
+    }).observe(el);
   }
   window._sma_chartPending = {};
 }
@@ -5718,6 +5750,7 @@ function renderStockSma(data) {
     <th style="position:sticky;top:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">SMA10</th>
     <th style="position:sticky;top:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">SMA20</th>
     <th style="position:sticky;top:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">SMA60</th>
+    <th style="position:sticky;top:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">股價</th>
   </tr>`;
 
   const bodyRows = data.data.map(d => `
@@ -5727,6 +5760,7 @@ function renderStockSma(data) {
     <td style="padding:6px 10px;text-align:center;font-size:12px;">${d.sma_10 ?? '-'}</td>
     <td style="padding:6px 10px;text-align:center;font-size:12px;">${d.sma_20 ?? '-'}</td>
     <td style="padding:6px 10px;text-align:center;font-size:12px;">${d.sma_60 ?? '-'}</td>
+    <td style="padding:6px 10px;text-align:center;font-size:12px;">${d.price ?? '-'}</td>
   </tr>`).join('');
 
   return `
@@ -5887,6 +5921,7 @@ function renderStockBrands(data) {
     <th style="position:sticky;top:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">上軌</th>
     <th style="position:sticky;top:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">中軌</th>
     <th style="position:sticky;top:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">下軌</th>
+    <th style="position:sticky;top:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">股價</th>
   </tr>`;
 
   const bodyRows = data.data.map(d => `
@@ -5895,6 +5930,7 @@ function renderStockBrands(data) {
     <td style="padding:6px 10px;text-align:center;font-size:12px;">${d.upper  ?? '-'}</td>
     <td style="padding:6px 10px;text-align:center;font-size:12px;">${d.middle ?? '-'}</td>
     <td style="padding:6px 10px;text-align:center;font-size:12px;">${d.lower ?? '-'}</td>
+    <td style="padding:6px 10px;text-align:center;font-size:12px;">${d.price ?? '-'}</td>
   </tr>`).join('');
 
   return `
