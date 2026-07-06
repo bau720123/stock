@@ -3584,10 +3584,17 @@ function generateCustomEvents(year) {
   ));
   events.push(createEventObj(
     new Date("2026-07-09"),
+    "FOMC",
+    "聯準會 FOMC 6 月會議記錄（台灣時間週四凌晨）",
+    "#3498db",
+    "001"
+  ));
+  events.push(createEventObj(
+    new Date("2026-07-09"),
     "DELTA",
     "台達電公佈5月份業績",
     "#3498db",
-    "001"
+    "002"
   ));
   events.push(createEventObj(
     new Date("2026-07-10"),
@@ -3595,6 +3602,13 @@ function generateCustomEvents(year) {
     "台積電公佈5月份業績",
     "#3498db",
     "001"
+  ));
+  events.push(createEventObj(
+    new Date("2026-07-10"),
+    "DELTA",
+    "台達電海外法人說明會（地點：新加坡）",
+    "#3498db",
+    "002"
   ));
   events.push(createEventObj(
     new Date("2026-07-16"),
