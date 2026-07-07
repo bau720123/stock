@@ -3583,6 +3583,13 @@ function generateCustomEvents(year) {
     "001"
   ));
   events.push(createEventObj(
+    new Date("2026-07-07"),
+    "Samsung",
+    "三星公布 Q2 營運展望預估",
+    "#3498db",
+    "001"
+  ));
+  events.push(createEventObj(
     new Date("2026-07-08"),
     "DELTA",
     "台達電海外法人說明會（地點：新加坡）",
@@ -3632,9 +3639,23 @@ function generateCustomEvents(year) {
     "001"
   ));
   events.push(createEventObj(
+    new Date("2026-07-29"),
+    "SK",
+    "海力士正式召開 Q2 財報法人說明會",
+    "#3498db",
+    "001"
+  ));
+  events.push(createEventObj(
     new Date("2026-07-30"),
     "DELTA",
     "台達電法說會",
+    "#3498db",
+    "001"
+  ));
+  events.push(createEventObj(
+    new Date("2026-07-30"),
+    "Samsung",
+    "三星正式召開 Q2 財報法人說明會",
     "#3498db",
     "001"
   ));
