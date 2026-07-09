@@ -265,6 +265,23 @@ const ALERT_CONFIGS = {
         unit: ''
       },
     ]
+  },
+  utckrw: {
+    title: '美元兌韓元匯率 偵測設定',
+    fields: [
+      {
+        key: 'utckrw_high',
+        label: '價格大於等於此值時通知',
+        placeholder: '例：100',
+        unit: ''
+      },
+      {
+        key: 'utckrw_low',
+        label: '價格小於等於此值時通知',
+        placeholder: '例：99',
+        unit: ''
+      },
+    ]
   }
 };
 
@@ -2916,7 +2933,7 @@ async function loadMaterials() {
 
 // 市場情緒
 async function loadSentiment() {
-  const [ /*sinaVix, */ sinaVixFutures, fearGreed, sinaUsdollar, yahooUtcTwd, yahooUtcJpy, fedwatch] = await Promise.all([
+  const [ /*sinaVix, */ sinaVixFutures, fearGreed, sinaUsdollar, yahooUtcTwd, yahooUtcJpy, yahooUtcKrw, fedwatch] = await Promise.all([
     // fetch(WORKER + '/sina/znb_VIX').then(r => r.json()).catch(() => ({ success: false })), // VIX 恐慌指數
     fetch(WORKER + '/sina/hf_VX').then(r => r.json()).catch(() => ({
       success: false
@@ -2933,6 +2950,9 @@ async function loadSentiment() {
     fetch(WORKER + '/yahoo-finance/USDJPY=X').then(r => r.json()).catch(() => ({
       success: false
     })), // 美金兌換日幣匯率
+    fetch(WORKER + '/yahoo-finance/USDKRW=X').then(r => r.json()).catch(() => ({
+      success: false
+    })), // 美金兌換韓元匯率
     fetch(WORKER + '/fedwatch').then(r => r.json()).catch(() => ({
       success: false
     })), // 聯準會利率
@@ -3093,14 +3113,14 @@ async function loadSentiment() {
       sendNotification(
         '美金兌換台幣匯率警示',
         `數值 ${yahooUtcTwd.close.toFixed(2)}，已高於設定門檻 ${usdtwdHigh}`,
-        'https://hk.investing.com/indices/usdollar'
+        'https://hk.investing.com/currencies/usd-twd'
       );
     }
     if (usdtwdLow !== null && yahooUtcTwd.close <= usdtwdLow) {
       sendNotification(
         '美金兌換台幣匯率警示',
         `數值 ${yahooUtcTwd.close.toFixed(2)}，已低於設定門檻 ${usdtwdLow}`,
-        'https://hk.investing.com/indices/usdollar'
+        'https://hk.investing.com/currencies/usd-twd'
       );
     }
   } else {
@@ -3130,14 +3150,51 @@ async function loadSentiment() {
       sendNotification(
         '美金兌換日幣匯率警示',
         `數值 ${yahooUtcJpy.close.toFixed(2)}，已高於設定門檻 ${utcjpyHigh}`,
-        'https://hk.investing.com/indices/usdollar'
+        'https://hk.investing.com/currencies/usd-jpy'
       );
     }
     if (utcjpyLow !== null && yahooUtcJpy.close <= utcjpyLow) {
       sendNotification(
         '美金兌換日幣匯率警示',
         `數值 ${yahooUtcJpy.close.toFixed(2)}，已低於設定門檻 ${utcjpyLow}`,
-        'https://hk.investing.com/indices/usdollar'
+        'https://hk.investing.com/currencies/usd-jpy'
+      );
+    }
+  } else {
+    html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
+  }
+
+  // 【美金兌換韓元匯率】
+  html += groupHeader('【美金兌換韓元匯率】', 'utckrw', '美金兌換韓元匯率（USDKRW）是反映美元與韓國 won 之間兌換關係的指標。');
+  if (yahooUtcKrw.success) {
+    const changeNum = yahooUtcKrw.close - yahooUtcKrw.prev;
+    const cls = changeClass(changeNum, 1);
+    const changePercent = changeNum / yahooUtcKrw.prev * 100;
+
+    html += row('前次', yahooUtcKrw.prev.toFixed(2));
+    html += row('開盤價', yahooUtcKrw.open.toFixed(2));
+    html += row('最高價', yahooUtcKrw.high.toFixed(2));
+    html += row('最低價', yahooUtcKrw.low.toFixed(2));
+    html += row('價格', yahooUtcKrw.close.toFixed(2), 'accent');
+    html += row('漲跌', changeNum.toFixed(2), cls);
+    // html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
+    html += row('更新時間', yahooUtcKrw.updateTime);
+
+    // 價格門檻通知（從 localStorage 讀取，未設定則不觸發）
+    const utckrwHigh = alertGet('utckrw_high');
+    const utckrwLow = alertGet('utckrw_low');
+    if (utckrwHigh !== null && yahooUtcKrw.close >= utckrwHigh) {
+      sendNotification(
+        '美金兌換韓元匯率警示',
+        `數值 ${yahooUtcKrw.close.toFixed(2)}，已高於設定門檻 ${utckrwHigh}`,
+        'https://hk.investing.com/currencies/usd-krw'
+      );
+    }
+    if (utckrwLow !== null && yahooUtcKrw.close <= utckrwLow) {
+      sendNotification(
+        '美金兌換韓元匯率警示',
+        `數值 ${yahooUtcKrw.close.toFixed(2)}，已低於設定門檻 ${utckrwLow}`,
+        'https://hk.investing.com/currencies/usd-krw'
       );
     }
   } else {
