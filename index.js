@@ -3619,7 +3619,7 @@ function _renderMyStock({
     <div class="row">
     <span class="row-label">歷史股價</span>
     <div style="display: flex; gap: 8px; align-items: center;">
-      <a style="cursor:pointer; user-select:none; text-decoration:none;" onclick="showInfo('${historyResults[0].result.story}')">❔</a>
+      <a style="cursor:pointer; user-select:none; text-decoration:none;" onclick="showInfo('${historyResults[i].result.story}')">❔</a>
       <span style="cursor:pointer;user-select:none;" onclick="
       const ob = document.getElementById('stockhistory_${i}');
       const btn = this;
