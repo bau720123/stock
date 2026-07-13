@@ -19,21 +19,21 @@
     │
     └─ Cloudflare Worker     → 代理爬蟲 / 推播發送
             │
-            ├─ HiStock       → 台股期貨、富台指
+            ├─ HiStock       → 台股期貨、富台指、三大法人買賣、外資期貨淨部位、個股法人明細、個股融資融券餘額
             ├─ 鉅亨網         → 富台指（備援來源）
             ├─ TaiFex        → 台股/台積電期貨
             ├─ Fugle         → 台股現貨即時報價、歷史K線、技術指標（需 API Key）
-            ├─ 玩股網 (wearn) → 外資期貨淨部位、三大法人買賣、個股法人明細
-            ├─ 台灣證券交易所  → 融資餘額
+            ├─ 台灣證券交易所  → 全市場融資餘額
             ├─ 新浪財經       → 布蘭特原油、黃金、白銀、美元指數、VIX
             ├─ Yahoo Finance  → 美股/ETF 個股行情、亞洲市場指數
             ├─ CNBC          → 美股四大指數、盤前 Fair Value、TSM ADR
             ├─ RobinHood     → TSM ADR 即時報價（目前因 TLS 封鎖暫停）
             ├─ CNN           → 恐慌貪婪指數（Fear & Greed Index）
+            ├─ Investing.com + FRED → CME FedWatch 聯準會利率預期（需 FRED API Key）
             ├─ MoneyDJ       → 美股重要經濟指標行事曆
             ├─ MacroMicro    → 科技股財報日曆、總體經濟事件（靜態 JSON）
             ├─ Finnhub       → 科技股財報日曆（需 API Key，路由保留但已停用）
-            └─ RSS Feeds     → Yahoo奇摩財經、中央社、自由時報
+            └─ RSS Feeds     → Yahoo奇摩財經、中央社、自由時報、韓聯社
 ```
 
 ---
@@ -86,7 +86,8 @@ fetch("https://histock.tw/stock/module/function.aspx", {
 | `/stock/quote/{symbol}` | Fugle | 台股個股即時報價（含委買委賣五檔） |
 | `/stock/volume/{symbol}` | Fugle | 台股個股分價量表 |
 | `/stock/history/{symbol}` | Fugle | 台股個股歷史 K 線（近 30 天，日線） |
-| `/stock/institutional/{symbol}` | 玩股網 | 個股三大法人買賣明細 |
+| `/stock/institutional/{symbol}` | HiStock | 個股三大法人買賣明細（含籌碼故事分析） |
+| `/stock/margintradingbalance/{symbol}` | HiStock | 個股融資融券餘額、使用率、收盤價（含增減故事分析） |
 | `/stock/sma/{symbol}` | Fugle | 均線（SMA 5/10/20/60 日） |
 | `/stock/rsi/{symbol}` | Fugle | RSI 指標（6/9/14/20 日） |
 | `/stock/kdj/{symbol}` | Fugle | KDJ 指標（9/3/3） |
@@ -98,10 +99,11 @@ fetch("https://histock.tw/stock/module/function.aspx", {
 | `/cnbc` | CNBC | 美股四大指數 + 盤前 Fair Value + TSM ADR |
 | `/rh` | RobinHood | TSM ADR 即時變動（TLS 封鎖中） |
 | `/fear-greed` | CNN | 恐慌貪婪指數（Fear & Greed Index） |
-| `/foreign-net-position` | 玩股網 | 外資期貨淨未平倉口數（日期序列） |
-| `/institutional` | 玩股網 | 三大法人合計買賣超（日期序列） |
+| `/fedwatch` | Investing.com + FRED | CME FedWatch 聯準會利率決策機率（需 `FRED_KEY`） |
+| `/foreign-net-position` | HiStock | 外資期貨淨未平倉口數（日期序列） |
+| `/institutional` | HiStock | 三大法人合計買賣超（日期序列） |
 | `/margin-trading-balance` | 台灣證券交易所 | 全市場融資餘額（億元） |
-| `/news-rss` | Yahoo奇摩/中央社/自由時報 | 關鍵字過濾財經新聞 |
+| `/news-rss` | Yahoo奇摩/中央社/自由時報/韓聯社 | 關鍵字過濾財經新聞 |
 | `/america-calendar` | MoneyDJ + MacroMicro + 自訂 | 美股重要事件行事曆 |
 | `/generateCustomEventsFinnhub/{from}/{to}` | Finnhub | 科技股財報日曆（最多 14 天，路由保留供單獨呼叫） |
 | `/subscribe` | — | 接收並儲存裝置推播訂閱資料 |
@@ -199,9 +201,55 @@ https://www.taifex.com.tw/cht/quotesApi/getQuotes?objId={objId}
 
 ---
 
-### 7. 新聞 RSS 聚合（/news-rss）
+### 7. HiStock 三大法人 / 融資融券資料
 
-**用途：** 聚合多個台灣財經媒體 RSS，依關鍵字過濾相關新聞；同一端點也供「國際政治新聞」卡片使用
+**用途：** 提供三大法人買賣超（合計與個股）、外資期貨淨部位、個股融資融券餘額
+
+**解決的問題：** 原資料來源玩股網（stock.wearn.com）已改用 HiStock（histock.tw）取代，爬蟲邏輯與比對的 CSS class 皆已改寫；舊版函式以 `_old` 後綴保留於原始碼中但未接上路由，僅供參考不會實際執行。
+
+**現有端點：**
+
+| 路徑 | 對應函式 | 說明 |
+|------|----------|------|
+| `/institutional` | `fetchInstitutional` | 三大法人合計買賣超（日期序列） |
+| `/foreign-net-position` | `fetchForeignNetPosition` | 外資期貨淨未平倉口數（日期序列） |
+| `/stock/institutional/{symbol}` | `fetchHiStockInstitutional` | 個股三大法人買賣明細（含籌碼故事分析） |
+| `/stock/margintradingbalance/{symbol}` | `fetchHiStockMarginTradingBalance` | 個股融資融券餘額、使用率、收盤價（含增減故事分析），於「我的自選股」卡片顯示 |
+
+**來源網址格式：**
+```
+https://histock.tw/stock/three.aspx           # 三大法人合計 / 外資期貨淨部位
+https://histock.tw/stock/chips.aspx?no={symbol}       # 個股三大法人明細
+https://histock.tw/stock/chips.aspx?no={symbol}&m=mg  # 個股融資融券餘額
+```
+
+**注意事項：** 個股融資融券頁面（`m=mg`）表格 class 為 `tb-stock tbChip nofade`，與三大法人明細頁面的 `tb-stock tbChip w50p pr0` 不同，須分別比對；解析欄位時 CSS class 須完全比對（見專案的「Web scraping」慣例）。
+
+---
+
+### 8. CME FedWatch 聯準會利率預期（/fedwatch）
+
+**用途：** 顯示下次 FOMC 會議各目標利率區間的市場預期機率，作為總體經濟情緒的補充指標，於「市場情緒」卡片顯示
+
+**資料來源合併：**
+1. Investing.com（`https://www.investing.com/central-banks/fed-rate-monitor`）— 爬取 `class="infoFed"` 區塊取得下次會議時間，`class="genTbl openTbl fedRateTbl"` 表格取得各利率區間機率
+2. FRED API（St. Louis Fed，`DFEDTARL` / `DFEDTARU` 序列）— 取得目前基準利率區間下限與上限，需 `FRED_KEY`
+
+**回傳欄位：**
+
+| 欄位 | 說明 |
+|------|------|
+| `meetingTimeET` / `meetingTimeTW` | 下次 FOMC 會議時間（美東時間原始字串 / 換算為台北時間） |
+| `currentRate` | 目前基準利率區間（如 `3.75 - 4.00`），來自 FRED |
+| `rates[]` | 各目標利率區間的機率陣列，含 `targetRate`、`currentProb`、`prevDayProb`、`prevWeekProb`、`action`（依與目前利率差距自動推導「維持利率／升息 N 碼／降息 N 碼」） |
+
+**注意事項：** Investing.com 會議時間字串格式為美東時間（ET），須自行判斷夏令/冬令時間（4～10 月視為 EDT，其餘為 EST）再換算為台北時間；FRED 查詢失敗不影響主要機率資料，僅 `currentRate` 與各筆 `action` 會回傳 `null`。
+
+---
+
+### 9. 新聞 RSS 聚合（/news-rss）
+
+**用途：** 聚合多個台灣及國際財經媒體 RSS，依關鍵字過濾相關新聞；同一端點也供「國際政治新聞」卡片使用
 
 **RSS 來源：**
 
@@ -213,8 +261,11 @@ https://www.taifex.com.tw/cht/quotesApi/getQuotes?objId={objId}
 | 中央社政治 | `https://feeds.feedburner.com/rsscna/politics` |
 | 自由時報國際 | `https://news.ltn.com.tw/rss/world.xml` |
 | 自由時報財經 | `https://news.ltn.com.tw/rss/business.xml` |
+| 韓聯社（中文版） | `https://cb.yna.co.kr/gate/big5/cn.yna.co.kr/RSS/politics.xml` |
 
 **過濾關鍵字（部分）：** 伊朗、油價、原油、台積電、ADR、戰爭、中東、川普、軍事、衝突…等
+
+**韓聯社編碼注意事項：** XML header 宣告為 UTF-8，但實際回應內容為 Big5 編碼，需透過 `res.arrayBuffer()` 取得原始位元組後，再用 `TextDecoder("big5")` 手動解碼，不可直接呼叫 `res.text()`（否則中文會亂碼）。
 
 **其他特性：**
 - 依 `pubDate` 降冪排序，最多回傳 30 則
@@ -224,7 +275,7 @@ https://www.taifex.com.tw/cht/quotesApi/getQuotes?objId={objId}
 
 ---
 
-### 8. 美股行事曆（/america-calendar）
+### 10. 美股行事曆（/america-calendar）
 
 **用途：** 整合多來源，提供完整的美股投資重要事件日曆
 
@@ -252,7 +303,7 @@ NVDA、TSM、AAPL、META、MSFT、GOOGL、AMZN、TSLA、AMD、PLTR、AVGO、QCOM
 
 ---
 
-### 9. Cron 定時推播（handleCron）
+### 11. Cron 定時推播（handleCron）
 
 **觸發時間：** 每小時整點（UTC `0 */1 * * *`）
 
@@ -276,7 +327,7 @@ getVixStatus(value)    // < 20: 平靜 / < 25: 留意 / < 30: 波動加劇 / ≥
 
 ---
 
-### 10. PWA（Progressive Web App）
+### 12. PWA（Progressive Web App）
 
 **用途：** 讓網頁可安裝至手機桌面，提供類原生 App 體驗
 
@@ -306,7 +357,7 @@ getVixStatus(value)    // < 20: 平靜 / < 25: 留意 / < 30: 波動加劇 / ≥
 
 ---
 
-### 11. Service Worker（sw.js）
+### 13. Service Worker（sw.js）
 
 **用途：** 在瀏覽器背景執行的 JavaScript，是 PWA 推播通知的核心
 
@@ -322,7 +373,7 @@ getVixStatus(value)    // < 20: 平靜 / < 25: 留意 / < 30: 波動加劇 / ≥
 
 ---
 
-### 12. Web Push Protocol
+### 14. Web Push Protocol
 
 **用途：** 從伺服器主動推送通知到使用者裝置
 
@@ -367,7 +418,7 @@ isApplePlatform(platform)    // 偵測 iPhone / iPad / iPod / Mac
 
 ---
 
-### 13. VAPID 金鑰（vapidkeys.com）
+### 15. VAPID 金鑰（vapidkeys.com）
 
 **用途：** Web Push 身份驗證
 
@@ -384,10 +435,11 @@ isApplePlatform(platform)    // 偵測 iPhone / iPad / iPod / Mac
 | `VAPID_SUBJECT` | Plaintext | `wrangler.toml` `[vars]` |
 | `FUGLE_KEY` | Secret | Cloudflare 後台 |
 | `FINNHUB_KEY` | Secret | Cloudflare 後台 |
+| `FRED_KEY` | Secret | Cloudflare 後台（`/fedwatch` 查詢當前基準利率用） |
 
 ---
 
-### 14. Cloudflare KV
+### 16. Cloudflare KV
 
 **用途：** 儲存推播訂閱資料與系統 LOG
 
@@ -421,7 +473,7 @@ isApplePlatform(platform)    // 偵測 iPhone / iPad / iPod / Mac
 
 ---
 
-### 15. Cloudflare Cron Trigger
+### 17. Cloudflare Cron Trigger
 
 **用途：** 定時執行推播邏輯
 
@@ -438,7 +490,7 @@ npm run cron-test
 
 ---
 
-### 16. Node.js 與 Wrangler CLI
+### 18. Node.js 與 Wrangler CLI
 
 **用途：** 執行 Wrangler CLI 工具
 
@@ -500,11 +552,11 @@ VAPID_SUBJECT = "mailto:your@email.com"
 | 美股市場概況 | 盤前電子盤 Fair Value、道瓊/標普/納斯達克/費城半導體、TSM ADR |
 | 亞洲市場概況 | 日經225指數（^N225）、韓國綜合指數（KOSPI, ^KS11） |
 | 原物料市場 | 布蘭特原油（含評級）、黃金、白銀 |
-| 市場情緒 | 美元指數（DXY）、VIX 恐慌指數（含評級）、CNN 恐慌貪婪指數 |
+| 市場情緒 | 美元指數（DXY）、VIX 恐慌指數（含評級）、CNN 恐慌貪婪指數、CME FedWatch 聯準會利率預期 |
 | 國際政治新聞 | 關鍵字過濾新聞（戰爭/地緣政治）、已讀/未讀標記 |
 | 美股行事曆 | 月曆視圖，含經濟指標、財報日、結算日等 |
-| 法人動向 | 三大法人買賣超、外資期貨淨部位、融資餘額 |
-| 自選股 | localStorage 自訂股票清單，支援 `^` 符號（Yahoo Finance 格式），含 Autocomplete 搜尋 |
+| 法人動向 | 三大法人買賣超、外資期貨淨部位、全市場融資餘額 |
+| 自選股 | localStorage 自訂股票清單，支援 `^` 符號（Yahoo Finance 格式），含 Autocomplete 搜尋、個股法人明細、個股融資融券餘額、SMA/RSI/KDJ/MACD/BB 技術指標 |
 
 **Header 功能：**
 - `☰` 漢堡按鈕：開啟左側 Slide Menu
@@ -553,10 +605,13 @@ stock/
 | 台股個股現貨 | Fugle 官方 API | JSON API（需 API Key） |
 | 台股全市場 Tickers | Fugle 官方 API | JSON API（需 API Key，Autocomplete 用） |
 | 技術指標（SMA/RSI/KDJ/MACD/BB） | Fugle 官方 API | JSON API（需 API Key） |
-| 個股法人明細 | 玩股網 (wearn.com) | HTML 爬蟲 |
-| 三大法人合計 | 玩股網 (wearn.com) | HTML 爬蟲 |
-| 外資期貨淨部位 | 玩股網 (wearn.com) | HTML 爬蟲 |
-| 融資餘額 | 台灣證券交易所 (TWSE) | HTML 爬蟲 |
+| 個股法人明細 | HiStock (histock.tw) | HTML 爬蟲 |
+| 個股融資融券餘額 | HiStock (histock.tw) | HTML 爬蟲 |
+| 三大法人合計 | HiStock (histock.tw) | HTML 爬蟲 |
+| 外資期貨淨部位 | HiStock (histock.tw) | HTML 爬蟲 |
+| 全市場融資餘額 | 台灣證券交易所 (TWSE) | JSON API |
+| 聯準會利率預期（FedWatch） | Investing.com | HTML 爬蟲 |
+| 目前基準利率區間 | FRED (St. Louis Fed) | 官方 JSON API（需 API Key） |
 | 布蘭特原油 | 新浪財經 (hf_OIL) | 非官方字串 API |
 | 黃金、白銀 | 新浪財經 (hf_GC, hf_SI) | 非官方字串 API |
 | 美元指數（DXY） | 新浪財經 (DINIW) | 非官方字串 API（特殊欄位格式） |
@@ -571,19 +626,21 @@ stock/
 | 總體經濟事件 | MacroMicro | 靜態 JSON（部署於 GitHub Pages） |
 | 科技股財報日（備用） | Finnhub | 官方 API（需 API Key，免費方案限 14 天，目前停用） |
 | 美股經濟行事曆 | MoneyDJ | 非官方 JSON API |
-| 財經新聞 / 國際政治新聞 | Yahoo奇摩/中央社/自由時報 | RSS Feed |
+| 財經新聞 / 國際政治新聞 | Yahoo奇摩/中央社/自由時報/韓聯社 | RSS Feed |
 
 ---
 
 ## 注意事項
 
-- 本專案使用的第三方 API（新浪、HiStock、CNBC、MoneyDJ）均為非官方接口，可能隨時變更或中斷
+- 本專案使用的第三方 API（新浪、HiStock、CNBC、MoneyDJ、Investing.com）均為非官方接口，可能隨時變更或中斷
 - RobinHood API 因 CloudFront WAF + TLS fingerprint 驗證，目前從非瀏覽器環境（Workers、curl、Java）無法存取
+- 三大法人（合計/個股）、外資期貨淨部位、個股融資融券餘額原資料來源為玩股網 (wearn.com)，已全面改用 HiStock (histock.tw)；舊版函式以 `_old` 後綴保留於 `worker.js` 中僅供參考，未接上任何路由
 - Finnhub 財報來源已由 MacroMicro 靜態 JSON 取代；若 MacroMicro 資料過期，前端會顯示警告提示
 - Finnhub 免費方案超過 14 天的查詢會靜默截斷，不會報錯，若重新啟用需主動限制日期範圍
-- VAPID 私鑰與 Fugle/Finnhub API Key 存放於 Cloudflare Worker Secrets，請勿提交至 Git
+- VAPID 私鑰與 Fugle/Finnhub/FRED API Key 存放於 Cloudflare Worker Secrets，請勿提交至 Git
 - `node_modules/` 和 `.wrangler/` 已加入 `.gitignore`
 - Cron Trigger 時間為 UTC，台灣時間需加 8 小時換算
 - Android 與 iOS 的推播 Action 按鈕有平台限制，目前僅電腦版與 Windows Edge 支援
 - 前端資料自動刷新間隔為 5 分鐘（避免觸發第三方 API 封鎖限制）
 - 新浪財經 API 回應為 GBK 編碼，必須透過 `TextDecoder("gbk")` 解碼，不可直接使用 `res.text()`
+- 韓聯社 RSS 回應標榜 UTF-8 但實際為 Big5 編碼，須以 `arrayBuffer()` + `TextDecoder("big5")` 解碼，不可直接使用 `res.text()`
