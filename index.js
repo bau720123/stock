@@ -6310,10 +6310,7 @@ function renderCalendarView() {
 }
 
 function renderCalendarList() {
-  const {
-    year,
-    month
-  } = currentCalView;
+  const { year, month } = currentCalView;
   const cardId = 'card-america-calendar';
 
   const todayStr = new Date().toISOString().split('T')[0].replace(/-/g, '');
@@ -6343,33 +6340,40 @@ function renderCalendarList() {
   `;
 
   const dayNames = ['日', '一', '二', '三', '四', '五', '六'];
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-  Object.keys(grouped).sort().forEach(dateKey => {
-    const day = parseInt(dateKey.substring(6, 8));
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dateKey = `${year}${String(month + 1).padStart(2, '0')}${String(day).padStart(2, '0')}`;
     const dateObj = new Date(year, month, day);
     const dayName = dayNames[dateObj.getDay()];
     const isToday = dateKey === todayStr;
     const isWeekend = dateObj.getDay() === 0 || dateObj.getDay() === 6;
+    const dayEvents = grouped[dateKey]; // 有可能是 undefined
 
     html += `
     <div style="border-left: 3px solid ${isToday ? 'var(--accent)' : 'var(--border)'}; padding: 4px 8px;">
     <div style="font-size:0.8em; color:${isToday ? 'var(--accent)' : (isWeekend ? '#888' : 'var(--fg)')};
           margin-bottom:4px; font-weight:bold;">
       ${month + 1}/${day}（${dayName}）${isToday ? ' ◀ 今天' : ''}
-    </div>
-    ${grouped[dateKey].map(ev =>
-      ev.indicators.map(ind => `
-      <div class="calendar-event"
-         style="background:${ev.textColor}15; color:${ev.textColor}; border-left:2px solid ${ev.textColor};
-            margin-bottom:3px; padding:4px 6px;"
-         onclick="gotoMoneyDJ('${ind.code}')">
-        ${ev.type === 'market' ? '休 ' : ''}${ind.name}
-      </div>
-      `).join('')
-    ).join('')}
-    </div>
-  `;
-  });
+    </div>`;
+
+    if (!dayEvents || dayEvents.length === 0) {
+      html += `<div style="color:#888; padding:4px 0;">無事件</div>`;
+    } else {
+      html += dayEvents.map(ev =>
+        ev.indicators.map(ind => `
+        <div class="calendar-event"
+           style="background:${ev.textColor}15; color:${ev.textColor}; border-left:2px solid ${ev.textColor};
+              margin-bottom:3px; padding:4px 6px;"
+           onclick="gotoMoneyDJ('${ind.code}')">
+          ${ev.type === 'market' ? '休 ' : ''}${ind.name}
+        </div>
+        `).join('')
+      ).join('');
+    }
+
+    html += `</div>`;
+  }
 
   if (Object.keys(grouped).length === 0) {
     html += `<div style="color:#888; padding:12px;">本月無事件</div>`;
