@@ -3907,7 +3907,7 @@ async function generateCustomEventsMacroEarnings() {
           `${item.name} 財報發布（${item.period || ''} ${item.calendar_year || ''}）`,
           '#27ae60',
           `61${String(index).padStart(3, '0')}`, // 61xxx，與 Finnhub 60xx 不衝突
-        'https://www.macromicro.me/stocks/info/' + symbol || '' // 連結
+          'https://www.macromicro.me/stocks/info/' + symbol || '' // 連結
         ));
         index++;
       }
