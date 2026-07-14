@@ -6282,8 +6282,14 @@ function renderCalendarView() {
   // 填充空白
   for (let i = 0; i < firstDay; i++) html += `<div class="calendar-cell" style="opacity:0.1;"></div>`;
 
-  // 填充日期
-  const todayStr = new Date().toISOString().split('T')[0].replace(/-/g, '');
+  // 現在日期
+  const todayStr = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Taipei',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).format(new Date()).replace(/-/g, '');
+
   for (let day = 1; day <= daysInMonth; day++) {
     const dateKey = `${year}${String(month + 1).padStart(2, '0')}${String(day).padStart(2, '0')}`;
     const isToday = dateKey === todayStr;
@@ -6313,7 +6319,13 @@ function renderCalendarList() {
   const { year, month } = currentCalView;
   const cardId = 'card-america-calendar';
 
-  const todayStr = new Date().toISOString().split('T')[0].replace(/-/g, '');
+  // 現在日期
+  const todayStr = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Taipei',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).format(new Date()).replace(/-/g, '');
 
   // 只取當月資料，依日期排序
   const monthPrefix = `${year}${String(month + 1).padStart(2, '0')}`;
