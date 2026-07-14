@@ -128,7 +128,7 @@ export default {
 
     if (path === "/news-rss") return await fetchNewsRss(env);
 
-    if (path === "/america-calendar") return await fetchAmericaCalendar(env);
+    if (path === "/finance-calendar") return await fetchFinanceCalendar(env);
 
     if (path.startsWith("/generateCustomEventsFinnhub")) {
       try {
@@ -3262,7 +3262,7 @@ async function fetchNewsRss(env) {
 }
 
 // 美股行事曆
-async function fetchAmericaCalendar(env) {
+async function fetchFinanceCalendar(env) {
   try {
     const now = new Date();
     const twTime = new Date(now.getTime() + 8 * 3600 * 1000);

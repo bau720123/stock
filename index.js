@@ -1082,9 +1082,9 @@ async function loadAll() {
       id: 'card-news',
       fn: loadNews
     },
-    'america-calendar': {
-      id: 'card-america-calendar',
-      fn: loadAmericaCalendar
+    'finance-calendar': {
+      id: 'card-finance-calendar',
+      fn: loadFinanceCalendar
     },
   };
 
@@ -6192,7 +6192,7 @@ async function loadNews() {
   setCard('card-news', 0, html, 'card-wide');
 }
 
-// 美股行事曆
+// 財經行事曆
 let calendarDataCache = null; // 儲存從 Worker 拿到的所有資料
 let currentCalView = {
   year: new Date().getFullYear(),
@@ -6212,14 +6212,14 @@ function renderCalendarMode() {
   }
 }
 
-async function loadAmericaCalendar() {
-  const cardId = 'card-america-calendar';
+async function loadFinanceCalendar() {
+  const cardId = 'card-finance-calendar';
   const container = document.getElementById(cardId);
 
   // 只有第一次加載或點擊重新整理時才 Fetch
   if (!calendarDataCache) {
     try {
-      const res = await fetch(WORKER + '/america-calendar');
+      const res = await fetch(WORKER + '/finance-calendar');
       const data = await res.json();
       if (!data.success) throw new Error(data.error);
       calendarDataCache = data.items;
@@ -6235,7 +6235,7 @@ async function loadAmericaCalendar() {
       }
 
     } catch (e) {
-      container.innerHTML = `<div class="card-title">美股行事曆</div><div class="error-text">載入失敗：${e.message}</div>`;
+      container.innerHTML = `<div class="card-title">財經行事曆</div><div class="error-text">載入失敗：${e.message}</div>`;
       return;
     }
   }
@@ -6253,7 +6253,7 @@ function renderCalendarView() {
     year,
     month
   } = currentCalView;
-  const cardId = 'card-america-calendar';
+  const cardId = 'card-finance-calendar';
 
   const eventMap = {};
   calendarDataCache.forEach(item => {
@@ -6269,7 +6269,7 @@ function renderCalendarView() {
   }).format(new Date(year, month));
 
   let html = `
-  <div class="card-title">美股行事曆</div>
+  <div class="card-title">財經行事曆</div>
   <div class="calendar-header">
     <button class="calendar-nav-btn" onclick="changeMonth(-1)">◀</button>
     <div style="color:var(--accent);">${year} / ${String(month + 1).padStart(2, '0')}<!--（${monthName}）--></div>
@@ -6317,7 +6317,7 @@ function renderCalendarView() {
 
 function renderCalendarList() {
   const { year, month } = currentCalView;
-  const cardId = 'card-america-calendar';
+  const cardId = 'card-finance-calendar';
 
   // 現在日期
   const todayStr = new Intl.DateTimeFormat('en-CA', {
@@ -6342,7 +6342,7 @@ function renderCalendarList() {
   });
 
   let html = `
-  <div class="card-title">美股行事曆</div>
+  <div class="card-title">財經行事曆</div>
   <div class="calendar-header">
     <button class="calendar-nav-btn" onclick="changeMonth(-1)">◀</button>
     <div style="color:var(--accent);">${year} / ${String(month + 1).padStart(2, '0')}</div>
@@ -6417,7 +6417,10 @@ window.changeMonth = function(offset) {
 
 function gotoMoneyDJ(code = '') {
   if (code != '') {
-    location.href = "https://www.moneydj.com/funddj/yl/BFRK01.djhtm?a=" + code;
+    // location.href = "https://www.moneydj.com/funddj/yl/BFRK01.djhtm?a=" + code;
+    // 在新分頁開啟指定的網址
+    window.open("https://www.moneydj.com/funddj/yl/BFRK01.djhtm?a=" + code, '_blank');
+
   } else {
     // 
   }
@@ -6523,7 +6526,7 @@ if (card_type == 'all') {
   const tourSelectors = [
     '#card-tw', '#card-america', '#card-asia',
     '#card-materials', '#card-sentiment', '#card-mystock',
-    '#card-news', '#card-america-calendar',
+    '#card-news', '#card-finance-calendar',
   ];
 
   waitForElements(tourSelectors).then(() => {
@@ -6607,10 +6610,10 @@ if (card_type == 'all') {
           }
         },
         {
-          element: '#card-america-calendar',
+          element: '#card-finance-calendar',
           popover: {
-            title: '美股行事曆',
-            description: '列出美股行事曆中相關的重要經濟事件、財報發布日等資訊',
+            title: '財經行事曆',
+            description: '列出財經行事曆中相關的重要經濟事件、財報發布日等資訊',
           }
         },
       ]

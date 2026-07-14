@@ -104,7 +104,7 @@ fetch("https://histock.tw/stock/module/function.aspx", {
 | `/institutional` | HiStock | 三大法人合計買賣超（日期序列） |
 | `/margin-trading-balance` | 台灣證券交易所 | 全市場融資餘額（億元） |
 | `/news-rss` | Yahoo奇摩/中央社/自由時報/韓聯社 | 關鍵字過濾財經新聞 |
-| `/america-calendar` | MoneyDJ + MacroMicro + 自訂 | 美股重要事件行事曆 |
+| `/finance-calendar` | MoneyDJ + MacroMicro + 自訂 | 美股重要事件行事曆 |
 | `/generateCustomEventsFinnhub/{from}/{to}` | Finnhub | 科技股財報日曆（最多 14 天，路由保留供單獨呼叫） |
 | `/subscribe` | — | 接收並儲存裝置推播訂閱資料 |
 | `/push-test` | — | 手動觸發推播測試 |
@@ -275,7 +275,7 @@ https://histock.tw/stock/chips.aspx?no={symbol}&m=mg  # 個股融資融券餘額
 
 ---
 
-### 10. 美股行事曆（/america-calendar）
+### 10. 財經行事曆（/finance-calendar）
 
 **用途：** 整合多來源，提供完整的美股投資重要事件日曆
 
@@ -554,7 +554,7 @@ VAPID_SUBJECT = "mailto:your@email.com"
 | 原物料市場 | 布蘭特原油（含評級）、黃金、白銀 |
 | 市場情緒 | 美元指數（DXY）、VIX 恐慌指數（含評級）、CNN 恐慌貪婪指數、CME FedWatch 聯準會利率預期 |
 | 國際政治新聞 | 關鍵字過濾新聞（戰爭/地緣政治）、已讀/未讀標記 |
-| 美股行事曆 | 月曆視圖，含經濟指標、財報日、結算日等 |
+| 財經行事曆 | 月曆視圖，含經濟指標、財報日、結算日等 |
 | 法人動向 | 三大法人買賣超、外資期貨淨部位、全市場融資餘額 |
 | 自選股 | localStorage 自訂股票清單，支援 `^` 符號（Yahoo Finance 格式），含 Autocomplete 搜尋、個股法人明細、個股融資融券餘額、SMA/RSI/KDJ/MACD/BB 技術指標 |
 
