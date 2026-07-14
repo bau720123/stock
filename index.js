@@ -6100,7 +6100,7 @@ function warMarkRead(link, source) {
       showConfirmButton: false,
     });
   } else {
-    location.href = link;
+    window.open(link, '_blank');
   }
 }
 
@@ -6303,7 +6303,7 @@ function renderCalendarView() {
       return ev.indicators.map(ind => `
       <div class="calendar-event" 
          style="background: ${ev.textColor}15; color: ${ev.textColor}; border-left: 2px solid ${ev.textColor}"
-         onclick="gotoMoneyDJ('${ind.code}')">
+         onclick="gotoCalendarDetail('${ind.link}')">
         ${ev.type === 'market' ? '休' : ''}${ind.name}
       </div>
       `).join('');
@@ -6377,7 +6377,7 @@ function renderCalendarList() {
         <div class="calendar-event"
            style="background:${ev.textColor}15; color:${ev.textColor}; border-left:2px solid ${ev.textColor};
               margin-bottom:3px; padding:4px 6px;"
-           onclick="gotoMoneyDJ('${ind.code}')">
+           onclick="gotoCalendarDetail('${ind.link}')">
           ${ev.type === 'market' ? '休 ' : ''}${ind.name}
         </div>
         `).join('')
@@ -6415,12 +6415,9 @@ window.changeMonth = function(offset) {
   renderCalendarMode(); // 切換月份時直接根據當下的螢幕方向渲染適合的版型
 };
 
-function gotoMoneyDJ(code = '') {
-  if (code != '') {
-    // location.href = "https://www.moneydj.com/funddj/yl/BFRK01.djhtm?a=" + code;
-    // 在新分頁開啟指定的網址
-    window.open("https://www.moneydj.com/funddj/yl/BFRK01.djhtm?a=" + code, '_blank');
-
+function gotoCalendarDetail(link = '') {
+  if (link != '') {
+    window.open(link, '_blank');
   } else {
     // 
   }

@@ -3261,7 +3261,7 @@ async function fetchNewsRss(env) {
   }
 }
 
-// 美股行事曆
+// 財經行事曆
 async function fetchFinanceCalendar(env) {
   try {
     const now = new Date();
@@ -3287,9 +3287,12 @@ async function fetchFinanceCalendar(env) {
     let processed = data.reduce((acc, item) => {
       const indicatorList = item.details.split(',').map(d => {
         const parts = d.split(':');
+        const code = parts.length > 1 ? parts[0].trim() : '';
+        const name = parts.length > 1 ? parts[1].trim() : parts[0].trim();
         return {
-          code: parts.length > 1 ? parts[0].trim() : '',
-          name: parts.length > 1 ? parts[1].trim() : parts[0].trim()
+          code,
+          name,
+          link: code ? `https://www.moneydj.com/funddj/yl/BFRK01.djhtm?a=${code}` : ''
         };
       });
 
@@ -3708,7 +3711,7 @@ function generateCustomEvents(year) {
 /**
  * 輔助：建立符合結構的事件物件
  */
-function createEventObj(dateObj, shortText, fullName, color, id_series = '999') {
+function createEventObj(dateObj, shortText, fullName, color, id_series = '999', link = '') {
   const y = dateObj.getFullYear();
   const m = String(dateObj.getMonth() + 1).padStart(2, '0');
   const d = String(dateObj.getDate()).padStart(2, '0');
@@ -3725,7 +3728,8 @@ function createEventObj(dateObj, shortText, fullName, color, id_series = '999') 
     "details": `:${fullName}`,
     "indicators": [{
       "code": "",
-      "name": fullName
+      "name": fullName,
+      "link": link
     }]
   };
 }
@@ -3902,7 +3906,8 @@ async function generateCustomEventsMacroEarnings() {
           symbol,
           `${item.name} 財報發布（${item.period || ''} ${item.calendar_year || ''}）`,
           '#27ae60',
-          `61${String(index).padStart(3, '0')}` // 61xxx，與 Finnhub 60xx 不衝突
+          `61${String(index).padStart(3, '0')}`, // 61xxx，與 Finnhub 60xx 不衝突
+        'https://www.macromicro.me/stocks/info/' + symbol || '' // 連結
         ));
         index++;
       }
@@ -3975,7 +3980,8 @@ async function generateCustomEventsMacroMacro() {
         item.name,
         `${item.name}（MacroMicro 總經）`,
         '#e67e22', // 橘色，與財報綠色區分
-        `62${String(index).padStart(3, '0')}` // 62xxx，與財報 61xxx 不衝突
+        `62${String(index).padStart(3, '0')}`, // 62xxx，與財報 61xxx 不衝突
+        'https://www.macromicro.me' + item.link || '' // 連結
       ));
       index++;
     }
