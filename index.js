@@ -3343,7 +3343,9 @@ let _tickersCache = null;
 async function loadTickers() {
   if (_tickersCache) return _tickersCache;
   try {
-    const res = await fetch('https://bau720123.github.io/stock/data/tickers.json?v=20260714');
+    const res = await fetch('https://bau720123.github.io/stock/data/tickers.json', {
+      cache: 'no-cache' // 每次都跟伺服器驗證
+    });
     const json = await res.json();
     if (json.success && Array.isArray(json.data)) {
       // 缺少 name 的資料，預設使用 symbol 值補齊
