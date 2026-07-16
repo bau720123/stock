@@ -3869,9 +3869,7 @@ async function generateCustomEventsMacroEarnings() {
   ]);
 
   try {
-    const res = await fetch('https://bau720123.github.io/stock/data/macromicro_earnings.json', {
-      cache: 'no-cache' // 每次都跟伺服器驗證
-    });
+    const res = await fetch('https://bau720123.github.io/stock/data/macromicro_earnings.json');
     if (!res.ok) {
       console.error(`MacroMicro JSON 讀取失敗 (${res.status})`);
       return {
@@ -3946,9 +3944,7 @@ async function generateCustomEventsMacroMacro() {
   ]);
 
   try {
-    const res = await fetch('https://bau720123.github.io/stock/data/macromicro_macro.json', {
-      cache: 'no-cache' // 每次都跟伺服器驗證
-    });
+    const res = await fetch('https://bau720123.github.io/stock/data/macromicro_macro.json');
     if (!res.ok) {
       console.error(`MacroMicro Macro JSON 讀取失敗 (${res.status})`);
       return {
