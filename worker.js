@@ -3978,7 +3978,7 @@ async function generateCustomEventsMacroMacro() {
       events.push(createEventObj(
         dateObj,
         item.name,
-        `${item.name}（MacroMicro 總經）`,
+        `${item.name}`,
         '#e67e22', // 橘色，與財報綠色區分
         `62${String(index).padStart(3, '0')}`, // 62xxx，與財報 61xxx 不衝突
         'https://www.macromicro.me' + item.link || '' // 連結
