@@ -165,6 +165,8 @@ export default {
 
     if (path === "/fear-greed") return await fetchFearAndGreed();
 
+    if (path === "/generateCustomEventsMacroEarnings") return json(await generateCustomEventsMacroEarnings());
+
     return json({
       error: "unknown path"
     }, 404);
@@ -3865,7 +3867,6 @@ async function generateCustomEventsMacroEarnings() {
     'SMCI', // Supermicro - AI 伺服器基礎設施
     'ARM', // Arm - AI 晶片架構設計核心
     'SPCX', // SpaceX - AI 航太與衛星網路（Starlink）
-    'AMD', // AMD - AI 替代方案與 CPU 大廠
   ]);
 
   try {
