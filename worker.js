@@ -2775,15 +2775,61 @@ async function fetchFugleBrands(symbol, env) {
       (histData.data || []).map(row => [row.date, row.close])
     );
 
-    const data = bbData.data
+    let data = bbData.data
       .sort((a, b) => b.date.localeCompare(a.date))
       .map(row => ({
         date: row.date,
         upper: parseFloat(row.upper.toFixed(2)),
         middle: parseFloat(row.middle.toFixed(2)),
         lower: parseFloat(row.lower.toFixed(2)),
-        price: priceMap.get(row.date) ?? null, // ← 新增，找不到日期就給 null
+        price: priceMap.get(row.date) ?? null, // 找不到日期就給 null
       }));
+
+    // 檢查是否已經有「今天」的資料 ──
+    const hasToday = data.length > 0 && data[0].date === to;
+
+    if (!hasToday) {
+      // 透過 fetchFugleQuote 取得當下盤中股價 ──
+      const quoteResult = await fetchFugleQuote(symbol, env);
+
+      // 依你實際的 fetchFugleQuote 回傳結構調整這一行取值方式
+      const currentPrice = quoteResult?.success
+        ? (quoteResult.data?.closePrice ?? quoteResult.data?.lastPrice ?? quoteResult.data?.price ?? null)
+        : null;
+
+      if (currentPrice != null) {
+        // 動態計算今天的布林通道 ──
+        // 取「歷史收盤價」中最近 19 筆（由新到舊），加上當下即時價，湊滿 period=20 的窗口
+        const period = 20;
+        const recentCloses = (histData.data || [])
+          .slice() // 避免動到原陣列
+          .sort((a, b) => b.date.localeCompare(a.date))
+          .filter(row => row.date !== to) // 保險起見排除掉today（理論上histData也不會有）
+          .slice(0, period - 1)
+          .map(row => row.close);
+
+        if (recentCloses.length === period - 1) {
+          const window = [currentPrice, ...recentCloses]; // 20 筆
+
+          const mean = window.reduce((sum, v) => sum + v, 0) / period;
+          const variance = window.reduce((sum, v) => sum + (v - mean) ** 2, 0) / period; // 母體標準差
+          const stdDev = Math.sqrt(variance);
+
+          const todayRow = {
+            date: to,
+            upper: parseFloat((mean + 2 * stdDev).toFixed(2)),
+            middle: parseFloat(mean.toFixed(2)),
+            lower: parseFloat((mean - 2 * stdDev).toFixed(2)),
+            price: currentPrice,
+            isRealtime: true, // 標記這是盤中動態估算值，方便前端顯示提示（例如加個星號或不同顏色）
+          };
+
+          data = [todayRow, ...data];
+        }
+        // 若歷史資料不足 19 筆（例如新股上市不久），就不硬湊，維持原本 data 即可
+      }
+      // currentPrice 拿不到時（quote API 失敗），直接沿用原本 data，不阻斷整支 API
+    }
 
     return json({
       success: true,

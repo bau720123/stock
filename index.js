@@ -5853,8 +5853,8 @@ function renderStockSma(data) {
     <th style="position:sticky;left:0;top:0;z-index:3;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);">日期</th>
     <th style="position:sticky;top:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">SMA5</th>
     <th style="position:sticky;top:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">SMA10</th>
-    <th style="position:sticky;top:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">SMA20</th>
-    <th style="position:sticky;top:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">SMA60</th>
+    <th style="position:sticky;top:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">SMA20（月線）</th>
+    <th style="position:sticky;top:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">SMA60（季線）</th>
     <th style="position:sticky;top:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">股價</th>
   </tr>`;
 
@@ -5897,7 +5897,7 @@ function renderStockRsi(data) {
   const headerRow = `
   <tr>
     <th style="position:sticky;left:0;top:0;z-index:3;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);">日期</th>
-    <th style="position:sticky;top:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">RS6</th>
+    <th style="position:sticky;top:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">RSI6</th>
     <th style="position:sticky;top:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">RSI9</th>
     <th style="position:sticky;top:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">RSI14</th>
     <th style="position:sticky;top:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">RSI20</th>
