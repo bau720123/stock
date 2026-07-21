@@ -68,12 +68,8 @@ function groupHeader(label, settingsKey = null, wording = '') {
 // 偵測設定彈窗
 // config 格式：{ title, fields: [{ key, label, placeholder, unit }] }
 // 自選股票清單：從 localStorage 讀取，fallback 到預設值
-const MY_STOCKS_DEFAULT = [{
-    symbol: '2330',
-    name: '台積電'
-  },
-  // { symbol: '2308', name: '台達電' },
-  // { symbol: '2317', name: '鴻海' },
+const MY_STOCKS_DEFAULT = [
+  { symbol: '2330', name: '台積電'},
 ];
 
 function loadMyStocksList() {
