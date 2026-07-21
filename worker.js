@@ -2790,12 +2790,11 @@ async function fetchFugleBrands(symbol, env) {
 
     if (!hasToday) {
       // 透過 fetchFugleQuote 取得當下盤中股價 ──
-      const quoteResult = await fetchFugleQuote(symbol, env);
+      const quoteRes = await fetchFugleQuote(symbol, env);
 
       // 依你實際的 fetchFugleQuote 回傳結構調整這一行取值方式
-      const currentPrice = quoteResult?.success
-        ? (quoteResult.data?.closePrice ?? quoteResult.data?.lastPrice ?? quoteResult.data?.price ?? null)
-        : null;
+      const quoteResult = await quoteRes.json();
+      const currentPrice = quoteResult?.success ? (quoteResult.closePrice ?? null) : null;
 
       if (currentPrice != null) {
         // 動態計算今天的布林通道 ──
