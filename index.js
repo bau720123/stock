@@ -6031,7 +6031,7 @@ function renderStockBrands(data) {
 
   const bodyRows = data.data.map(d => `
   <tr style="border-bottom:1px solid var(--border);">
-    <td style="position:sticky;left:0;z-index:1;background:#1a2332;padding:6px 10px;white-space:nowrap;text-align:center;font-size:12px;">${d.date}</td>
+    <td style="position:sticky;left:0;z-index:1;background:#1a2332;padding:6px 10px;white-space:nowrap;text-align:center;font-size:12px;">${d.date}<!-- ${d.isRealtime ? '（盤中演算）' : '（歷史資料）'} --></td>
     <td style="padding:6px 10px;text-align:center;font-size:12px;">${d.upper  ?? '-'}</td>
     <td style="padding:6px 10px;text-align:center;font-size:12px;">${d.middle ?? '-'}</td>
     <td style="padding:6px 10px;text-align:center;font-size:12px;">${d.lower ?? '-'}</td>
