@@ -1000,7 +1000,9 @@ function setCard(id, updown, html, extraClass = '') {
 }
 
 async function loadAll() {
-  $("body").loading(); // 開始
+  if (localStorage.getItem('tourDone')) {
+    $("body").loading(); // 開始
+  }
 
   if (typeof Notification !== 'undefined') {
     if (Notification.permission === 'default') {
