@@ -1000,6 +1000,8 @@ function setCard(id, updown, html, extraClass = '') {
 }
 
 async function loadAll() {
+  $("body").loading(); // 開始
+
   if (typeof Notification !== 'undefined') {
     if (Notification.permission === 'default') {
       Notification.requestPermission().then(permission => {
@@ -1133,6 +1135,8 @@ async function loadAll() {
 
   btn.classList.remove('spinning');
   startCountdown();
+
+  $("body").loading("stop"); // 停止
 }
 
 window.onload = loadAll;
