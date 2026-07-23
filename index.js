@@ -41,7 +41,7 @@ function groupHeader(label, settingsKey = null, wording = '') {
 
   var space = settingsKey != '' ? '&nbsp;' : '';
 
-  const usStocks = ['TSM', 'NVDA', 'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'TSLA', 'AVGO', 'SMCI', 'ASML', 'SPCX', 'AMD'];
+  const usStocks = ['TSM', 'NVDA', 'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'TSLA', 'AVGO', 'SMCI', 'ASML', 'SPCX', 'AMD', 'INTC'];
 
   var settingsButton = '';
   if (settingsKey) {
@@ -62,7 +62,7 @@ function groupHeader(label, settingsKey = null, wording = '') {
     }
   }
 
-  return `<span class="group-header"><span class="group-header-title">${label}</span>${descButton}${space}${settingsButton}</span>`;
+  return `<span class="group-header"><span class="group-header-title" id="warning-${settingsKey}">${label}</span>${descButton}${space}${settingsButton}</span>`;
 }
 
 // 偵測設定彈窗
@@ -653,10 +653,11 @@ async function openMyStockSettings() {
 const swalQueue = [];
 let isSwalRunning = false;
 
-async function showInfo(wording = '', title = '內容說明') {
+async function showInfo(wording = '', title = '內容說明', icon = 'info') {
   swalQueue.push({
     wording,
-    title
+    title,
+    icon
   });
   if (!isSwalRunning) {
     await processSwalQueue();
@@ -668,10 +669,11 @@ async function processSwalQueue() {
   while (swalQueue.length > 0) {
     const {
       wording,
-      title
+      title,
+      icon
     } = swalQueue.shift();
     await Swal.fire({
-      icon: 'info',
+      icon: icon,
       title: title,
       html: `<div style="text-align: left;">${wording.toString().replace(/\n/g, '<br>')}</div>`,
       showCancelButton: false,
@@ -1973,7 +1975,7 @@ async function loadAmerica() {
     html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
   }
 
-  html += `<div class="card-title" style="margin-top: 5%;">美國公債殖利率</div>`;
+  html += `<div class="card-title" style="margin-top: 5%;" id="us-treasury-yield">美國公債殖利率</div>`;
 
   // 美國5年期公債殖利率
   html += groupHeader('【5年期公債殖利率】', '', '美國5年期公債殖利率是反映美國5年期國債收益率的重要指標，通常被視為衡量市場利率水平和經濟前景的重要參考。');
@@ -2048,9 +2050,9 @@ async function loadAmerica() {
 
     // 警戒區間判斷
     const txyRate = yahooTxy.close;
-    if (txyRate >= 5.25) {
+    if (txyRate >= 5) {
       html += row('警戒水位', '紅色危險區（衝擊資產/引發拋售）');
-    } else if (txyRate >= 5.00) {
+    } else if (txyRate >= 4.50) {
       html += row('警戒水位', '黃色警戒（開始承壓）');
     } else {
       html += row('利率狀態', '正常', 'accent');
@@ -2076,7 +2078,7 @@ async function loadAmerica() {
       html += row('隔夜漲跌', robinHood.TSM.tertiaryText, changeClass(robinHood.TSM.tertiaryText));
     }
     html += row('更新時間', robinHood.TSM.updated_at);
-    html += row('對應台股：台積電（2330）');
+    html += row('對應台股如下：台積電（2330）');
 
     if (fugleQuote.success && yahooUtcTwd.success) {
       const twdPrice = parseFloat(fugleQuote.closePrice); // 台積電現股價格
@@ -2545,7 +2547,46 @@ async function loadAmerica() {
     html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
   }
 
+  // 英特爾
+  html += groupHeader('【英特爾】', 'INTC', '英特爾（Intel Corporation，代號：INTC）是美國的一家科技公司，專注於設計、開發和銷售微處理器（CPU）、圖形處理器（GPU）和個人電腦、伺服器晶片組。');
+  if (robinHood.INTC.success && robinHood.INTC.changeText != '') {
+    html += row('前次', robinHood.INTC.previousClose, 'accent');
+    html += row('今日漲跌', robinHood.INTC.changeText, changeClass(robinHood.INTC.changeText));
+    if (robinHood.INTC.tertiaryText) {
+      html += row('隔夜漲跌', robinHood.INTC.tertiaryText, changeClass(robinHood.INTC.tertiaryText));
+    }
+    html += row('更新時間', robinHood.INTC.updated_at);
+    html += `
+    <div class="row">
+    <span class="row-label">對應台股如下</span>
+    <span style="cursor:pointer;user-select:none;" onclick="
+      const ob = document.getElementById('INTC');
+      const btn = this;
+      if (ob.style.display === 'none') {
+      ob.style.display = 'block';
+      btn.textContent = '－';
+      } else {
+      ob.style.display = 'none';
+      btn.textContent = '＋';
+      }
+    ">＋</span>
+    </div>`;
+    html += `<div id="INTC" style="display:none;">`;
+    html += row('台積電（2330）：Intel Arrow Lake / Lunar Lake 等 CPU 控制晶粒（Tile）、Arc 獨立顯示卡及 Gaudi 3 AI 晶片之先進製程（3奈米/4奈米/5奈米）外包代工');
+    html += row('聯電（2303）：與 Intel 合作開發亞利桑那州 12 奈米成熟與中階製程平台，提供行動、通訊與網路晶片代工服務');
+    html += row('力積電（6770）：提供高階矽電容（IPD）產品，通過 Intel 認證並打入其 EMIB 先進封裝供應鏈');
+    html += `</div>`;
+  } else {
+    html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
+  }
+
   setCard('card-america', 0, html);
+
+  if ((yahooFvx.success && yahooFvx.close.toFixed(2) >= 4.35) && (yahooTnx.success && yahooTnx.close.toFixed(2) >= 4.50)) {
+    const el = document.getElementById("us-treasury-yield");
+    el.style.color = "red";
+    el.innerText += "\n已進入警戒區間"; 
+  }
 }
 
 function getAsiaMarketEmoji() {
@@ -2649,7 +2690,7 @@ async function loadMaterials() {
     fetch(WORKER + '/sina/hf_SI').then(r => r.json()).catch(() => ({
       success: false
     })), // 白銀
-    fetch(WORKER + '/sina/hf_CAD').then(r => r.json()).catch(() => ({
+    fetch(WORKER + '/sina/hf_HG').then(r => r.json()).catch(() => ({
       success: false
     })), // 銅
   ]);
@@ -2766,10 +2807,17 @@ async function loadMaterials() {
     html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
   }
 
-  // 【銅】
-  html += groupHeader('【銅】', 'copper', '銅是一種重要的工業金屬，廣泛應用於電力、建築和製造業。其價格受全球經濟活動、供需關係和地緣政治因素影響，常以美元計價。');
+  // 【美銅】
+  html += groupHeader('【美銅】', 'copper', '美銅是一種重要的工業金屬，廣泛應用於電力、建築和製造業。其價格受全球經濟活動、供需關係和地緣政治因素影響，常以美元計價。');
   if (sinaCopper.success) {
-    const changeNum = sinaCopper.price - sinaCopper.prev;
+    // 銅的價格單位是美分，轉換為美元
+    sinaCopper.price = Number((sinaCopper.price * 0.01).toFixed(4));
+    sinaCopper.open  = Number((sinaCopper.open * 0.01).toFixed(4));
+    sinaCopper.high  = Number((sinaCopper.high * 0.01).toFixed(4));
+    sinaCopper.low   = Number((sinaCopper.low * 0.01).toFixed(4));
+    sinaCopper.prev  = Number((sinaCopper.prev * 0.01).toFixed(4));
+
+    const changeNum = (sinaCopper.price - sinaCopper.prev);
     const cls = changeNum < 0 ? 'down' : 'up';
     const changePercent = changeNum / sinaCopper.prev * 100;
     // html += row('前次', sinaCopper.prev.toFixed(2));
@@ -2803,6 +2851,30 @@ async function loadMaterials() {
   }
 
   setCard('card-materials', 0, html);
+
+  if (sinaBrent.success && sinaBrent.price.toFixed(2) >= 90) {
+    const el = document.getElementById("warning-brent");
+    el.style.color = "red";
+    el.innerText += "\n已進入警戒區間"; 
+  }
+
+  if (sinaGold.success && sinaGold.price.toFixed(2) >= 4000) {
+    const el = document.getElementById("warning-gold");
+    el.style.color = "red";
+    el.innerText += "\n已進入警戒區間"; 
+  }
+
+  if (sinaSilver.success && sinaSilver.price.toFixed(2) >= 55) {
+    const el = document.getElementById("warning-silver");
+    el.style.color = "red";
+    el.innerText += "\n已進入警戒區間"; 
+  }
+
+  if (sinaCopper.success && sinaCopper.price.toFixed(2) >= 5.5) {
+    const el = document.getElementById("warning-copper");
+    el.style.color = "red";
+    el.innerText += "\n已進入警戒區間"; 
+  }
 }
 // async function loadMaterials() {
 //   const [yahooBrent, yahooGold, yahooSilver] = await Promise.all([
@@ -3220,6 +3292,36 @@ async function loadSentiment() {
   }
 
   setCard('card-sentiment', 0, html);
+
+  if (sinaVixFutures.success && sinaVixFutures.price.toFixed(2) >= 20) {
+    const el = document.getElementById("warning-vix_futures");
+    el.style.color = "red";
+    el.innerText += "\n已進入警戒區間"; 
+  }
+
+  if (sinaUsdollar.success && sinaUsdollar.price.toFixed(2) >= 101) {
+    const el = document.getElementById("warning-usdollar");
+    el.style.color = "red";
+    el.innerText += "\n已進入警戒區間"; 
+  }
+
+  if (yahooUtcTwd.success && yahooUtcTwd.close.toFixed(2) >= 32) {
+    const el = document.getElementById("warning-utctwd");
+    el.style.color = "red";
+    el.innerText += "\n已進入警戒區間"; 
+  }
+
+  if (yahooUtcJpy.success && yahooUtcJpy.close.toFixed(2) >= 160) {
+    const el = document.getElementById("warning-utcjpy");
+    el.style.color = "red";
+    el.innerText += "\n已進入警戒區間"; 
+  }
+
+  if (yahooUtcKrw.success && yahooUtcKrw.close.toFixed(2) >= 1450) {
+    const el = document.getElementById("warning-utckrw");
+    el.style.color = "red";
+    el.innerText += "\n已進入警戒區間"; 
+  }
 
   ChartFedWatch();
 }
