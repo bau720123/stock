@@ -23,6 +23,8 @@ const ROBINHOOD_INSTRUMENTS = {
   INTC: "ad059c69-0c1c-4c6b-8322-f53f1bbd69d4", // 英特爾
 };
 
+const github_pages = "https://bau720123.github.io";
+
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
@@ -3921,7 +3923,7 @@ async function generateCustomEventsMacroEarnings() {
   ]);
 
   try {
-    const res = await fetch('https://bau720123.github.io/stock/data/macromicro_earnings.json');
+    const res = await fetch(github_pages + '/stock/data/macromicro_earnings.json');
     if (!res.ok) {
       console.error(`MacroMicro JSON 讀取失敗 (${res.status})`);
       return {
@@ -4011,7 +4013,7 @@ async function generateCustomEventsMacroMacro() {
   ]);
 
   try {
-    const res = await fetch('https://bau720123.github.io/stock/data/macromicro_macro.json');
+    const res = await fetch(github_pages + '/stock/data/macromicro_macro.json');
     if (!res.ok) {
       console.error(`MacroMicro Macro JSON 讀取失敗 (${res.status})`);
       return {

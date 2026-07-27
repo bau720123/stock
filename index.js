@@ -1,5 +1,7 @@
 const urlParams = new URLSearchParams(window.location.search);
 const card_type = urlParams.get('card_type') || 'taiwan-market';
+const WORKER = "https://billowing-queen-4a58.bau720123.workers.dev";
+const github_pages = "https://bau720123.github.io";
 
 // 警示閾值 localStorage 工具
 const ALERT_PREFIX = 'alert_';
@@ -890,7 +892,7 @@ async function subscribeUser() {
 
     try {
       // 把 subscription 傳給 Worker 時，順便帶上 User-Agent
-      await fetch('https://billowing-queen-4a58.bau720123.workers.dev/subscribe', {
+      await fetch(WORKER + '/subscribe', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -953,7 +955,6 @@ function urlBase64ToUint8Array(base64String) {
   return Uint8Array.from([...rawData].map(c => c.charCodeAt(0)));
 }
 
-const WORKER = "https://billowing-queen-4a58.bau720123.workers.dev";
 let tsmCnbcData = null; // 用於跨卡片共享資料
 
 // 系統即時時間顯示
@@ -3445,7 +3446,7 @@ function ChartFedWatch() {
 
 async function loadTickers() {
   try {
-    const res = await fetch('https://bau720123.github.io/stock/data/tickers.json', {
+    const res = await fetch(github_pages + '/stock/data/tickers.json', {
       cache: 'no-cache' // 每次都跟伺服器 revalidate，有更新拿新的，沒更新瀏覽器自動用舊的
     });
     const json = await res.json();
