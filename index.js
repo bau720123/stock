@@ -1001,7 +1001,9 @@ function setCard(id, updown, html, extraClass = '') {
 
 async function loadAll() {
   if (localStorage.getItem('tourDone')) {
-    $("body").loading(); // 開始
+    $("body").loading({
+      message: '讀取中，請稍後...' // This is the default theme
+    });
   }
 
   if (typeof Notification !== 'undefined') {

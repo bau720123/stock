@@ -3963,10 +3963,7 @@ async function generateCustomEventsMacroEarnings() {
         if (!BMO_SYMBOLS.has(symbol)) {
           // 盤後發布：台北時間跨到隔天凌晨
           twDate.setDate(twDate.getDate() + 1);
-          timeLabel = ' 凌晨';
-        } else {
-          // 盤前發布：台北時間為當天晚上
-          timeLabel = ' 晚上';
+          timeLabel = ' （凌晨）';
         }
 
         if (isNaN(twDate.getTime())) continue;
@@ -3974,7 +3971,7 @@ async function generateCustomEventsMacroEarnings() {
         events.push(createEventObj(
           twDate,
           symbol,
-          `${item.name} 財報發布（${item.period || ''}${timeLabel}）`,
+          `${item.name} 財報發布${timeLabel}`,
           '#27ae60',
           `61${String(index).padStart(3, '0')}`,
           'https://www.macromicro.me/stocks/info/' + symbol
