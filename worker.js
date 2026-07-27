@@ -3915,6 +3915,11 @@ async function generateCustomEventsMacroEarnings() {
     'SPCX', // SpaceX - AI 航太與衛星網路（Starlink）
   ]);
 
+  const BMO_SYMBOLS = new Set([
+    'TSM',  // 台積電：美股盤前 (台灣當天下午)
+    'ASML', // 艾司摩爾：美股盤前 (台灣當晚)
+  ]);
+
   try {
     const res = await fetch('https://bau720123.github.io/stock/data/macromicro_earnings.json');
     if (!res.ok) {
@@ -3940,21 +3945,39 @@ async function generateCustomEventsMacroEarnings() {
 
     // calendarItems 結構：{ "2026-04-28": [...], "2026-04-29": [...] }
     for (const [dateStr, items] of Object.entries(calendarItems)) {
-      const dateObj = new Date(dateStr);
-      // dateObj.setDate(dateObj.getDate() + 1); // 因為是美東時間，所以日期會比台北晚一天，這裡先加一天轉回台北日期
-      if (isNaN(dateObj.getTime())) continue;
+      // 驗證日期格式
+      const baseDate = new Date(dateStr);
+      if (isNaN(baseDate.getTime())) continue;
 
       for (const item of items) {
         const symbol = (item.symbol || '').toUpperCase();
         if (!AI_TECH_SYMBOLS.has(symbol)) continue;
 
+        // 1. 複製一份獨立的日期物件
+        const twDate = new Date(dateStr);
+        
+        // 2. 在每一支股票處理內部宣告與重置時段標記
+        let timeLabel = '';
+
+        // 3. 判斷盤前/盤後與加算天數
+        if (!BMO_SYMBOLS.has(symbol)) {
+          // 盤後發布：台北時間跨到隔天凌晨
+          twDate.setDate(twDate.getDate() + 1);
+          timeLabel = ' 凌晨';
+        } else {
+          // 盤前發布：台北時間為當天晚上
+          timeLabel = ' 晚上';
+        }
+
+        if (isNaN(twDate.getTime())) continue;
+
         events.push(createEventObj(
-          dateObj,
+          twDate,
           symbol,
-          `${item.name} 財報發布（${item.period || ''} ${item.calendar_year || ''}）`,
+          `${item.name} 財報發布（${item.period || ''}${timeLabel}）`,
           '#27ae60',
-          `61${String(index).padStart(3, '0')}`, // 61xxx，與 Finnhub 60xx 不衝突
-          'https://www.macromicro.me/stocks/info/' + symbol || '' // 連結
+          `61${String(index).padStart(3, '0')}`,
+          'https://www.macromicro.me/stocks/info/' + symbol
         ));
         index++;
       }
