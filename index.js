@@ -3441,29 +3441,23 @@ function ChartFedWatch() {
   new ResizeObserver(() => chart.resize()).observe(el);
 }
 
-// Tickers 快取
-let _tickersCache = null;
-
 async function loadTickers() {
-  if (_tickersCache) return _tickersCache;
   try {
     const res = await fetch('https://bau720123.github.io/stock/data/tickers.json', {
-      cache: 'no-cache' // 每次都跟伺服器驗證
+      cache: 'no-cache' // 每次都跟伺服器 revalidate，有更新拿新的，沒更新瀏覽器自動用舊的
     });
     const json = await res.json();
     if (json.success && Array.isArray(json.data)) {
-      // 缺少 name 的資料，預設使用 symbol 值補齊
       _tickersCache = json.data.map(t => ({
         ...t,
         name: t.name || t.symbol
       }));
-    } else {
-      _tickersCache = [];
     }
+    // 若 json.success 為 false，不覆蓋，直接沿用下面 return 的舊 _tickersCache
   } catch (e) {
-    _tickersCache = [];
+    // 網路離線或請求失敗時，不覆蓋，沿用舊快取（如果有的話）
   }
-  return _tickersCache;
+  return _tickersCache || [];
 }
 
 // 我的自選股
