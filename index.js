@@ -3646,6 +3646,14 @@ function _renderMyStock({
       <span style="color:var(--dim);text-align:center;">張數</span>
       </div>`;
 
+      // 若跌停鎖死，bids 會是空陣列，先用 closePrice 補滿，避免後續渲染出現空白列
+      if (data.bids.length === 0) {
+          const rowCount = data.asks.length || 5; // 沒有 asks 資料時，預設補 5 檔
+          data.bids = Array.from({ length: rowCount }, () => ({
+              price: closePrice,
+              size: 0
+          }));
+      }
       const maxRows = Math.max(data.bids.length, data.asks.length);
       for (let j = 0; j < maxRows; j++) {
         const bid = data.bids[j];
