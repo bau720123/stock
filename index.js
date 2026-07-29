@@ -1426,12 +1426,19 @@ async function loadTw() {
 
   html += row('融資餘額', MarginTradingBalance.marginBalance + ' 億', 'accent');
   html += row('增減', MarginTradingBalance.marginBalance_diff, cls);
-  html += row('更新時間', MarginTradingBalance.date);
+
+  const isToday = MarginTradingBalance.date === getTaipeiDateStr();
+  const dateLabel = MarginTradingBalance.date + (isToday ? '（今天）' : '（上個交易日）');
+  html += row('更新時間', dateLabel);
 
   setCard('card-tw', 0, html, card_type === 'taiwan-market' ? 'card-wide' : '');
 
   ChartForeignNetPosition();
   ChartInstitutional();
+}
+
+function getTaipeiDateStr() {
+    return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Taipei' }).format(new Date()); // 回傳格式：YYYY-MM-DD
 }
 
 function renderChartForeignNetPosition(data) {
@@ -6474,7 +6481,7 @@ function renderCalendarList() {
     const dayEvents = grouped[dateKey]; // 有可能是 undefined
 
     html += `
-    <div style="border-left: 3px solid ${isToday ? 'var(--accent)' : 'var(--border)'}; padding: 4px 8px;">
+    <div id="${isToday ? 'today' : ''}" style="border-left: 3px solid ${isToday ? 'var(--accent)' : 'var(--border)'}; padding: 4px 8px;">
     <div style="font-size:0.8em; color:${isToday ? 'var(--accent)' : (isWeekend ? '#888' : 'var(--fg)')};
           margin-bottom:4px; font-weight:bold;">
       ${month + 1}/${day}（${dayName}）${isToday ? ' ◀ 今天' : ''}
@@ -6504,6 +6511,13 @@ function renderCalendarList() {
 
   html += `</div>`;
   setCard(cardId, 0, html, 'card-wide');
+
+  // 滾動到今天
+  if (card_type === 'finance-calendar') {
+    document.querySelector('#today').scrollIntoView({
+      behavior: 'smooth'
+    });
+  }
 }
 
 // 切換月份函式
