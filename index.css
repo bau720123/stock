@@ -493,11 +493,25 @@ header h1 {
   overflow: hidden;
 }
 
+/* 1. 允許卡片內容超出，不要截斷（這樣 sticky 才能作用） */
+#card-mystock {
+  overflow: visible !important;
+}
+
+/* 2. 設定 .mystock-nav 的 sticky 樣式 */
 .mystock-nav {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 14px;
+  margin-top: 0px;
+
+  /* 新增懸浮關鍵 CSS */
+  position: sticky;
+  top: 60px; /* 這裡填 60px 是因為你的 <header> 也是 fixed，且高約 60px，避免被 header 遮住 */
+  z-index: 10; /* 確保浮在下方圖表與內容之上 */
+  background-color: var(--surface); /* 加上卡片背景色 #111620，防止滾動時下方文字透出來 */
+  padding: 10px 0; /* 增加留白 */
+  border-bottom: 1px solid var(--border); /* 可選：加一條底線分隔內容 */
 }
 
 .mystock-nav-btn {

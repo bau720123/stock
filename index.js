@@ -3559,6 +3559,26 @@ async function loadMyStock() {
   _renderMyStock(_mystockApiCache);
 }
 
+function toggleAllByClass(targetClass, btn) {
+  // 1. 取得所有目標內容元素
+  const targets = document.querySelectorAll('.' + targetClass);
+  
+  // 2. 判斷點擊的按鈕狀態
+  const isExpanding = (btn.textContent.trim() === '＋');
+  const newSymbol = isExpanding ? '－' : '＋';
+
+  // 3. 批量切換內容顯示/隱藏
+  targets.forEach(el => {
+    el.style.display = isExpanding ? 'block' : 'none';
+  });
+
+  // 4. 更新「所有」控制該 targetClass 的按鈕符號
+  const relatedBtns = document.querySelectorAll(`.toggle-btn[data-target="${targetClass}"]`);
+  relatedBtns.forEach(b => {
+    b.textContent = newSymbol;
+  });
+}
+
 function _renderMyStock({
   quoteResults,
   volumeResults,
@@ -3615,14 +3635,14 @@ function _renderMyStock({
     if (data.success) {
       const cls = changeClass(data.change, 1);
       const sign = data.change > 0 ? '▲' : data.change < 0 ? '▼' : '';
-      const lowMinusOpen = (data.lowPrice - data.openPrice).toFixed(0);
+      const lowMinusOpen = (data.lowPrice - data.openPrice).toFixed(2);
       const lowMinusOpenCls = lowMinusOpen > 0 ? 'up' : lowMinusOpen < 0 ? 'down' : '';
-      const closePrice = data.closePrice.toFixed(0);
+      const closePrice = data.closePrice.toFixed(2);
 
-      html += row('上個收盤價', data.previousClose.toFixed(0));
-      html += row('開盤價', data.openPrice.toFixed(0));
-      html += row('最高價', data.highPrice.toFixed(0));
-      html += row('最低價', data.lowPrice.toFixed(0));
+      html += row('上個收盤價', data.previousClose.toFixed(2));
+      html += row('開盤價', data.openPrice.toFixed(2));
+      html += row('最高價', data.highPrice.toFixed(2));
+      html += row('最低價', data.lowPrice.toFixed(2));
       html += row('現價', closePrice, 'accent');
       html += row('均價', data.avgPrice.toFixed(2));
       html += row('漲跌', sign + data.change, cls);
@@ -3632,20 +3652,10 @@ function _renderMyStock({
       html += `
     <div class="row">
       <span class="row-label">委託簿</span>
-      <span style="cursor:pointer;user-select:none;" onclick="
-      const ob = document.getElementById('orderbook_${i}');
-      const btn = this;
-      if (ob.style.display === 'none') {
-        ob.style.display = 'block';
-        btn.textContent = '－';
-      } else {
-        ob.style.display = 'none';
-        btn.textContent = '＋';
-      }
-      ">＋</span>
+      <span class="toggle-btn" data-target="orderbook" style="cursor:pointer;user-select:none;" onclick="toggleAllByClass('orderbook', this)">＋</span>
     </div>`;
       html += `
-    <div id="orderbook_${i}" style="display: none">
+    <div id="orderbook_${i}" style="display: none" class="orderbook">
       <div style="display:grid;grid-template-columns:1fr 58px 58px 1fr;gap:2px;font-family:var(--mono);font-size:.75rem;">
       <span style="color:var(--dim);text-align:center;">張數</span>
       <span style="color:var(--up);text-align:right;padding-right:6px;">委買</span>
@@ -3738,20 +3748,10 @@ function _renderMyStock({
     <span class="row-label">歷史股價</span>
     <div style="display: flex; gap: 8px; align-items: center;">
       <a style="cursor:pointer; user-select:none; text-decoration:none;" onclick="showInfo('${historyResults[i].result.story}')">❔</a>
-      <span style="cursor:pointer;user-select:none;" onclick="
-      const ob = document.getElementById('stockhistory_${i}');
-      const btn = this;
-      if (ob.style.display === 'none') {
-        ob.style.display = 'block';
-        btn.textContent = '－';
-      } else {
-        ob.style.display = 'none';
-        btn.textContent = '＋';
-      }
-      ">＋</span>
+      <span class="toggle-btn" data-target="stockhistory" style="cursor:pointer;user-select:none;" onclick="toggleAllByClass('stockhistory', this)">＋</span>
     </div>
     </div>`;
-    html += `<div id="stockhistory_${i}" style="display:none;" class="donotswipe">
+    html += `<div id="stockhistory_${i}" style="display:none;" class="donotswipe stockhistory">
     ${renderStockHistory(historyResults[i])}
   </div>`;
 
@@ -3765,20 +3765,10 @@ function _renderMyStock({
     <span class="row-label">三大法人買賣超</span>
     <div style="display: flex; gap: 8px; align-items: center;">
       <a style="cursor:pointer; user-select:none; text-decoration:none;" onclick="showInfo('${institutionalResults?.[i]?.result?.story ?? '無三大法人買賣超資料'}')">❔</a>
-      <span style="cursor:pointer;user-select:none;" onclick="
-      const ob = document.getElementById('stockinstitutional_${i}');
-      const btn = this;
-      if (ob.style.display === 'none') {
-        ob.style.display = 'block';
-        btn.textContent = '－';
-      } else {
-        ob.style.display = 'none';
-        btn.textContent = '＋';
-      }
-      ">＋</span>
+      <span class="toggle-btn" data-target="stockinstitutional" style="cursor:pointer;user-select:none;" onclick="toggleAllByClass('stockinstitutional', this)">＋</span>
     </div>
     </div>`;
-    html += `<div id="stockinstitutional_${i}" style="display:none;" class="donotswipe">
+    html += `<div id="stockinstitutional_${i}" style="display:none;" class="donotswipe stockinstitutional">
     ${renderStockInstitutional(institutionalResults[i])}
   </div>`;
 
@@ -3792,20 +3782,10 @@ function _renderMyStock({
     <span class="row-label">融資餘額增減</span>
     <div style="display: flex; gap: 8px; align-items: center;">
       <a style="cursor:pointer; user-select:none; text-decoration:none;" onclick="showInfo('${margintradingbalanceResults?.[i]?.result?.story ?? '無融資餘額增減資料'}')">❔</a>
-      <span style="cursor:pointer;user-select:none;" onclick="
-      const ob = document.getElementById('stockmargintradingbalance_${i}');
-      const btn = this;
-      if (ob.style.display === 'none') {
-        ob.style.display = 'block';
-        btn.textContent = '－';
-      } else {
-        ob.style.display = 'none';
-        btn.textContent = '＋';
-      }
-      ">＋</span>
+      <span class="toggle-btn" data-target="stockmargintradingbalance" style="cursor:pointer;user-select:none;" onclick="toggleAllByClass('stockmargintradingbalance', this)">＋</span>
     </div>
     </div>`;
-    html += `<div id="stockmargintradingbalance_${i}" style="display:none;" class="donotswipe">
+    html += `<div id="stockmargintradingbalance_${i}" style="display:none;" class="donotswipe stockmargintradingbalance">
     ${renderStockMarginTradingBalance(margintradingbalanceResults[i])}
   </div>`;
 
@@ -3845,19 +3825,9 @@ function _renderMyStock({
     html += `
     <div class="row">
     <span class="row-label">簡單移動平均線<br>比較股價是否站上均線</span>
-    <span style="cursor:pointer;user-select:none;" onclick="
-      const ob = document.getElementById('stocksma_${i}');
-      const btn = this;
-      if (ob.style.display === 'none') {
-      ob.style.display = 'block';
-      btn.textContent = '－';
-      } else {
-      ob.style.display = 'none';
-      btn.textContent = '＋';
-      }
-    ">＋</span>
+    <span class="toggle-btn" data-target="stocksma" style="cursor:pointer;user-select:none;" onclick="toggleAllByClass('stocksma', this)">＋</span>
     </div>`;
-    html += `<div id="stocksma_${i}" style="display:none;" class="donotswipe">
+    html += `<div id="stocksma_${i}" style="display:none;" class="donotswipe stocksma">
     ${renderStockSma(smaResults[i])}
   </div>`;
 
@@ -3869,19 +3839,9 @@ function _renderMyStock({
     html += `
     <div class="row">
     <span class="row-label">相對強弱指數<br>大於70可能超買，小於30可能超賣</span>
-    <span style="cursor:pointer;user-select:none;" onclick="
-      const ob = document.getElementById('stockrsi_${i}');
-      const btn = this;
-      if (ob.style.display === 'none') {
-      ob.style.display = 'block';
-      btn.textContent = '－';
-      } else {
-      ob.style.display = 'none';
-      btn.textContent = '＋';
-      }
-    ">＋</span>
+    <span class="toggle-btn" data-target="stockrsi" style="cursor:pointer;user-select:none;" onclick="toggleAllByClass('stockrsi', this)">＋</span>
     </div>`;
-    html += `<div id="stockrsi_${i}" style="display:none;" class="donotswipe">
+    html += `<div id="stockrsi_${i}" style="display:none;" class="donotswipe stockrsi">
     ${renderStockRsi(rsiResults[i])}
   </div>`;
 
@@ -3893,19 +3853,9 @@ function _renderMyStock({
     html += `
     <div class="row">
     <span class="row-label">隨機指標<br>KD大於80可能超買，KD小於20可能超賣</span>
-    <span style="cursor:pointer;user-select:none;" onclick="
-      const ob = document.getElementById('stockkdj_${i}');
-      const btn = this;
-      if (ob.style.display === 'none') {
-      ob.style.display = 'block';
-      btn.textContent = '－';
-      } else {
-      ob.style.display = 'none';
-      btn.textContent = '＋';
-      }
-    ">＋</span>
+    <span class="toggle-btn" data-target="stockkdj" style="cursor:pointer;user-select:none;" onclick="toggleAllByClass('stockkdj', this)">＋</span>
     </div>`;
-    html += `<div id="stockkdj_${i}" style="display:none;" class="donotswipe">
+    html += `<div id="stockkdj_${i}" style="display:none;" class="donotswipe stockkdj">
     ${renderStockKdj(kdjResults[i])}
   </div>`;
 
@@ -3917,19 +3867,9 @@ function _renderMyStock({
     html += `
     <div class="row">
     <span class="row-label">平滑異同移動平均線（MACD）<br>MACD 慢慢往上交叉信號線時，這通常被視為買進<br>MACD 慢慢往下交叉信號線時，這通常被視為賣出</span>
-    <span style="cursor:pointer;user-select:none;" onclick="
-      const ob = document.getElementById('stockmacd_${i}');
-      const btn = this;
-      if (ob.style.display === 'none') {
-      ob.style.display = 'block';
-      btn.textContent = '－';
-      } else {
-      ob.style.display = 'none';
-      btn.textContent = '＋';
-      }
-    ">＋</span>
+    <span class="toggle-btn" data-target="stockmacd" style="cursor:pointer;user-select:none;" onclick="toggleAllByClass('stockmacd', this)">＋</span>
     </div>`;
-    html += `<div id="stockmacd_${i}" style="display:none;" class="donotswipe">
+    html += `<div id="stockmacd_${i}" style="display:none;" class="donotswipe stockmacd">
     ${renderStockMacd(macdResults[i])}
   </div>`;
 
@@ -3941,19 +3881,9 @@ function _renderMyStock({
     html += `
     <div class="row">
     <span class="row-label">布林通道（Bollinger Bands）<br>上、中、下軌則代表價格的波動範圍<br>也間接代表了超買或是超賣的可能機率</span>
-    <span style="cursor:pointer;user-select:none;" onclick="
-      const ob = document.getElementById('stockbrands_${i}');
-      const btn = this;
-      if (ob.style.display === 'none') {
-      ob.style.display = 'block';
-      btn.textContent = '－';
-      } else {
-      ob.style.display = 'none';
-      btn.textContent = '＋';
-      }
-    ">＋</span>
+    <span class="toggle-btn" data-target="stockbrands" style="cursor:pointer;user-select:none;" onclick="toggleAllByClass('stockbrands', this)">＋</span>
     </div>`;
-    html += `<div id="stockbrands_${i}" style="display:none;" class="donotswipe">
+    html += `<div id="stockbrands_${i}" style="display:none;" class="donotswipe stockbrands">
     ${renderStockBrands(brandsResults[i])}
   </div>`;
 
@@ -5777,7 +5707,7 @@ function renderVolumeProfile(data, id) {
     if (!priceColor && askRatio > 0.8) priceColor = 'color:#ffd600;font-weight:bold;';
 
     return `
-      <div style="display:none;align-items:center;margin-bottom:0px;border-bottom: 1px solid var(--border);padding: 10px 0px 10px 12px;" class="ordervolume_${id}">
+      <div style="display:none;align-items:center;margin-bottom:0px;border-bottom: 1px solid var(--border);padding: 10px 0px 10px 12px;" class="ordervolume">
       <!-- 左側文字 -->
       <div style="width:160px;font-size:12px;line-height:1.6;flex-shrink:0;">
         <div style="${priceColor}">成交價：${d.price.toFixed(2)}</div>
@@ -5807,13 +5737,7 @@ function renderVolumeProfile(data, id) {
       <span class="row-label">分價量表</span>
       <div style="display: flex; gap: 8px; align-items: center;">
         <a style="cursor:pointer; user-select:none; text-decoration:none;" onclick="showInfo('${data.result.story}')">❔</a>
-        <span style="cursor:pointer;user-select:none;" onclick="
-        const items = document.querySelectorAll('.ordervolume_${id}');
-        const btn = this;
-        const isHidden = items[0].style.display === 'none';
-        items.forEach(el => el.style.display = isHidden ? 'flex' : 'none');
-        btn.textContent = isHidden ? '－' : '＋';
-        ">＋</span>
+        <span class="toggle-btn" data-target="ordervolume" style="cursor:pointer;user-select:none;" onclick="toggleAllByClass('ordervolume', this)">＋</span>
       </div>
       </div>
       <div style="overflow-y:auto;max-height:200px;">

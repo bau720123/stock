@@ -1505,6 +1505,92 @@ function buildVolPriceResult(volUp, priceUp, isAvg, recentVolAvg, priorVolAvg, v
 }
 
 /**
+ * 將歷史K線的 open / high / low 全部攤平成價格點，依「整數關卡、每 zoneWidth 元」動態分級距，
+ * 並在每個有資料的級距中，找出最低與最高價位（含觸發日期與欄位，若同價位有多筆則一併列出）。
+ *
+ * 級距切法：以 0 為基準，向下對齊到 zoneWidth 的整數倍（例如 zoneWidth=95 時，2180 會落在
+ * 2090-2185 這個級距）。級距範圍會依實際資料的最低/最高價動態偵測，不會有資料的級距不會出現。
+ *
+ * @param {Array} data 富果 API 回傳的歷史K線 (desc 或 asc 皆可，此函式不依賴順序)
+ * @param {number} [zoneWidth=95] 每個級距的價格寬度
+ * @returns {Array} 由高價位到低價位遞減排序的級距陣列
+ */
+function analyzePriceZoneLevels(data, zoneWidth = 95) {
+  if (!data || data.length === 0) return [];
+
+  // 1. 攤平所有 open / high / low 價格點，並記錄來源日期與欄位
+  const points = [];
+  data.forEach(d => {
+    if (typeof d.high === "number") points.push({ price: d.high, date: d.date, field: "high" });
+    if (typeof d.low === "number") points.push({ price: d.low, date: d.date, field: "low" });
+    if (typeof d.open === "number") points.push({ price: d.open, date: d.date, field: "open" });
+  });
+  if (points.length === 0) return [];
+
+  // 2. 依價格動態分組到所屬級距（向下對齊到 zoneWidth 整數倍）
+  const zoneMap = new Map(); // key: 級距起點, value: 該級距內的所有價格點
+  points.forEach(p => {
+    const zoneStart = Math.floor(p.price / zoneWidth) * zoneWidth;
+    if (!zoneMap.has(zoneStart)) zoneMap.set(zoneStart, []);
+    zoneMap.get(zoneStart).push(p);
+  });
+
+  // 3. 每個級距內，找出最低價與最高價（同價位多筆時一併列出）
+  const zones = [];
+  for (const [zoneStart, pts] of zoneMap.entries()) {
+    const zoneEnd = zoneStart + zoneWidth;
+    const minPrice = Math.min(...pts.map(p => p.price));
+    const maxPrice = Math.max(...pts.map(p => p.price));
+
+    const minHits = pts
+      .filter(p => p.price === minPrice)
+      .map(p => ({ date: p.date, field: p.field }));
+    const maxHits = pts
+      .filter(p => p.price === maxPrice)
+      .map(p => ({ date: p.date, field: p.field }));
+
+    zones.push({
+      rangeLabel: `${zoneStart} - ${zoneEnd}`,
+      rangeStart: zoneStart,
+      rangeEnd: zoneEnd,
+      min: { price: minPrice, hits: minHits },
+      max: { price: maxPrice, hits: maxHits }
+    });
+  }
+
+  // 4. 級距由高到低遞減排序
+  zones.sort((a, b) => b.rangeStart - a.rangeStart);
+
+  return zones;
+}
+
+/**
+ * 台灣股票「升降單位」（跳動點）對照表，依此區間動態決定價格級距分析的 zoneWidth。
+ * zoneWidth 是抓一個「類似密度」的經驗值：讓不同價位的股票，一個月的高低點資料
+ * 大致都能切出約 5~10 組級距，避免低價股全部擠在同一級距、或高價股切太細。
+ * 若對某個區間的密度感覺不對，直接調整這裡的 zoneWidth 即可，不影響其他邏輯。
+ */
+const PRICE_ZONE_TIER_CONFIG = [
+  { maxPrice: 10, tickSize: 0.01, zoneWidth: 0.5 },
+  { maxPrice: 50, tickSize: 0.05, zoneWidth: 3 },
+  { maxPrice: 100, tickSize: 0.1, zoneWidth: 7 },
+  { maxPrice: 500, tickSize: 0.5, zoneWidth: 30 },
+  { maxPrice: 1000, tickSize: 1, zoneWidth: 70 },
+  { maxPrice: Infinity, tickSize: 5, zoneWidth: 95 }
+];
+
+/**
+ * 依參考股價（通常取最新一筆收盤價）判斷應使用的價格級距寬度
+ * @param {number} referencePrice 參考股價
+ * @returns {number} 對應的 zoneWidth
+ */
+function getPriceZoneWidth(referencePrice) {
+  const tier = PRICE_ZONE_TIER_CONFIG.find(t => referencePrice < t.maxPrice)
+    || PRICE_ZONE_TIER_CONFIG[PRICE_ZONE_TIER_CONFIG.length - 1];
+  return tier.zoneWidth;
+}
+
+/**
  * @param {Array} data 富果 API 回傳的歷史K線 (desc，最新在前)
  * @param {Object} [config] 可選，覆寫各項分析的天數設定，不傳則使用預設值
  * @param {number} [config.breakoutRecentDays=3]   X日不破前高低：「近X日」的X（逐日跟前一天比較）
@@ -1512,6 +1598,8 @@ function buildVolPriceResult(volUp, priceUp, isAvg, recentVolAvg, priorVolAvg, v
  * @param {number} [config.pivotRightBars=2]       趨勢結構：轉折點右側確認天數（越大越慢但越可靠）
  * @param {number} [config.volRecentDays=3]        量價關係：近X日均量的X
  * @param {number} [config.volPriorDays=3]         量價關係：前X日均量的X
+ * @param {number|null} [config.priceZoneWidth=null] 價格級距分析：每個級距的價格寬度，
+ *   不傳（null）則依 data[0].close 自動判斷；有明確傳值則以傳入值為準
  */
 function analyzeHistoryData(data, config = {}) {
   const cfg = {
@@ -1520,6 +1608,7 @@ function analyzeHistoryData(data, config = {}) {
     pivotRightBars: 2,
     volRecentDays: 3,
     volPriorDays: 3,
+    priceZoneWidth: null,
     ...config
   };
 
@@ -1639,6 +1728,23 @@ function analyzeHistoryData(data, config = {}) {
     stories.push(`${volBasis}${volPriceInfo.volUp ? "放大" : "縮減"}，今日收盤價較昨日${volPriceInfo.priceUp ? "上漲" : "下跌"}，屬於「${volPriceInfo.label}」格局。`);
   }
 
+  // 故事七：價格級距分析，動態偵測每 priceZoneWidth 元一個級距，找出各級距的最低／最高價
+  // zoneWidth 未手動指定時，依最新一筆收盤價（data[0].close）自動對應台灣股票跳動單位級距
+  const referencePrice = data[0] && typeof data[0].close === "number" ? data[0].close : latestClose;
+  const resolvedZoneWidth = cfg.priceZoneWidth != null ? cfg.priceZoneWidth : getPriceZoneWidth(referencePrice);
+  const priceZones = analyzePriceZoneLevels(data, resolvedZoneWidth);
+  const zoneFieldLabel = { high: "最高價", low: "最低價", open: "開盤價" };
+  priceZones.forEach((zone, idx) => {
+    const minHitsText = zone.min.hits.map(h => `${h.date} ${zoneFieldLabel[h.field]}`).join("、");
+    if (zone.min.price === zone.max.price) {
+      // 該級距內所有價格點恰為同一價位（常見於單筆資料獨自落在一個級距內），合併為單行顯示
+      stories.push(`${idx + 1}. 級距 ${zone.rangeLabel}<br>* 僅一筆：${zone.min.price.toFixed(2)}（${minHitsText}）`);
+    } else {
+      const maxHitsText = zone.max.hits.map(h => `${h.date} ${zoneFieldLabel[h.field]}`).join("、");
+      stories.push(`${idx + 1}. 級距 ${zone.rangeLabel}<br>* 最低：${zone.min.price.toFixed(2)}（${minHitsText}）<br>* 最高：${zone.max.price.toFixed(2)}（${maxHitsText}）`);
+    }
+  });
+
   return {
     summary: {
       rangeHigh: maxPrice,
@@ -1660,7 +1766,9 @@ function analyzeHistoryData(data, config = {}) {
       volumePriceRelation: volPriceInfo.available ? {
         type: volPriceInfo.type,
         label: volPriceInfo.label
-      } : null
+      } : null,
+      priceZones,
+      priceZoneWidth: resolvedZoneWidth,
     },
     story: stories.join("<br><br>")
   };
