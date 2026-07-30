@@ -2640,8 +2640,9 @@ function stripTags(html) {
 // 解析數字，處理 "+ 4,826" / "-138" 格式
 function parseNumber(html) {
   const text = stripTags(html).replace(/,/g, "").replace(/\s/g, "");
-  const match = text.match(/[+-]?\d+/);
-  return match ? parseInt(match[0], 10) : 0;
+  // \d+(\.\d+)? 代表：一或多個數字 + (小數點 + 一或多個數字) 的可選組合
+  const match = text.match(/[+-]?\d+(\.\d+)?/);
+  return match ? parseFloat(match[0]) : 0;
 }
 
 async function fetchFugleSma(symbol, env) {
