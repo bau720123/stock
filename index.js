@@ -3609,12 +3609,14 @@ function _renderMyStock({
     `<span class="mystock-dot ${i === 0 ? 'active' : ''}" onclick="gotoMyStockSlide(${i})" title="${s.name}"></span>`
   ).join('');
 
-  html += `
-  <div class="mystock-nav">
-  <button class="mystock-nav-btn" id="mystock-prev" onclick="stepMyStockSlide(-1)" ${MY_STOCKS.length <= 1 ? 'style="visibility:hidden"' : ''}>◀ 上一檔</button>
-  <div class="mystock-dots" id="mystock-dots">${dotsHtml}</div>
-  <button class="mystock-nav-btn" id="mystock-next" onclick="stepMyStockSlide(1)" ${MY_STOCKS.length <= 1 ? 'style="visibility:hidden"' : ''}>下一檔 ▶</button>
-  </div>`;
+  if (MY_STOCKS.length >= 2) {
+    html += `
+    <div class="mystock-nav">
+    <button class="mystock-nav-btn" id="mystock-prev" onclick="stepMyStockSlide(-1)" ${MY_STOCKS.length <= 1 ? 'style="visibility:hidden"' : ''}>◀ 上一檔</button>
+    <div class="mystock-dots" id="mystock-dots">${dotsHtml}</div>
+    <button class="mystock-nav-btn" id="mystock-next" onclick="stepMyStockSlide(1)" ${MY_STOCKS.length <= 1 ? 'style="visibility:hidden"' : ''}>下一檔 ▶</button>
+    </div>`;
+  }
 
   html += `<div style="position:relative;">
   <div class="mystock-slider-wrapper">
