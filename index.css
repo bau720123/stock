@@ -447,12 +447,25 @@ header h1 {
   }
 }
 
+/* 1. 解除行事曆卡片的 overflow 限制，讓 sticky 效果生效 */
+#card-finance-calendar {
+    overflow: visible !important;
+}
+
+/* 2. 將 calendar-header 設定為 sticky 定位 */
 .calendar-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 12px;
-  font-family: var(--mono);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+    font-family: var(--mono);
+
+    /* 新增懸浮關鍵 CSS */
+    position: sticky;
+    top: 60px; /* 避開頂部 fixed 的 Header（依你的 Header 實際高度調整，通常為 55px ~ 60px） */
+    z-index: 10; /* 確保浮在下方月曆表格/列表之上 */
+    background-color: var(--surface); /* 加上卡片背景色 (#111620)，防止滾動時下方內容透出來 */
+    padding: 8px 0; /* 增加上下留白 */
 }
 
 .calendar-nav-btn {
@@ -519,7 +532,7 @@ header h1 {
   border: 1px solid var(--muted);
   color: var(--text);
   border-radius: 4px;
-  padding: 5px 14px;
+  padding: 5px 11px;
   font-family: var(--mono);
   font-size: .8rem;
   cursor: pointer;

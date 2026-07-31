@@ -3636,7 +3636,7 @@ function _renderMyStock({
 
   // 導覽列（按鈕 + dots）
   const dotsHtml = MY_STOCKS.map((s, i) =>
-    `<span class="mystock-dot ${i === 0 ? 'active' : ''}" onclick="gotoMyStockSlide(${i})" title="${s.name}"></span>`
+    `<span class="mystock-dot ${i === 0 ? 'active' : ''}" onclick="gotoMyStockSlide(${i})" title="${s.name}"></span><span class="mystock-name"  style="${i === 0 ? '' : 'display:none;'}font-size:smaller;">${s.name}</span>`
   ).join('');
 
   if (MY_STOCKS.length >= 2) {
@@ -4015,6 +4015,12 @@ function _updateMyStockSlider() {
   // dots
   document.querySelectorAll('.mystock-dot').forEach((dot, idx) => {
     dot.classList.toggle('active', idx === i);
+  });
+
+  // stock name
+  document.querySelectorAll('.mystock-name').forEach((el, idx) => {
+    // 當 idx 等於當前索引 i 時顯示 (block)，其餘隱藏 (none)
+    el.style.display = (idx === i) ? 'block' : 'none';
   });
 
   // 底部按鈕 disabled 狀態
@@ -6416,7 +6422,7 @@ function renderCalendarList() {
   });
 
   let html = `
-  <div class="card-title">財經行事曆</div>
+  <div class="card-title" style="margin-bottom: 6px;">財經行事曆</div>
   <div class="calendar-header">
     <button class="calendar-nav-btn" onclick="changeMonth(-1)">◀</button>
     <div style="color:var(--accent);">${year} / ${String(month + 1).padStart(2, '0')}</div>
