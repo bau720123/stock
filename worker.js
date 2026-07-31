@@ -357,6 +357,7 @@ function getOilSymbol() {
   return `hf_OIL${yy}${mm}`;
 }
 
+// 新浪網的VIX恐慌指數代碼是 hf_VX，但它是近月合約，會隨著時間推移而變動，所以我們需要動態計算出正確的合約代碼
 function getVixSymbol() {
   const now = new Date();
   const year = now.getFullYear();
