@@ -421,7 +421,7 @@ async function fetchSina(list) {
         "User-Agent": UA,
         "Referer": "https://finance.sina.com.cn/"
       }
-    });
+    }, 10000);
     // const text = await res.text();
 
     // 1. 先取得原始的 ArrayBuffer (二進位資料)
@@ -4269,11 +4269,18 @@ async function handleCron(env) {
   ]);
 
   // 第二批：其他
-  const [twnRes, /*twnConRes, */ brentRes, vixRes, tsmcStock] = await Promise.all([
+  const [
+    twnRes,
+    // twnConRes,
+    brentRes,
+    vixRes,
+    tsmcStock,
+  ] = await Promise.all([
     fetchHiStock("stocktop2017", "TWN", "指數", "成交量(口)"),
     // fetchCnyesTwn(), // 富台指
     fetchSina("hf_OIL"),
     fetchSina("hf_VX"),
+    // fetchYahooFinance("^VIX", 1, 1),
     fetchFugleQuote("2330", env),
   ]);
 
@@ -4370,6 +4377,7 @@ async function handleCron(env) {
 
   if (vix.success) {
     lines.push(`VIX 恐慌指數：${vix.price.toFixed(2)}（` + getVixStatus(vix.price) + `）`);
+    // lines.push(`VIX 恐慌指數：${vix.close.toFixed(2)}（` + getVixStatus(vix.close) + `）`);
   } else if (vix.error) {
     lines.push(`VIX 恐慌指數：` + vix.error);
   } else {

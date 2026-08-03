@@ -3017,12 +3017,24 @@ async function loadMaterials() {
 
 // 市場情緒
 async function loadSentiment() {
-  const [ /*sinaVix,  sinaVixFutures, */ yahooVix, fearGreed, sinaUsdollar, yahooUtcTwd, yahooUtcJpy, yahooUtcKrw, fedwatch] = await Promise.all([
+  const [ 
+    // sinaVix,
+    sinaVixFutures,
+    // yahooVix,
+    // fearGreed,
+    // sinaUsdollar,
+    yahooUtc,
+    yahooUtcTwd,
+    yahooUtcJpy,
+    yahooUtcKrw,
+    fedwatch,
+  ] = await Promise.all([
     // fetch(WORKER + '/sina/znb_VIX').then(r => r.json()).catch(() => ({ success: false })), // VIX 恐慌指數
-    // fetch(WORKER + '/sina/hf_VX').then(r => r.json()).catch(() => ({ success: false })), // VIX 恐慌指數期貨
-    fetch(WORKER + '/yahoo-finance/^VIX').then(r => r.json()).catch(() => ({ success: false })), // VIX 恐慌指數期貨
-    fetch(WORKER + '/fear-greed').then(r => r.json()).catch(() => ({ success: false })), // CNN Fear & Greed Index
-    fetch(WORKER + '/sina/DINIW').then(r => r.json()).catch(() => ({ success: false })), // 美元指數
+    fetch(WORKER + '/sina/hf_VX').then(r => r.json()).catch(() => ({ success: false })), // VIX 恐慌指數期貨
+    // fetch(WORKER + '/yahoo-finance/^VIX').then(r => r.json()).catch(() => ({ success: false })), // VIX 恐慌指數
+    // fetch(WORKER + '/fear-greed').then(r => r.json()).catch(() => ({ success: false })), // CNN Fear & Greed Index
+    // fetch(WORKER + '/sina/DINIW').then(r => r.json()).catch(() => ({ success: false })), // 美元指數
+    fetch(WORKER + '/yahoo-finance/DX-Y.NYB').then(r => r.json()).catch(() => ({ success: false })), //美元指數
     fetch(WORKER + '/yahoo-finance/USDTWD=X').then(r => r.json()).catch(() => ({ success: false })), // 美金兌換台幣匯率
     fetch(WORKER + '/yahoo-finance/USDJPY=X').then(r => r.json()).catch(() => ({ success: false })), // 美金兌換日幣匯率
     fetch(WORKER + '/yahoo-finance/USDKRW=X').then(r => r.json()).catch(() => ({ success: false })), // 美金兌換韓元匯率
@@ -3070,59 +3082,21 @@ async function loadSentiment() {
   }*/
 
   // 【VIX 恐慌指數期貨】
-  // html += groupHeader('【VIX 恐慌指數期貨】', 'vix_futures', 'VIX 恐慌指數期貨是基於 VIX 指數的衍生品，反映市場對未來 30 天美股波動幅度的預期。數值越高代表投資者越恐慌、預期波動越大；通常在股市急跌或市場震盪時飆升。');
-  // if (sinaVixFutures.success) {
-  //   const changeNum = sinaVixFutures.price - sinaVixFutures.prev;
-  //   const cls = changeNum < 0 ? 'down' : 'up';
-  //   const changePercent = changeNum / sinaVixFutures.prev * 100;
-
-  //   html += row('前次', sinaVixFutures.prev.toFixed(2));
-  //   // html += row('開盤價', sinaVixFutures.open.toFixed(2));
-  //   // html += row('最高價', sinaVixFutures.high.toFixed(2));
-  //   // html += row('最低價', sinaVixFutures.low.toFixed(2));
-  //   html += row('數值', sinaVixFutures.price.toFixed(2), 'accent');
-  //   html += row('漲跌', changeNum.toFixed(2), cls);
-  //   // html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
-  //   html += row('情緒評級', sinaVixFutures.rating);
-  //   html += row('更新時間', sinaVixFutures.time);
-
-  //   // 價格門檻通知（從 localStorage 讀取，未設定則不觸發）
-  //   const vixFuturesHigh = alertGet('vix_futures_high');
-  //   const vixFuturesLow = alertGet('vix_futures_low');
-  //   if (vixFuturesHigh !== null && sinaVixFutures.price >= vixFuturesHigh) {
-  //     sendNotification(
-  //       'VIX 恐慌指數期貨警示',
-  //       `數值 ${sinaVixFutures.price.toFixed(2)}，已高於設定門檻 ${vixFuturesHigh}`,
-  //       'https://hk.investing.com/indices/volatility-s-p-500'
-  //     );
-  //   }
-  //   if (vixFuturesLow !== null && sinaVixFutures.price <= vixFuturesLow) {
-  //     sendNotification(
-  //       'VIX 恐慌指數期貨警示',
-  //       `數值 ${sinaVixFutures.price.toFixed(2)}，已低於設定門檻 ${vixLow}`,
-  //       'https://hk.investing.com/indices/volatility-s-p-500'
-  //     );
-  //   }
-  // } else {
-  //   html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
-  // }
-
-
-  // 【VIX 恐慌指數期貨】
   html += groupHeader('【VIX 恐慌指數期貨】', 'vix_futures', 'VIX 恐慌指數期貨是基於 VIX 指數的衍生品，反映市場對未來 30 天美股波動幅度的預期。數值越高代表投資者越恐慌、預期波動越大；通常在股市急跌或市場震盪時飆升。');
-  if (yahooVix.success) {
-    const changeNum = yahooVix.close - yahooVix.prev;
-    const cls = changeClass(changeNum, 1);
-    const changePercent = changeNum / yahooVix.prev * 100;
+  if (sinaVixFutures.success) {
+    const changeNum = sinaVixFutures.price - sinaVixFutures.prev;
+    const cls = changeNum < 0 ? 'down' : 'up';
+    const changePercent = changeNum / sinaVixFutures.prev * 100;
 
-    html += row('前次', yahooVix.prev.toFixed(2));
-    html += row('開盤價', yahooVix.open.toFixed(2));
-    html += row('最高價', yahooVix.high.toFixed(2));
-    html += row('最低價', yahooVix.low.toFixed(2));
-    html += row('價格', yahooVix.close.toFixed(2), 'accent');
+    html += row('前次', sinaVixFutures.prev.toFixed(2));
+    // html += row('開盤價', sinaVixFutures.open.toFixed(2));
+    // html += row('最高價', sinaVixFutures.high.toFixed(2));
+    // html += row('最低價', sinaVixFutures.low.toFixed(2));
+    html += row('數值', sinaVixFutures.price.toFixed(2), 'accent');
     html += row('漲跌', changeNum.toFixed(2), cls);
     // html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
-    html += row('更新時間', yahooVix.updateTime);
+    html += row('情緒評級', sinaVixFutures.rating);
+    html += row('更新時間', sinaVixFutures.time);
 
     // 價格門檻通知（從 localStorage 讀取，未設定則不觸發）
     const vixFuturesHigh = alertGet('vix_futures_high');
@@ -3130,68 +3104,143 @@ async function loadSentiment() {
     if (vixFuturesHigh !== null && sinaVixFutures.price >= vixFuturesHigh) {
       sendNotification(
         'VIX 恐慌指數期貨警示',
-        `數值 ${yahooVix.close.toFixed(2)}，已高於設定門檻 ${vixFuturesHigh}`,
-        'https://hk.investing.com/currencies/usd-twd'
+        `數值 ${sinaVixFutures.price.toFixed(2)}，已高於設定門檻 ${vixFuturesHigh}`,
+        'https://hk.investing.com/indices/volatility-s-p-500'
       );
     }
     if (vixFuturesLow !== null && sinaVixFutures.price <= vixFuturesLow) {
       sendNotification(
         'VIX 恐慌指數期貨警示',
-        `數值 ${yahooVix.close.toFixed(2)}，已低於設定門檻 ${vixFuturesLow}`,
-        'https://hk.investing.com/currencies/usd-twd'
+        `數值 ${sinaVixFutures.price.toFixed(2)}，已低於設定門檻 ${vixLow}`,
+        'https://hk.investing.com/indices/volatility-s-p-500'
       );
     }
   } else {
     html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
   }
 
-  // 【CNN Fear & Greed Index】
-  html += groupHeader('【CNN Fear & Greed Index】', '', 'CNN Fear & Greed Index 是由 CNN Business 編製的綜合市場情緒指數，數值介於 0–100，整合了七項子指標：股價動能、漲跌強弱、漲跌廣度、Put/Call 比率、垃圾債券需求、市場波動率（VIX）及避險資產需求。數值越低代表市場越恐慌，越高則越貪婪。與 VIX 單一衡量波動率不同，此指數反映的是市場整體情緒的多面向變化。');
-  if (fearGreed.success) {
-    const scoreColor = fearGreed.score >= 50 ? 'up' : 'down';
-    const trendIcon = (curr, prev) => curr > prev ? '▲' : curr < prev ? '▼' : '－';
 
-    html += row('前次收盤', `${fearGreed.prevClose.toFixed(1)} ${trendIcon(fearGreed.score, fearGreed.prevClose)}`);
-    html += row('一週前', `${fearGreed.prev1Week.toFixed(1)} ${trendIcon(fearGreed.score, fearGreed.prev1Week)}`);
-    html += row('一個月前', `${fearGreed.prev1Month.toFixed(1)} ${trendIcon(fearGreed.score, fearGreed.prev1Month)}`);
-    html += row('一年前', `${fearGreed.prev1Year.toFixed(1)} ${trendIcon(fearGreed.score, fearGreed.prev1Year)}`);
-    html += row('當前指數', fearGreed.score.toFixed(1), scoreColor);
-    html += row('情緒評級', fearGreed.ratingZh, scoreColor);
-    html += row('更新時間', fearGreed.updateTime);
-  } else {
-    html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
-  }
+  // 【VIX 恐慌指數】
+  // html += groupHeader('【VIX 恐慌指數】', 'vix', 'VIX 恐慌指數（全稱：CBOE Volatility Index，簡稱 VIX）是衡量標準普爾 500 指數（S&P 500）期權隱含波動率的指標，反映市場對未來 30 天美股波動幅度的預期。數值越高代表投資者越恐慌、預期波動越大；通常在股市急跌或市場震盪時飆升。');
+  // if (yahooVix.success) {
+  //   const changeNum = yahooVix.close - yahooVix.prev;
+  //   const cls = changeClass(changeNum, 1);
+  //   const changePercent = changeNum / yahooVix.prev * 100;
+
+  //   html += row('前次', yahooVix.prev.toFixed(2));
+  //   html += row('開盤價', yahooVix.open.toFixed(2));
+  //   html += row('最高價', yahooVix.high.toFixed(2));
+  //   html += row('最低價', yahooVix.low.toFixed(2));
+  //   html += row('價格', yahooVix.close.toFixed(2), 'accent');
+  //   html += row('漲跌', changeNum.toFixed(2), cls);
+  //   // html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
+  //   html += row('更新時間', yahooVix.updateTime);
+
+  //   // 價格門檻通知（從 localStorage 讀取，未設定則不觸發）
+  //   const vixFuturesHigh = alertGet('vix_futures_high');
+  //   const vixFuturesLow = alertGet('vix_futures_low');
+  //   if (vixFuturesHigh !== null && sinaVixFutures.price >= vixFuturesHigh) {
+  //     sendNotification(
+  //       'VIX 恐慌指數期貨警示',
+  //       `數值 ${yahooVix.close.toFixed(2)}，已高於設定門檻 ${vixFuturesHigh}`,
+  //       'https://hk.investing.com/currencies/usd-twd'
+  //     );
+  //   }
+  //   if (vixFuturesLow !== null && sinaVixFutures.price <= vixFuturesLow) {
+  //     sendNotification(
+  //       'VIX 恐慌指數期貨警示',
+  //       `數值 ${yahooVix.close.toFixed(2)}，已低於設定門檻 ${vixFuturesLow}`,
+  //       'https://hk.investing.com/currencies/usd-twd'
+  //     );
+  //   }
+  // } else {
+  //   html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
+  // }
+
+  // 【CNN Fear & Greed Index】
+  // html += groupHeader('【CNN Fear & Greed Index】', '', 'CNN Fear & Greed Index 是由 CNN Business 編製的綜合市場情緒指數，數值介於 0–100，整合了七項子指標：股價動能、漲跌強弱、漲跌廣度、Put/Call 比率、垃圾債券需求、市場波動率（VIX）及避險資產需求。數值越低代表市場越恐慌，越高則越貪婪。與 VIX 單一衡量波動率不同，此指數反映的是市場整體情緒的多面向變化。');
+  // if (fearGreed.success) {
+  //   const scoreColor = fearGreed.score >= 50 ? 'up' : 'down';
+  //   const trendIcon = (curr, prev) => curr > prev ? '▲' : curr < prev ? '▼' : '－';
+
+  //   html += row('前次收盤', `${fearGreed.prevClose.toFixed(1)} ${trendIcon(fearGreed.score, fearGreed.prevClose)}`);
+  //   html += row('一週前', `${fearGreed.prev1Week.toFixed(1)} ${trendIcon(fearGreed.score, fearGreed.prev1Week)}`);
+  //   html += row('一個月前', `${fearGreed.prev1Month.toFixed(1)} ${trendIcon(fearGreed.score, fearGreed.prev1Month)}`);
+  //   html += row('一年前', `${fearGreed.prev1Year.toFixed(1)} ${trendIcon(fearGreed.score, fearGreed.prev1Year)}`);
+  //   html += row('當前指數', fearGreed.score.toFixed(1), scoreColor);
+  //   html += row('情緒評級', fearGreed.ratingZh, scoreColor);
+  //   html += row('更新時間', fearGreed.updateTime);
+  // } else {
+  //   html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
+  // }
+
+  // 【美元指數】
+  // html += groupHeader('【美元指數】', 'usdollar', '美元指數（DXY）是顯示美元相對於主要貨幣強弱的指數。當美元指數 > 100 且持續走強，意味著外資（特別是美資）正在全球進行「獲利了結、班師回朝」。');
+  // if (sinaUsdollar.success) {
+  //   const changeNum = sinaUsdollar.price - sinaUsdollar.prev;
+  //   const cls = changeNum < 0 ? 'down' : 'up';
+  //   const changePercent = changeNum / sinaUsdollar.prev * 100;
+
+  //   html += row('前次', sinaUsdollar.prev.toFixed(2));
+  //   html += row('開盤價', sinaUsdollar.open.toFixed(2));
+  //   html += row('最高價', sinaUsdollar.high.toFixed(2));
+  //   html += row('最低價', sinaUsdollar.low.toFixed(2));
+  //   html += row('漲跌', changeNum.toFixed(2), cls);
+  //   // html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
+  //   html += row('數值', sinaUsdollar.price.toFixed(2), 'accent');
+  //   html += row('更新時間', sinaUsdollar.time);
+
+  //   // 價格門檻通知（從 localStorage 讀取，未設定則不觸發）
+  //   const usdollarHigh = alertGet('usdollar_high');
+  //   const usdollarLow = alertGet('usdollar_low');
+  //   if (usdollarHigh !== null && sinaUsdollar.price >= usdollarHigh) {
+  //     sendNotification(
+  //       '美元指數警示',
+  //       `數值 ${sinaUsdollar.price.toFixed(2)}，已高於設定門檻 ${usdollarHigh}`,
+  //       'https://hk.investing.com/indices/usdollar'
+  //     );
+  //   }
+  //   if (usdollarLow !== null && sinaUsdollar.price <= usdollarLow) {
+  //     sendNotification(
+  //       '美元指數警示',
+  //       `數值 ${sinaUsdollar.price.toFixed(2)}，已低於設定門檻 ${usdollarLow}`,
+  //       'https://hk.investing.com/indices/usdollar'
+  //     );
+  //   }
+  // } else {
+  //   html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
+  // }
 
   // 【美元指數】
   html += groupHeader('【美元指數】', 'usdollar', '美元指數（DXY）是顯示美元相對於主要貨幣強弱的指數。當美元指數 > 100 且持續走強，意味著外資（特別是美資）正在全球進行「獲利了結、班師回朝」。');
-  if (sinaUsdollar.success) {
-    const changeNum = sinaUsdollar.price - sinaUsdollar.prev;
-    const cls = changeNum < 0 ? 'down' : 'up';
-    const changePercent = changeNum / sinaUsdollar.prev * 100;
+  if (yahooUtc.success) {
+    const changeNum = yahooUtc.close - yahooUtc.prev;
+    const cls = changeClass(changeNum, 1);
+    const changePercent = changeNum / yahooUtc.prev * 100;
 
-    html += row('前次', sinaUsdollar.prev.toFixed(2));
-    html += row('開盤價', sinaUsdollar.open.toFixed(2));
-    html += row('最高價', sinaUsdollar.high.toFixed(2));
-    html += row('最低價', sinaUsdollar.low.toFixed(2));
+    html += row('前次', yahooUtc.prev.toFixed(2));
+    html += row('開盤價', yahooUtc.open.toFixed(2));
+    html += row('最高價', yahooUtc.high.toFixed(2));
+    html += row('最低價', yahooUtc.low.toFixed(2));
+    html += row('價格', yahooUtc.close.toFixed(2), 'accent');
     html += row('漲跌', changeNum.toFixed(2), cls);
     // html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
-    html += row('數值', sinaUsdollar.price.toFixed(2), 'accent');
-    html += row('更新時間', sinaUsdollar.time);
+    html += row('更新時間', yahooUtc.updateTime);
 
     // 價格門檻通知（從 localStorage 讀取，未設定則不觸發）
     const usdollarHigh = alertGet('usdollar_high');
     const usdollarLow = alertGet('usdollar_low');
-    if (usdollarHigh !== null && sinaUsdollar.price >= usdollarHigh) {
+    if (usdollarHigh !== null && yahooUtc.close >= usdollarHigh) {
       sendNotification(
         '美元指數警示',
-        `數值 ${sinaUsdollar.price.toFixed(2)}，已高於設定門檻 ${usdollarHigh}`,
+        `數值 ${yahooUtc.close.toFixed(2)}，已高於設定門檻 ${usdollarHigh}`,
         'https://hk.investing.com/indices/usdollar'
       );
     }
-    if (usdollarLow !== null && sinaUsdollar.price <= usdollarLow) {
+    if (usdollarLow !== null && yahooUtc.close <= usdollarLow) {
       sendNotification(
         '美元指數警示',
-        `數值 ${sinaUsdollar.price.toFixed(2)}，已低於設定門檻 ${usdollarLow}`,
+        `數值 ${yahooUtc.close.toFixed(2)}，已低於設定門檻 ${usdollarLow}`,
         'https://hk.investing.com/indices/usdollar'
       );
     }
@@ -3345,7 +3394,8 @@ async function loadSentiment() {
     el.innerText += "\n已進入警戒區間"; 
   }
 
-  if (sinaUsdollar.success && sinaUsdollar.price.toFixed(2) >= 101) {
+  // if (sinaUsdollar.success && sinaUsdollar.price.toFixed(2) >= 101) {
+  if (yahooUtc.success && yahooUtc.close.toFixed(2) >= 101) {
     const el = document.getElementById("warning-usdollar");
     el.style.color = "red";
     el.innerText += "\n已進入警戒區間"; 
