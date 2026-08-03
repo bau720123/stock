@@ -3636,17 +3636,15 @@ function _renderMyStock({
 
   // 導覽列（按鈕 + dots）
   const dotsHtml = MY_STOCKS.map((s, i) =>
-    `<span class="mystock-dot ${i === 0 ? 'active' : ''}" onclick="gotoMyStockSlide(${i})" title="${s.name}"></span><span class="mystock-name"  style="${i === 0 ? '' : 'display:none;'}font-size:smaller;">${s.name}</span>`
+    `<span class="mystock-dot ${i === 0 ? 'active' : ''}" onclick="gotoMyStockSlide(${i})" title="${s.name}"></span><span class="mystock-display-name" style="${i === 0 ? '' : 'display:none;'}font-size:smaller;width:40px;">${s.name}</span>`
   ).join('');
 
-  if (MY_STOCKS.length >= 2) {
-    html += `
-    <div class="mystock-nav">
-    <button class="mystock-nav-btn" id="mystock-prev" onclick="stepMyStockSlide(-1)" ${MY_STOCKS.length <= 1 ? 'style="visibility:hidden"' : ''}>◀ 上一檔</button>
-    <div class="mystock-dots" id="mystock-dots">${dotsHtml}</div>
-    <button class="mystock-nav-btn" id="mystock-next" onclick="stepMyStockSlide(1)" ${MY_STOCKS.length <= 1 ? 'style="visibility:hidden"' : ''}>下一檔 ▶</button>
-    </div>`;
-  }
+  html += `
+  <div class="mystock-nav">
+  <button class="mystock-nav-btn" id="mystock-prev" onclick="stepMyStockSlide(-1)" ${MY_STOCKS.length <= 1 ? 'style="visibility:hidden"' : ''}>◀ 上一檔</button>
+  <div class="mystock-dots" id="mystock-dots">${dotsHtml}</div>
+  <button class="mystock-nav-btn" id="mystock-next" onclick="stepMyStockSlide(1)" ${MY_STOCKS.length <= 1 ? 'style="visibility:hidden"' : ''}>下一檔 ▶</button>
+  </div>`;
 
   html += `<div style="position:relative;">
   <div class="mystock-slider-wrapper">
@@ -3703,6 +3701,16 @@ function _renderMyStock({
               size: 0
           }));
       }
+
+      // 若漲停鎖死，asks 會是空陣列，先用 closePrice 補滿，避免後續渲染出現空白列
+      if (data.asks.length === 0) {
+          const rowCount = data.asks.length || 5; // 沒有 asks 資料時，預設補 5 檔
+          data.asks = Array.from({ length: rowCount }, () => ({
+              price: closePrice,
+              size: 0
+          }));
+      }
+
       const maxRows = Math.max(data.bids.length, data.asks.length);
       for (let j = 0; j < maxRows; j++) {
         const bid = data.bids[j];
@@ -3942,6 +3950,30 @@ function _renderMyStock({
   StockChartBrands();
 
   initMyStockSlider();
+
+  const mystockDisplayNames = document.querySelectorAll('.mystock-display-name');
+  const isPortrait = window.matchMedia('(orientation: portrait)').matches;
+  let elwidth = '';
+
+  // 當頁面切換到"我的自選股"
+  if (card_type === 'my-stock') {
+    // 如果自選股數量大於等於 2 時，縮小顯示名稱的寬度
+    if (MY_STOCKS.length >= 2 && isPortrait) {
+      elwidth = '40px';
+    }
+  }
+
+  // 當頁面切換到"全類別顯示"
+  if (card_type === 'all') {
+    // 如果自選股數量大於等於 2 時，縮小顯示名稱的寬度
+    if (MY_STOCKS.length >= 2) {
+      elwidth = '40px';
+    }
+  }
+
+  mystockDisplayNames.forEach(el => {
+    el.style.width = elwidth;
+  });
 }
 
 // ── MyStock Slider ──
@@ -4017,8 +4049,8 @@ function _updateMyStockSlider() {
     dot.classList.toggle('active', idx === i);
   });
 
-  // stock name
-  document.querySelectorAll('.mystock-name').forEach((el, idx) => {
+  // stock display name
+  document.querySelectorAll('.mystock-display-name').forEach((el, idx) => {
     // 當 idx 等於當前索引 i 時顯示 (block)，其餘隱藏 (none)
     el.style.display = (idx === i) ? 'block' : 'none';
   });
