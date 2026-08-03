@@ -1173,13 +1173,13 @@ function getMarketEmoji() {
 
 // 台股市場概況
 async function loadTw() {
-  const [taifexNight, taifexDay, twn, /*twncon, */ taifexTsmc, fugleQuote /*, fugleVolume, fugleHistory*/ , ForeignNetPosition, Institutional, MarginTradingBalance] = await Promise.all([
+  const [taifexNight, taifexDay, twn, /*twncon, */ taifexTsmc /*, fugleQuote /*, fugleVolume, fugleHistory*/ , ForeignNetPosition, Institutional, MarginTradingBalance] = await Promise.all([
     fetch(WORKER + '/taifex/12/臺股期貨').then(r => r.json()), // 台股期貨夜盤
     fetch(WORKER + '/taifex/2/臺股期貨').then(r => r.json()), // 台股期貨日盤
     fetch(WORKER + '/twn').then(r => r.json()), // 富台指
     // fetch(WORKER + '/twncon').then(r => r.json()), // 富台指
     fetch(WORKER + '/taifex/12/台積電期貨').then(r => r.json()), // 台積電期貨夜盤
-    fetch(WORKER + '/stock/quote/2330').then(r => r.json()), // 台積電現貨日盤股價資訊
+    // fetch(WORKER + '/stock/quote/2330').then(r => r.json()), // 台積電現貨日盤股價資訊
     // fetch(WORKER + '/stock/volume/2330').then(r => r.json()), // 台積電現貨日盤分價量表
     // fetch(WORKER + '/stock/history/2330').then(r => r.json()), // 台積電現股歷史股價資料
     fetch(WORKER + '/foreign-net-position').then(r => r.json()), // 外資空單數
@@ -1273,7 +1273,7 @@ async function loadTw() {
     html += `<div class="error-text">暫時無法取得資料，請於 17:25 之後再進行嘗試</div>`;
   }
 
-  // 【台積電現貨日盤】
+  /*// 【台積電現貨日盤】
   html += groupHeader(spotDay, '', '台積電（TSMC）是全球最大的專業積體電路（IC）製造服務公司，總部位於臺灣新竹科學園區，1987年由張忠謀創立。台積電首創「純晶圓代工」模式，不設計自有品牌產品，專注為Apple、NVIDIA等科技大廠代工生產領先技術的晶片，在先進製程（如3奈米、2奈米）上具統治性地位，被譽為「護國神山」。');
   if (fugleQuote.success) {
     const cls = changeClass(fugleQuote.change, 1);
@@ -1348,7 +1348,7 @@ async function loadTw() {
     // }
   } else {
     html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
-  }
+  }*/
 
   // // 分價量表
   // const volumeHtml = renderVolumeProfile(fugleVolume, 'tw');
@@ -1864,7 +1864,7 @@ function getMarketStatus() {
 
 // 美股市場概況
 async function loadAmerica() {
-  const [cnbcPreMarkets, /*yahooNqf, yahooIxic, yahooSox, */ yahooBtc, yahooFvx, yahooTnx, yahooTxy, /*yahooTsm, */ robinHood, fugleQuote, yahooUtcTwd] = await Promise.all([
+  const [cnbcPreMarkets, /*yahooNqf, yahooIxic, yahooSox, */ yahooBtc, yahooFvx, yahooTnx, yahooTxy, /*yahooTsm, */ robinHood/*, fugleQuote, yahooUtcTwd */] = await Promise.all([
     fetch(WORKER + '/cnbc').then(r => r.json()).catch(() => ({
       success: false
     })), // 美股盤前電子盤
@@ -1887,10 +1887,12 @@ async function loadAmerica() {
     fetch(WORKER + '/rh').then(r => r.json()).catch(() => ({
       success: false
     })), // Robinhood
-    fetch(WORKER + '/stock/quote/2330').then(r => r.json()), // 台積電現貨日盤股價資訊
-    fetch(WORKER + '/yahoo-finance/USDTWD=X').then(r => r.json()).catch(() => ({
-      success: false
-    })), // 美金兌換台幣匯率
+    // fetch(WORKER + '/stock/quote/2330').then(r => r.json()), // 台積電現貨日盤股價資訊
+    
+    // 美金兌換台幣匯率
+    // fetch(WORKER + '/yahoo-finance/USDTWD=X').then(r => r.json()).catch(() => ({
+    //   success: false
+    // })),
   ]);
 
   let html = `<div class="card-title">美股市場概況</div>`;
@@ -2096,7 +2098,7 @@ async function loadAmerica() {
     html += row('更新時間', robinHood.TSM.updated_at);
     html += row('對應台股如下：台積電（2330）');
 
-    if (fugleQuote.success && yahooUtcTwd.success) {
+    /*if (fugleQuote.success && yahooUtcTwd.success) {
       const twdPrice = parseFloat(fugleQuote.closePrice); // 台積電現股價格
       const fx = parseFloat(yahooUtcTwd.close); // 美金兌換台幣匯率
       const adr = parseFloat(robinHood.TSM.previousClose); // 台積電ADR的收盤價格
@@ -2131,7 +2133,7 @@ async function loadAmerica() {
       html += row('換算台股價', adrToTwd.toFixed(2) + ' 元');
       html += row('即時溢價率', premium.toFixed(2) + '%', pCls);
       html += row('溢價警戒狀態', pStatus, pCls);
-    }
+    }*/
   } else {
     html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
   }
