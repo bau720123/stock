@@ -4299,7 +4299,7 @@ function StockChartHistory() {
     const sorted = pending[i];
 
     const dates = sorted.map(d => d.date);
-    const ohlc = sorted.map(d => [d.open, d.close, d.low, d.high]);
+    const ohlc = sorted.map(d => [d.open, d.close, d.low, d.high, d.change]);
     const vols = sorted.map(d => ({
       value: Math.round(d.volume / 1000),
       itemStyle: {
@@ -4331,8 +4331,8 @@ function StockChartHistory() {
           const c = params.find(p => p.seriesType === 'candlestick');
           const v = params.find(p => p.seriesName === 'vol');
           if (!c) return '';
-          const [, o, cl, lo, hi] = c.value; // 第0位是index，用逗號跳過
-          const chg = cl - o;
+          const [, o, cl, lo, hi, ch] = c.value; // 第0位是index，用逗號跳過
+          const chg = ch;
           const col = chg >= 0 ? '#ff4d6a' : '#00c98a';
           return `
             <div style="font-family:monospace;font-size:11px;line-height:1.8">
