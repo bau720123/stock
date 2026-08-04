@@ -421,7 +421,7 @@ async function fetchSina(list) {
         "User-Agent": UA,
         "Referer": "https://finance.sina.com.cn/"
       }
-    }, 10000);
+    });
     // const text = await res.text();
 
     // 1. 先取得原始的 ArrayBuffer (二進位資料)
