@@ -38,7 +38,7 @@ function groupHeader(label, settingsKey = null, wording = '') {
 
   var descButton = wording ? `
   <button class="alert-settings-btn" onclick="showInfo('${wording}')" title="內容說明">
-    ❔
+    💡
   </button>` : '';
 
   var space = settingsKey != '' ? '&nbsp;' : '';
@@ -1378,9 +1378,11 @@ async function loadTw() {
 
   // 外資空單數
   html += `
-  <div class="row">
-    <span class="row-label">外資空單數</span>
-    <span style="cursor:pointer;user-select:none;" onclick="
+  <span class="group-header"><span class="group-header-title" id="warning-brent">外資空單數</span>
+  <button class="alert-settings-btn" onclick="showInfo('外資空單數是指外國機構投資人在台灣期貨市場（如台指期）中，持有的尚未結清的賣出（放空）合約總口數。<br><br>當這個數字很高時，不一定代表外資全面看空台股，它經常是法人用來對龐大現貨持股進行風險避險或期現貨套利的工具。')" title="內容說明">
+    💡
+  </button>&nbsp;
+  <button class="alert-settings-btn " onclick="
     const ob = document.getElementById('foreignnetposition');
     const btn = this;
     if (ob.style.display === 'none') {
@@ -1390,8 +1392,10 @@ async function loadTw() {
       ob.style.display = 'none';
       btn.textContent = '＋';
     }
-    ">＋</span>
-  </div>`;
+    ">
+    ＋
+  </button></span>`;
+
   html += `<div id="foreignnetposition" style="display:none;">
   ${renderForeignNetPosition(ForeignNetPosition)}
   </div>`;
@@ -1402,9 +1406,11 @@ async function loadTw() {
 
   // 三大法人買賣超
   html += `
-  <div class="row">
-    <span class="row-label">三大法人買賣超</span>
-    <span style="cursor:pointer;user-select:none;" onclick="
+  <span class="group-header"><span class="group-header-title" id="warning-brent">三大法人買賣超</span>
+  <button class="alert-settings-btn" onclick="showInfo('「三大法人買賣超」是指外資、投信、自營商這三種大型法人機構，在某一段時間內買進股票的總金額或總張數，減去賣出金額或張數後的淨額。<br><br>買超代表買的比賣的多（看好）<br>賣超代表賣的比買的多（看壞）')" title="內容說明">
+    💡
+  </button>&nbsp;
+  <button class="alert-settings-btn " onclick="
     const ob = document.getElementById('institutional');
     const btn = this;
     if (ob.style.display === 'none') {
@@ -1414,8 +1420,10 @@ async function loadTw() {
       ob.style.display = 'none';
       btn.textContent = '＋';
     }
-    ">＋</span>
-  </div>`;
+    ">
+    ＋
+  </button></span>`;
+
   html += `<div id="institutional" style="display:none;">
   ${renderInstitutional(Institutional)}
   </div>`;
@@ -1424,12 +1432,24 @@ async function loadTw() {
   ${renderChartInstitutional(Institutional)}
   </div>`;
 
-  html += row('融資餘額', MarginTradingBalance.marginBalance + ' 億', 'accent');
-  html += row('增減', MarginTradingBalance.marginBalance_diff, cls);
+  // 融資融券餘額
+  html += `
+  <span class="group-header"><span class="group-header-title" id="warning-brent">融資融券餘額</span>
+  <button class="alert-settings-btn" onclick="showInfo('融資餘額代表投資人向券商「借錢買股」還沒還清的總額（或總張數），代表偏多、看好後市的散戶力量。<br><br>融券餘額則是向券商「借股票來賣出（放空）」還沒買回還給券商的總數，代表偏空、看跌的氣氛。<br><br>這兩者是觀察市場散戶動向與多空情緒的重要籌碼指標。')" title="內容說明">
+    💡
+  </button>&nbsp;
+  </span>`;
 
-  const isToday = MarginTradingBalance.date === getTaipeiDateStr();
-  const dateLabel = MarginTradingBalance.date + (isToday ? '（今天）' : '（上個交易日）');
-  html += row('更新時間', dateLabel);
+  if (MarginTradingBalance.marginBalance) {
+    html += row('融資餘額', MarginTradingBalance.marginBalance + ' 億', 'accent');
+    html += row('增減', MarginTradingBalance.marginBalance_diff, cls);
+
+    const isToday = MarginTradingBalance.date === getTaipeiDateStr();
+    const dateLabel = MarginTradingBalance.date + (isToday ? '（今天）' : '（上個交易日）');
+    html += row('更新時間', dateLabel);
+  } else {
+    html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
+  }
 
   setCard('card-tw', 0, html, card_type === 'taiwan-market' ? 'card-wide' : '');
 
@@ -3839,7 +3859,7 @@ function _renderMyStock({
     <div class="row">
     <span class="row-label">歷史股價</span>
     <div style="display: flex; gap: 8px; align-items: center;">
-      <a style="cursor:pointer; user-select:none; text-decoration:none;" onclick="showInfo('${historyResults[i].result.story}')">❔</a>
+      <a style="cursor:pointer; user-select:none; text-decoration:none;" onclick="showInfo('${historyResults[i].result.story}')">💡</a>
       <span class="toggle-btn" data-target="stockhistory" style="cursor:pointer;user-select:none;" onclick="toggleAllByClass('stockhistory', this)">＋</span>
     </div>
     </div>`;
@@ -3856,7 +3876,7 @@ function _renderMyStock({
     <div class="row">
     <span class="row-label">三大法人買賣超</span>
     <div style="display: flex; gap: 8px; align-items: center;">
-      <a style="cursor:pointer; user-select:none; text-decoration:none;" onclick="showInfo('${institutionalResults?.[i]?.result?.story ?? '無三大法人買賣超資料'}')">❔</a>
+      <a style="cursor:pointer; user-select:none; text-decoration:none;" onclick="showInfo('${institutionalResults?.[i]?.result?.story ?? '無三大法人買賣超資料'}')">💡</a>
       <span class="toggle-btn" data-target="stockinstitutional" style="cursor:pointer;user-select:none;" onclick="toggleAllByClass('stockinstitutional', this)">＋</span>
     </div>
     </div>`;
@@ -3873,7 +3893,7 @@ function _renderMyStock({
     <div class="row">
     <span class="row-label">融資餘額增減</span>
     <div style="display: flex; gap: 8px; align-items: center;">
-      <a style="cursor:pointer; user-select:none; text-decoration:none;" onclick="showInfo('${margintradingbalanceResults?.[i]?.result?.story ?? '無融資餘額增減資料'}')">❔</a>
+      <a style="cursor:pointer; user-select:none; text-decoration:none;" onclick="showInfo('${margintradingbalanceResults?.[i]?.result?.story ?? '無融資餘額增減資料'}')">💡</a>
       <span class="toggle-btn" data-target="stockmargintradingbalance" style="cursor:pointer;user-select:none;" onclick="toggleAllByClass('stockmargintradingbalance', this)">＋</span>
     </div>
     </div>`;
@@ -5858,7 +5878,7 @@ function renderVolumeProfile(data, id) {
       <div class="row">
       <span class="row-label">分價量表</span>
       <div style="display: flex; gap: 8px; align-items: center;">
-        <a style="cursor:pointer; user-select:none; text-decoration:none;" onclick="showInfo('${data.result.story}')">❔</a>
+        <a style="cursor:pointer; user-select:none; text-decoration:none;" onclick="showInfo('${data.result.story}')">💡</a>
         <span class="toggle-btn" data-target="ordervolume" style="cursor:pointer;user-select:none;" onclick="toggleAllByClass('ordervolume', this)">＋</span>
       </div>
       </div>
