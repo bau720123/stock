@@ -2091,7 +2091,7 @@ async function fetchMarginTradingBalance() {
 
     // 2. 檢查 API 狀態與資料完整性
     if (jsonRes.stat !== "OK" || !jsonRes.tables || jsonRes.tables.length === 0) {
-      throw new Error(`API response status not OK or tables empty: ${jsonRes.stat || 'Unknown'}`);
+      throw new Error(`API response status not OK or tables empty：${jsonRes.stat || 'Unknown'}`);
     }
 
     // 3. 解析日期 (從 "20260602" 轉為 "2026-06-02")
