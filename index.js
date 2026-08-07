@@ -6691,13 +6691,16 @@ function openMenu() {
   // document.getElementById("grid").style.marginLeft = "250px";
 }
 
-function closeMenu() {
+function closeMenu(goto = '') {
   document.getElementById('slideMenu').classList.remove('active');
   document.getElementById('menuOverlay').classList.remove('active');
   document.body.style.overflow = ''; // 恢復 body 滾動
   // document.getElementById("slideMenu").style.width = "0px";
   // document.getElementById("header").style.marginLeft = "0px";
   // document.getElementById("grid").style.marginLeft = "0px";
+  if (goto !== '') {
+    window.location.href = goto;
+  }
 }
 
 if (card_type == 'all') {
