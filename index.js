@@ -6744,9 +6744,16 @@ if (card_type == 'all') {
       },
 
       onDestroyStarted: () => {
+        if (driverObj.isLastStep()) {
+          // 先清除 hash，避免影響捲動或之後重新整理時又跳到該錨點
+          history.replaceState(null, '', window.location.pathname + window.location.search);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
         localStorage.setItem('tourDone', '1');
         driverObj.destroy();
       },
+
       steps: [
         {
           element: '#card-tw',
