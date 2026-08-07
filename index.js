@@ -1241,7 +1241,7 @@ async function loadTw() {
     html += row('漲跌', twn.changeText, cls);
     html += row('更新時間', formattedTime);
   } else {
-    html += `<div class="error-text">暫時無法取得資料，請稍後再進行嘗試</div>`;
+    html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
   }
 
   // 【富台指】
@@ -1270,7 +1270,7 @@ async function loadTw() {
     html += row('現價', taifexTsmc.price.toFixed(1), 'accent');
     html += row('漲跌', sign + Math.abs(taifexTsmc.updown).toFixed(0), cls);
   } else {
-    html += `<div class="error-text">暫時無法取得資料，請於 17:25 之後再進行嘗試</div>`;
+    html += `<div class="error-text">暫時無法取得資料，請於 17:25 之後再試</div>`;
   }
 
   /*// 【台積電現貨日盤】
@@ -6037,8 +6037,8 @@ function renderStockSma(data) {
   const headerRow = `
   <tr>
     <th style="position:sticky;left:0;top:0;z-index:3;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);">日期</th>
-    <th style="position:sticky;top:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">SMA5</th>
-    <th style="position:sticky;top:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">SMA10</th>
+    <th style="position:sticky;top:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">SMA5（週線）</th>
+    <th style="position:sticky;top:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">SMA10（雙週線）</th>
     <th style="position:sticky;top:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">SMA20（月線）</th>
     <th style="position:sticky;top:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">SMA60（季線）</th>
     <th style="position:sticky;top:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">股價</th>
