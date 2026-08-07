@@ -1214,7 +1214,7 @@ async function loadTw() {
     html += row('現價', taifexNight.price.toFixed(1), 'accent');
     html += row('漲跌', sign + Math.abs(taifexNight.updown).toFixed(0), cls);
   } else {
-    html += `<div class="error-text">暫時無法取得資料，請於 15:00 之後再進行嘗試</div>`;
+    html += `<div class="error-text">暫時無法取得資料，請於 15:00 之後或是稍後再試</div>`;
   }
 
   // 【台股期貨日盤】
@@ -1226,7 +1226,7 @@ async function loadTw() {
     html += row('現價', taifexDay.price.toFixed(1), 'accent');
     html += row('漲跌', sign + Math.abs(taifexDay.updown).toFixed(0), cls);
   } else {
-    html += `<div class="error-text">暫時無法取得資料，請於 09:00 之後再進行嘗試</div>`;
+    html += `<div class="error-text">暫時無法取得資料，請於 09:00 之後或是稍後再試</div>`;
   }
 
   // 【富台指】
@@ -1241,7 +1241,7 @@ async function loadTw() {
     html += row('漲跌', twn.changeText, cls);
     html += row('更新時間', formattedTime);
   } else {
-    html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
+    html += `<div class="error-text">暫時無法取得資料，請稍後再進行嘗試</div>`;
   }
 
   // 【富台指】
@@ -6516,6 +6516,7 @@ function renderCalendarList() {
   const monthItems = calendarDataCache
     .filter(item => item.id.substring(0, 6) === monthPrefix)
     .sort((a, b) => a.id.localeCompare(b.id));
+  console.log('monthItems', monthItems);
 
   // 依日期分組
   const grouped = {};
@@ -6546,15 +6547,20 @@ function renderCalendarList() {
     const isWeekend = dateObj.getDay() === 0 || dateObj.getDay() === 6;
     const dayEvents = grouped[dateKey]; // 有可能是 undefined
 
-    html += `
-    <div id="${isToday ? 'today' : ''}" style="border-left: 3px solid ${isToday ? 'var(--accent)' : 'var(--border)'}; padding: 4px 8px;">
-    <div style="font-size:0.8em; color:${isToday ? 'var(--accent)' : (isWeekend ? '#888' : 'var(--fg)')};
-          margin-bottom:4px; font-weight:bold;">
-      ${month + 1}/${day}（${dayName}）${isToday ? ' ◀ 今天' : ''}
-    </div>`;
+    // 可自行定義沒有事件的日期是否要顯示
+    // ${month + 1}/
+    if (dayEvents && dayEvents.length > 0) {
+      html += `
+      <div id="${isToday ? 'today' : ''}" style="border-left: 3px solid ${isToday ? 'var(--accent)' : 'var(--border)'}; padding: 4px 8px;">
+      <div style="font-size:0.8em; color:${isToday ? 'var(--accent)' : (isWeekend ? '#888' : 'var(--fg)')};
+            margin-bottom:4px; font-weight:bold;">
+        ${day}號（禮拜${dayName}）${isToday ? ' ◀ 今天' : ''}
+      </div>`;
+    }
 
     if (!dayEvents || dayEvents.length === 0) {
-      html += `<div style="color:#888; padding:4px 0;">無事件</div>`;
+      // 可自行定義沒有事件的日期是否要顯示
+      // html += `<div style="color:#888; padding:4px 0;">無事件</div>`;
     } else {
       html += dayEvents.map(ev =>
         ev.indicators.map(ind => `
