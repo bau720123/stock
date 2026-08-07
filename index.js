@@ -6481,7 +6481,7 @@ function renderCalendarView() {
 
     html += `
     <div class="calendar-cell ${isToday ? 'today' : ''}">
-    <div class="calendar-date-num">${day}</div>
+    <div class="calendar-date-num">${day} ${isToday ? '◀ 今天' : ''}</div>
     ${dayEvents.map(ev => {
       // 💡 這裡已經可以使用 ev.indicators 陣列了
       return ev.indicators.map(ind => `
@@ -6581,7 +6581,8 @@ function renderCalendarList() {
   // 滾動到今天
   if (card_type === 'finance-calendar') {
     document.querySelector('#today').scrollIntoView({
-      behavior: 'smooth'
+      behavior: 'smooth',
+      block: 'center',
     });
   }
 }
