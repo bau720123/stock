@@ -841,6 +841,13 @@ async function subscribeUser() {
     return;
   }
 
+  if (window.location.protocol === 'file:') {
+    const replyMessage = 'Service Worker 無法在 file:// 下運作，請透過本地 Server (如 http://localhost) 執行。';
+    showInfo(replyMessage, '發生錯誤', 'error');
+    await writeLogs('ERROR', replyMessage);
+    return;
+  }
+
   try {
     // 確保 SW 已啟動
     const reg = await navigator.serviceWorker.ready;
@@ -903,11 +910,9 @@ async function subscribeUser() {
         })
       });
       const replyMessage = 'Push 訂閱完成，已傳送到 Worker';
-      alert(0);
       showInfo(replyMessage, '訂閱狀態', 'info');
       await writeLogs('SW', replyMessage);
     } catch (e) {
-      alert(1);
       const replyMessage = '傳送到 Worker 失敗：' + e.message;
       showInfo(replyMessage, '發生錯誤', 'error');
       await writeLogs('ERROR', replyMessage);
