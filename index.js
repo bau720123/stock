@@ -3772,7 +3772,7 @@ function _renderMyStock({
       <span style="color:var(--dim);text-align:center;">張數</span>
       </div>`;
 
-      // 若跌停鎖死，bids 會是空陣列，先用 closePrice 補滿，避免後續渲染出現空白列
+      // 若跌停鎖死，bids（買） 會是空陣列，先用 closePrice 補滿，避免後續渲染出現空白列
       if (data.bids.length === 0) {
           const rowCount = data.asks.length || 5; // 沒有 asks 資料時，預設補 5 檔
           data.bids = Array.from({ length: rowCount }, () => ({
@@ -3781,7 +3781,7 @@ function _renderMyStock({
           }));
       }
 
-      // 若漲停鎖死，asks 會是空陣列，先用 closePrice 補滿，避免後續渲染出現空白列
+      // 若漲停鎖死，asks（賣） 會是空陣列，先用 closePrice 補滿，避免後續渲染出現空白列
       if (data.asks.length === 0) {
           const rowCount = data.asks.length || 5; // 沒有 asks 資料時，預設補 5 檔
           data.asks = Array.from({ length: rowCount }, () => ({
