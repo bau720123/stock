@@ -836,7 +836,6 @@ async function sendNotification(title, body, url = '../stock/index.html', sound 
 async function subscribeUser() {
   if (!('serviceWorker' in navigator)) {
     const replyMessage = '您的瀏覽器不支援 Service Worker';
-    // showSweetAlert('error', '發生錯誤', replyMessage);
     showInfo(replyMessage, '發生錯誤', 'error');
     await writeLogs('ERROR', replyMessage);
     return;
@@ -850,7 +849,6 @@ async function subscribeUser() {
     const isStandalone = window.navigator.standalone === true;
     if (!isStandalone && /iPhone|iPad|iPod/.test(navigator.userAgent)) {
       const replyMessage = 'iOS 必須先「加入主畫面」成為 PWA 才能開啟通知！';
-      // showSweetAlert('error', '發生錯誤', replyMessage);
       showInfo(replyMessage, '發生錯誤', 'error');
       await writeLogs('ERROR', replyMessage);
       return;
@@ -859,13 +857,11 @@ async function subscribeUser() {
     // 請求通知權限
     const permission = await Notification.requestPermission();
     const replyMessage = '[SW] 通知權限：' + permission;
-    // showSweetAlert('info', '通知權限', replyMessage);
     showInfo(replyMessage, '通知權限', 'info');
     await writeLogs('INFO', replyMessage);
 
     if (permission !== 'granted') {
       const replyMessage = '權限被拒絕，請至「設定 > 通知 > 即時報價」手動開啟';
-      // showSweetAlert('error', '發生錯誤', replyMessage);
       showInfo(replyMessage, '發生錯誤', 'error');
       await writeLogs('ERROR', replyMessage);
       return;
@@ -885,12 +881,10 @@ async function subscribeUser() {
         applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
       });
       const replyMessage = '訂閱成功：' + subscription.endpoint.substring(0, 50);
-      // showSweetAlert('info', '訂閱狀態', replyMessage);
       showInfo(replyMessage, '訂閱狀態', 'info');
       await writeLogs('PUSH', replyMessage);
     } catch (e) {
       const replyMessage = '訂閱失敗：' + e.message;
-      // showSweetAlert('error', '發生錯誤', replyMessage);
       showInfo(replyMessage, '發生錯誤', 'error');
       await writeLogs('SW', replyMessage);
       return;
@@ -909,18 +903,17 @@ async function subscribeUser() {
         })
       });
       const replyMessage = 'Push 訂閱完成，已傳送到 Worker';
-      // showSweetAlert('info', '訂閱狀態', replyMessage);
+      alert(0);
       showInfo(replyMessage, '訂閱狀態', 'info');
       await writeLogs('SW', replyMessage);
     } catch (e) {
+      alert(1);
       const replyMessage = '傳送到 Worker 失敗：' + e.message;
-      // showSweetAlert('error', '發生錯誤', replyMessage);
       showInfo(replyMessage, '發生錯誤', 'error');
       await writeLogs('ERROR', replyMessage);
     }
   } catch (err) {
     const replyMessage = '例外失敗：' + err;
-    // showSweetAlert('error', '發生錯誤', replyMessage);
     showInfo(replyMessage, '發生錯誤', 'error');
     await writeLogs('ERROR', replyMessage);
   }
@@ -932,13 +925,13 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/stock/sw.js')
       .then(async reg => {
         const replyMessage = '註冊成功：' + reg.scope;
-        // showSweetAlert('info', '註冊狀態', replyMessage);
+        // showInfo(replyMessage, '註冊狀態', 'info');
         await writeLogs('SW', replyMessage);
 
         // 先檢查 Notification 是否存在
         if (typeof Notification === 'undefined') {
           const replyMessage = '此環境不支援通知功能';
-          showSweetAlert('error', '發生錯誤', replyMessage);
+          showInfo(replyMessage, '發生錯誤', 'error');
           await writeLogs('ERROR', replyMessage);
           return;
         }
@@ -950,7 +943,7 @@ if ('serviceWorker' in navigator) {
       })
       .catch(async err => {
         const replyMessage = '註冊失敗：' + err;
-        // showSweetAlert('error', '發生錯誤', replyMessage);
+        // showInfo(replyMessage, '發生錯誤', 'error');
         await writeLogs('ERROR', replyMessage);
       });
   });
@@ -6419,12 +6412,12 @@ async function loadFinanceCalendar() {
 
       // 檢查 MacroMicro 財報資料是否過期
       if (data.macroEarningsExpired) {
-        showSweetAlert('warning', 'MacroMicro 財報資料已過期', `資料涵蓋範圍至：${data.macroEarningsEndDate}`);
+        showInfo(`資料涵蓋範圍至：${data.macroEarningsEndDate}`, 'MacroMicro 財報資料已過期', 'warning');
       }
 
       // 檢查 MacroMicro 總經資料是否過期
       if (data.macroMacroExpired) {
-        showSweetAlert('warning', 'MacroMicro 總經資料已過期', `資料涵蓋範圍至：${data.macroMacroEndDate}`);
+        showInfo(`資料涵蓋範圍至：${data.macroMacroEndDate}`, 'MacroMicro 總經資料已過期', 'warning');
       }
 
     } catch (e) {
