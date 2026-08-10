@@ -3776,8 +3776,8 @@ function _renderMyStock({
       if (data.bids.length === 0) {
           const rowCount = data.asks.length || 5; // 沒有 asks 資料時，預設補 5 檔
           data.bids = Array.from({ length: rowCount }, () => ({
-              price: closePrice,
-              size: 0
+              price: '-',
+              size: '-'
           }));
       }
 
@@ -3785,8 +3785,8 @@ function _renderMyStock({
       if (data.asks.length === 0) {
           const rowCount = data.asks.length || 5; // 沒有 asks 資料時，預設補 5 檔
           data.asks = Array.from({ length: rowCount }, () => ({
-              price: closePrice,
-              size: 0
+              price: '-',
+              size: '-'
           }));
       }
 
