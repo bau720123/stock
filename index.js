@@ -836,7 +836,8 @@ async function sendNotification(title, body, url = '../stock/index.html', sound 
 async function subscribeUser() {
   if (!('serviceWorker' in navigator)) {
     const replyMessage = '您的瀏覽器不支援 Service Worker';
-    showSweetAlert('error', '發生錯誤', replyMessage);
+    // showSweetAlert('error', '發生錯誤', replyMessage);
+    showInfo(replyMessage, '發生錯誤', 'error');
     await writeLogs('ERROR', replyMessage);
     return;
   }
@@ -849,7 +850,8 @@ async function subscribeUser() {
     const isStandalone = window.navigator.standalone === true;
     if (!isStandalone && /iPhone|iPad|iPod/.test(navigator.userAgent)) {
       const replyMessage = 'iOS 必須先「加入主畫面」成為 PWA 才能開啟通知！';
-      showSweetAlert('error', '發生錯誤', replyMessage);
+      // showSweetAlert('error', '發生錯誤', replyMessage);
+      showInfo(replyMessage, '發生錯誤', 'error');
       await writeLogs('ERROR', replyMessage);
       return;
     }
@@ -857,12 +859,14 @@ async function subscribeUser() {
     // 請求通知權限
     const permission = await Notification.requestPermission();
     const replyMessage = '[SW] 通知權限：' + permission;
-    showSweetAlert('info', '通知權限', replyMessage);
+    // showSweetAlert('info', '通知權限', replyMessage);
+    showInfo(replyMessage, '通知權限', 'info');
     await writeLogs('INFO', replyMessage);
 
     if (permission !== 'granted') {
       const replyMessage = '權限被拒絕，請至「設定 > 通知 > 即時報價」手動開啟';
-      showSweetAlert('error', '發生錯誤', replyMessage);
+      // showSweetAlert('error', '發生錯誤', replyMessage);
+      showInfo(replyMessage, '發生錯誤', 'error');
       await writeLogs('ERROR', replyMessage);
       return;
     }
@@ -881,11 +885,13 @@ async function subscribeUser() {
         applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
       });
       const replyMessage = '訂閱成功：' + subscription.endpoint.substring(0, 50);
-      showSweetAlert('info', '訂閱狀態', replyMessage);
+      // showSweetAlert('info', '訂閱狀態', replyMessage);
+      showInfo(replyMessage, '訂閱狀態', 'info');
       await writeLogs('PUSH', replyMessage);
     } catch (e) {
       const replyMessage = '訂閱失敗：' + e.message;
-      showSweetAlert('error', '發生錯誤', replyMessage);
+      // showSweetAlert('error', '發生錯誤', replyMessage);
+      showInfo(replyMessage, '發生錯誤', 'error');
       await writeLogs('SW', replyMessage);
       return;
     }
@@ -903,16 +909,19 @@ async function subscribeUser() {
         })
       });
       const replyMessage = 'Push 訂閱完成，已傳送到 Worker';
-      showSweetAlert('info', '訂閱狀態', replyMessage);
+      // showSweetAlert('info', '訂閱狀態', replyMessage);
+      showInfo(replyMessage, '訂閱狀態', 'info');
       await writeLogs('SW', replyMessage);
     } catch (e) {
       const replyMessage = '傳送到 Worker 失敗：' + e.message;
-      showSweetAlert('error', '發生錯誤', replyMessage);
+      // showSweetAlert('error', '發生錯誤', replyMessage);
+      showInfo(replyMessage, '發生錯誤', 'error');
       await writeLogs('ERROR', replyMessage);
     }
   } catch (err) {
     const replyMessage = '例外失敗：' + err;
-    showSweetAlert('error', '發生錯誤', replyMessage);
+    // showSweetAlert('error', '發生錯誤', replyMessage);
+    showInfo(replyMessage, '發生錯誤', 'error');
     await writeLogs('ERROR', replyMessage);
   }
 }
