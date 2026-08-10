@@ -11,3 +11,10 @@ crons = ["0 */1 * * *"]
 
 [vars]
 VAPID_SUBJECT = "mailto:bau720123@gmail.com"
+
+[observability.logs]
+enabled = true
+invocation_logs = true
+
+[observability.traces]
+enabled = false

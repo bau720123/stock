@@ -4250,14 +4250,38 @@ async function handleCron(env) {
   const twDay = twTime.getUTCDay();
   const currentYear = twTime.getFullYear();
 
-  // 週一(1)至週五(5)，05:00～23:59
-  if (twDay === 0 || twDay === 6) return; // 週六、週日不執行
-  if (twHour < 5) return; // 00:00～04:59 不執行
+  await writeLogs(env, 'CRON', `觸發 handleCron，UTC=${now.toISOString()} 台灣時間=${twTime.toISOString().replace('T',' ').substring(0,19)} twHour=${twHour} twDay=${twDay}`);
 
+  // 週一(1)至週五(5)，05:00～23:59
+  if (twDay === 0 || twDay === 6) {
+    await writeLogs(env, 'CRON', `略過：週六/週日不執行 (twDay=${twDay})`);
+    return; // 週六、週日不執行
+  }
+  if (twHour < 5) {
+    await writeLogs(env, 'CRON', `略過：00:00～04:59 不執行 (twHour=${twHour})`);
+    return; // 00:00～04:59 不執行
+  }
+
+  try {
+    await handleCronInner(env, twTime, twHour, twDay, currentYear);
+  } catch (e) {
+    await writeLogs(env, 'ERROR', `handleCron 發生未預期錯誤：${e.message}\n${e.stack || ''}`);
+    throw e;
+  }
+}
+
+async function handleCronInner(env, twTime, twHour, twDay, currentYear) {
   const existing = await env.KV.get("subscriptions");
-  if (!existing) return;
+  if (!existing) {
+    await writeLogs(env, 'CRON', `略過：KV 中沒有 subscriptions`);
+    return;
+  }
 
   const list = JSON.parse(existing);
+  if (list.length === 0) {
+    await writeLogs(env, 'CRON', `略過：subscriptions 清單為空`);
+    return;
+  }
 
   /*Cloudflare Workers 對外連線有並發限制 Workers 免費方案最多同時 6 個 subrequest*/
 
@@ -4386,7 +4410,7 @@ async function handleCron(env) {
 
   const body = lines.length > 0 ? lines.join('\n') : '點擊查看即時報價';
 
-  await Promise.all(
+  const pushResults = await Promise.all(
     list.map(sub => sendWebPush(sub, {
       title: '每小時市場摘要',
       body,
@@ -4405,6 +4429,18 @@ async function handleCron(env) {
       ]
     }, env))
   );
+
+  const succeeded = pushResults.filter(r => r.status && r.status >= 200 && r.status < 300);
+  const failed = pushResults.filter(r => !(r.status && r.status >= 200 && r.status < 300));
+
+  let summary = `推播完成：共 ${list.length} 個訂閱，成功 ${succeeded.length}，失敗 ${failed.length}`;
+  if (failed.length > 0) {
+    const failDetail = failed.slice(0, 5).map(r =>
+      `${r.endpoint ? r.endpoint.substring(0, 40) : '?'}... status=${r.status ?? 'N/A'} ${r.error || r.responseBody || ''}`
+    ).join(' | ');
+    summary += `\n失敗明細（最多顯示5筆）：${failDetail}`;
+  }
+  await writeLogs(env, failed.length > 0 ? 'WARN' : 'CRON', summary);
 }
 
 function getBrentStatus(p) {
@@ -4443,4 +4479,4 @@ function toInt(s) {
   if (s == null) return 0;
   const n = parseInt(String(s).replace(/,/g, ""));
   return isNaN(n) ? 0 : n;
-}
+}
