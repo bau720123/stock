@@ -1059,7 +1059,7 @@ async function loadAll() {
 
   // 尋找 href 包含當前 card_type 的連結並加上 active
   // 利用屬性選擇器 [href*="..."] 非常精準
-  const activeLink = document.querySelector(`#menuList a[href*="card_type=${card_type}"]`);
+  const activeLink = document.querySelector(`#menuList a[onclick*="card_type=${card_type}"]`);
   if (activeLink) {
     activeLink.classList.add('active');
   }
