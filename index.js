@@ -3412,25 +3412,21 @@ async function loadSentiment() {
 
   setCard('card-sentiment', 0, html);
 
-  // if (sinaVixFutures.success && sinaVixFutures.price.toFixed(2) >= 20) {
-  //   const el = document.getElementById("warning-vix_futures");
-  //   el.style.color = "red";
-  //   el.innerText += "\n已進入警戒區間"; 
-  // }
-  if (yahooVix.success && yahooVix.close.toFixed(2) >= 20) {
+  // if (yahooVix.success && yahooVix.close.toFixed(2) >= 20) {
+  if (sinaVixFutures.success && sinaVixFutures.price.toFixed(2) >= 20) {
     const el = document.getElementById("warning-vix_futures");
     el.style.color = "red";
     el.innerText += "\n已進入警戒區間"; 
   }
 
   // if (sinaUsdollar.success && sinaUsdollar.price.toFixed(2) >= 101) {
-  if (yahooUtc.success && yahooUtc.close.toFixed(2) >= 101) {
+  if (yahooUtc.success && yahooUtc.close.toFixed(2) >= 100) {
     const el = document.getElementById("warning-usdollar");
     el.style.color = "red";
     el.innerText += "\n已進入警戒區間"; 
   }
 
-  if (yahooUtcTwd.success && yahooUtcTwd.close.toFixed(2) >= 32) {
+  if (yahooUtcTwd.success && yahooUtcTwd.close.toFixed(2) >= 32.3) {
     const el = document.getElementById("warning-utctwd");
     el.style.color = "red";
     el.innerText += "\n已進入警戒區間"; 
