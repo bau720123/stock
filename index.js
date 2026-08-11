@@ -3412,6 +3412,8 @@ async function loadSentiment() {
 
   setCard('card-sentiment', 0, html);
 
+  ChartFedWatch();
+
   // if (yahooVix.success && yahooVix.close.toFixed(2) >= 20) {
   if (sinaVixFutures.success && sinaVixFutures.price.toFixed(2) >= 20) {
     const el = document.getElementById("warning-vix_futures");
@@ -3426,7 +3428,7 @@ async function loadSentiment() {
     el.innerText += "\n已進入警戒區間"; 
   }
 
-  if (yahooUtcTwd.success && yahooUtcTwd.close.toFixed(2) >= 32.3) {
+  if (yahooUtcTwd.success && yahooUtcTwd.close.toFixed(2) >= 32.2) {
     const el = document.getElementById("warning-utctwd");
     el.style.color = "red";
     el.innerText += "\n已進入警戒區間"; 
@@ -3443,8 +3445,6 @@ async function loadSentiment() {
     el.style.color = "red";
     el.innerText += "\n已進入警戒區間"; 
   }
-
-  ChartFedWatch();
 }
 
 function renderChartFedWatch(data) {
