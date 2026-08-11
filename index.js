@@ -6556,7 +6556,7 @@ function renderCalendarList() {
 
     // 可自行定義沒有事件的日期是否要顯示
     // ${month + 1}/
-    if (dayEvents && dayEvents.length > 0) {
+    if ((dayEvents && dayEvents.length > 0) || isToday) {
       html += `
       <div id="${isToday ? 'today' : ''}" style="border-left: 3px solid ${isToday ? 'var(--accent)' : 'var(--border)'}; padding: 4px 8px;">
       <div style="font-size:0.8em; color:${isToday ? 'var(--accent)' : (isWeekend ? '#888' : 'var(--fg)')};
