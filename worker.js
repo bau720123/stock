@@ -4444,10 +4444,10 @@ async function handleCronInner(env, twTime, twHour, twDay, currentYear) {
 }
 
 function getBrentStatus(p) {
-  if (p < 95) return '平靜';
-  if (p < 100) return '警戒';
-  if (p < 110) return '留意';
-  if (p < 120) return '波動加劇';
+  if (p < 80) return '平靜';
+  if (p < 90) return '警戒';
+  if (p < 100) return '留意';
+  if (p < 110) return '波動加劇';
   return '恐慌';
 }
 
@@ -4479,4 +4479,4 @@ function toInt(s) {
   if (s == null) return 0;
   const n = parseInt(String(s).replace(/,/g, ""));
   return isNaN(n) ? 0 : n;
-}
+}

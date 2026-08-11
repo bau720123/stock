@@ -1277,7 +1277,7 @@ async function loadTw() {
     html += row('現價', taifexTsmc.price.toFixed(1), 'accent');
     html += row('漲跌', sign + Math.abs(taifexTsmc.updown).toFixed(0), cls);
   } else {
-    html += `<div class="error-text">暫時無法取得資料，請於 17:25 之後再試</div>`;
+    html += `<div class="error-text">暫時無法取得資料，請於 17:25 之後或是稍後再試</div>`;
   }
 
   /*// 【台積電現貨日盤】
@@ -1385,7 +1385,7 @@ async function loadTw() {
 
   // 外資空單數
   html += `
-  <span class="group-header"><span class="group-header-title" id="warning-brent">外資空單數</span>
+  <span class="group-header"><span class="group-header-title" id="warning-foreignnetposition">外資空單數</span>
   <button class="alert-settings-btn" onclick="showInfo('外資空單數是指外國機構投資人在台灣期貨市場（如台指期）中，持有的尚未結清的賣出（放空）合約總口數。<br><br>當這個數字很高時，不一定代表外資全面看空台股，它經常是法人用來對龐大現貨持股進行風險避險或期現貨套利的工具。')" title="內容說明">
     💡
   </button>&nbsp;
@@ -1413,7 +1413,7 @@ async function loadTw() {
 
   // 三大法人買賣超
   html += `
-  <span class="group-header"><span class="group-header-title" id="warning-brent">三大法人買賣超</span>
+  <span class="group-header"><span class="group-header-title" id="warning-institutional">三大法人買賣超</span>
   <button class="alert-settings-btn" onclick="showInfo('「三大法人買賣超」是指外資、投信、自營商這三種大型法人機構，在某一段時間內買進股票的總金額或總張數，減去賣出金額或張數後的淨額。<br><br>買超代表買的比賣的多（看好）<br>賣超代表賣的比買的多（看壞）')" title="內容說明">
     💡
   </button>&nbsp;
@@ -1441,7 +1441,7 @@ async function loadTw() {
 
   // 融資融券餘額
   html += `
-  <span class="group-header"><span class="group-header-title" id="warning-brent">融資融券餘額</span>
+  <span class="group-header"><span class="group-header-title" id="warning-margintradingbalance">融資融券餘額</span>
   <button class="alert-settings-btn" onclick="showInfo('融資餘額代表投資人向券商「借錢買股」還沒還清的總額（或總張數），代表偏多、看好後市的散戶力量。<br><br>融券餘額則是向券商「借股票來賣出（放空）」還沒買回還給券商的總數，代表偏空、看跌的氣氛。<br><br>這兩者是觀察市場散戶動向與多空情緒的重要籌碼指標。')" title="內容說明">
     💡
   </button>&nbsp;
@@ -2897,7 +2897,7 @@ async function loadMaterials() {
 
   setCard('card-materials', 0, html);
 
-  if (sinaBrent.success && sinaBrent.price.toFixed(2) >= 90) {
+  if (sinaBrent.success && sinaBrent.price.toFixed(2) >= 85) {
     const el = document.getElementById("warning-brent");
     el.style.color = "red";
     el.innerText += "\n已進入警戒區間"; 
