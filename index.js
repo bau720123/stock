@@ -4137,13 +4137,25 @@ function _updateMyStockSlider() {
   // 底部按鈕 disabled 狀態
   const prevBtn = document.getElementById('mystock-prev');
   const nextBtn = document.getElementById('mystock-next');
-  if (prevBtn) prevBtn.disabled = (i === 0);
-  if (nextBtn) nextBtn.disabled = (i === total - 1);
+  
+  // 使用邊界值禁用按鈕的方式
+  // if (prevBtn) prevBtn.disabled = (i === 0);
+  // if (nextBtn) nextBtn.disabled = (i === total - 1);
+
+  // 使用循環滑動的方式
+  if (prevBtn) prevBtn.disabled = false;
+  if (nextBtn) nextBtn.disabled = false;
 }
 
 window.stepMyStockSlide = function(dir) {
   const total = MY_STOCKS.length;
-  _mystockSlideIndex = Math.max(0, Math.min(total - 1, _mystockSlideIndex + dir));
+
+  // 使用無法循換
+  // _mystockSlideIndex = Math.max(0, Math.min(total - 1, _mystockSlideIndex + dir));
+  _updateMyStockSlider();
+
+  // 使用取餘數做循環：((n % m) + m) % m 可避免負數取餘的問題
+  _mystockSlideIndex = ((_mystockSlideIndex + dir) % total + total) % total;
   _updateMyStockSlider();
 };
 
