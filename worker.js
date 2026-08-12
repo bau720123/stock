@@ -3574,12 +3574,13 @@ function generateCustomEvents(year) {
     if ([1, 4, 7, 10].includes(month)) {
       // 1. 調整生效日 (2, 5, 8, 11 月最後一個交易日/平日) 
       const msciEffectiveDate = getLastWeekday(year, month);
-      events.push(createEventObj(msciEffectiveDate, "MSCI生效", "MSCI 指數調整生效日", "#16a085"));
+      events.push(createEventObj(msciEffectiveDate, "MSCI生效", "MSCI 指數調整生效日（盤後）", "#16a085"));
 
       // 2. 調整公佈日，如果對照表有資料就使用，否則可以用「該月12號」當作估計值
       let announceDay = msciAnnounceDates[year] ? msciAnnounceDates[year][month] : 12;
       const msciAnnounceDate = new Date(year, month, announceDay);
-      events.push(createEventObj(msciAnnounceDate, "MSCI公佈", "MSCI 指數審查結果公佈", "#16a085"));
+      msciAnnounceDate.setDate(msciAnnounceDate.getDate() + 1); // 轉換為台北時間隔天
+      events.push(createEventObj(msciAnnounceDate, "MSCI公佈", "MSCI 指數審查結果公佈（凌晨）", "#16a085"));
     }
 
     // E. 費城半導體指數 (SOX) 重組生效日 (通常在 3月、6月、9月、12月第三個星期五)
