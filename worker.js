@@ -3527,13 +3527,19 @@ async function fetchFinanceCalendar(env) {
 function generateCustomEvents(year) {
   const events = [];
 
-  // 這裡以 2026 年官方 MSCI 公佈日
+  // 官方 MSCI 公佈日
   const msciAnnounceDates = {
     "2026": {
-      1: 10, // 2月 10號
-      4: 12, // 5月 12號
-      7: 12, // 8月 12號
-      10: 11 // 11月 11號
+      1: 10,  // 2月 10號
+      4: 12,  // 5月 12號
+      7: 12,  // 8月 12號
+      10: 11  // 11月 11號
+    },
+    "2027": {
+      1: 9,   // 2月 9號
+      4: 10,  // 5月 10號
+      7: 12,  // 8月 12號
+      10: 11  // 11月 11號
     }
   };
 
@@ -3552,14 +3558,14 @@ function generateCustomEvents(year) {
 
     // C. 富時羅素指數重組生效日
 
-    // 6 月最後一個星期五
+    // 6 月第四個星期五
     if (month === 5) {
-      const ftseJune = getNthDay(year, month, 5, -1);
+      const ftseJune = getNthDay(year, month, 5, 4);
       events.push(createEventObj(ftseJune, "富時", "富時羅素指數重組生效日", "#e66767"));
     }
 
-    // 11 月第二個星期五
-    if (month === 10) {
+    // 12 月第二個星期五
+    if (month === 11) {
       const ftseNov = getNthDay(year, month, 5, 2);
       events.push(createEventObj(ftseNov, "富時", "富時羅素指數重組生效日", "#e66767"));
     }
@@ -3576,8 +3582,8 @@ function generateCustomEvents(year) {
       events.push(createEventObj(msciAnnounceDate, "MSCI公佈", "MSCI 指數審查結果公佈", "#16a085"));
     }
 
-    // E. 費城半導體指數 (SOX) 重組生效日 (通常在 9月、12月第三個星期五)
-    if ([8, 11].includes(month)) {
+    // E. 費城半導體指數 (SOX) 重組生效日 (通常在 3月、6月、9月、12月第三個星期五)
+    if ([2, 5, 8, 11].includes(month)) {
       const soxDate = getNthDay(year, month, 5, 3);
       events.push(createEventObj(soxDate, "SOX調整", "費半指數重組生效日", "#e67e22"));
     }
