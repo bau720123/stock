@@ -3428,7 +3428,7 @@ async function loadSentiment() {
     el.innerText += "\n已進入警戒區間"; 
   }
 
-  if (yahooUtcTwd.success && yahooUtcTwd.close.toFixed(2) >= 32.2) {
+  if (yahooUtcTwd.success && yahooUtcTwd.close.toFixed(2) >= 32.3) {
     const el = document.getElementById("warning-utctwd");
     el.style.color = "red";
     el.innerText += "\n已進入警戒區間"; 
