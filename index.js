@@ -1153,6 +1153,27 @@ async function loadAll() {
 
 window.onload = loadAll;
 
+let lastLeaveTime = 0;
+const COOLDOWN_TIME = 60000; // 冷卻時間：60000 毫秒（60 秒）
+
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "hidden") {
+    // 記錄離開的時間點
+    lastLeaveTime = Date.now();
+  } 
+  else if (document.visibilityState === "visible") {
+    const timePassed = Date.now() - lastLeaveTime;
+
+    // 如果使用者離開超過 10 秒，才執行重整或向後端請求
+    if (timePassed > COOLDOWN_TIME) {
+      console.log(`離開了 ${timePassed / 1000} 秒，觸發更新資料！`);
+      loadAll(); // 執行你的業務邏輯
+    } else {
+      console.log(`快速切換回分頁（僅離開 ${timePassed / 1000} 秒），不重複觸發。`);
+    }
+  }
+});
+
 function getMarketEmoji() {
   const now = new Date();
   // 轉成台北時間
