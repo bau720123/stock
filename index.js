@@ -1160,8 +1160,7 @@ document.addEventListener("visibilitychange", () => {
   if (document.visibilityState === "hidden") {
     // 記錄離開的時間點
     lastLeaveTime = Date.now();
-  } 
-  else if (document.visibilityState === "visible") {
+  } else if (document.visibilityState === "visible") {
     const timePassed = Date.now() - lastLeaveTime;
 
     // 如果使用者離開超過 10 秒，才執行重整或向後端請求
