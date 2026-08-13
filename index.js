@@ -1163,7 +1163,7 @@ document.addEventListener("visibilitychange", () => {
   } else if (document.visibilityState === "visible") {
     const timePassed = Date.now() - lastLeaveTime;
 
-    // 如果使用者離開超過 10 秒，才執行重整或向後端請求
+    // 如果使用者離開超過 60 秒，才執行重整或向後端請求
     if (timePassed > COOLDOWN_TIME) {
       console.log(`離開了 ${timePassed / 1000} 秒，觸發更新資料！`);
       loadAll(); // 執行你的業務邏輯
