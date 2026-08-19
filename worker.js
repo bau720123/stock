@@ -4119,8 +4119,8 @@ async function generateCustomEventsMacroEarnings() {
 async function generateCustomEventsMacroMacro() {
   const US_MACRO_EVENTS = new Set([
     '美國聯準會利率決策',
-    // '美國聯準會會議紀要',
-    // '美國聯準會褐皮書',
+    '美國聯準會會議紀要',
+    '美國聯準會褐皮書',
     // '美國非農就業', // （美國勞工部）
     '美國消費者物價', // CPI
     '美國ADP非農就業', // （ADP公司）
