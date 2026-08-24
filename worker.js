@@ -3441,14 +3441,37 @@ async function fetchFinanceCalendar(env) {
     });
     const data = await res.json();
 
-    const keywords = ['美國核心CPI年增率', '美國生產者物價指數', 'EI020089', '美國零售額月增率', '申請失業救濟人數', '美國非農業就業人數變化', '美國消費者信心指數'];
+    // 【新增：關鍵字與其發布時間型態的對照表】
+    // type - 1: 一般美國經濟指標 (美東 08:30 -> 台北 20:30 / 21:30)
+    // type - 2: 密西根大學/會議信心指數 (美東 10:00 -> 台北 22:00 / 23:00)
+    // type - 3: 每週失業金 (美東 08:30 -> 台北 20:30 / 21:30，與型態1相同，此處可歸類在一起或分開)
+    const KEYWORD_TIME_RULES = [
+      { kw: '美國核心CPI年增率', type: 1 },
+      { kw: '美國生產者物價指數', type: 1 },
+      { kw: 'EI020089',           type: 1 }, // 假設此代號代表特定指標
+      { kw: '美國零售額月增率',   type: 1 },
+      { kw: '申請失業救濟人數',   type: 1 }, 
+      { kw: '美國非農業就業人數變化', type: 1 },
+      { kw: '美國消費者信心指數', type: 2 }  // 信心指數是美東 AM 10:00 發布
+    ];
 
     // 2. 處理原本的 MoneyDJ 資料
     let processed = data.reduce((acc, item) => {
+      // 從 item.id (通常是 '20260825') 或 item.date 解析出當天的台北日期物件，用來計算夏冬令
+      // 假設 item.id 格式為 YYYYMMDD，若非此格式，請依實際欄位調整
+      let itemDateStr = '';
+      if (item.id && item.id.length === 8) {
+        itemDateStr = `${item.id.slice(0, 4)}-${item.id.slice(4, 6)}-${item.id.slice(6, 8)}`;
+      } else {
+        itemDateStr = new Date(Date.now() + 8 * 3600 * 1000).toISOString().split('T')[0]; // 備用方案
+      }
+      
+      const targetDate = new Date(itemDateStr);
+
       const indicatorList = item.details.split(',').map(d => {
         const parts = d.split(':');
         const code = parts.length > 1 ? parts[0].trim() : '';
-        const name = parts.length > 1 ? parts[1].trim() : parts[0].trim();
+        let name = parts.length > 1 ? parts[1].trim() : parts[0].trim();
         return {
           code,
           name,
@@ -3463,9 +3486,35 @@ async function fetchFinanceCalendar(env) {
         shouldInclude = true;
         filteredIndicators = indicatorList;
       } else if (item.type === 'index') {
-        filteredIndicators = indicatorList.filter(ind =>
-          keywords.some(kw => ind.name.includes(kw) || ind.code.includes(kw))
-        );
+        // 在過濾的同時，動態比對關鍵字並注入時間標籤
+        indicatorList.forEach(ind => {
+          // 尋找是否有匹配的關鍵字規則
+          const rule = KEYWORD_TIME_RULES.find(r => ind.name.includes(r.kw) || ind.code.includes(r.kw));
+          
+          if (rule) {
+            // 【修正：直接從 item.id 或是 targetDate 取得月份】
+            // 8 月 (August) 絕對是夏令時間
+            const month = targetDate.getUTCMonth() + 1; // getUTCMonth 0-11，所以要 +1
+            
+            // 標準美東夏令：4月到10月必定為夏令；12月到2月必定為冬令
+            // 3月與11月為轉換期，為求安全，3-11月皆可大致歸類為夏令 (美國夏令長達近8個月)
+            const isDst = (month >= 3 && month <= 11); 
+
+            let timeLabel = '';
+            if (rule.type === 1) {
+              // 美東 08:30 發布
+              timeLabel = isDst ? ' （晚間八點半）' : ' （晚間九點半）';
+            } else if (rule.type === 2) {
+              // 美東 10:00 發布 (如：諮商會消費者信心指數)
+              timeLabel = isDst ? ' （晚間十點）' : ' （晚間十一點）';
+            }
+
+            // 動態修改 name 的值
+            ind.name = `${ind.name}${timeLabel}`;
+            filteredIndicators.push(ind);
+          }
+        });
+
         if (filteredIndicators.length > 0) shouldInclude = true;
       }
 
@@ -3500,7 +3549,7 @@ async function fetchFinanceCalendar(env) {
       endDate: macroMacroEndDate
     } = await generateCustomEventsMacroMacro();
 
-    // 7. 合併所有來源並排序 (依日期 ID)：MoneyDJ + 週期性事件 + 手動事件 + MacroMicro財報 + MacroMicro總經
+    // 7. 合併所有來源並排序
     const finalData = [...processed, ...customEvents, /*...earningsEvents,*/ ...macroEarningsEvents, ...macroMacroEvents]
       .sort((a, b) => a.id.localeCompare(b.id));
 
@@ -3830,6 +3879,13 @@ function generateCustomEvents(year) {
     "001"
   ));
   events.push(createEventObj(
+    new Date("2026-08-28"),
+    "Fed",
+    "美國聯準會（Fed）主席華許發表央行年會演說（晚間十點）",
+    "#3498db",
+    "001"
+  ));
+  events.push(createEventObj(
     new Date("2026-09-23"),
     "TSM",
     "台積電北美技術論壇",
@@ -4117,17 +4173,15 @@ async function generateCustomEventsMacroEarnings() {
 
 // MacroMicro 靜態 JSON 總體經濟事件
 async function generateCustomEventsMacroMacro() {
-  const US_MACRO_EVENTS = new Set([
-    '美國聯準會利率決策',
-    '美國聯準會會議紀要',
-    '美國聯準會褐皮書',
-    // '美國非農就業', // （美國勞工部）
-    '美國消費者物價', // CPI
-    '美國ADP非農就業', // （ADP公司）
-    // '美國生產者物價',  // PPI
-    // '美國消費者信心',
-    // '美國申請失業金人數',
-    '美國PCE物價指數',
+  // 將原本的 Set 改為 Map，定義每個事件對應的設定
+  // isFedEvent: true 代表是半夜凌晨的聯準會事件
+  const US_MACRO_EVENTS = new Map([
+    ['美國聯準會利率決策', { isFedEvent: true }],
+    ['美國聯準會會議紀要', { isFedEvent: true }],
+    ['美國聯準會褐皮書',   { isFedEvent: true }],
+    ['美國消費者物價',     { isFedEvent: false }], // CPI
+    ['美國ADP非農就業',   { isFedEvent: false, isAdp: true }], // ADP 提早 15 分鐘
+    ['美國PCE物價指數',    { isFedEvent: false }]
   ]);
 
   try {
@@ -4156,16 +4210,35 @@ async function generateCustomEventsMacroMacro() {
 
     for (const item of items) {
       if (item.country !== 'us') continue;
-      if (!US_MACRO_EVENTS.has(item.name)) continue;
+      
+      // 1. 檢查 Map 中是否有這個事件，沒有就直接跳過
+      const eventConfig = US_MACRO_EVENTS.get(item.name);
+      if (!eventConfig) continue;
 
       // eta 是 UTC 秒，+8h 轉台北時間
       const dateObj = new Date((item.eta * 1000) + 8 * 3600 * 1000);
       if (isNaN(dateObj.getTime())) continue;
 
+      // 2. 動態產生時間標籤 (自動適應夏冬令時間)
+      let timeLabel = '';
+      const hours = dateObj.getHours(); // 取得台北時間的小時 (0-23)
+
+      if (eventConfig.isFedEvent) {
+        // 聯準會事件：半夜 2 點或 3 點
+        timeLabel = hours === 2 ? ' （凌晨兩點）' : ' （凌晨三點）';
+      } else if (eventConfig.isAdp) {
+        // ADP 就業：晚間 8:15 或 9:15
+        timeLabel = hours === 20 ? ' （晚間八點一刻）' : ' （晚間九點一刻）';
+      } else {
+        // 一般經濟指標 (CPI, PCE)：晚間 8:30 或 9:30
+        timeLabel = hours === 20 ? ' （晚間八點半）' : ' （晚間九點半）';
+      }
+
+      // 3. 推入事件陣列
       events.push(createEventObj(
         dateObj,
         item.name,
-        `${item.name}`,
+        `${item.name}${timeLabel}`, // 自動加上動態時間標籤
         '#e67e22', // 橘色，與財報綠色區分
         `62${String(index).padStart(3, '0')}`, // 62xxx，與財報 61xxx 不衝突
         'https://www.macromicro.me' + item.link || '' // 連結
