@@ -4127,6 +4127,7 @@ async function generateCustomEventsMacroMacro() {
     // '美國生產者物價',  // PPI
     // '美國消費者信心',
     // '美國申請失業金人數',
+    '美國PCE物價指數',
   ]);
 
   try {
