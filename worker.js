@@ -3879,6 +3879,12 @@ function generateCustomEvents(year) {
     "001"
   ));
   events.push(createEventObj(
+    new Date("2026-08-25"),
+    "UST", "美國財政部長貝森特招開記者會發表對伊朗的新一輪制裁（凌晨2時）",
+    "#3498db",
+    "001"
+  ));
+  events.push(createEventObj(
     new Date("2026-08-28"),
     "Fed",
     "美國聯準會（Fed）主席華許發表央行年會演說（晚間十點）",
