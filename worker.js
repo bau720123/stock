@@ -170,6 +170,10 @@ export default {
 
     if (path === "/generateCustomEventsMacroEarnings") return json(await generateCustomEventsMacroEarnings());
 
+    if (path === "/read-history") return await readHistory(env);
+    if (path === "/write-history") return await handleHistory(request, env);
+    if (path === "/clear-history") return await clearHistory(env);
+
     return json({
       error: "unknown path"
     }, 404);
@@ -4528,6 +4532,60 @@ async function handleCronInner(env, twTime, twHour, twDay, currentYear) {
     summary += `\n失敗明細（最多顯示5筆）：${failDetail}`;
   }
   await writeLogs(env, failed.length > 0 ? 'WARN' : 'CRON', summary);
+}
+
+async function handleHistory(request, env) {
+  try {
+    const snapshot = await request.json();
+
+    // 台灣時間（UTC+8）
+    const now = new Date();
+    const twTime = new Date(now.getTime() + 8 * 60 * 60 * 1000);
+    const time = twTime.toISOString().replace('T', ' ').substring(0, 19);
+    const today = time.substring(0, 10); // YYYY-MM-DD
+
+    // 利用既有的 readHistory 取出最新一筆，若不是「今天」的資料，代表是隔夜的舊資料，先清空
+    const historyRes = await readHistory(env);
+    const { history } = await historyRes.json();
+    if (history.length && history[0].time.substring(0, 10) !== today) {
+      await clearHistory(env);
+    }
+
+    // 讀取現有歷史紀錄（陣列），加入本次快照後寫回
+    const existing = await env.KV.get("history");
+    const list = existing ? JSON.parse(existing) : [];
+
+    list.push({
+      ...snapshot,
+      time
+    });
+
+    // 只保留最新 100 筆，避免 KV 無限增長
+    if (list.length > 100) list.splice(0, list.length - 100);
+
+    await env.KV.put("history", JSON.stringify(list));
+
+    return json({ success: true });
+  } catch (e) {
+    return json({ success: false, error: e.message }, 500);
+  }
+}
+
+async function readHistory(env) {
+  const existing = await env.KV.get("history");
+  const history = existing ? JSON.parse(existing) : [];
+  return json({
+    count: history.length,
+    history: history.reverse()
+  }); // 最新的在前
+}
+
+async function clearHistory(env) {
+  await env.KV.put("history", JSON.stringify([]));
+  return json({
+    success: true,
+    message: "已清除所有 history"
+  });
 }
 
 function getBrentStatus(p) {

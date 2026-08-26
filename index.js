@@ -1007,6 +1007,24 @@ function setCard(id, updown, html, extraClass = '') {
   setTimeout(() => card.classList.add('loaded'), 20);
 }
 
+// 用於彙整「大盤盤勢」快照，供 /history 記錄使用
+window.marketSnapshot = {};
+
+async function saveMarketHistory() {
+  const { isDaySession } = getMarketEmoji();
+  if (!isDaySession) return; // 非台股日盤時段，不記錄
+
+  try {
+    await fetch(WORKER + '/write-history', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(window.marketSnapshot)
+    });
+  } catch (e) {
+    console.error('儲存盤勢歷史失敗：', e);
+  }
+}
+
 async function loadAll() {
   if (localStorage.getItem('tourDone')) {
     $("body").loading({
@@ -1098,6 +1116,10 @@ async function loadAll() {
       id: 'card-finance-calendar',
       fn: loadFinanceCalendar
     },
+    'comprehensive-market': {
+      id: 'card-comprehensive',
+      fn: loadComprehensive
+    },
   };
 
   // 先隱藏所有卡片並重置樣式
@@ -1114,15 +1136,16 @@ async function loadAll() {
     for (const key in config) {
       const target = config[key];
       const el = document.getElementById(target.id);
-      if (el) {
-        el.style.display = 'block'; // 顯示所有卡片
+      if (el && target.id != 'card-comprehensive') {
+        el.style.display = 'block'; // 顯示所有卡片，但不顯示 "綜合市場概況"
+        promises.push(target.fn()); // 加入執行隊列
       }
-      promises.push(target.fn()); // 加入執行隊列
     }
 
     // 並行執行所有抓取函式
     await Promise.allSettled(promises);
 
+    saveMarketHistory(); // 把這次的盤勢快照存到 KV
   } else {
     // 單一顯示
     // 取得目標設定
@@ -1252,6 +1275,7 @@ async function loadTw() {
     if (taifexDay.updown > 0) cls = 'down';
     html += row('現價', taifexDay.price.toFixed(1), 'accent');
     html += row('漲跌', sign + Math.abs(taifexDay.updown).toFixed(0), cls);
+    window.marketSnapshot.taifexDay = Math.abs(taifexDay.updown).toFixed(0);
   } else {
     html += `<div class="error-text">暫時無法取得資料，請於 09:00 之後或是稍後再試</div>`;
   }
@@ -1952,6 +1976,7 @@ async function loadAmerica() {
     html += row('道瓊期貨', formatChange(cnbcPreMarkets.fairValue.dow), changeClass(cnbcPreMarkets.fairValue.dow));
     html += row('標普500期貨', formatChange(cnbcPreMarkets.fairValue.sp), changeClass(cnbcPreMarkets.fairValue.sp));
     html += row('納斯達克100期貨', formatChange(cnbcPreMarkets.fairValue.nasdaq), changeClass(cnbcPreMarkets.fairValue.nasdaq));
+    window.marketSnapshot.nasdaq100Futures = cnbcPreMarkets.fairValue.nasdaq;
     html += row('羅素2000期貨', formatChange(cnbcPreMarkets.fairValue.russell), changeClass(cnbcPreMarkets.fairValue.russell));
   }
 
@@ -2033,6 +2058,7 @@ async function loadAmerica() {
     // html += row('最高價', yahooBtc.high.toFixed(2));
     // html += row('最低價', yahooBtc.low.toFixed(2));
     html += row('價格', yahooBtc.close.toFixed(2), 'accent');
+    window.marketSnapshot.bitcoin = yahooBtc.close.toFixed(2);
     html += row('漲跌', changeNum.toFixed(2), cls);
     // html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
     html += row('更新時間', yahooBtc.updateTime);
@@ -2054,6 +2080,7 @@ async function loadAmerica() {
     // html += row('最高價', yahooFvx.high.toFixed(2));
     // html += row('最低價', yahooFvx.low.toFixed(2));
     html += row('利率', yahooFvx.close.toFixed(2), 'accent');
+    window.marketSnapshot.us5y = yahooFvx.close.toFixed(2);
 
     // 警戒區間判斷
     const fvxRate = yahooFvx.close;
@@ -2083,6 +2110,7 @@ async function loadAmerica() {
     // html += row('最高價', yahooTnx.high.toFixed(2));
     // html += row('最低價', yahooTnx.low.toFixed(2));
     html += row('利率', yahooTnx.close.toFixed(2), 'accent');
+    window.marketSnapshot.us10y = yahooTnx.close.toFixed(2);
 
     // 警戒區間判斷
     const tnxRate = yahooTnx.close;
@@ -2112,6 +2140,7 @@ async function loadAmerica() {
     // html += row('最高價', yahooTxy.high.toFixed(2));
     // html += row('最低價', yahooTxy.low.toFixed(2));
     html += row('利率', yahooTxy.close.toFixed(2), 'accent');
+    window.marketSnapshot.us30y = yahooTxy.close.toFixed(2); // 美國30年期公債殖利率
 
     // 警戒區間判斷
     const txyRate = yahooTxy.close;
@@ -2139,8 +2168,10 @@ async function loadAmerica() {
   if (robinHood.TSM.success && robinHood.TSM.changeText != '') {
     html += row('前次', robinHood.TSM.previousClose, 'accent');
     html += row('今日漲跌', robinHood.TSM.changeText, changeClass(robinHood.TSM.changeText));
+    window.marketSnapshot.tsm = robinHood.TSM.changeText;
     if (robinHood.TSM.tertiaryText) {
       html += row('隔夜漲跌', robinHood.TSM.tertiaryText, changeClass(robinHood.TSM.tertiaryText));
+      window.marketSnapshot.tsm = robinHood.TSM.tertiaryText;
     }
     html += row('更新時間', robinHood.TSM.updated_at);
     html += row('對應台股如下：台積電（2330）');
@@ -2714,6 +2745,7 @@ async function loadAsia() {
     // html += row('最高價', yahooJapan.high.toFixed(2));
     // html += row('最低價', yahooJapan.low.toFixed(2));
     html += row('價格', yahooJapan.close.toFixed(2), 'accent');
+    window.marketSnapshot.nikkei225 = yahooJapan.close.toFixed(2);
     html += row('漲跌', changeNum.toFixed(2), cls);
     // html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
     html += row('更新時間', yahooJapan.updateTime);
@@ -2733,6 +2765,7 @@ async function loadAsia() {
     // html += row('最高價', yahooKorea.high.toFixed(2));
     // html += row('最低價', yahooKorea.low.toFixed(2));
     html += row('價格', yahooKorea.close.toFixed(2), 'accent');
+    window.marketSnapshot.kospi = yahooKorea.close.toFixed(2);
     html += row('漲跌', changeNum.toFixed(2), cls);
     // html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
     html += row('更新時間', yahooKorea.updateTime);
@@ -2774,6 +2807,7 @@ async function loadMaterials() {
     html += row('最高價', sinaBrent.high.toFixed(2));
     html += row('最低價', sinaBrent.low.toFixed(2));
     html += row('價格', sinaBrent.price.toFixed(2), 'accent');
+    window.marketSnapshot.brent = sinaBrent.price.toFixed(2);
     html += row('漲跌', changeNum.toFixed(2), cls);
     // html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
     html += row('情緒評級', sinaBrent.rating);
@@ -3142,6 +3176,7 @@ async function loadSentiment() {
     // html += row('最高價', sinaVixFutures.high.toFixed(2));
     // html += row('最低價', sinaVixFutures.low.toFixed(2));
     html += row('數值', sinaVixFutures.price.toFixed(2), 'accent');
+    window.marketSnapshot.vixFutures = sinaVixFutures.price.toFixed(2);
     html += row('漲跌', changeNum.toFixed(2), cls);
     // html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
     html += row('情緒評級', sinaVixFutures.rating);
@@ -3272,6 +3307,7 @@ async function loadSentiment() {
     html += row('最高價', yahooUtc.high.toFixed(2));
     html += row('最低價', yahooUtc.low.toFixed(2));
     html += row('價格', yahooUtc.close.toFixed(2), 'accent');
+    window.marketSnapshot.usDollarIndex = yahooUtc.close.toFixed(2);
     html += row('漲跌', changeNum.toFixed(2), cls);
     // html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
     html += row('更新時間', yahooUtc.updateTime);
@@ -3309,6 +3345,7 @@ async function loadSentiment() {
     html += row('最高價', yahooUtcTwd.high.toFixed(2));
     html += row('最低價', yahooUtcTwd.low.toFixed(2));
     html += row('價格', yahooUtcTwd.close.toFixed(2), 'accent');
+    window.marketSnapshot.usdTwd = yahooUtcTwd.close.toFixed(2);
     html += row('漲跌', changeNum.toFixed(2), cls);
     // html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
     html += row('更新時間', yahooUtcTwd.updateTime);
@@ -6654,6 +6691,254 @@ function gotoCalendarDetail(link = '') {
   } else {
     // 
   }
+}
+
+// history 快照的欄位對照（表格與圖表共用）
+const COMPREHENSIVE_FIELDS = [
+  { key: 'taifexDay', label: '台指期漲跌', color: '#5a9eff' },
+  { key: 'nasdaq100Futures', label: '那斯達克100期貨漲跌', color: '#ff9f43' },
+  { key: 'tsm', label: '台積電ADR漲跌', color: '#ff9f43' },
+  { key: 'bitcoin', label: '比特幣', color: '#f7b731' },
+  { key: 'nikkei225', label: '日經225', color: '#ff4d6a' },
+  { key: 'kospi', label: '韓國綜合指數', color: '#a55eea' },
+  { key: 'brent', label: '布蘭特原油', color: '#26de81' },
+  { key: 'vixFutures', label: 'VIX恐慌指數期貨', color: '#fc5c65' },
+  { key: 'usDollarIndex', label: '美元指數', color: '#45aaf2' },
+  { key: 'usdTwd', label: '美金兌台幣', color: '#2bcbba' },
+  { key: 'us5y', label: '美5年期公債殖利率', color: '#778ca3' },
+  { key: 'us10y', label: '美10年期公債殖利率', color: '#a5b1c2' },
+  { key: 'us30y', label: '美30年期公債殖利率', color: '#d1d8e0' },
+];
+
+// 綜合市場概況
+async function loadComprehensive() {
+  const [Comprehensive] = await Promise.all([
+    fetch(WORKER + '/read-history').then(r => r.json()), // 大盤盤勢歷史快照
+  ]);
+
+  let html = `<div class="card-title">綜合市場概況</div>`;
+
+  // 大盤盤勢趨勢
+  html += `
+  <span class="group-header"><span class="group-header-title" id="warning-comprehensive">大盤指數趨勢漲跌</span>
+  <button class="alert-settings-btn" onclick="showInfo('彙整台股期貨、美股期貨、亞股、原物料、市場情緒等 12 項指標，每次刷新「全類別顯示」時記錄一筆快照，用以觀察短期盤勢是緩步向上還是向下。')" title="內容說明">
+    💡
+  </button>&nbsp;
+  <button class="alert-settings-btn " onclick="
+    const ob = document.getElementById('comprehensive');
+    const btn = this;
+    if (ob.style.display === 'none') {
+      ob.style.display = 'block';
+      btn.textContent = '－';
+    } else {
+      ob.style.display = 'none';
+      btn.textContent = '＋';
+    }
+    ">
+    ＋
+  </button></span>`;
+
+  html += `<div id="comprehensive" style="display:none;">
+  ${renderComprehensive(Comprehensive)}
+  </div>`;
+
+  html += `<div class="row">
+  ${renderChartComprehensive(Comprehensive)}
+  </div>`;
+
+  setCard('card-comprehensive', 0, html, card_type === 'comprehensive-market' ? 'card-wide' : '');
+
+  ChartComprehensive();
+}
+
+function renderComprehensive(data) {
+  if (!data || !data.history || !data.history.length) return '<p>無盤勢歷史資料</p>';
+
+  const headerCells = COMPREHENSIVE_FIELDS.map(f => `
+    <th style="position:sticky;top:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">${f.label}</th>`).join('');
+
+  const headerRow = `
+  <tr>
+    <th style="position:sticky;left:0;top:0;z-index:3;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);">時間</th>
+    ${headerCells}
+  </tr>`;
+
+  const bodyRows = data.history.map(d => `
+  <tr style="border-bottom:1px solid var(--border);">
+    <td style="position:sticky;left:0;z-index:1;background:#1a2332;padding:6px 10px;white-space:nowrap;text-align:center;font-size:12px;">${d.time}</td>
+    ${COMPREHENSIVE_FIELDS.map(f => `<td style="padding:6px 10px;text-align:center;font-size:12px;">${d[f.key] ?? '-'}</td>`).join('')}
+  </tr>`).join('');
+
+  return `
+    <div style="overflow-x:auto;overflow-y:auto;max-height:180px;">
+      <table style="border-collapse:collapse;font-family:var(--mono);width:100%;">
+      <thead>${headerRow}</thead>
+      <tbody>${bodyRows}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+function renderChartComprehensive(data) {
+  if (!data || !data.history || !data.history.length) return '<p>無盤勢趨勢圖表資料</p>';
+
+  // 圖表要正序（舊→新），跟表格的「最新在前」相反
+  const sorted = [...data.history].sort((a, b) => a.time.localeCompare(b.time));
+
+  // 把資料暫存到 window，等 DOM 就緒後取用
+  window._tw_comprehensive_chartPending = window._tw_comprehensive_chartPending || {};
+  window._tw_comprehensive_chartPending[0] = sorted;
+
+  // 回傳容器，圖表由 setTimeout 在 DOM 就緒後掛入
+  return `<div id="tw_comprehensive_chart" style="height:320px;"></div>`;
+}
+
+function ChartComprehensive() {
+  const pending = window._tw_comprehensive_chartPending || {};
+  const el = document.getElementById('tw_comprehensive_chart');
+  if (!el || !pending[0]) return;
+  const sorted = pending[0];
+
+  const dates = sorted.map(d => d.time);
+
+  // 各指標數值差異很大（例如台指期近千 vs 殖利率個位數），
+  // 預設只勾選台指期、那斯達克100期貨，其餘可自行點圖例切換比較
+  // const defaultVisible = ['taifexDay', 'nasdaq100Futures'];
+  const defaultVisible = [];
+  const legendSelected = {};
+  COMPREHENSIVE_FIELDS.forEach(f => {
+    legendSelected[f.label] = defaultVisible.includes(f.key);
+  });
+  
+
+  const series = COMPREHENSIVE_FIELDS.map(f => ({
+    name: f.label,
+    type: 'line',
+    data: sorted.map(d => d[f.key] != null ? parseFloat(d[f.key]) : null),
+    smooth: true,
+    symbol: 'none',
+    connectNulls: true,
+    lineStyle: {
+      color: f.color,
+      width: 1.5
+    },
+    itemStyle: {
+      color: f.color
+    },
+  }));
+
+  el.style.width = '100%';
+  const chart = echarts.init(el, null, {
+    height: 320
+  });
+  chart.setOption({
+    backgroundColor: '#0a0e14',
+    tooltip: {
+      trigger: 'axis',
+      backgroundColor: '#1e2736',
+      borderColor: '#3a4a5c',
+      textStyle: {
+        color: '#c8d8e8',
+        fontSize: 11
+      },
+    },
+    legend: {
+      type: 'scroll',
+      top: 0,
+      textStyle: {
+        color: '#8fa3b3',
+        fontSize: 10
+      },
+      selected: legendSelected
+    },
+    grid: {
+      left: 60,
+      right: 10,
+      top: 40,
+      bottom: 60
+    },
+    xAxis: {
+      type: 'category',
+      data: dates,
+      axisLine: {
+        lineStyle: {
+          color: '#1e2736'
+        }
+      },
+      axisLabel: {
+        color: '#5a7080',
+        fontSize: 10,
+        rotate: 30
+      },
+      splitLine: {
+        show: false
+      },
+    },
+    yAxis: {
+      type: 'value',
+      scale: true,
+      axisLine: {
+        lineStyle: {
+          color: '#1e2736'
+        }
+      },
+      axisLabel: {
+        color: '#5a7080',
+        fontSize: 10
+      },
+      splitLine: {
+        lineStyle: {
+          color: '#1e2736'
+        }
+      },
+    },
+    dataZoom: [
+      {
+        type: 'inside',
+        start: 0,
+        end: 100
+      },
+      {
+        type: 'slider',
+        bottom: 0,
+        height: 20,
+        borderColor: '#3a4a5c',
+        backgroundColor: '#0a0e14',
+        fillerColor: '#1e273680',
+        handleStyle: {
+          color: '#5a9eff'
+        },
+        textStyle: {
+          color: '#5a7080',
+          fontSize: 10
+        }
+      },
+    ],
+    series,
+  });
+  
+  // 圖例改為單選（radio）行為：點選某項目時，只顯示該項目，其餘自動取消
+  chart.on('legendselectchanged', function (params) {
+    const clickedName = params.name;
+    const isNowSelected = params.selected[clickedName];
+
+    const newSelected = {};
+    COMPREHENSIVE_FIELDS.forEach(f => {
+      newSelected[f.label] = false;
+    });
+    if (isNowSelected) {
+      newSelected[clickedName] = true;
+    }
+
+    chart.setOption({
+      legend: {
+        selected: newSelected
+      }
+    });
+  });
+
+  new ResizeObserver(() => chart.resize()).observe(el);
+  window._tw_comprehensive_chartPending = {};
 }
 
 const {
