@@ -6782,8 +6782,12 @@ function renderComprehensive(data) {
 function renderChartComprehensive(data) {
   if (!data || !data.history || !data.history.length) return '<p>無盤勢趨勢圖表資料</p>';
 
+  // 資料量太大時圖表沒有適合的顯示範圍，先只取「最新 10 筆」
+  const CHART_RANGE = 10; // 之後要改成顯示全部，把這裡改成 null 或直接註解掉下面那行
+  const recent = CHART_RANGE ? data.history.slice(0, CHART_RANGE) : data.history;
+
   // 圖表要正序（舊→新），跟表格的「最新在前」相反
-  const sorted = [...data.history].sort((a, b) => a.time.localeCompare(b.time));
+  const sorted = [...recent].sort((a, b) => a.time.localeCompare(b.time));
 
   // 把資料暫存到 window，等 DOM 就緒後取用
   window._tw_comprehensive_chartPending = window._tw_comprehensive_chartPending || {};
