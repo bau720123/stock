@@ -172,6 +172,7 @@ export default {
 
     if (path === "/read-history") return await readHistory(env);
     if (path === "/write-history") return await handleHistory(request, env);
+    if (path === "/write-history-background") return await handleHistoryBackground(env);
     if (path === "/clear-history") return await clearHistory(env);
 
     return json({
@@ -179,7 +180,12 @@ export default {
     }, 404);
   },
   async scheduled(event, env, ctx) {
-    ctx.waitUntil(handleCron(env));
+    if (event.cron === "0 */1 * * *") {
+      ctx.waitUntil(handleCron(env)); // 原本的每小時 Web Push 摘要
+    }
+    if (event.cron === "*/5 0-6 * * 1-5") {
+      ctx.waitUntil(handleHistoryBackground(env)); // 新增：日盤期間每 5 分鐘記錄一次盤勢
+    }
   }
 };
 
@@ -4588,6 +4594,101 @@ async function clearHistory(env) {
     success: true,
     message: "已清除所有 history"
   });
+}
+
+// 綜合市場概況快照（伺服器端版本，專供 handleHistoryBackground 使用）
+async function buildComprehensiveSnapshot() {
+  // 第一批（Cloudflare 免費方案並發限制 ≤6，比照 handleCronInner 的分批做法）
+  const [taifexDay, cnbcPreMarkets, yahooBtc/*, yahooFvx, yahooTnx, yahooTyx*/] = await Promise.all([
+    fetchTaifex(2, "臺股期貨").then(r => r.json()).catch(() => ({ success: false })), // 台指期
+    fetchCnbc().then(r => r.json()).catch(() => ({ success: false })), // 美股盤前電子盤
+    fetchYahooFinance('BTC-USD').then(r => r.json()).catch(() => ({ success: false })), // 比特幣
+    /*fetchYahooFinance('^FVX').then(r => r.json()).catch(() => ({ success: false })), // 美5年期公債殖利率
+    fetchYahooFinance('^TNX').then(r => r.json()).catch(() => ({ success: false })), // 美10年期公債殖利率
+    fetchYahooFinance('^TYX').then(r => r.json()).catch(() => ({ success: false })), // 美30年期公債殖利率*/
+  ]);
+
+  // 第二批
+  const [yahooJapan, yahooKorea, robinHood, sinaBrent, sinaVixFutures] = await Promise.all([
+    fetchYahooFinance('^N225').then(r => r.json()).catch(() => ({ success: false })), // 日經225
+    fetchYahooFinance('^KS11').then(r => r.json()).catch(() => ({ success: false })), // 韓國綜合指數
+    fetchRobinHood().then(r => r.json()).catch(() => ({})), // 台積電ADR
+    fetchSina('hf_OIL').then(r => r.json()).catch(() => ({ success: false })), // 布蘭特原油
+    fetchSina('hf_VX').then(r => r.json()).catch(() => ({ success: false })), // VIX恐慌指數期貨
+  ]);
+
+  // 第三批
+  const [yahooUtc, yahooUtcTwd] = await Promise.all([
+    fetchYahooFinance('DX-Y.NYB').then(r => r.json()).catch(() => ({ success: false })), // 美元指數
+    fetchYahooFinance('USDTWD=X').then(r => r.json()).catch(() => ({ success: false })), // 美金兌台幣
+  ]);
+
+  const snapshot = {};
+  if (taifexDay.success) snapshot.taifexDay = Math.abs(taifexDay.updown).toFixed(0);
+  if (cnbcPreMarkets.success) snapshot.nasdaq100Futures = cnbcPreMarkets.fairValue.nasdaq;
+  if (robinHood?.TSM?.success) snapshot.tsm = robinHood.TSM.bid_price;
+  if (yahooBtc.success) snapshot.bitcoin = yahooBtc.close.toFixed(2);
+  if (yahooJapan.success) snapshot.nikkei225 = yahooJapan.close.toFixed(2);
+  if (yahooKorea.success) snapshot.kospi = yahooKorea.close.toFixed(2);
+  if (sinaBrent.success) snapshot.brent = sinaBrent.price.toFixed(2);
+  if (sinaVixFutures.success) snapshot.vixFutures = sinaVixFutures.price.toFixed(2);
+  if (yahooUtc.success) snapshot.usDollarIndex = yahooUtc.close.toFixed(2);
+  if (yahooUtcTwd.success) snapshot.usdTwd = yahooUtcTwd.close.toFixed(2);
+  /*if (yahooFvx.success) snapshot.us5y = yahooFvx.close.toFixed(2);
+  if (yahooTnx.success) snapshot.us10y = yahooTnx.close.toFixed(2);
+  if (yahooTyx.success) snapshot.us30y = yahooTyx.close.toFixed(2);*/
+
+  return snapshot;
+}
+
+// 判斷是否為台股日盤時段（08:30~13:45，週一至週五），比照前端 getMarketEmoji 的 isDaySession
+function isTaiwanDaySession() {
+  const now = new Date();
+  const twTime = new Date(now.getTime() + 8 * 60 * 60 * 1000);
+  const day = twTime.getUTCDay();
+  const hour = twTime.getUTCHours();
+  const minute = twTime.getUTCMinutes();
+  const hm = hour * 100 + minute;
+  const isWeekday = day >= 1 && day <= 5;
+  return isWeekday && hm >= 830 && hm <= 1345;
+}
+
+// 專供 cron 使用：worker 主動抓取 12 項指標並寫入 history，跟 handleHistory 完全獨立
+async function handleHistoryBackground(env) {
+  if (!isTaiwanDaySession()) return; // 非台股日盤時段，不執行
+
+  try {
+    const snapshot = await buildComprehensiveSnapshot();
+
+    // 台灣時間（UTC+8）
+    const now = new Date();
+    const twTime = new Date(now.getTime() + 8 * 60 * 60 * 1000);
+    const time = twTime.toISOString().replace('T', ' ').substring(0, 19);
+    const today = time.substring(0, 10); // YYYY-MM-DD
+
+    // 利用既有的 readHistory 取出最新一筆，若不是「今天」的資料，代表是隔夜的舊資料，先清空
+    const historyRes = await readHistory(env);
+    const { history } = await historyRes.json();
+    if (history.length && history[0].time.substring(0, 10) !== today) {
+      await clearHistory(env);
+    }
+
+    // 讀取現有歷史紀錄（陣列），加入本次快照後寫回
+    const existing = await env.KV.get("history");
+    const list = existing ? JSON.parse(existing) : [];
+
+    list.push({
+      ...snapshot,
+      time
+    });
+
+    // 只保留最新 100 筆，避免 KV 無限增長
+    if (list.length > 100) list.splice(0, list.length - 100);
+
+    await env.KV.put("history", JSON.stringify(list));
+  } catch (e) {
+    await writeLogs(env, 'ERROR', `handleHistoryBackground 發生未預期錯誤：${e.message}\n${e.stack || ''}`);
+  }
 }
 
 function getBrentStatus(p) {

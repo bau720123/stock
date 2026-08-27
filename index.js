@@ -949,7 +949,7 @@ if ('serviceWorker' in navigator) {
       .catch(async err => {
         const replyMessage = '註冊失敗：' + err;
         // showInfo(replyMessage, '發生錯誤', 'error');
-        await writeLogs('ERROR', replyMessage);
+        // await writeLogs('ERROR', replyMessage);
       });
   });
 }
@@ -1145,7 +1145,7 @@ async function loadAll() {
     // 並行執行所有抓取函式
     await Promise.allSettled(promises);
 
-    saveMarketHistory(); // 把這次的盤勢快照存到 KV
+    // saveMarketHistory(); // 把這次的盤勢快照存到 KV
   } else {
     // 單一顯示
     // 取得目標設定
@@ -6704,9 +6704,9 @@ const COMPREHENSIVE_FIELDS = [
   { key: 'vixFutures', label: 'VIX恐慌指數期貨', color: '#fc5c65' },
   { key: 'usDollarIndex', label: '美元指數', color: '#45aaf2' },
   { key: 'usdTwd', label: '美金兌台幣', color: '#2bcbba' },
-  { key: 'us5y', label: '美5年期公債殖利率', color: '#778ca3' },
+  /*{ key: 'us5y', label: '美5年期公債殖利率', color: '#778ca3' },
   { key: 'us10y', label: '美10年期公債殖利率', color: '#a5b1c2' },
-  { key: 'us30y', label: '美30年期公債殖利率', color: '#d1d8e0' },
+  { key: 'us30y', label: '美30年期公債殖利率', color: '#d1d8e0' },*/
 ];
 
 // 綜合市場概況
@@ -6937,7 +6937,7 @@ const {
 } = getMarketEmoji();
 var REFRESH_INTERVAL = 999; // 秒，改這個就通吃
 if (isDaySession) {
-  REFRESH_INTERVAL = 60; // 台股交易時間更新頻率較高
+  REFRESH_INTERVAL = 999; // 台股交易時間更新頻率較高
 }
 let _countdownTimer = null;
 

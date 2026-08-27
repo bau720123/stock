@@ -7,7 +7,7 @@ binding = "KV"
 id = "e733a1b2b10c4c44b9aa862b241ee83f"
 
 [triggers]
-crons = ["0 */1 * * *"]
+crons = ["0 */1 * * *", "*/5 0-6 * * 1-5"]
 
 [vars]
 VAPID_SUBJECT = "mailto:bau720123@gmail.com"
