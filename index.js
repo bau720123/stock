@@ -2167,11 +2167,10 @@ async function loadAmerica() {
   html += groupHeader('【台積電 ADR】', 'TSM', '台積電 ADR（American Depositary Receipts，美國存託憑證）是台積電在美國發行的股票憑證（代號：TSM），掛牌於紐約證券交易所（NYSE）。它讓美國投資人能用美元直接買賣台積電，代表國際資金對台積電的看法，且 1 單位 ADR 等於 5 股台積電台股（2330）普通股。');
   if (robinHood.TSM.success && robinHood.TSM.changeText != '') {
     html += row('前次', robinHood.TSM.previousClose, 'accent');
+    window.marketSnapshot.tsm = robinHood.TSM.bid_price;
     html += row('今日漲跌', robinHood.TSM.changeText, changeClass(robinHood.TSM.changeText));
-    window.marketSnapshot.tsm = robinHood.TSM.changeText;
     if (robinHood.TSM.tertiaryText) {
       html += row('隔夜漲跌', robinHood.TSM.tertiaryText, changeClass(robinHood.TSM.tertiaryText));
-      window.marketSnapshot.tsm = robinHood.TSM.tertiaryText;
     }
     html += row('更新時間', robinHood.TSM.updated_at);
     html += row('對應台股如下：台積電（2330）');
@@ -6697,9 +6696,9 @@ function gotoCalendarDetail(link = '') {
 const COMPREHENSIVE_FIELDS = [
   { key: 'taifexDay', label: '台指期漲跌', color: '#5a9eff' },
   { key: 'nasdaq100Futures', label: '那斯達克100期貨漲跌', color: '#ff9f43' },
-  { key: 'tsm', label: '台積電ADR漲跌', color: '#ff9f43' },
+  { key: 'tsm', label: '台積電ADR', color: '#ff9f43' },
   { key: 'bitcoin', label: '比特幣', color: '#f7b731' },
-  { key: 'nikkei225', label: '日經225', color: '#ff4d6a' },
+  { key: 'nikkei225', label: '日經225指數', color: '#ff4d6a' },
   { key: 'kospi', label: '韓國綜合指數', color: '#a55eea' },
   { key: 'brent', label: '布蘭特原油', color: '#26de81' },
   { key: 'vixFutures', label: 'VIX恐慌指數期貨', color: '#fc5c65' },
@@ -6724,21 +6723,9 @@ async function loadComprehensive() {
   <button class="alert-settings-btn" onclick="showInfo('彙整台股期貨、美股期貨、亞股、原物料、市場情緒等 12 項指標，每次刷新「全類別顯示」時記錄一筆快照，用以觀察短期盤勢是緩步向上還是向下。')" title="內容說明">
     💡
   </button>&nbsp;
-  <button class="alert-settings-btn " onclick="
-    const ob = document.getElementById('comprehensive');
-    const btn = this;
-    if (ob.style.display === 'none') {
-      ob.style.display = 'block';
-      btn.textContent = '－';
-    } else {
-      ob.style.display = 'none';
-      btn.textContent = '＋';
-    }
-    ">
-    ＋
-  </button></span>`;
+  </span>`;
 
-  html += `<div id="comprehensive" style="display:none;">
+  html += `<div id="comprehensive">
   ${renderComprehensive(Comprehensive)}
   </div>`;
 
@@ -6808,7 +6795,7 @@ function ChartComprehensive() {
   // 各指標數值差異很大（例如台指期近千 vs 殖利率個位數），
   // 預設只勾選台指期、那斯達克100期貨，其餘可自行點圖例切換比較
   // const defaultVisible = ['taifexDay', 'nasdaq100Futures'];
-  const defaultVisible = [];
+  const defaultVisible = ['tsm'];
   const legendSelected = {};
   COMPREHENSIVE_FIELDS.forEach(f => {
     legendSelected[f.label] = defaultVisible.includes(f.key);

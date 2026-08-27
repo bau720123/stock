@@ -695,6 +695,7 @@ async function fetchRobinHoodOne(instrumentId) {
   const tertiaryText = display?.tertiary_value?.main?.value || "";
 
   const quote = data?.chart_section?.quote;
+  const bid_price = parseFloat(quote?.bid_price || "").toString();
   const previousClose = parseFloat(quote?.previous_close || "").toString();
   const previousCloseDate = quote?.previous_close_date || "";
   const updated_at = quote?.updated_at ?
@@ -710,11 +711,12 @@ async function fetchRobinHoodOne(instrumentId) {
     }).replace(/\//g, '-') :
     '-';
 
-  const success = changeText !== "" || tertiaryText !== "" || previousClose !== "" || previousCloseDate !== "" || updated_at !== "";
+  const success = changeText !== "" || tertiaryText !== "" || bid_price !== "" || previousClose !== "" || previousCloseDate !== "" || updated_at !== "";
   return {
     success,
     changeText,
     tertiaryText,
+    bid_price,
     previousClose,
     previousCloseDate,
     updated_at
