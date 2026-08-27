@@ -4653,9 +4653,11 @@ function isTaiwanDaySession() {
   return isWeekday && hm >= 830 && hm <= 1345;
 }
 
-// 專供 cron 使用：worker 主動抓取 12 項指標並寫入 history，跟 handleHistory 完全獨立
+// 專供 /write-history-background 及 cron 使用：worker 主動抓取 12 項指標並寫入 history
 async function handleHistoryBackground(env) {
-  if (!isTaiwanDaySession()) return; // 非台股日盤時段，不執行
+  if (!isTaiwanDaySession()) {
+    return json({ success: true, skipped: true, reason: '非台股日盤時段' }); // 非台股日盤時段，不執行
+  }
 
   try {
     const snapshot = await buildComprehensiveSnapshot();
@@ -4686,8 +4688,11 @@ async function handleHistoryBackground(env) {
     if (list.length > 100) list.splice(0, list.length - 100);
 
     await env.KV.put("history", JSON.stringify(list));
+
+    return json({ success: true });
   } catch (e) {
     await writeLogs(env, 'ERROR', `handleHistoryBackground 發生未預期錯誤：${e.message}\n${e.stack || ''}`);
+    return json({ success: false, error: e.message }, 500);
   }
 }
 

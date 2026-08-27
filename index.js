@@ -1011,7 +1011,7 @@ function setCard(id, updown, html, extraClass = '') {
 window.marketSnapshot = {};
 
 async function saveMarketHistory() {
-  const { isDaySession } = getMarketEmoji();
+  /*const { isDaySession } = getMarketEmoji();
   if (!isDaySession) return; // 非台股日盤時段，不記錄
 
   try {
@@ -1020,6 +1020,14 @@ async function saveMarketHistory() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(window.marketSnapshot)
     });
+  } catch (e) {
+    console.error('儲存盤勢歷史失敗：', e);
+  }*/
+  try {
+    const res = await fetch(WORKER + '/write-history-background').then(r => r.json());
+    if (res.skipped) {
+      console.log('未寫入盤勢歷史：', res.reason);
+    }
   } catch (e) {
     console.error('儲存盤勢歷史失敗：', e);
   }
@@ -1145,7 +1153,7 @@ async function loadAll() {
     // 並行執行所有抓取函式
     await Promise.allSettled(promises);
 
-    // saveMarketHistory(); // 把這次的盤勢快照存到 KV
+    saveMarketHistory(); // 把這次的盤勢快照存到 KV
   } else {
     // 單一顯示
     // 取得目標設定
@@ -6936,8 +6944,8 @@ const {
   isDaySession
 } = getMarketEmoji();
 var REFRESH_INTERVAL = 999; // 秒，改這個就通吃
-if (isDaySession) {
-  REFRESH_INTERVAL = 999; // 台股交易時間更新頻率較高
+if (isDaySession && card_type == 'comprehensive-market') {
+  REFRESH_INTERVAL = 60; // 台股交易時間更新頻率較高
 }
 let _countdownTimer = null;
 
