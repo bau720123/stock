@@ -1023,14 +1023,14 @@ async function saveMarketHistory() {
   } catch (e) {
     console.error('儲存盤勢歷史失敗：', e);
   }*/
-  try {
+  /*try {
     const res = await fetch(WORKER + '/write-history-background').then(r => r.json());
     if (res.skipped) {
       console.log('未寫入盤勢歷史：', res.reason);
     }
   } catch (e) {
     console.error('儲存盤勢歷史失敗：', e);
-  }
+  }*/
 }
 
 async function loadAll() {
