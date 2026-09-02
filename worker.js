@@ -4643,7 +4643,11 @@ async function buildComprehensiveSnapshot() {
 
   if (robinHood?.TSM?.success) {
     snapshot.tsm = robinHood.TSM.primaryValue;
-    snapshot.tsm_updown = robinHood.TSM.tertiaryText;
+    if (robinHood.TSM.tertiaryText) {
+      snapshot.tsm_updown = robinHood.TSM.tertiaryText;
+    } else {
+      snapshot.tsm_updown = robinHood.TSM.changeText;
+    }
   }
 
   if (yahooBtc.success) {
