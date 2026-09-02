@@ -6702,8 +6702,8 @@ function gotoCalendarDetail(link = '') {
 
 // history 快照的欄位對照（表格與圖表共用）
 const COMPREHENSIVE_FIELDS = [
-  { key: 'taifexDay', label: '台指期漲跌', color: '#5a9eff' },
-  { key: 'nasdaq100Futures', label: '那斯達克100期貨漲跌', color: '#ff9f43' },
+  { key: 'taifexDay', label: '台指期', color: '#5a9eff' },
+  { key: 'nasdaq100Futures', label: '那斯達克100期貨', color: '#ff9f43' },
   { key: 'tsm', label: '台積電ADR', color: '#ff9f43' },
   { key: 'bitcoin', label: '比特幣', color: '#f7b731' },
   { key: 'nikkei225', label: '日經225指數', color: '#ff4d6a' },
@@ -6728,7 +6728,7 @@ async function loadComprehensive() {
   // 大盤盤勢趨勢
   html += `
   <span class="group-header"><span class="group-header-title" id="warning-comprehensive">大盤指數趨勢漲跌</span>
-  <button class="alert-settings-btn" onclick="showInfo('彙整台股期貨、美股期貨、亞股、原物料、市場情緒等 12 項指標，每次刷新「全類別顯示」時記錄一筆快照，用以觀察短期盤勢是緩步向上還是向下。')" title="內容說明">
+  <button class="alert-settings-btn" onclick="showInfo('彙整台股期貨、美股期貨、亞股、原物料、市場情緒等指標，每分鐘記錄一筆快照，用以觀察短期盤勢是緩步向上還是向下。')" title="內容說明">
     💡
   </button>&nbsp;
   </span>`;

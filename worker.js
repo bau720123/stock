@@ -615,7 +615,10 @@ async function fetchCnbc() {
       updateTime: "未知"
     };
     for (const q of fvQuotes) {
-      if (q.symbol in fv) fv[q.symbol] = q.fmt_change || 0;
+      if (q.symbol in fv) {
+          fv[q.symbol] = q.fmt_change || 0;
+          fv[q.symbol + "_last"] = q.last || 0;
+      }
       if (fv.updateTime === "未知" && q.last_timedate) fv.updateTime = q.last_timedate;
     }
 
@@ -669,6 +672,7 @@ async function fetchCnbc() {
         dow: fv.DJ,
         sp: fv.SP,
         nasdaq: fv.ND,
+        nasdaq_last: fv.ND_last,
         russell: fv.TF,
         updateTime: fv.updateTime,
       },
@@ -697,6 +701,7 @@ async function fetchRobinHoodOne(instrumentId) {
   const data = await res.json();
 
   const display = data?.chart_section?.default_display;
+  const primaryValue = (display?.primary_value?.value || "").replace('$', '');
   const changeText = display?.secondary_value?.main?.value || "";
   const tertiaryText = display?.tertiary_value?.main?.value || "";
 
@@ -717,9 +722,10 @@ async function fetchRobinHoodOne(instrumentId) {
     }).replace(/\//g, '-') :
     '-';
 
-  const success = changeText !== "" || tertiaryText !== "" || bid_price !== "" || previousClose !== "" || previousCloseDate !== "" || updated_at !== "";
+  const success = primaryValue !== "" || changeText !== "" || tertiaryText !== "" || bid_price !== "" || previousClose !== "" || previousCloseDate !== "" || updated_at !== "";
   return {
     success,
+    primaryValue,
     changeText,
     tertiaryText,
     bid_price,
@@ -4624,9 +4630,9 @@ async function buildComprehensiveSnapshot() {
   ]);
 
   const snapshot = {};
-  if (taifexDay.success) snapshot.taifexDay = Math.abs(taifexDay.updown).toFixed(0);
-  if (cnbcPreMarkets.success) snapshot.nasdaq100Futures = cnbcPreMarkets.fairValue.nasdaq;
-  if (robinHood?.TSM?.success) snapshot.tsm = robinHood.TSM.bid_price;
+  if (taifexDay.success) snapshot.taifexDay = taifexDay.price;
+  if (cnbcPreMarkets.success) snapshot.nasdaq100Futures = cnbcPreMarkets.fairValue.nasdaq_last;
+  if (robinHood?.TSM?.success) snapshot.tsm = robinHood.TSM.primaryValue;
   if (yahooBtc.success) snapshot.bitcoin = yahooBtc.close.toFixed(2);
   if (yahooJapan.success) snapshot.nikkei225 = yahooJapan.close.toFixed(2);
   if (yahooKorea.success) snapshot.kospi = yahooKorea.close.toFixed(2);
