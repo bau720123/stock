@@ -6702,16 +6702,16 @@ function gotoCalendarDetail(link = '') {
 
 // history 快照的欄位對照（表格與圖表共用）
 const COMPREHENSIVE_FIELDS = [
-  { key: 'taifexDay', label: '台指期', color: '#5a9eff' },
-  { key: 'nasdaq100Futures', label: '那斯達克100期貨', color: '#ff9f43' },
-  { key: 'tsm', label: '台積電ADR', color: '#ff9f43' },
-  { key: 'bitcoin', label: '比特幣', color: '#f7b731' },
-  { key: 'nikkei225', label: '日經225指數', color: '#ff4d6a' },
-  { key: 'kospi', label: '韓國綜合指數', color: '#a55eea' },
-  { key: 'brent', label: '布蘭特原油', color: '#26de81' },
-  { key: 'vixFutures', label: 'VIX恐慌指數期貨', color: '#fc5c65' },
-  { key: 'usDollarIndex', label: '美元指數', color: '#45aaf2' },
-  { key: 'usdTwd', label: '美金兌台幣', color: '#2bcbba' },
+  { key: 'taifexDay', key_updown: 'taifexDay_updown', label: '台指期', color: '#5a9eff' },
+  { key: 'nasdaq100Futures', key_updown: 'nasdaq100Futures_updown', label: '那斯達克100期貨', color: '#ff9f43' },
+  { key: 'tsm', key_updown: 'tsm_updown', label: '台積電ADR', color: '#ff9f43' },
+  { key: 'bitcoin', key_updown: 'bitcoin_updown', label: '比特幣', color: '#f7b731' },
+  { key: 'nikkei225', key_updown: 'nikkei225_updown', label: '日經225指數', color: '#ff4d6a' },
+  { key: 'kospi', key_updown: 'kospi_updown', label: '韓國綜合指數', color: '#a55eea' },
+  { key: 'brent', key_updown: 'brent_updown', label: '布蘭特原油', color: '#26de81' },
+  { key: 'vixFutures', key_updown: 'vixFutures_updown', label: 'VIX恐慌指數期貨', color: '#fc5c65' },
+  { key: 'usDollarIndex', key_updown: 'usDollarIndex_updown', label: '美元指數', color: '#45aaf2' },
+  { key: 'usdTwd', key_updown: 'usdTwd_updown', label: '美金兌台幣', color: '#2bcbba' },
   /*{ key: 'us5y', label: '美5年期公債殖利率', color: '#778ca3' },
   { key: 'us10y', label: '美10年期公債殖利率', color: '#a5b1c2' },
   { key: 'us30y', label: '美30年期公債殖利率', color: '#d1d8e0' },*/
@@ -6761,7 +6761,7 @@ function renderComprehensive(data) {
   const bodyRows = data.history.map(d => `
   <tr style="border-bottom:1px solid var(--border);">
     <td style="position:sticky;left:0;z-index:1;background:#1a2332;padding:6px 10px;white-space:nowrap;text-align:center;font-size:12px;">${d.time}</td>
-    ${COMPREHENSIVE_FIELDS.map(f => `<td style="padding:6px 10px;text-align:center;font-size:12px;">${d[f.key] ?? '-'}</td>`).join('')}
+    ${COMPREHENSIVE_FIELDS.map(f => `<td style="padding:6px 10px;text-align:center;font-size:12px;">${d[f.key] ?? '-'}（${d[f.key_updown] ?? '-'}）</td>`).join('')}
   </tr>`).join('');
 
   return `

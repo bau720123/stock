@@ -4630,16 +4630,57 @@ async function buildComprehensiveSnapshot() {
   ]);
 
   const snapshot = {};
-  if (taifexDay.success) snapshot.taifexDay = taifexDay.price;
-  if (cnbcPreMarkets.success) snapshot.nasdaq100Futures = cnbcPreMarkets.fairValue.nasdaq_last;
-  if (robinHood?.TSM?.success) snapshot.tsm = robinHood.TSM.primaryValue;
-  if (yahooBtc.success) snapshot.bitcoin = yahooBtc.close.toFixed(2);
-  if (yahooJapan.success) snapshot.nikkei225 = yahooJapan.close.toFixed(2);
-  if (yahooKorea.success) snapshot.kospi = yahooKorea.close.toFixed(2);
-  if (sinaBrent.success) snapshot.brent = sinaBrent.price.toFixed(2);
-  if (sinaVixFutures.success) snapshot.vixFutures = sinaVixFutures.price.toFixed(2);
-  if (yahooUtc.success) snapshot.usDollarIndex = yahooUtc.close.toFixed(2);
-  if (yahooUtcTwd.success) snapshot.usdTwd = yahooUtcTwd.close.toFixed(2);
+
+  if (taifexDay.success) {
+    snapshot.taifexDay = taifexDay.price;
+    snapshot.taifexDay_updown = taifexDay.updown;
+  }
+  
+  if (cnbcPreMarkets.success) {
+    snapshot.nasdaq100Futures = cnbcPreMarkets.fairValue.nasdaq_last;
+    snapshot.nasdaq100Futures_updown = cnbcPreMarkets.fairValue.nasdaq;
+  }
+
+  if (robinHood?.TSM?.success) {
+    snapshot.tsm = robinHood.TSM.primaryValue;
+    snapshot.tsm_updown = robinHood.TSM.tertiaryText;
+  }
+
+  if (yahooBtc.success) {
+    snapshot.bitcoin = yahooBtc.close.toFixed(2);
+    snapshot.bitcoin_updown = (yahooBtc.close - yahooBtc.prev).toFixed(2);
+  }
+
+  if (yahooJapan.success) {
+    snapshot.nikkei225 = yahooJapan.close.toFixed(2);
+    snapshot.nikkei225_updown = (yahooJapan.close - yahooJapan.prev).toFixed(2);
+  }
+
+  if (yahooKorea.success) {
+    snapshot.kospi = yahooKorea.close.toFixed(2);
+    snapshot.kospi_updown = (yahooKorea.close - yahooKorea.prev).toFixed(2);
+  }
+
+  if (sinaBrent.success) {
+    snapshot.brent = sinaBrent.price.toFixed(2);
+    snapshot.brent_updown = (sinaBrent.price - sinaBrent.prev).toFixed(2);
+  }
+
+  if (sinaVixFutures.success) {
+    snapshot.vixFutures = sinaVixFutures.price.toFixed(2);
+    snapshot.vixFutures_updown = (sinaVixFutures.price - sinaVixFutures.prev).toFixed(2);
+  }
+
+  if (yahooUtc.success) {
+    snapshot.usDollarIndex = yahooUtc.close.toFixed(2);
+    snapshot.usDollarIndex_updown = (yahooUtc.close - yahooUtc.prev).toFixed(2);
+  }
+
+  if (yahooUtcTwd.success) {
+    snapshot.usdTwd = yahooUtcTwd.close.toFixed(2);
+    snapshot.usdTwd_updown = (yahooUtcTwd.close - yahooUtcTwd.prev).toFixed(2);
+  }
+
   /*if (yahooFvx.success) snapshot.us5y = yahooFvx.close.toFixed(2);
   if (yahooTnx.success) snapshot.us10y = yahooTnx.close.toFixed(2);
   if (yahooTyx.success) snapshot.us30y = yahooTyx.close.toFixed(2);*/
