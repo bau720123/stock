@@ -104,8 +104,13 @@ fetch("https://histock.tw/stock/module/function.aspx", {
 | `/institutional` | HiStock | 三大法人合計買賣超（日期序列） |
 | `/margin-trading-balance` | 台灣證券交易所 | 全市場融資餘額（億元） |
 | `/news-rss` | Yahoo奇摩/中央社/自由時報/韓聯社 | 關鍵字過濾財經新聞 |
-| `/finance-calendar` | MoneyDJ + MacroMicro + 自訂 | 美股重要事件行事曆 |
+| `/finance-calendar` | MoneyDJ + MacroMicro + 自訂 | 美股與台股重要財經事件行事曆 |
 | `/generateCustomEventsFinnhub/{from}/{to}` | Finnhub | 科技股財報日曆（最多 14 天，路由保留供單獨呼叫） |
+| `/generateCustomEventsMacroEarnings` | MacroMicro | 科技股財報靜態 JSON 事件（除錯用，可單獨呼叫查看解析結果） |
+| `/read-history` | — | 讀取「綜合市場概況」盤勢快照歷史（最新在前） |
+| `/write-history` | — | 前端 POST 寫入盤勢快照（目前前端呼叫已註解停用，保留供未來使用） |
+| `/write-history-background` | — | Worker 端主動抓取 10 項指標並寫入快照，供 Cron 呼叫（僅台股日盤時段執行） |
+| `/clear-history` | — | 清除所有盤勢快照歷史 |
 | `/subscribe` | — | 接收並儲存裝置推播訂閱資料 |
 | `/push-test` | — | 手動觸發推播測試 |
 | `/read-subs` | — | 查看所有訂閱裝置清單 |
@@ -321,13 +326,30 @@ NVDA、TSM、AAPL、META、MSFT、GOOGL、AMZN、TSLA、AMD、PLTR、AVGO、QCOM
 **情緒評級輔助函式：**
 
 ```javascript
-getBrentStatus(price)  // < 100: 平靜 / < 110: 留意 / < 120: 波動加劇 / ≥ 120: 恐慌
+getBrentStatus(price)  // < 80: 平靜 / < 90: 警戒 / < 100: 留意 / < 110: 波動加劇 / ≥ 110: 恐慌
 getVixStatus(value)    // < 20: 平靜 / < 25: 留意 / < 30: 波動加劇 / ≥ 30: 恐慌
 ```
 
 ---
 
-### 12. PWA（Progressive Web App）
+### 12. 綜合市場概況 — 盤勢快照歷史（handleHistoryBackground）
+
+**用途：** 於台股日盤時段每 2 分鐘記錄一次大盤指標快照，讓「綜合市場概況」卡片以表格與 ECharts 折線圖呈現短期盤勢趨勢（緩步向上或向下）
+
+**觸發方式：** 獨立的 Cloudflare Cron Trigger（`*/2 0-6 * * 1-5`，UTC 週一至週五 00:00～06:59，換算台灣時間 08:00～14:59）呼叫 `handleHistoryBackground`；函式內部再以 `isTaiwanDaySession()` 精確判斷是否為 08:30～13:45 台股日盤時段，非日盤時段直接略過不寫入
+
+**記錄的 10 項指標（`buildComprehensiveSnapshot`）：**
+台指期、那斯達克100期貨（CNBC 盤前）、台積電 ADR（RobinHood）、比特幣、日經225指數、韓國綜合指數、布蘭特原油、VIX恐慌指數期貨、美元指數、美金兌台幣（皆含漲跌變化值）
+
+**資料儲存：** 寫入 Cloudflare KV 的 `history` key，最多保留最新 100 筆，跨日偵測到日期變化時自動清空重新累積
+
+**前端呼叫：** 前端 `saveMarketHistory()` 內原本的 `/write-history`（POST 快照）與 `/write-history-background`（觸發 Worker 抓取）呼叫皆已註解停用，目前完全依賴 Cloudflare Cron 定時寫入，不再由前端雙寫
+
+**相關端點：** 詳見「Cloudflare Workers」章節的 `/read-history`、`/write-history`、`/write-history-background`、`/clear-history`
+
+---
+
+### 13. PWA（Progressive Web App）
 
 **用途：** 讓網頁可安裝至手機桌面，提供類原生 App 體驗
 
@@ -357,7 +379,7 @@ getVixStatus(value)    // < 20: 平靜 / < 25: 留意 / < 30: 波動加劇 / ≥
 
 ---
 
-### 13. Service Worker（sw.js）
+### 14. Service Worker（sw.js）
 
 **用途：** 在瀏覽器背景執行的 JavaScript，是 PWA 推播通知的核心
 
@@ -373,7 +395,7 @@ getVixStatus(value)    // < 20: 平靜 / < 25: 留意 / < 30: 波動加劇 / ≥
 
 ---
 
-### 14. Web Push Protocol
+### 15. Web Push Protocol
 
 **用途：** 從伺服器主動推送通知到使用者裝置
 
@@ -418,7 +440,7 @@ isApplePlatform(platform)    // 偵測 iPhone / iPad / iPod / Mac
 
 ---
 
-### 15. VAPID 金鑰（vapidkeys.com）
+### 16. VAPID 金鑰（vapidkeys.com）
 
 **用途：** Web Push 身份驗證
 
@@ -439,9 +461,9 @@ isApplePlatform(platform)    // 偵測 iPhone / iPad / iPod / Mac
 
 ---
 
-### 16. Cloudflare KV
+### 17. Cloudflare KV
 
-**用途：** 儲存推播訂閱資料與系統 LOG
+**用途：** 儲存推播訂閱資料、系統 LOG 與盤勢快照歷史
 
 **現有 Key：**
 
@@ -449,6 +471,7 @@ isApplePlatform(platform)    // 偵測 iPhone / iPad / iPod / Mac
 |-----|------|
 | `subscriptions` | 所有裝置的 Push subscription 清單 |
 | `logs` | 系統事件 LOG（最新 100 筆） |
+| `history` | 「綜合市場概況」盤勢快照歷史（最新 100 筆，跨日自動清空） |
 
 **subscription 資料結構：**
 ```json
@@ -469,15 +492,39 @@ isApplePlatform(platform)    // 偵測 iPhone / iPad / iPod / Mac
 }
 ```
 
+**history 資料結構：**
+```json
+{
+  "time": "2026-04-22 10:00:00",
+  "taifexDay": "24560", "taifexDay_updown": "▲50",
+  "nasdaq100Futures": "...", "nasdaq100Futures_updown": "...",
+  "tsm": "...", "tsm_updown": "...",
+  "bitcoin": "...", "bitcoin_updown": "...",
+  "nikkei225": "...", "nikkei225_updown": "...",
+  "kospi": "...", "kospi_updown": "...",
+  "brent": "...", "brent_updown": "...",
+  "vixFutures": "...", "vixFutures_updown": "...",
+  "usDollarIndex": "...", "usDollarIndex_updown": "...",
+  "usdTwd": "...", "usdTwd_updown": "..."
+}
+```
+
 **免費額度：** 每天 10 萬次讀寫，個人使用完全足夠。
 
 ---
 
-### 17. Cloudflare Cron Trigger
+### 18. Cloudflare Cron Trigger
 
-**用途：** 定時執行推播邏輯
+**用途：** 定時執行推播邏輯與盤勢快照記錄
 
-**現有設定：** 每小時整點觸發（`0 */1 * * *`）
+**現有設定（`wrangler.toml` `[triggers]`）：**
+
+| Cron 表達式 | 觸發時機（UTC） | 對應函式 |
+|-------------|------------------|----------|
+| `0 */1 * * *` | 每小時整點 | `handleCron`（每小時市場摘要推播） |
+| `*/2 0-6 * * 1-5` | 週一至週五 00:00～06:59，每 2 分鐘 | `handleHistoryBackground`（台股日盤盤勢快照，函式內再以 `isTaiwanDaySession()` 精確過濾至 08:30～13:45） |
+
+**判斷邏輯：** `scheduled(event, env, ctx)` 依 `event.cron` 字串比對，分派至對應的處理函式
 
 **本地測試方式（需開兩個終端機）：**
 ```powershell
@@ -490,7 +537,7 @@ npm run cron-test
 
 ---
 
-### 18. Node.js 與 Wrangler CLI
+### 19. Node.js 與 Wrangler CLI
 
 **用途：** 執行 Wrangler CLI 工具
 
@@ -518,16 +565,24 @@ binding = "KV"
 id = "e733a1b2b10c4c44b9aa862b241ee83f"
 
 [triggers]
-crons = ["0 */1 * * *"]
+crons = ["0 */1 * * *", "*/2 0-6 * * 1-5"]
 
 [vars]
 VAPID_SUBJECT = "mailto:your@email.com"
+
+[observability.logs]
+enabled = true
+invocation_logs = true
+
+[observability.traces]
+enabled = false
 ```
 
 **重要注意：**
 - `npm run deploy` 會自動 minify 程式碼，後台 Edit code 看到的是壓縮版本，原始碼以本地 `worker.js` 為準
-- Secret 變數（`VAPID_PUBLIC_KEY`、`VAPID_PRIVATE_KEY`、`FUGLE_KEY`、`FINNHUB_KEY`）不可放入 `wrangler.toml`，只能在後台設定
+- Secret 變數（`VAPID_PUBLIC_KEY`、`VAPID_PRIVATE_KEY`、`FUGLE_KEY`、`FINNHUB_KEY`、`FRED_KEY`）不可放入 `wrangler.toml`，只能在後台設定
 - Plaintext 變數（`VAPID_SUBJECT`）必須放入 `wrangler.toml`，否則每次 deploy 會被清除
+- `[observability.logs]` 開啟 invocation logs，方便在 Cloudflare 後台直接查看每次 Worker 呼叫的即時日誌；`[observability.traces]` 目前關閉
 
 ---
 
@@ -555,6 +610,7 @@ VAPID_SUBJECT = "mailto:your@email.com"
 | 市場情緒 | 美元指數（DXY）、VIX 恐慌指數（含評級）、CNN 恐慌貪婪指數、CME FedWatch 聯準會利率預期 |
 | 國際政治新聞 | 關鍵字過濾新聞（戰爭/地緣政治）、已讀/未讀標記 |
 | 財經行事曆 | 月曆視圖，含經濟指標、財報日、結算日等 |
+| 綜合市場概況 | 台股日盤時段每 2 分鐘記錄一次的 10 項大盤指標快照（台指期、那斯達克100期貨、台積電ADR、比特幣、日經225、KOSPI、布蘭特原油、VIX期貨、美元指數、美金兌台幣），表格 + ECharts 折線圖呈現短期趨勢 |
 | 法人動向 | 三大法人買賣超、外資期貨淨部位、全市場融資餘額 |
 | 自選股 | localStorage 自訂股票清單，支援 `^` 符號（Yahoo Finance 格式），含 Autocomplete 搜尋、個股法人明細、個股融資融券餘額、SMA/RSI/KDJ/MACD/BB 技術指標 |
 
@@ -635,6 +691,7 @@ stock/
 - 本專案使用的第三方 API（新浪、HiStock、CNBC、MoneyDJ、Investing.com）均為非官方接口，可能隨時變更或中斷
 - RobinHood API 因 CloudFront WAF + TLS fingerprint 驗證，目前從非瀏覽器環境（Workers、curl、Java）無法存取
 - 三大法人（合計/個股）、外資期貨淨部位、個股融資融券餘額原資料來源為玩股網 (wearn.com)，已全面改用 HiStock (histock.tw)；舊版函式以 `_old` 後綴保留於 `worker.js` 中僅供參考，未接上任何路由
+- 「綜合市場概況」盤勢快照原設計為前端 POST（`/write-history`）與 Cron 雙寫，目前前端呼叫已全部註解停用，改為完全依賴 Cloudflare Cron Trigger（`*/2 0-6 * * 1-5`）單一寫入路徑
 - Finnhub 財報來源已由 MacroMicro 靜態 JSON 取代；若 MacroMicro 資料過期，前端會顯示警告提示
 - Finnhub 免費方案超過 14 天的查詢會靜默截斷，不會報錯，若重新啟用需主動限制日期範圍
 - VAPID 私鑰與 Fugle/Finnhub/FRED API Key 存放於 Cloudflare Worker Secrets，請勿提交至 Git
