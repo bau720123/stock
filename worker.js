@@ -4707,6 +4707,7 @@ function isTaiwanDaySession() {
 // 專供 /write-history-background 及 cron 使用：worker 主動抓取 12 項指標並寫入 history
 async function handleHistoryBackground(env) {
   if (!isTaiwanDaySession()) {
+    await writeLogs(env, 'CRON', '非台股日盤時段，無須執行歷史快照');
     return json({ success: true, skipped: true, reason: '非台股日盤時段' }); // 非台股日盤時段，不執行
   }
 
@@ -4739,6 +4740,8 @@ async function handleHistoryBackground(env) {
     if (list.length > 100) list.splice(0, list.length - 100);
 
     await env.KV.put("history", JSON.stringify(list));
+
+    await writeLogs(env, 'CRON', '歷史快照完成');
 
     return json({ success: true });
   } catch (e) {
