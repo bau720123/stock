@@ -4615,19 +4615,19 @@ async function buildComprehensiveSnapshot() {
   ]);
 
   // 第二批
-  const [yahooJapan, yahooKorea, robinHood, sinaBrent, sinaVixFutures] = await Promise.all([
+  const [yahooJapan, yahooKorea, robinHood, sinaBrent/*, sinaVixFutures*/] = await Promise.all([
     fetchYahooFinance('^N225').then(r => r.json()).catch(() => ({ success: false })), // 日經225
     fetchYahooFinance('^KS11').then(r => r.json()).catch(() => ({ success: false })), // 韓國綜合指數
     fetchRobinHood().then(r => r.json()).catch(() => ({})), // 台積電ADR
     fetchSina('hf_OIL').then(r => r.json()).catch(() => ({ success: false })), // 布蘭特原油
-    fetchSina('hf_VX').then(r => r.json()).catch(() => ({ success: false })), // VIX恐慌指數期貨
+    // fetchSina('hf_VX').then(r => r.json()).catch(() => ({ success: false })), // VIX恐慌指數期貨
   ]);
 
   // 第三批
-  const [yahooUtc, yahooUtcTwd] = await Promise.all([
+  /*const [yahooUtc, yahooUtcTwd] = await Promise.all([
     fetchYahooFinance('DX-Y.NYB').then(r => r.json()).catch(() => ({ success: false })), // 美元指數
     fetchYahooFinance('USDTWD=X').then(r => r.json()).catch(() => ({ success: false })), // 美金兌台幣
-  ]);
+  ]);*/
 
   const snapshot = {};
 
@@ -4670,7 +4670,7 @@ async function buildComprehensiveSnapshot() {
     snapshot.brent_updown = (sinaBrent.price - sinaBrent.prev).toFixed(2);
   }
 
-  if (sinaVixFutures.success) {
+  /*if (sinaVixFutures.success) {
     snapshot.vixFutures = sinaVixFutures.price.toFixed(2);
     snapshot.vixFutures_updown = (sinaVixFutures.price - sinaVixFutures.prev).toFixed(2);
   }
@@ -4685,7 +4685,7 @@ async function buildComprehensiveSnapshot() {
     snapshot.usdTwd_updown = (yahooUtcTwd.close - yahooUtcTwd.prev).toFixed(2);
   }
 
-  /*if (yahooFvx.success) snapshot.us5y = yahooFvx.close.toFixed(2);
+  if (yahooFvx.success) snapshot.us5y = yahooFvx.close.toFixed(2);
   if (yahooTnx.success) snapshot.us10y = yahooTnx.close.toFixed(2);
   if (yahooTyx.success) snapshot.us30y = yahooTyx.close.toFixed(2);*/
 
