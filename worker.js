@@ -4720,12 +4720,12 @@ async function handleHistoryBackground(env) {
     const time = twTime.toISOString().replace('T', ' ').substring(0, 19);
     const today = time.substring(0, 10); // YYYY-MM-DD
 
-    // 利用既有的 readHistory 取出最新一筆，若不是「今天」的資料，代表是隔夜的舊資料，先清空
-    const historyRes = await readHistory(env);
-    const { history } = await historyRes.json();
-    if (history.length && history[0].time.substring(0, 10) !== today) {
+    // 改用獨立的輕量 key 判斷是否跨夜，不用每次都解析整包 history 陣列
+    const lastDate = await env.KV.get("history_last_date");
+    if (lastDate && lastDate !== today) {
       await clearHistory(env);
     }
+    await env.KV.put("history_last_date", today);
 
     // 讀取現有歷史紀錄（陣列），加入本次快照後寫回
     const existing = await env.KV.get("history");
