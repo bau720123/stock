@@ -109,7 +109,7 @@ fetch("https://histock.tw/stock/module/function.aspx", {
 | `/generateCustomEventsMacroEarnings` | MacroMicro | 科技股財報靜態 JSON 事件（除錯用，可單獨呼叫查看解析結果） |
 | `/read-history` | — | 讀取「綜合市場概況」盤勢快照歷史（最新在前） |
 | `/write-history` | — | 前端 POST 寫入盤勢快照（目前前端呼叫已註解停用，保留供未來使用） |
-| `/write-history-background` | — | Worker 端主動抓取 10 項指標並寫入快照，供 Cron 呼叫（僅台股日盤時段執行） |
+| `/write-history-background` | — | Worker 端主動抓取相關指標並寫入快照，供 Cron 呼叫（僅台股日盤時段執行） |
 | `/clear-history` | — | 清除所有盤勢快照歷史 |
 | `/subscribe` | — | 接收並儲存裝置推播訂閱資料 |
 | `/push-test` | — | 手動觸發推播測試 |
@@ -336,7 +336,7 @@ getVixStatus(value)    // < 20: 平靜 / < 25: 留意 / < 30: 波動加劇 / ≥
 
 **用途：** 於台股日盤時段每 2 分鐘記錄一次大盤指標快照，讓「綜合市場概況」卡片以表格與 ECharts 折線圖呈現短期盤勢趨勢（緩步向上或向下）
 
-**觸發方式：** 獨立的 Cloudflare Cron Trigger（`*/2 0-6 * * 1-5`，UTC 週一至週五 00:00～06:59，換算台灣時間 08:00～14:59）呼叫 `handleHistoryBackground`；函式內部再以 `isTaiwanDaySession()` 精確判斷是否為 08:30～13:45 台股日盤時段，非日盤時段直接略過不寫入
+**觸發方式：** 獨立的 Cloudflare Cron Trigger（`*/2 0-6 * * *`，UTC 00:00～06:59，換算台灣時間 08:00～14:59）呼叫 `handleHistoryBackground`；函式內部再以 `isTaiwanDaySession()` 精確判斷是否為 08:30～13:45 台股日盤時段，非日盤時段直接略過不寫入
 
 **記錄的 10 項指標（`buildComprehensiveSnapshot`）：**
 台指期、那斯達克100期貨（CNBC 盤前）、台積電 ADR（RobinHood）、比特幣、日經225指數、韓國綜合指數、布蘭特原油、VIX恐慌指數期貨、美元指數、美金兌台幣（皆含漲跌變化值）
@@ -522,7 +522,7 @@ isApplePlatform(platform)    // 偵測 iPhone / iPad / iPod / Mac
 | Cron 表達式 | 觸發時機（UTC） | 對應函式 |
 |-------------|------------------|----------|
 | `0 */1 * * *` | 每小時整點 | `handleCron`（每小時市場摘要推播） |
-| `*/2 0-6 * * 1-5` | 週一至週五 00:00～06:59，每 2 分鐘 | `handleHistoryBackground`（台股日盤盤勢快照，函式內再以 `isTaiwanDaySession()` 精確過濾至 08:30～13:45） |
+| `*/2 0-6 * * *` | UTC 00:00～06:59，換算台灣時間 08:00～14:59，每 2 分鐘 | `handleHistoryBackground`（台股日盤盤勢快照，函式內再以 `isTaiwanDaySession()` 精確過濾至 08:30～13:45） |
 
 **判斷邏輯：** `scheduled(event, env, ctx)` 依 `event.cron` 字串比對，分派至對應的處理函式
 
@@ -565,7 +565,7 @@ binding = "KV"
 id = "e733a1b2b10c4c44b9aa862b241ee83f"
 
 [triggers]
-crons = ["0 */1 * * *", "*/2 0-6 * * 1-5"]
+crons = ["0 */1 * * *", "*/2 0-6 * * *"]
 
 [vars]
 VAPID_SUBJECT = "mailto:your@email.com"
@@ -691,7 +691,7 @@ stock/
 - 本專案使用的第三方 API（新浪、HiStock、CNBC、MoneyDJ、Investing.com）均為非官方接口，可能隨時變更或中斷
 - RobinHood API 因 CloudFront WAF + TLS fingerprint 驗證，目前從非瀏覽器環境（Workers、curl、Java）無法存取
 - 三大法人（合計/個股）、外資期貨淨部位、個股融資融券餘額原資料來源為玩股網 (wearn.com)，已全面改用 HiStock (histock.tw)；舊版函式以 `_old` 後綴保留於 `worker.js` 中僅供參考，未接上任何路由
-- 「綜合市場概況」盤勢快照原設計為前端 POST（`/write-history`）與 Cron 雙寫，目前前端呼叫已全部註解停用，改為完全依賴 Cloudflare Cron Trigger（`*/2 0-6 * * 1-5`）單一寫入路徑
+- 「綜合市場概況」盤勢快照原設計為前端 POST（`/write-history`）與 Cron 雙寫，目前前端呼叫已全部註解停用，改為完全依賴 Cloudflare Cron Trigger（`*/2 0-6 * * *`）單一寫入路徑
 - Finnhub 財報來源已由 MacroMicro 靜態 JSON 取代；若 MacroMicro 資料過期，前端會顯示警告提示
 - Finnhub 免費方案超過 14 天的查詢會靜默截斷，不會報錯，若重新啟用需主動限制日期範圍
 - VAPID 私鑰與 Fugle/Finnhub/FRED API Key 存放於 Cloudflare Worker Secrets，請勿提交至 Git
