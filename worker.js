@@ -183,7 +183,7 @@ export default {
     if (event.cron === "0 */1 * * *") {
       ctx.waitUntil(handleCron(env)); // 原本的每小時 Web Push 摘要
     }
-    if (event.cron === "*/2 0-6 * * 1-5") {
+    if (event.cron === "*/2 0-6 * * *") {
       ctx.waitUntil(handleHistoryBackground(env)); // 日盤期間每 2 分鐘記錄一次盤勢
     }
   }
