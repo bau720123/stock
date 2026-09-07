@@ -4650,10 +4650,10 @@ async function buildComprehensiveSnapshot() {
     }
   }
 
-  if (yahooBtc.success) {
+  /*if (yahooBtc.success) {
     snapshot.bitcoin = yahooBtc.close.toFixed(2);
     snapshot.bitcoin_updown = (yahooBtc.close - yahooBtc.prev).toFixed(2);
-  }
+  }*/
 
   if (yahooJapan.success) {
     snapshot.nikkei225 = yahooJapan.close.toFixed(2);
