@@ -6705,7 +6705,7 @@ const COMPREHENSIVE_FIELDS = [
   { key: 'taifexDay', key_updown: 'taifexDay_updown', label: '台指期', color: '#5a9eff' },
   { key: 'nasdaq100Futures', key_updown: 'nasdaq100Futures_updown', label: '那斯達克100期貨', color: '#ff9f43' },
   { key: 'tsm', key_updown: 'tsm_updown', label: '台積電ADR', color: '#ff9f43' },
-  { key: 'bitcoin', key_updown: 'bitcoin_updown', label: '比特幣', color: '#f7b731' },
+  // { key: 'bitcoin', key_updown: 'bitcoin_updown', label: '比特幣', color: '#f7b731' },
   { key: 'nikkei225', key_updown: 'nikkei225_updown', label: '日經225指數', color: '#ff4d6a' },
   { key: 'kospi', key_updown: 'kospi_updown', label: '韓國綜合指數', color: '#a55eea' },
   { key: 'brent', key_updown: 'brent_updown', label: '布蘭特原油', color: '#26de81' },

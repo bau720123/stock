@@ -4605,11 +4605,11 @@ async function clearHistory(env) {
 // 綜合市場概況快照（伺服器端版本，專供 handleHistoryBackground 使用）
 async function buildComprehensiveSnapshot() {
   // 第一批（Cloudflare 免費方案並發限制 ≤6，比照 handleCronInner 的分批做法）
-  const [taifexDay, cnbcPreMarkets, yahooBtc/*, yahooFvx, yahooTnx, yahooTyx*/] = await Promise.all([
+  const [taifexDay, cnbcPreMarkets/*, yahooBtc, yahooFvx, yahooTnx, yahooTyx*/] = await Promise.all([
     fetchTaifex(2, "臺股期貨").then(r => r.json()).catch(() => ({ success: false })), // 台指期
     fetchCnbc().then(r => r.json()).catch(() => ({ success: false })), // 美股盤前電子盤
-    fetchYahooFinance('BTC-USD').then(r => r.json()).catch(() => ({ success: false })), // 比特幣
-    /*fetchYahooFinance('^FVX').then(r => r.json()).catch(() => ({ success: false })), // 美5年期公債殖利率
+    /*fetchYahooFinance('BTC-USD').then(r => r.json()).catch(() => ({ success: false })), // 比特幣
+    fetchYahooFinance('^FVX').then(r => r.json()).catch(() => ({ success: false })), // 美5年期公債殖利率
     fetchYahooFinance('^TNX').then(r => r.json()).catch(() => ({ success: false })), // 美10年期公債殖利率
     fetchYahooFinance('^TYX').then(r => r.json()).catch(() => ({ success: false })), // 美30年期公債殖利率*/
   ]);
