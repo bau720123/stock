@@ -4724,6 +4724,7 @@ async function handleHistoryBackground(env) {
     const lastDate = await env.KV.get("history_last_date");
     if (lastDate && lastDate !== today) {
       await clearHistory(env);
+      await writeLogs(env, 'CRON', '清除舊的歷史快照完成');
     }
     await env.KV.put("history_last_date", today);
 
@@ -4741,7 +4742,7 @@ async function handleHistoryBackground(env) {
 
     await env.KV.put("history", JSON.stringify(list));
 
-    await writeLogs(env, 'CRON', '歷史快照完成');
+    await writeLogs(env, 'CRON', '紀錄新的歷史快照完成');
 
     return json({ success: true });
   } catch (e) {
