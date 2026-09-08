@@ -1011,26 +1011,26 @@ function setCard(id, updown, html, extraClass = '') {
 window.marketSnapshot = {};
 
 async function saveMarketHistory() {
-  /*const { isDaySession } = getMarketEmoji();
-  if (!isDaySession) return; // 非台股日盤時段，不記錄
+  // const { isDaySession } = getMarketEmoji();
+  // if (!isDaySession) return; // 非台股日盤時段，不記錄
 
-  try {
-    await fetch(WORKER + '/write-history', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(window.marketSnapshot)
-    });
-  } catch (e) {
-    console.error('儲存盤勢歷史失敗：', e);
-  }*/
-  /*try {
-    const res = await fetch(WORKER + '/write-history-background').then(r => r.json());
-    if (res.skipped) {
-      console.log('未寫入盤勢歷史：', res.reason);
-    }
-  } catch (e) {
-    console.error('儲存盤勢歷史失敗：', e);
-  }*/
+  // try {
+  //   await fetch(WORKER + '/write-history', {
+  //     method: 'POST',
+  //     headers: { 'Content-Type': 'application/json' },
+  //     body: JSON.stringify(window.marketSnapshot)
+  //   });
+  // } catch (e) {
+  //   console.error('儲存盤勢歷史失敗：', e);
+  // }
+  // try {
+  //   const res = await fetch(WORKER + '/write-history-background').then(r => r.json());
+  //   if (res.skipped) {
+  //     console.log('未寫入盤勢歷史：', res.reason);
+  //   }
+  // } catch (e) {
+  //   console.error('儲存盤勢歷史失敗：', e);
+  // }
 }
 
 async function loadAll() {
@@ -6709,12 +6709,12 @@ const COMPREHENSIVE_FIELDS = [
   { key: 'nikkei225', key_updown: 'nikkei225_updown', label: '日經225指數', color: '#ff4d6a' },
   { key: 'kospi', key_updown: 'kospi_updown', label: '韓國綜合指數', color: '#a55eea' },
   { key: 'brent', key_updown: 'brent_updown', label: '布蘭特原油', color: '#26de81' },
-  /*{ key: 'vixFutures', key_updown: 'vixFutures_updown', label: 'VIX恐慌指數期貨', color: '#fc5c65' },
-  { key: 'usDollarIndex', key_updown: 'usDollarIndex_updown', label: '美元指數', color: '#45aaf2' },
-  { key: 'usdTwd', key_updown: 'usdTwd_updown', label: '美金兌台幣', color: '#2bcbba' },
-  { key: 'us5y', label: '美5年期公債殖利率', color: '#778ca3' },
-  { key: 'us10y', label: '美10年期公債殖利率', color: '#a5b1c2' },
-  { key: 'us30y', label: '美30年期公債殖利率', color: '#d1d8e0' },*/
+  // { key: 'vixFutures', key_updown: 'vixFutures_updown', label: 'VIX恐慌指數期貨', color: '#fc5c65' },
+  // { key: 'usDollarIndex', key_updown: 'usDollarIndex_updown', label: '美元指數', color: '#45aaf2' },
+  // { key: 'usdTwd', key_updown: 'usdTwd_updown', label: '美金兌台幣', color: '#2bcbba' },
+  // { key: 'us5y', label: '美5年期公債殖利率', color: '#778ca3' },
+  // { key: 'us10y', label: '美10年期公債殖利率', color: '#a5b1c2' },
+  // { key: 'us30y', label: '美30年期公債殖利率', color: '#d1d8e0' },
 ];
 
 // 綜合市場概況

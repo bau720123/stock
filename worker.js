@@ -4402,7 +4402,7 @@ async function handleCronInner(env, twTime, twHour, twDay, currentYear) {
     twnRes,
     // twnConRes,
     brentRes,
-    vixRes,
+    // vixRes,
     tsmcStock,
   ] = await Promise.all([
     fetchHiStock("stocktop2017", "TWN", "指數", "成交量(口)"),
@@ -4419,7 +4419,7 @@ async function handleCronInner(env, twTime, twHour, twDay, currentYear) {
   const twn = await twnRes.json();
   // const twncon  = await twnConRes.json();
   const brent = await brentRes.json();
-  const vix = await vixRes.json();
+  // const vix = await vixRes.json();
   const tsmc = await tsmcStock.json();
 
   // 組合摘要文案
@@ -4504,14 +4504,14 @@ async function handleCronInner(env, twTime, twHour, twDay, currentYear) {
     lines.push(`布蘭特原油：資料從缺`);
   }
 
-  if (vix.success) {
-    lines.push(`VIX 恐慌指數：${vix.price.toFixed(2)}（` + getVixStatus(vix.price) + `）`);
-    // lines.push(`VIX 恐慌指數：${vix.close.toFixed(2)}（` + getVixStatus(vix.close) + `）`);
-  } else if (vix.error) {
-    lines.push(`VIX 恐慌指數：` + vix.error);
-  } else {
-    lines.push(`VIX 恐慌指數：資料從缺`);
-  }
+  // if (vix.success) {
+  //   lines.push(`VIX 恐慌指數：${vix.price.toFixed(2)}（` + getVixStatus(vix.price) + `）`);
+  //   // lines.push(`VIX 恐慌指數：${vix.close.toFixed(2)}（` + getVixStatus(vix.close) + `）`);
+  // } else if (vix.error) {
+  //   lines.push(`VIX 恐慌指數：` + vix.error);
+  // } else {
+  //   lines.push(`VIX 恐慌指數：資料從缺`);
+  // }
 
   const body = lines.length > 0 ? lines.join('\n') : '點擊查看即時報價';
 
@@ -4608,10 +4608,10 @@ async function buildComprehensiveSnapshot() {
   const [taifexDay, cnbcPreMarkets/*, yahooBtc, yahooFvx, yahooTnx, yahooTyx*/] = await Promise.all([
     fetchTaifex(2, "臺股期貨").then(r => r.json()).catch(() => ({ success: false })), // 台指期
     fetchCnbc().then(r => r.json()).catch(() => ({ success: false })), // 美股盤前電子盤
-    /*fetchYahooFinance('BTC-USD').then(r => r.json()).catch(() => ({ success: false })), // 比特幣
-    fetchYahooFinance('^FVX').then(r => r.json()).catch(() => ({ success: false })), // 美5年期公債殖利率
-    fetchYahooFinance('^TNX').then(r => r.json()).catch(() => ({ success: false })), // 美10年期公債殖利率
-    fetchYahooFinance('^TYX').then(r => r.json()).catch(() => ({ success: false })), // 美30年期公債殖利率*/
+    // fetchYahooFinance('BTC-USD').then(r => r.json()).catch(() => ({ success: false })), // 比特幣
+    // fetchYahooFinance('^FVX').then(r => r.json()).catch(() => ({ success: false })), // 美5年期公債殖利率
+    // fetchYahooFinance('^TNX').then(r => r.json()).catch(() => ({ success: false })), // 美10年期公債殖利率
+    // fetchYahooFinance('^TYX').then(r => r.json()).catch(() => ({ success: false })), // 美30年期公債殖利率
   ]);
 
   // 第二批
@@ -4624,10 +4624,10 @@ async function buildComprehensiveSnapshot() {
   ]);
 
   // 第三批
-  /*const [yahooUtc, yahooUtcTwd] = await Promise.all([
-    fetchYahooFinance('DX-Y.NYB').then(r => r.json()).catch(() => ({ success: false })), // 美元指數
-    fetchYahooFinance('USDTWD=X').then(r => r.json()).catch(() => ({ success: false })), // 美金兌台幣
-  ]);*/
+  // const [yahooUtc, yahooUtcTwd] = await Promise.all([
+  //   fetchYahooFinance('DX-Y.NYB').then(r => r.json()).catch(() => ({ success: false })), // 美元指數
+  //   fetchYahooFinance('USDTWD=X').then(r => r.json()).catch(() => ({ success: false })), // 美金兌台幣
+  // ]);
 
   const snapshot = {};
 
@@ -4650,10 +4650,10 @@ async function buildComprehensiveSnapshot() {
     }
   }
 
-  /*if (yahooBtc.success) {
-    snapshot.bitcoin = yahooBtc.close.toFixed(2);
-    snapshot.bitcoin_updown = (yahooBtc.close - yahooBtc.prev).toFixed(2);
-  }*/
+  // if (yahooBtc.success) {
+  //   snapshot.bitcoin = yahooBtc.close.toFixed(2);
+  //   snapshot.bitcoin_updown = (yahooBtc.close - yahooBtc.prev).toFixed(2);
+  // }
 
   if (yahooJapan.success) {
     snapshot.nikkei225 = yahooJapan.close.toFixed(2);
@@ -4670,24 +4670,24 @@ async function buildComprehensiveSnapshot() {
     snapshot.brent_updown = (sinaBrent.price - sinaBrent.prev).toFixed(2);
   }
 
-  /*if (sinaVixFutures.success) {
-    snapshot.vixFutures = sinaVixFutures.price.toFixed(2);
-    snapshot.vixFutures_updown = (sinaVixFutures.price - sinaVixFutures.prev).toFixed(2);
-  }
+  // if (sinaVixFutures.success) {
+  //   snapshot.vixFutures = sinaVixFutures.price.toFixed(2);
+  //   snapshot.vixFutures_updown = (sinaVixFutures.price - sinaVixFutures.prev).toFixed(2);
+  // }
 
-  if (yahooUtc.success) {
-    snapshot.usDollarIndex = yahooUtc.close.toFixed(2);
-    snapshot.usDollarIndex_updown = (yahooUtc.close - yahooUtc.prev).toFixed(2);
-  }
+  // if (yahooUtc.success) {
+  //   snapshot.usDollarIndex = yahooUtc.close.toFixed(2);
+  //   snapshot.usDollarIndex_updown = (yahooUtc.close - yahooUtc.prev).toFixed(2);
+  // }
 
-  if (yahooUtcTwd.success) {
-    snapshot.usdTwd = yahooUtcTwd.close.toFixed(2);
-    snapshot.usdTwd_updown = (yahooUtcTwd.close - yahooUtcTwd.prev).toFixed(2);
-  }
+  // if (yahooUtcTwd.success) {
+  //   snapshot.usdTwd = yahooUtcTwd.close.toFixed(2);
+  //   snapshot.usdTwd_updown = (yahooUtcTwd.close - yahooUtcTwd.prev).toFixed(2);
+  // }
 
-  if (yahooFvx.success) snapshot.us5y = yahooFvx.close.toFixed(2);
-  if (yahooTnx.success) snapshot.us10y = yahooTnx.close.toFixed(2);
-  if (yahooTyx.success) snapshot.us30y = yahooTyx.close.toFixed(2);*/
+  // if (yahooFvx.success) snapshot.us5y = yahooFvx.close.toFixed(2);
+  // if (yahooTnx.success) snapshot.us10y = yahooTnx.close.toFixed(2);
+  // if (yahooTyx.success) snapshot.us30y = yahooTyx.close.toFixed(2);
 
   return snapshot;
 }
