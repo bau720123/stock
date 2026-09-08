@@ -1162,7 +1162,9 @@ async function fetchFugleTickers(env) {
     }
 
     const d = await res.json();
-    const data = d.data;
+    const data = (d.data || [])
+      .filter((item) => item.symbol !== item.name)
+      .sort((a, b) => a.symbol.localeCompare(b.symbol));
 
     return json({
       success: true,
