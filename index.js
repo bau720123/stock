@@ -6944,8 +6944,8 @@ const {
   isDaySession
 } = getMarketEmoji();
 var REFRESH_INTERVAL = 999; // 秒，改這個就通吃
-if (isDaySession && card_type == 'comprehensive-market') {
-  REFRESH_INTERVAL = 60; // 台股交易時間更新頻率較高
+if (isDaySession) {
+  REFRESH_INTERVAL = 30; // 台股交易時間更新頻率較高
 }
 let _countdownTimer = null;
 
