@@ -54,6 +54,13 @@ function groupHeader(label, settingsKey = null, wording = '') {
           onclick="window.open('https://robinhood.com/us/en/stocks/${settingsKey}/', '_blank')">
           📈
         </button>`;
+    } else if (settingsKey == 'u.s.-5' || settingsKey == 'u.s.-10' || settingsKey == 'u.s.-30'){
+      settingsButton = `
+        <button class="alert-settings-btn"
+          title="前往 Investing"
+          onclick="window.open('https://hk.investing.com/rates-bonds/${settingsKey}-year-bond-yield', '_blank')">
+          📈
+        </button>`;
     } else {
       settingsButton = `
         <button class="alert-settings-btn ${isActive ? 'active' : ''}"
@@ -2077,7 +2084,7 @@ async function loadAmerica() {
   html += `<div class="card-title" style="margin-top: 5%;" id="us-treasury-yield">美國公債殖利率</div>`;
 
   // 美國5年期公債殖利率
-  html += groupHeader('【5年期公債殖利率】', '', '美國5年期公債殖利率是反映美國5年期國債收益率的重要指標，通常被視為衡量市場利率水平和經濟前景的重要參考。');
+  html += groupHeader('【5年期公債殖利率】', 'u.s.-5', '美國5年期公債殖利率是反映美國5年期國債收益率的重要指標，通常被視為衡量市場利率水平和經濟前景的重要參考。');
   if (yahooFvx.success) {
     const changeNum = yahooFvx.close - yahooFvx.prev;
     const cls = changeNum < 0 ? 'down' : 'up';
@@ -2107,7 +2114,7 @@ async function loadAmerica() {
   }
 
   // 美國10年期公債殖利率
-  html += groupHeader('【10年期公債殖利率】', '', '美國10年期公債殖利率是反映美國10年期國債收益率的重要指標，通常被視為衡量市場利率水平和經濟前景的重要參考。');
+  html += groupHeader('【10年期公債殖利率】', 'u.s.-10', '美國10年期公債殖利率是反映美國10年期國債收益率的重要指標，通常被視為衡量市場利率水平和經濟前景的重要參考。');
   if (yahooTnx.success) {
     const changeNum = yahooTnx.close - yahooTnx.prev;
     const cls = changeNum < 0 ? 'down' : 'up';
@@ -2137,7 +2144,7 @@ async function loadAmerica() {
   }
 
   // 美國30年期公債殖利率
-  html += groupHeader('【30年期公債殖利率】', '', '美國30年期公債殖利率是反映美國30年期國債收益率的重要指標，通常被視為衡量市場利率水平和經濟前景的重要參考。');
+  html += groupHeader('【30年期公債殖利率】', 'u.s.-30', '美國30年期公債殖利率是反映美國30年期國債收益率的重要指標，通常被視為衡量市場利率水平和經濟前景的重要參考。');
   if (yahooTxy.success) {
     const changeNum = yahooTxy.close - yahooTxy.prev;
     const cls = changeNum < 0 ? 'down' : 'up';
