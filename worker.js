@@ -623,8 +623,9 @@ async function fetchCnbc() {
     }
 
     // 2. 四大指數 + 個股 (未來可在 symbols 繼續累加，如 |NVDA|AAPL)
+    // |TSM|NVDA|AAPL|MSFT|GOOGL|AMZN|META|TSLA
     const qRes = await fetchWithTimeout(
-      "https://quote.cnbc.com/quote-html-webservice/restQuote/symbolType/symbol?symbols=.DJI|.SPX|.IXIC|.SOX|TSM|NVDA|AAPL|MSFT|GOOGL|AMZN|META|TSLA&requestMethod=itv&noform=1&partnerId=2&fund=1&exthrs=1&output=json&events=1", {
+      "https://quote.cnbc.com/quote-html-webservice/restQuote/symbolType/symbol?symbols=.DJI|.SPX|.IXIC|.SOX&requestMethod=itv&noform=1&partnerId=2&fund=1&exthrs=1&output=json&events=1", {
         headers: {
           "User-Agent": UA
         }
@@ -735,9 +736,9 @@ async function fetchRobinHoodOne(instrumentId) {
   };
 }
 
-async function fetchRobinHood() {
+async function fetchRobinHood(instruments = ROBINHOOD_INSTRUMENTS) {
   try {
-    const entries = Object.entries(ROBINHOOD_INSTRUMENTS);
+    const entries = Object.entries(instruments);
 
     const results = await Promise.all(
       entries.map(async ([symbol, instrumentId]) => {
@@ -2918,11 +2919,11 @@ async function fetchFugleBrands(symbol, env) {
         price: priceMap.get(row.date) ?? null, // 找不到日期就給 null
       }));
 
-    // 檢查是否已經有「今天」的資料 ──
+    // 檢查是否已經有「今天」的資料
     const hasToday = data.length > 0 && data[0].date === to;
 
     if (!hasToday) {
-      // 透過 fetchFugleQuote 取得當下盤中股價 ──
+      // 透過 fetchFugleQuote 取得當下盤中股價
       const quoteRes = await fetchFugleQuote(symbol, env);
 
       // 依你實際的 fetchFugleQuote 回傳結構調整這一行取值方式
@@ -2930,7 +2931,7 @@ async function fetchFugleBrands(symbol, env) {
       const currentPrice = quoteResult?.success ? (quoteResult.closePrice ?? null) : null;
 
       if (currentPrice != null) {
-        // 動態計算今天的布林通道 ──
+        // 動態計算今天的布林通道
         // 取「歷史收盤價」中最近 19 筆（由新到舊），加上當下即時價，湊滿 period=20 的窗口
         const period = 20;
         const recentCloses = (histData.data || [])
@@ -3100,7 +3101,7 @@ async function fetchFedWatch(env) {
 
     const html = await investingRes.text();
 
-    // ── 一、抓第一個 class="infoFed" 區塊，取 Meeting Time ──
+    // 一、抓第一個 class="infoFed" 區塊，取 Meeting Time
     const infoFedIdx = html.indexOf('class="infoFed"');
     if (infoFedIdx === -1) return json({
       success: false,
@@ -3153,7 +3154,7 @@ async function fetchFedWatch(env) {
       meetingTimeTaipei = parseETtoTaipei(rawNoET);
     }
 
-    // ── 二、抓 fedRateTbl table ──
+    // 二、抓 fedRateTbl table
     const tableClass = 'class="genTbl openTbl fedRateTbl"';
     const tableIdx = html.indexOf(tableClass);
     if (tableIdx === -1) return json({
@@ -3202,7 +3203,7 @@ async function fetchFedWatch(env) {
       });
     }
 
-    // ── 三、FRED 當前基準利率 ──
+    // 三、FRED 當前基準利率
     let currentRateLow = null;
     let currentRateHigh = null;
 
@@ -3215,7 +3216,7 @@ async function fetchFedWatch(env) {
       // FRED 失敗不影響主資料，currentRate 留 null
     }
 
-    // ── 四、推導每筆 targetRate 的 action ──
+    // 四、推導每筆 targetRate 的 action
     rates.forEach(r => {
       if (currentRateLow === null || currentRateHigh === null) {
         r.action = null;
@@ -4620,7 +4621,7 @@ async function buildComprehensiveSnapshot() {
   const [yahooJapan, yahooKorea, robinHood, sinaBrent/*, sinaVixFutures*/] = await Promise.all([
     fetchYahooFinance('^N225').then(r => r.json()).catch(() => ({ success: false })), // 日經225
     fetchYahooFinance('^KS11').then(r => r.json()).catch(() => ({ success: false })), // 韓國綜合指數
-    fetchRobinHood().then(r => r.json()).catch(() => ({})), // 台積電ADR
+    fetchRobinHood({ TSM: ROBINHOOD_INSTRUMENTS.TSM }).then(r => r.json()).catch(() => ({})), // 台積電ADR
     fetchSina('hf_OIL').then(r => r.json()).catch(() => ({ success: false })), // 布蘭特原油
     // fetchSina('hf_VX').then(r => r.json()).catch(() => ({ success: false })), // VIX恐慌指數期貨
   ]);
