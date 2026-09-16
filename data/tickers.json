@@ -2,7 +2,7 @@
   "success": true,
   "data": [
     {
-      "symbol": "000170"
+      "symbol": "000115"
     },
     {
       "symbol": "00400A",
@@ -1310,55 +1310,34 @@
       "name": "元大加權N"
     },
     {
-      "symbol": "06995U"
+      "symbol": "03658U"
     },
     {
-      "symbol": "07001U"
+      "symbol": "04443U"
     },
     {
-      "symbol": "07560U"
+      "symbol": "05886U"
     },
     {
-      "symbol": "07578U"
+      "symbol": "07125U"
     },
     {
-      "symbol": "08352U"
+      "symbol": "08714U"
     },
     {
-      "symbol": "08585U"
+      "symbol": "08717U"
     },
     {
-      "symbol": "08586U"
+      "symbol": "08719U"
     },
     {
-      "symbol": "08590U"
+      "symbol": "08721U"
     },
     {
-      "symbol": "08591U"
+      "symbol": "08722U"
     },
     {
-      "symbol": "08592U"
-    },
-    {
-      "symbol": "08593U"
-    },
-    {
-      "symbol": "08595U"
-    },
-    {
-      "symbol": "08596U"
-    },
-    {
-      "symbol": "08598U"
-    },
-    {
-      "symbol": "08601U"
-    },
-    {
-      "symbol": "08604U"
-    },
-    {
-      "symbol": "08605U"
+      "symbol": "08725U"
     },
     {
       "symbol": "1101",
@@ -2744,11 +2723,6 @@
       "symbol": "2317",
       "industry": "31",
       "name": "鴻海"
-    },
-    {
-      "symbol": "2321",
-      "industry": "27",
-      "name": "東訊"
     },
     {
       "symbol": "2323",
@@ -4406,11 +4380,6 @@
       "name": "麗清"
     },
     {
-      "symbol": "3356",
-      "industry": "26",
-      "name": "奇偶"
-    },
-    {
       "symbol": "3376",
       "industry": "28",
       "name": "新日興"
@@ -4559,11 +4528,6 @@
       "symbol": "3588",
       "industry": "24",
       "name": "通嘉"
-    },
-    {
-      "symbol": "3591",
-      "industry": "26",
-      "name": "艾笛森"
     },
     {
       "symbol": "3592",

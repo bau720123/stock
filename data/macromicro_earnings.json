@@ -10,7 +10,7 @@
                 "name": "WILLIAMS-SONOMA INC",
                 "logo": "https://cdn.macromicro.me/stocks/logo/W/WSM-e7e673d1.png",
                 "industry_id": 255040,
-                "market_cap": 26782116300
+                "market_cap": 26081414550
             },
             {
                 "id": 4670,
@@ -21,7 +21,7 @@
                 "name": "直覺軟體",
                 "logo": "https://cdn.macromicro.me/stocks/logo/I/INTU-51a01b14.png",
                 "industry_id": 451030,
-                "market_cap": 90494400000
+                "market_cap": 91542361600
             }
         ],
         "2026-08-26": [
@@ -34,29 +34,7 @@
                 "name": "JM斯馬克公司",
                 "logo": "https://cdn.macromicro.me/stocks/logo/S/SJM-a0f9c1d5.png",
                 "industry_id": 302020,
-                "market_cap": 13465344000
-            },
-            {
-                "id": 43,
-                "time": "11:00",
-                "symbol": "CRWD",
-                "calendar_year": 2026,
-                "period": "Q2",
-                "name": "Crowdstrike",
-                "logo": "https://cdn.macromicro.me/stocks/logo/C/CRWD-77d8f5c7.png",
-                "industry_id": 451030,
-                "market_cap": 216770647500
-            },
-            {
-                "id": 1998,
-                "time": "11:00",
-                "symbol": "CRM",
-                "calendar_year": 2026,
-                "period": "Q2",
-                "name": "Salesforce",
-                "logo": "https://cdn.macromicro.me/stocks/logo/C/CRM-d83fa9ea.png",
-                "industry_id": 451030,
-                "market_cap": 212568600000
+                "market_cap": 12793038000
             },
             {
                 "id": 4345,
@@ -67,7 +45,7 @@
                 "name": "惠普",
                 "logo": "https://cdn.macromicro.me/stocks/logo/H/HPQ-e650c6c0.png",
                 "industry_id": 452020,
-                "market_cap": 29996160000
+                "market_cap": 31236810000
             },
             {
                 "id": 7978,
@@ -78,7 +56,7 @@
                 "name": "新思科技",
                 "logo": "https://cdn.macromicro.me/stocks/logo/S/SNPS-0853fcad.png",
                 "industry_id": 451030,
-                "market_cap": 75434538240
+                "market_cap": 70745736960
             },
             {
                 "id": 321262,
@@ -89,7 +67,29 @@
                 "name": "VEEVA SYSTEMS INC-CLASS A",
                 "logo": "https://cdn.macromicro.me/stocks/logo/V/VEEV-0d0d6d1b.png",
                 "industry_id": 351030,
-                "market_cap": 44659210959
+                "market_cap": 43284157280
+            },
+            {
+                "id": 1998,
+                "time": "11:01",
+                "symbol": "CRM",
+                "calendar_year": 2026,
+                "period": "Q2",
+                "name": "Salesforce",
+                "logo": "https://cdn.macromicro.me/stocks/logo/C/CRM-d83fa9ea.png",
+                "industry_id": 451030,
+                "market_cap": 214282400000
+            },
+            {
+                "id": 43,
+                "time": "11:05",
+                "symbol": "CRWD",
+                "calendar_year": 2026,
+                "period": "Q2",
+                "name": "Crowdstrike",
+                "logo": "https://cdn.macromicro.me/stocks/logo/C/CRWD-77d8f5c7.png",
+                "industry_id": 451030,
+                "market_cap": 246595684500
             },
             {
                 "id": 73,
@@ -100,7 +100,7 @@
                 "name": "安捷倫科技",
                 "logo": "https://cdn.macromicro.me/stocks/logo/A/A-70c625f9.png",
                 "industry_id": 352030,
-                "market_cap": 42542520000
+                "market_cap": 42421260000
             },
             {
                 "id": 3,
@@ -111,7 +111,7 @@
                 "name": "輝達",
                 "logo": "https://cdn.macromicro.me/stocks/logo/N/NVDA-3a77b5d3.png",
                 "industry_id": 453010,
-                "market_cap": 5572408400000
+                "market_cap": 5133118000000
             }
         ],
         "2026-08-27": [
@@ -124,29 +124,29 @@
                 "name": "錢樹商店",
                 "logo": "https://cdn.macromicro.me/stocks/logo/D/DLTR-9fd6f765.png",
                 "industry_id": 301010,
-                "market_cap": 25048651999
-            },
-            {
-                "id": 980,
-                "time": "03:30",
-                "symbol": "BBY",
-                "calendar_year": 2026,
-                "period": "Q3",
-                "name": "百思買",
-                "logo": "https://cdn.macromicro.me/stocks/logo/B/BBY-b995834c.png",
-                "industry_id": 255040,
-                "market_cap": 19074051000
+                "market_cap": 21717688280
             },
             {
                 "id": 2438,
-                "time": "03:30",
+                "time": "01:50",
                 "symbol": "DG",
                 "calendar_year": 2026,
                 "period": "Q2",
                 "name": "Dollar General",
                 "logo": "https://cdn.macromicro.me/stocks/logo/D/DG-279ab25f.png",
                 "industry_id": 301010,
-                "market_cap": 29386925260
+                "market_cap": 27538246980
+            },
+            {
+                "id": 980,
+                "time": "02:00",
+                "symbol": "BBY",
+                "calendar_year": 2026,
+                "period": "Q3",
+                "name": "百思買",
+                "logo": "https://cdn.macromicro.me/stocks/logo/B/BBY-b995834c.png",
+                "industry_id": 255040,
+                "market_cap": 19730137500
             },
             {
                 "id": 4370,
@@ -157,7 +157,7 @@
                 "name": "荷美爾食品",
                 "logo": "https://cdn.macromicro.me/stocks/logo/H/HRL-80ea9786.png",
                 "industry_id": 302020,
-                "market_cap": 11861539500
+                "market_cap": 11396219125
             },
             {
                 "id": 8849,
@@ -168,7 +168,7 @@
                 "name": "Ulta美妝",
                 "logo": "https://cdn.macromicro.me/stocks/logo/U/ULTA-b30907e1.png",
                 "industry_id": 255040,
-                "market_cap": 24464756160
+                "market_cap": 23606069760
             },
             {
                 "id": 293,
@@ -179,7 +179,7 @@
                 "name": "歐特克",
                 "logo": "https://cdn.macromicro.me/stocks/logo/A/ADSK-09f3e872.png",
                 "industry_id": 451030,
-                "market_cap": 45976900000
+                "market_cap": 48893975000
             },
             {
                 "id": 9270,
@@ -190,7 +190,7 @@
                 "name": "Workday公司",
                 "logo": "https://cdn.macromicro.me/stocks/logo/W/WDAY-23254d35.png",
                 "industry_id": 451030,
-                "market_cap": 48842556560
+                "market_cap": 47565300880
             },
             {
                 "id": 288679,
@@ -201,7 +201,7 @@
                 "name": "邁威爾科技",
                 "logo": "https://cdn.macromicro.me/stocks/logo/M/MRVL-2bfb8937.png",
                 "industry_id": 453010,
-                "market_cap": 200613770000
+                "market_cap": 199514455000
             }
         ],
         "2026-09-01": [
@@ -214,7 +214,7 @@
                 "name": "美敦力醫療產品",
                 "logo": "https://cdn.macromicro.me/stocks/logo/M/MDT-466fe9a9.png",
                 "industry_id": 351010,
-                "market_cap": 120518766000
+                "market_cap": 120467574000
             },
             {
                 "id": 6998,
@@ -225,7 +225,18 @@
                 "name": "帕羅奧圖網路",
                 "logo": "https://cdn.macromicro.me/stocks/logo/P/PANW-04e20345.png",
                 "industry_id": 451030,
-                "market_cap": 249611740000
+                "market_cap": 281339380000
+            },
+            {
+                "id": 2413,
+                "time": "11:05",
+                "symbol": "DELL",
+                "calendar_year": 2026,
+                "period": "Q2",
+                "name": "戴爾科技",
+                "logo": "https://cdn.macromicro.me/stocks/logo/D/DELL-ebfc3333.png",
+                "industry_id": 452020,
+                "market_cap": 354659700000
             },
             {
                 "id": 2409,
@@ -236,21 +247,10 @@
                 "name": "戴爾科技",
                 "logo": "https://cdn.macromicro.me/stocks/logo/D/DELL-ebfc3333.png",
                 "industry_id": 452020,
-                "market_cap": 338070300000
+                "market_cap": 354659700000
             }
         ],
         "2026-09-02": [
-            {
-                "id": 1948,
-                "time": "03:00",
-                "symbol": "CPRT",
-                "calendar_year": 2026,
-                "period": "Q2",
-                "name": "科派特",
-                "logo": "https://cdn.macromicro.me/stocks/logo/C/CPRT-2ba02468.png",
-                "industry_id": 202010,
-                "market_cap": 32279481600
-            },
             {
                 "id": 4320,
                 "time": "11:00",
@@ -260,7 +260,7 @@
                 "name": "慧與科技",
                 "logo": "https://cdn.macromicro.me/stocks/logo/H/HPE-995b0906.png",
                 "industry_id": 452020,
-                "market_cap": 69472000000
+                "market_cap": 75463960000
             },
             {
                 "id": 6654,
@@ -271,7 +271,7 @@
                 "name": "網路器械公司",
                 "logo": "https://cdn.macromicro.me/stocks/logo/N/NTAP-1afa256f.png",
                 "industry_id": 452020,
-                "market_cap": 36375640000
+                "market_cap": 37448740000
             },
             {
                 "id": 780,
@@ -282,20 +282,20 @@
                 "name": "博通",
                 "logo": "https://cdn.macromicro.me/stocks/logo/A/AVGO-c6c0d48f.png",
                 "industry_id": 453010,
-                "market_cap": 1705751400000
+                "market_cap": 1618557430000
             }
         ],
         "2026-09-03": [
             {
                 "id": 10701,
-                "time": "03:30",
+                "time": "02:00",
                 "symbol": "CIEN",
                 "calendar_year": 2026,
                 "period": "Q2",
                 "name": "CIENA CORP",
                 "logo": "https://cdn.macromicro.me/stocks/logo/C/CIEN-06f7cfc9.png",
                 "industry_id": 452010,
-                "market_cap": 45601581000
+                "market_cap": 46946898670
             },
             {
                 "id": 5540,
@@ -306,31 +306,20 @@
                 "name": "露露檸檬",
                 "logo": "https://cdn.macromicro.me/stocks/logo/L/LULU-cbdf42c5.png",
                 "industry_id": 252030,
-                "market_cap": 11358667780
-            },
-            {
-                "id": 2413,
-                "time": "12:00",
-                "symbol": "DELL",
-                "calendar_year": 2026,
-                "period": "Q2",
-                "name": "戴爾科技",
-                "logo": "https://cdn.macromicro.me/stocks/logo/D/DELL-ebfc3333.png",
-                "industry_id": 452020,
-                "market_cap": 338070300000
+                "market_cap": 10981588460
             }
         ],
         "2026-09-08": [
             {
                 "id": 113320,
-                "time": "11:00",
+                "time": "11:30",
                 "symbol": "CASY",
                 "calendar_year": 2026,
                 "period": "Q2",
                 "name": "CASEY'S GENERAL STORES INC",
                 "logo": "https://cdn.macromicro.me/stocks/logo/C/CASY-87da55da.png",
                 "industry_id": 301010,
-                "market_cap": 28024717042
+                "market_cap": 22002189734
             }
         ],
         "2026-09-09": [
@@ -343,7 +332,7 @@
                 "name": "酷柏公司",
                 "logo": "https://cdn.macromicro.me/stocks/logo/C/COO-34e21ebd.png",
                 "industry_id": 351010,
-                "market_cap": 13570050000
+                "market_cap": 10376374160
             }
         ],
         "2026-09-10": [
@@ -356,7 +345,18 @@
                 "name": "Adobe",
                 "logo": "https://cdn.macromicro.me/stocks/logo/A/ADBE-23ab5315.png",
                 "industry_id": 451030,
-                "market_cap": 107137020000
+                "market_cap": 103945000500
+            },
+            {
+                "id": 1948,
+                "time": "11:15",
+                "symbol": "CPRT",
+                "calendar_year": 2026,
+                "period": "Q2",
+                "name": "科派特",
+                "logo": "https://cdn.macromicro.me/stocks/logo/C/CPRT-2ba02468.png",
+                "industry_id": 202010,
+                "market_cap": 30189910276
             },
             {
                 "id": 6899,
@@ -367,7 +367,7 @@
                 "name": "甲骨文",
                 "logo": "https://cdn.macromicro.me/stocks/logo/O/ORCL-1a63b6ae.png",
                 "industry_id": 451030,
-                "market_cap": 456968840000
+                "market_cap": 426896350340
             }
         ],
         "2026-09-11": [
@@ -380,45 +380,10 @@
                 "name": "克羅格",
                 "logo": "https://cdn.macromicro.me/stocks/logo/K/KR-62c68d67.png",
                 "industry_id": 301010,
-                "market_cap": 35915670000
-            }
-        ],
-        "2026-09-15": [
-            {
-                "id": 3891,
-                "time": "04:30",
-                "symbol": "GIS",
-                "calendar_year": 2026,
-                "period": "Q3",
-                "name": "通用磨坊",
-                "logo": "https://cdn.macromicro.me/stocks/logo/G/GIS-a7f394fa.png",
-                "industry_id": 302020,
-                "market_cap": 20557901000
+                "market_cap": 37578060000
             }
         ],
         "2026-09-16": [
-            {
-                "id": 2664,
-                "time": "03:30",
-                "symbol": "DRI",
-                "calendar_year": 2026,
-                "period": "Q3",
-                "name": "達登餐廳",
-                "logo": "https://cdn.macromicro.me/stocks/logo/D/DRI-a89e5890.png",
-                "industry_id": 253010,
-                "market_cap": 24789384000
-            },
-            {
-                "id": 3413,
-                "time": "03:30",
-                "symbol": "FDS",
-                "calendar_year": 2026,
-                "period": "Q3",
-                "name": "Factset公司",
-                "logo": "https://cdn.macromicro.me/stocks/logo/F/FDS-2430d8a6.png",
-                "industry_id": 402030,
-                "market_cap": 11117865240
-            },
             {
                 "id": 5315,
                 "time": "11:00",
@@ -428,7 +393,7 @@
                 "name": "萊納房屋",
                 "logo": "https://cdn.macromicro.me/stocks/logo/L/LEN-a9085f05.png",
                 "industry_id": 252010,
-                "market_cap": 20277093060
+                "market_cap": 19391577510
             },
             {
                 "id": 3437,
@@ -439,20 +404,7 @@
                 "name": "聯邦快遞",
                 "logo": "https://cdn.macromicro.me/stocks/logo/F/FDX-35de6e24.png",
                 "industry_id": 203010,
-                "market_cap": 77727320000
-            }
-        ],
-        "2026-09-21": [
-            {
-                "id": 38,
-                "time": "13:00",
-                "symbol": "MU",
-                "calendar_year": 2026,
-                "period": "Q3",
-                "name": "美光",
-                "logo": "https://cdn.macromicro.me/stocks/logo/M/MU-9408c0bd.png",
-                "industry_id": 453010,
-                "market_cap": 1146713520000
+                "market_cap": 74094245000
             }
         ],
         "2026-09-22": [
@@ -465,8 +417,10 @@
                 "name": "汽車地帶",
                 "logo": "https://cdn.macromicro.me/stocks/logo/A/AZO-b6cf79c8.png",
                 "industry_id": 255040,
-                "market_cap": 49128819720
-            },
+                "market_cap": 47577204760
+            }
+        ],
+        "2026-09-23": [
             {
                 "id": 2113,
                 "time": "03:30",
@@ -476,10 +430,8 @@
                 "name": "信達思",
                 "logo": "https://cdn.macromicro.me/stocks/logo/C/CTAS-f7a4e896.png",
                 "industry_id": 202010,
-                "market_cap": 80231301520
-            }
-        ],
-        "2026-09-23": [
+                "market_cap": 80416281355
+            },
             {
                 "id": 4933,
                 "time": "03:30",
@@ -489,10 +441,32 @@
                 "name": "捷普公司",
                 "logo": "https://cdn.macromicro.me/stocks/logo/J/JBL-63e43c3e.png",
                 "industry_id": 452030,
-                "market_cap": 32703021000
+                "market_cap": 31174065000
+            },
+            {
+                "id": 3891,
+                "time": "04:30",
+                "symbol": "GIS",
+                "calendar_year": 2026,
+                "period": "Q3",
+                "name": "通用磨坊",
+                "logo": "https://cdn.macromicro.me/stocks/logo/G/GIS-a7f394fa.png",
+                "industry_id": 302020,
+                "market_cap": 19489470000
             }
         ],
         "2026-09-24": [
+            {
+                "id": 2664,
+                "time": "03:30",
+                "symbol": "DRI",
+                "calendar_year": 2026,
+                "period": "Q3",
+                "name": "達登餐廳",
+                "logo": "https://cdn.macromicro.me/stocks/logo/D/DRI-a89e5890.png",
+                "industry_id": 253010,
+                "market_cap": 24125872500
+            },
             {
                 "id": 1898,
                 "time": "11:15",
@@ -502,7 +476,7 @@
                 "name": "好市多",
                 "logo": "https://cdn.macromicro.me/stocks/logo/C/COST-976a1dc2.png",
                 "industry_id": 301010,
-                "market_cap": 406518048020
+                "market_cap": 402749186142
             }
         ],
         "2026-09-28": [
@@ -515,7 +489,7 @@
                 "name": "嘉年華集團",
                 "logo": "https://cdn.macromicro.me/stocks/logo/C/CCL-64274f1e.png",
                 "industry_id": 253010,
-                "market_cap": 32490820000
+                "market_cap": 30424730000
             },
             {
                 "id": 7058,
@@ -526,7 +500,7 @@
                 "name": "沛齊",
                 "logo": "https://cdn.macromicro.me/stocks/logo/P/PAYX-d7b418ca.png",
                 "industry_id": 202020,
-                "market_cap": 43523496000
+                "market_cap": 42706380000
             },
             {
                 "id": 6530,
@@ -537,7 +511,31 @@
                 "name": "耐吉",
                 "logo": "https://cdn.macromicro.me/stocks/logo/N/NKE-d2725daf.png",
                 "industry_id": 252030,
-                "market_cap": 56931840000
+                "market_cap": 53795103180
+            }
+        ],
+        "2026-09-30": [
+            {
+                "id": 3413,
+                "time": "03:30",
+                "symbol": "FDS",
+                "calendar_year": 2026,
+                "period": "Q3",
+                "name": "Factset公司",
+                "logo": "https://cdn.macromicro.me/stocks/logo/F/FDS-2430d8a6.png",
+                "industry_id": 402030,
+                "market_cap": 10470587220
+            },
+            {
+                "id": 38,
+                "time": "13:00",
+                "symbol": "MU",
+                "calendar_year": 2026,
+                "period": "Q3",
+                "name": "美光",
+                "logo": "https://cdn.macromicro.me/stocks/logo/M/MU-9408c0bd.png",
+                "industry_id": 453010,
+                "market_cap": 1043411280000
             }
         ],
         "2026-10-01": [
@@ -550,7 +548,7 @@
                 "name": "埃森哲",
                 "logo": "https://cdn.macromicro.me/stocks/logo/A/ACN-59b7a32f.png",
                 "industry_id": 451020,
-                "market_cap": 114312495944
+                "market_cap": 120976439380
             }
         ],
         "2026-10-05": [
@@ -563,7 +561,7 @@
                 "name": "味好美",
                 "logo": "https://cdn.macromicro.me/stocks/logo/M/MKC-90f385fb.png",
                 "industry_id": 302020,
-                "market_cap": 14019936000
+                "market_cap": 13481536000
             },
             {
                 "id": 8104,
@@ -574,7 +572,7 @@
                 "name": "星座集團",
                 "logo": "https://cdn.macromicro.me/stocks/logo/S/STZ-fea25465.png",
                 "industry_id": 302010,
-                "market_cap": 22070801480
+                "market_cap": 21332123540
             }
         ],
         "2026-10-07": [
@@ -587,7 +585,7 @@
                 "name": "達美航空",
                 "logo": "https://cdn.macromicro.me/stocks/logo/D/DAL-69fdc77f.png",
                 "industry_id": 203020,
-                "market_cap": 52351010000
+                "market_cap": 50976445000
             },
             {
                 "id": 7159,
@@ -598,7 +596,7 @@
                 "name": "百事公司",
                 "logo": "https://cdn.macromicro.me/stocks/logo/P/PEP-0e83f2a2.png",
                 "industry_id": 302010,
-                "market_cap": 188002580000
+                "market_cap": 185376718199
             }
         ]
     },
