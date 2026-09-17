@@ -54,11 +54,18 @@ function groupHeader(label, settingsKey = null, wording = '') {
           onclick="window.open('https://robinhood.com/us/en/stocks/${settingsKey}/', '_blank')">
           📈
         </button>`;
-    } else if (settingsKey == 'u.s.-5' || settingsKey == 'u.s.-10' || settingsKey == 'u.s.-30'){
+    } else if (settingsKey == 'u.s.-5' || settingsKey == 'u.s.-10' || settingsKey == 'u.s.-30') {
       settingsButton = `
         <button class="alert-settings-btn"
           title="前往 Investing"
           onclick="window.open('https://hk.investing.com/rates-bonds/${settingsKey}-year-bond-yield', '_blank')">
+          📈
+        </button>`;
+    } else if (settingsKey == 'brent') {
+      settingsButton = `
+        <button class="alert-settings-btn"
+          title="前往 Investing"
+          onclick="window.open('https://hk.investing.com/commodities/brent-oil', '_blank')">
           📈
         </button>`;
     } else {
@@ -1950,7 +1957,7 @@ function getMarketStatus() {
 
 // 美股市場概況
 async function loadAmerica() {
-  const [cnbcPreMarkets, /*yahooNqf, yahooIxic, yahooSox, */ yahooBtc, yahooFvx, yahooTnx, yahooTxy, /*yahooTsm, */ robinHood/*, fugleQuote, yahooUtcTwd */] = await Promise.all([
+  const [cnbcPreMarkets, /*yahooNqf, yahooIxic, yahooSox, */ yahooBtc, /*yahooTsm, */ robinHood/*, fugleQuote, yahooUtcTwd */] = await Promise.all([
     fetch(WORKER + '/cnbc').then(r => r.json()).catch(() => ({
       success: false
     })), // 美股盤前電子盤
@@ -1960,15 +1967,6 @@ async function loadAmerica() {
     fetch(WORKER + '/yahoo-finance/BTC-USD').then(r => r.json()).catch(() => ({
       success: false
     })), // 比特幣
-    fetch(WORKER + '/yahoo-finance/^FVX').then(r => r.json()).catch(() => ({
-      success: false
-    })), // 美國5年期公債殖利率
-    fetch(WORKER + '/yahoo-finance/^TNX').then(r => r.json()).catch(() => ({
-      success: false
-    })), // 美國10年期公債殖利率
-    fetch(WORKER + '/yahoo-finance/^TYX').then(r => r.json()).catch(() => ({
-      success: false
-    })), // 美國30年期公債殖利率
     // fetch(WORKER + '/yahoo-finance/TSM').then(r => r.json()).catch(() => ({ success: false })), // 台積電 ADR
     fetch(WORKER + '/rh').then(r => r.json()).catch(() => ({
       success: false
@@ -2085,20 +2083,18 @@ async function loadAmerica() {
 
   // 美國5年期公債殖利率
   html += groupHeader('【5年期公債殖利率】', 'u.s.-5', '美國5年期公債殖利率是反映美國5年期國債收益率的重要指標，通常被視為衡量市場利率水平和經濟前景的重要參考。');
-  if (yahooFvx.success) {
-    const changeNum = yahooFvx.close - yahooFvx.prev;
+  if (cnbcPreMarkets.success) {
+    const changeNum = cnbcPreMarkets.bondyield.US5Y.change;
     const cls = changeNum < 0 ? 'down' : 'up';
-    const changePercent = changeNum / yahooFvx.prev * 100;
 
-    // html += row('前次', yahooFvx.prev.toFixed(2));
-    // html += row('開盤價', yahooFvx.open.toFixed(2));
-    // html += row('最高價', yahooFvx.high.toFixed(2));
-    // html += row('最低價', yahooFvx.low.toFixed(2));
-    html += row('利率', yahooFvx.close.toFixed(2), 'accent');
-    window.marketSnapshot.us5y = yahooFvx.close.toFixed(2);
+    html += row('前次', cnbcPreMarkets.bondyield.US5Y.previous_day_closing);
+    // html += row('開盤價', cnbcPreMarkets.bondyield.US5Y.open);
+    // html += row('最高價', cnbcPreMarkets.bondyield.US5Y.high);
+    // html += row('最低價', cnbcPreMarkets.bondyield.US5Y.low);
+    html += row('利率', cnbcPreMarkets.bondyield.US5Y.last, 'accent');
 
     // 警戒區間判斷
-    const fvxRate = yahooFvx.close;
+    const fvxRate = cnbcPreMarkets.bondyield.US5Y.last;
     if (fvxRate >= 4.55) {
       html += row('警戒水位', `紅色危險區（${fvxRate >= 5.0 ? '逼近5.0%' : '衝擊資產/引發拋售'}）`);
     } else if (fvxRate >= 4.35) {
@@ -2106,29 +2102,26 @@ async function loadAmerica() {
     } else {
       html += row('利率狀態', '正常', 'accent');
     }
-    html += row('漲跌', changeNum.toFixed(2), cls);
-    // html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
-    html += row('更新時間', yahooFvx.updateTime);
+    html += row('漲跌', changeNum, cls);
+    html += row('更新時間', cnbcPreMarkets.bondyield.US5Y.last_time);
   } else {
     html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
   }
 
   // 美國10年期公債殖利率
   html += groupHeader('【10年期公債殖利率】', 'u.s.-10', '美國10年期公債殖利率是反映美國10年期國債收益率的重要指標，通常被視為衡量市場利率水平和經濟前景的重要參考。');
-  if (yahooTnx.success) {
-    const changeNum = yahooTnx.close - yahooTnx.prev;
+  if (cnbcPreMarkets.success) {
+    const changeNum = cnbcPreMarkets.bondyield.US10Y.change;
     const cls = changeNum < 0 ? 'down' : 'up';
-    const changePercent = changeNum / yahooTnx.prev * 100;
 
-    // html += row('前次', yahooTnx.prev.toFixed(2));
-    // html += row('開盤價', yahooTnx.open.toFixed(2));
-    // html += row('最高價', yahooTnx.high.toFixed(2));
-    // html += row('最低價', yahooTnx.low.toFixed(2));
-    html += row('利率', yahooTnx.close.toFixed(2), 'accent');
-    window.marketSnapshot.us10y = yahooTnx.close.toFixed(2);
+    // html += row('前次', cnbcPreMarkets.bondyield.US10Y.previous_day_closing);
+    // html += row('開盤價', cnbcPreMarkets.bondyield.US10Y.open);
+    // html += row('最高價', cnbcPreMarkets.bondyield.US10Y.high);
+    // html += row('最低價', cnbcPreMarkets.bondyield.US10Y.low);
+    html += row('利率', cnbcPreMarkets.bondyield.US10Y.last, 'accent');
 
     // 警戒區間判斷
-    const tnxRate = yahooTnx.close;
+    const tnxRate = cnbcPreMarkets.bondyield.US10Y.last;
     if (tnxRate >= 4.65) {
       html += row('警戒水位', `紅色危險區（${tnxRate >= 5.0 ? '逼近5.0%' : '衝擊資產/引發拋售'}）`);
     } else if (tnxRate >= 4.50) {
@@ -2136,40 +2129,35 @@ async function loadAmerica() {
     } else {
       html += row('利率狀態', '正常', 'accent');
     }
-    html += row('漲跌', changeNum.toFixed(2), cls);
-    // html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
-    html += row('更新時間', yahooTnx.updateTime);
+    html += row('漲跌', changeNum, cls);
+    html += row('更新時間', cnbcPreMarkets.bondyield.US10Y.last_time);
   } else {
     html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
   }
 
   // 美國30年期公債殖利率
   html += groupHeader('【30年期公債殖利率】', 'u.s.-30', '美國30年期公債殖利率是反映美國30年期國債收益率的重要指標，通常被視為衡量市場利率水平和經濟前景的重要參考。');
-  if (yahooTxy.success) {
-    const changeNum = yahooTxy.close - yahooTxy.prev;
+  if (cnbcPreMarkets.success) {
+    const changeNum = cnbcPreMarkets.bondyield.US30Y.change;
     const cls = changeNum < 0 ? 'down' : 'up';
-    const changePercent = changeNum / yahooTxy.prev * 100;
 
-    // html += row('前次', yahooTxy.prev.toFixed(2));
-    // html += row('開盤價', yahooTxy.open.toFixed(2));
-    // html += row('最高價', yahooTxy.high.toFixed(2));
-    // html += row('最低價', yahooTxy.low.toFixed(2));
-    html += row('利率', yahooTxy.close.toFixed(2), 'accent');
-    window.marketSnapshot.us30y = yahooTxy.close.toFixed(2); // 美國30年期公債殖利率
+    // html += row('前次', cnbcPreMarkets.bondyield.US30Y.previous_day_closing);
+    // html += row('開盤價', cnbcPreMarkets.bondyield.US30Y.open);
+    // html += row('最高價', cnbcPreMarkets.bondyield.US30Y.high);
+    // html += row('最低價', cnbcPreMarkets.bondyield.US30Y.low);
+    html += row('利率', cnbcPreMarkets.bondyield.US30Y.last, 'accent');
 
     // 警戒區間判斷
-    const txyRate = yahooTxy.close;
+    const txyRate = cnbcPreMarkets.bondyield.US30Y.last;
     if (txyRate >= 5) {
-      html += row('警戒水位', '紅色危險區（衝擊資產/引發拋售）');
+      html += row('警戒水位', `紅色危險區（${txyRate >= 5.0 ? '逼近5.0%' : '衝擊資產/引發拋售'}）`);
     } else if (txyRate >= 4.50) {
       html += row('警戒水位', '黃色警戒（開始承壓）');
     } else {
       html += row('利率狀態', '正常', 'accent');
     }
-
-    html += row('漲跌', changeNum.toFixed(2), cls);
-    // html += row('漲跌幅', changePercent.toFixed(2) + '%', cls);
-    html += row('更新時間', yahooTxy.updateTime);
+    html += row('漲跌', changeNum, cls);
+    html += row('更新時間', cnbcPreMarkets.bondyield.US30Y.last_time);
   } else {
     html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
   }
@@ -2692,7 +2680,7 @@ async function loadAmerica() {
 
   setCard('card-america', 0, html);
 
-  if ((yahooFvx.success && yahooFvx.close.toFixed(2) >= 4.35) && (yahooTnx.success && yahooTnx.close.toFixed(2) >= 4.50)) {
+  if (cnbcPreMarkets.success && (cnbcPreMarkets.bondyield.US5Y.last >= 4.35 || cnbcPreMarkets.bondyield.US10Y.last >= 4.50 || cnbcPreMarkets.bondyield.US30Y.last >= 4.50)) {
     const el = document.getElementById("us-treasury-yield");
     el.style.color = "red";
     el.innerText += "\n已進入警戒區間"; 
@@ -6711,6 +6699,9 @@ function gotoCalendarDetail(link = '') {
 const COMPREHENSIVE_FIELDS = [
   { key: 'taifexDay', key_updown: 'taifexDay_updown', label: '台指期', color: '#5a9eff' },
   { key: 'nasdaq100Futures', key_updown: 'nasdaq100Futures_updown', label: '那斯達克100期貨', color: '#ff9f43' },
+  { key: 'us5y', key_updown: 'us5y_updown', label: '美5年期公債殖利率', color: '#778ca3' },
+  { key: 'us10y', key_updown: 'us10y_updown', label: '美10年期公債殖利率', color: '#a5b1c2' },
+  { key: 'us30y', key_updown: 'us30y_updown', label: '美30年期公債殖利率', color: '#d1d8e0' },
   { key: 'tsm', key_updown: 'tsm_updown', label: '台積電ADR', color: '#ff9f43' },
   // { key: 'bitcoin', key_updown: 'bitcoin_updown', label: '比特幣', color: '#f7b731' },
   { key: 'nikkei225', key_updown: 'nikkei225_updown', label: '日經225指數', color: '#ff4d6a' },
@@ -6719,9 +6710,6 @@ const COMPREHENSIVE_FIELDS = [
   // { key: 'vixFutures', key_updown: 'vixFutures_updown', label: 'VIX恐慌指數期貨', color: '#fc5c65' },
   // { key: 'usDollarIndex', key_updown: 'usDollarIndex_updown', label: '美元指數', color: '#45aaf2' },
   // { key: 'usdTwd', key_updown: 'usdTwd_updown', label: '美金兌台幣', color: '#2bcbba' },
-  // { key: 'us5y', label: '美5年期公債殖利率', color: '#778ca3' },
-  // { key: 'us10y', label: '美10年期公債殖利率', color: '#a5b1c2' },
-  // { key: 'us30y', label: '美30年期公債殖利率', color: '#d1d8e0' },
 ];
 
 // 綜合市場概況

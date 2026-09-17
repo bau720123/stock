@@ -592,6 +592,29 @@ async function fetchTaifex(objId, contractName) {
   }
 }
 
+// 純位移運算，不用 Intl/toLocaleString，避免 CPU 成本
+function toTaipeiTimeString(isoString) {
+  const d = new Date(isoString);
+  if (isNaN(d.getTime())) return isoString; // 解析失敗就原樣回傳，避免拋錯
+
+  const taipeiMs = d.getTime() + 8 * 60 * 60 * 1000; // UTC+8
+  const t = new Date(taipeiMs);
+  const pad = (n) => String(n).padStart(2, "0");
+
+  // 用 UTC getter 取值，因為時間戳已經手動位移過，不能再用 local getter
+  return `${t.getUTCFullYear()}-${pad(t.getUTCMonth() + 1)}-${pad(t.getUTCDate())} ` +
+         `${pad(t.getUTCHours())}:${pad(t.getUTCMinutes())}:${pad(t.getUTCSeconds())}`;
+}
+
+// 移除物件內所有字串值中的 "%" 符號
+function stripPercentSigns(obj) {
+  const result = {};
+  for (const [key, value] of Object.entries(obj)) {
+    result[key] = typeof value === "string" ? value.replace(/%/g, "") : value;
+  }
+  return result;
+}
+
 // CNBC（美股四大指數 + TSM ADR + 盤前電子盤）
 async function fetchCnbc() {
   try {
@@ -625,7 +648,7 @@ async function fetchCnbc() {
     // 2. 四大指數 + 個股 (未來可在 symbols 繼續累加，如 |NVDA|AAPL)
     // |TSM|NVDA|AAPL|MSFT|GOOGL|AMZN|META|TSLA
     const qRes = await fetchWithTimeout(
-      "https://quote.cnbc.com/quote-html-webservice/restQuote/symbolType/symbol?symbols=.DJI|.SPX|.IXIC|.SOX&requestMethod=itv&noform=1&partnerId=2&fund=1&exthrs=1&output=json&events=1", {
+      "https://quote.cnbc.com/quote-html-webservice/restQuote/symbolType/symbol?symbols=.DJI|.SPX|.IXIC|.SOX|US5Y|US10Y|US30Y&requestMethod=itv&noform=1&partnerId=2&fund=1&exthrs=1&output=json&events=1", {
         headers: {
           "User-Agent": UA
         }
@@ -642,6 +665,7 @@ async function fetchCnbc() {
       sox: "N/A"
     };
     const stock = {};
+    const bondyield = {};
 
     // 指數與代碼的映射表
     const indexMap = {
@@ -657,6 +681,17 @@ async function fetchCnbc() {
       // 如果是四大指數
       if (indexMap[sym]) {
         market[indexMap[sym]] = q.change || "N/A";
+      } else if (sym == 'US5Y' || sym == 'US10Y' || sym == 'US30Y') {
+        bondyield[sym] = stripPercentSigns({
+          last: q.last || "N/A",
+          last_time: q.last_time ? toTaipeiTimeString(q.last_time) : "N/A",
+          open: q.open || "N/A",
+          high: q.high || "N/A",
+          low: q.low || "N/A",
+          change: q.change || "N/A",
+          change_pct: q.change_pct || "N/A",
+          previous_day_closing: q.previous_day_closing || "N/A"
+        });
       } else {
         // 如果不是指數 (代表是個股)，則放入分門別類的 stock 物件中
         stock[sym] = {
@@ -678,6 +713,7 @@ async function fetchCnbc() {
         updateTime: fv.updateTime,
       },
       market,
+      bondyield,
       stock, // 這裡現在會是 { TSM: { regular: "...", type: "...", market: "..." } }
     });
   } catch (e) {
@@ -4642,6 +4678,14 @@ async function buildComprehensiveSnapshot() {
   if (cnbcPreMarkets.success) {
     snapshot.nasdaq100Futures = cnbcPreMarkets.fairValue.nasdaq_last;
     snapshot.nasdaq100Futures_updown = cnbcPreMarkets.fairValue.nasdaq;
+
+    // 美債殖利率
+    snapshot.us5y = cnbcPreMarkets.bondyield.US5Y.last;
+    snapshot.us5y_updown = cnbcPreMarkets.bondyield.US5Y.change;
+    snapshot.us10y = cnbcPreMarkets.bondyield.US10Y.last;
+    snapshot.us10y_updown = cnbcPreMarkets.bondyield.US10Y.change;
+    snapshot.us30y = cnbcPreMarkets.bondyield.US30Y.last;
+    snapshot.us30y_updown = cnbcPreMarkets.bondyield.US30Y.change;
   }
 
   if (robinHood?.TSM?.success) {
@@ -4740,8 +4784,8 @@ async function handleHistoryBackground(env) {
       time
     });
 
-    // 只保留最新 100 筆，避免 KV 無限增長
-    if (list.length > 100) list.splice(0, list.length - 100);
+    // 只保留最新 120 筆，避免 KV 無限增長
+    // if (list.length > 120) list.splice(0, list.length - 120);
 
     await env.KV.put("history", JSON.stringify(list));
 
