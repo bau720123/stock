@@ -54,7 +54,7 @@ function groupHeader(label, settingsKey = null, wording = '') {
           onclick="window.open('https://robinhood.com/us/en/stocks/${settingsKey}/', '_blank')">
           📈
         </button>`;
-    } else if (settingsKey == 'u.s.-5' || settingsKey == 'u.s.-10' || settingsKey == 'u.s.-30') {
+    } else if (settingsKey == 'u.s.-2' || settingsKey == 'u.s.-5' || settingsKey == 'u.s.-10' || settingsKey == 'u.s.-30') {
       settingsButton = `
         <button class="alert-settings-btn"
           title="前往 Investing"
@@ -2081,26 +2081,53 @@ async function loadAmerica() {
 
   html += `<div class="card-title" style="margin-top: 5%;" id="us-treasury-yield">美國公債殖利率</div>`;
 
+  // 美國2年期公債殖利率
+  html += groupHeader('【2年期公債殖利率】', 'u.s.-2', '貨幣政策前瞻雷達，直接定價聯準會 1~2 年利率路徑，對 CPI、非農數據極度敏感，為全球短線避險與跨國搬錢首選。');
+  if (cnbcPreMarkets.success) {
+    const changeNum = cnbcPreMarkets.bondyield.US2Y.change;
+    const cls = changeNum < 0 ? 'down' : 'up';
+
+    // html += row('前次', cnbcPreMarkets.bondyield.US2Y.previous_day_closing);
+    // html += row('開盤價', cnbcPreMarkets.bondyield.US2Y.open);
+    // html += row('最高價', cnbcPreMarkets.bondyield.US2Y.high);
+    // html += row('最低價', cnbcPreMarkets.bondyield.US2Y.low);
+    html += row('利率', cnbcPreMarkets.bondyield.US2Y.last, 'accent');
+
+    // 警戒區間判斷
+    const lastRate = cnbcPreMarkets.bondyield.US2Y.last;
+    if (lastRate >= 5) {
+      html += row('警戒水位（5）', `紅色危險區（衝擊資產/引發拋售）`);
+    } else if (lastRate >= 4.75) {
+      html += row('警戒水位（4.75）', '黃色警戒（開始承壓）');
+    } else {
+      html += row('警戒水位', '正常', 'accent');
+    }
+    html += row('漲跌', changeNum, cls);
+    html += row('更新時間', cnbcPreMarkets.bondyield.US2Y.last_time);
+  } else {
+    html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
+  }
+
   // 美國5年期公債殖利率
-  html += groupHeader('【5年期公債殖利率】', 'u.s.-5', '美國5年期公債殖利率是反映美國5年期國債收益率的重要指標，通常被視為衡量市場利率水平和經濟前景的重要參考。');
+  html += groupHeader('【5年期公債殖利率】', 'u.s.-5', '中期企業信貸溫度計，決定 3~5 年商業貸款與車貸成本，反映市場對中期「高利率維持期」及企業再融資壓力的承受度。');
   if (cnbcPreMarkets.success) {
     const changeNum = cnbcPreMarkets.bondyield.US5Y.change;
     const cls = changeNum < 0 ? 'down' : 'up';
 
-    html += row('前次', cnbcPreMarkets.bondyield.US5Y.previous_day_closing);
+    // html += row('前次', cnbcPreMarkets.bondyield.US5Y.previous_day_closing);
     // html += row('開盤價', cnbcPreMarkets.bondyield.US5Y.open);
     // html += row('最高價', cnbcPreMarkets.bondyield.US5Y.high);
     // html += row('最低價', cnbcPreMarkets.bondyield.US5Y.low);
     html += row('利率', cnbcPreMarkets.bondyield.US5Y.last, 'accent');
 
     // 警戒區間判斷
-    const fvxRate = cnbcPreMarkets.bondyield.US5Y.last;
-    if (fvxRate >= 4.55) {
-      html += row('警戒水位', `紅色危險區（${fvxRate >= 5.0 ? '逼近5.0%' : '衝擊資產/引發拋售'}）`);
-    } else if (fvxRate >= 4.35) {
-      html += row('警戒水位', '黃色警戒（開始承壓）');
+    const lastRate = cnbcPreMarkets.bondyield.US5Y.last;
+    if (lastRate >= 4.7) {
+      html += row('警戒水位（4.7）', `紅色危險區（衝擊資產/引發拋售）`);
+    } else if (lastRate >= 4.5) {
+      html += row('警戒水位（4.5）', '黃色警戒（開始承壓）');
     } else {
-      html += row('利率狀態', '正常', 'accent');
+      html += row('警戒水位', '正常', 'accent');
     }
     html += row('漲跌', changeNum, cls);
     html += row('更新時間', cnbcPreMarkets.bondyield.US5Y.last_time);
@@ -2109,7 +2136,7 @@ async function loadAmerica() {
   }
 
   // 美國10年期公債殖利率
-  html += groupHeader('【10年期公債殖利率】', 'u.s.-10', '美國10年期公債殖利率是反映美國10年期國債收益率的重要指標，通常被視為衡量市場利率水平和經濟前景的重要參考。');
+  html += groupHeader('【10年期公債殖利率】', 'u.s.-10', '全球無風險定價錨，決定股權風險溢酬（ERP），同時反映中長期名目 GDP 潛在成長率與實質通膨中樞。。');
   if (cnbcPreMarkets.success) {
     const changeNum = cnbcPreMarkets.bondyield.US10Y.change;
     const cls = changeNum < 0 ? 'down' : 'up';
@@ -2121,13 +2148,13 @@ async function loadAmerica() {
     html += row('利率', cnbcPreMarkets.bondyield.US10Y.last, 'accent');
 
     // 警戒區間判斷
-    const tnxRate = cnbcPreMarkets.bondyield.US10Y.last;
-    if (tnxRate >= 4.65) {
-      html += row('警戒水位', `紅色危險區（${tnxRate >= 5.0 ? '逼近5.0%' : '衝擊資產/引發拋售'}）`);
-    } else if (tnxRate >= 4.50) {
-      html += row('警戒水位', '黃色警戒（開始承壓）');
+    const lastRate = cnbcPreMarkets.bondyield.US10Y.last;
+    if (lastRate >= 5) {
+      html += row('警戒水位（5）', `紅色危險區（衝擊資產/引發拋售）`);
+    } else if (lastRate >= 4.8) {
+      html += row('警戒水位（4.8）', '黃色警戒（開始承壓）');
     } else {
-      html += row('利率狀態', '正常', 'accent');
+      html += row('警戒水位', '正常', 'accent');
     }
     html += row('漲跌', changeNum, cls);
     html += row('更新時間', cnbcPreMarkets.bondyield.US10Y.last_time);
@@ -2136,7 +2163,7 @@ async function loadAmerica() {
   }
 
   // 美國30年期公債殖利率
-  html += groupHeader('【30年期公債殖利率】', 'u.s.-30', '美國30年期公債殖利率是反映美國30年期國債收益率的重要指標，通常被視為衡量市場利率水平和經濟前景的重要參考。');
+  html += groupHeader('【30年期公債殖利率】', 'u.s.-30', '終端期限溢價與房市命脈，反映買方對美國長線財政赤字擴張、美債供給消化力與長期通膨失控風險的補償要求。');
   if (cnbcPreMarkets.success) {
     const changeNum = cnbcPreMarkets.bondyield.US30Y.change;
     const cls = changeNum < 0 ? 'down' : 'up';
@@ -2148,13 +2175,13 @@ async function loadAmerica() {
     html += row('利率', cnbcPreMarkets.bondyield.US30Y.last, 'accent');
 
     // 警戒區間判斷
-    const txyRate = cnbcPreMarkets.bondyield.US30Y.last;
-    if (txyRate >= 5) {
-      html += row('警戒水位', `紅色危險區（${txyRate >= 5.0 ? '逼近5.0%' : '衝擊資產/引發拋售'}）`);
-    } else if (txyRate >= 4.50) {
-      html += row('警戒水位', '黃色警戒（開始承壓）');
+    const lastRate = cnbcPreMarkets.bondyield.US30Y.last;
+    if (lastRate >= 5.25) {
+      html += row('警戒水位（5.25）', `紅色危險區（衝擊資產/引發拋售）`);
+    } else if (lastRate >= 5) {
+      html += row('警戒水位（5）', '黃色警戒（開始承壓）');
     } else {
-      html += row('利率狀態', '正常', 'accent');
+      html += row('警戒水位', '正常', 'accent');
     }
     html += row('漲跌', changeNum, cls);
     html += row('更新時間', cnbcPreMarkets.bondyield.US30Y.last_time);
@@ -2680,7 +2707,7 @@ async function loadAmerica() {
 
   setCard('card-america', 0, html);
 
-  if (cnbcPreMarkets.success && (cnbcPreMarkets.bondyield.US5Y.last >= 4.35 || cnbcPreMarkets.bondyield.US10Y.last >= 4.50 || cnbcPreMarkets.bondyield.US30Y.last >= 4.50)) {
+  if (cnbcPreMarkets.success && cnbcPreMarkets.bondyield.US10Y.last >= 5 && cnbcPreMarkets.bondyield.US30Y.last >= 5.25) {
     const el = document.getElementById("us-treasury-yield");
     el.style.color = "red";
     el.innerText += "\n已進入警戒區間"; 

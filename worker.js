@@ -648,7 +648,7 @@ async function fetchCnbc() {
     // 2. 四大指數 + 個股 (未來可在 symbols 繼續累加，如 |NVDA|AAPL)
     // |TSM|NVDA|AAPL|MSFT|GOOGL|AMZN|META|TSLA
     const qRes = await fetchWithTimeout(
-      "https://quote.cnbc.com/quote-html-webservice/restQuote/symbolType/symbol?symbols=.DJI|.SPX|.IXIC|.SOX|US5Y|US10Y|US30Y&requestMethod=itv&noform=1&partnerId=2&fund=1&exthrs=1&output=json&events=1", {
+      "https://quote.cnbc.com/quote-html-webservice/restQuote/symbolType/symbol?symbols=.DJI|.SPX|.IXIC|.SOX|US2Y|US5Y|US10Y|US30Y&requestMethod=itv&noform=1&partnerId=2&fund=1&exthrs=1&output=json&events=1", {
         headers: {
           "User-Agent": UA
         }
@@ -681,7 +681,7 @@ async function fetchCnbc() {
       // 如果是四大指數
       if (indexMap[sym]) {
         market[indexMap[sym]] = q.change || "N/A";
-      } else if (sym == 'US5Y' || sym == 'US10Y' || sym == 'US30Y') {
+      } else if (sym == 'US2Y' || sym == 'US5Y' || sym == 'US10Y' || sym == 'US30Y') {
         bondyield[sym] = stripPercentSigns({
           last: q.last || "N/A",
           last_time: q.last_time ? toTaipeiTimeString(q.last_time) : "N/A",
@@ -4680,6 +4680,8 @@ async function buildComprehensiveSnapshot() {
     snapshot.nasdaq100Futures_updown = cnbcPreMarkets.fairValue.nasdaq;
 
     // 美債殖利率
+    snapshot.us2y = cnbcPreMarkets.bondyield.US2Y.last;
+    snapshot.us5y_updown = cnbcPreMarkets.bondyield.US2Y.change;
     snapshot.us5y = cnbcPreMarkets.bondyield.US5Y.last;
     snapshot.us5y_updown = cnbcPreMarkets.bondyield.US5Y.change;
     snapshot.us10y = cnbcPreMarkets.bondyield.US10Y.last;
