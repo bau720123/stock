@@ -68,6 +68,13 @@ function groupHeader(label, settingsKey = null, wording = '') {
           onclick="window.open('https://hk.investing.com/commodities/brent-oil', '_blank')">
           📈
         </button>`;
+    } else if (settingsKey == 'pre-markets') {
+      settingsButton = `
+        <button class="alert-settings-btn"
+          title="前往 CNBC"
+          onclick="window.open('https://www.cnbc.com/markets/pre-markets/', '_blank')">
+          📈
+        </button>`;
     } else {
       settingsButton = `
         <button class="alert-settings-btn ${isActive ? 'active' : ''}"
@@ -1984,7 +1991,7 @@ async function loadAmerica() {
   const status = getMarketStatus();
 
   // 美股期貨電子盤
-  html += groupHeader(`${status.futuresStatus}【美股期貨電子盤】`, '', '美股期貨電子盤（Pre-Market Session）指在正常開盤時間（美東時間 9:30 AM）前，透過電子通訊網路（ECN）進行的股票交易時段，通常為美東時間凌晨 4:00 至 9:30，對應台灣時間晚上 16:00/17:00 後至 21:30。此時段成交量較小但波動大，適合作為盤前財報發布後的策略布局與風險控管。');
+  html += groupHeader(`${status.futuresStatus}【美股期貨電子盤】`, 'pre-markets', '美股期貨電子盤（Pre-Market Session）指在正常開盤時間（美東時間 9:30 AM）前，透過電子通訊網路（ECN）進行的股票交易時段，通常為美東時間凌晨 4:00 至 9:30，對應台灣時間晚上 16:00/17:00 後至 21:30。此時段成交量較小但波動大，適合作為盤前財報發布後的策略布局與風險控管。');
   if (cnbcPreMarkets.success) {
     html += row('道瓊期貨', formatChange(cnbcPreMarkets.fairValue.dow), changeClass(cnbcPreMarkets.fairValue.dow));
     html += row('標普500期貨', formatChange(cnbcPreMarkets.fairValue.sp), changeClass(cnbcPreMarkets.fairValue.sp));
