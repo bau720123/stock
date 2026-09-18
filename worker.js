@@ -113,6 +113,7 @@ export default {
       if (method === "quote" && symbol) return await fetchFugleQuote(symbol, env);
       if (method === "volume" && symbol) return await fetchFugleVolume(symbol, env);
       if (method === "history" && symbol) return await fetchFugleHistory(symbol, env);
+      if (method === "stats" && symbol) return await fetchFugleStats(symbol, env);
       if (method === "institutional" && symbol) return await fetchHiStockInstitutional(symbol);
       if (method === "margintradingbalance" && symbol) return await fetchHiStockMarginTradingBalance(symbol);
       if (method === "sma" && symbol) return await fetchFugleSma(symbol, env);
@@ -1862,6 +1863,39 @@ async function fetchFugleHistory(symbol, env) {
       success: true,
       data,
       result
+    });
+  } catch (e) {
+    const errorMsg = e.name === 'AbortError' ? "連線逾時" : e.message;
+    return json({
+      success: false,
+      error: errorMsg
+    }, 500);
+  }
+}
+
+async function fetchFugleStats(symbol, env) {
+  try {
+    const res = await fetchWithTimeout(
+      `https://api.fugle.tw/marketdata/v1.0/stock/historical/stats/${symbol}`, {
+        headers: {
+          "X-API-KEY": env.FUGLE_KEY,
+          "Accept": "application/json"
+        }
+      }
+    );
+
+    if (!res.ok) {
+      return json({
+        success: false,
+        error: `HTTP ${res.status}`
+      });
+    }
+
+    const data = await res.json();
+
+    return json({
+      success: true,
+      ...data
     });
   } catch (e) {
     const errorMsg = e.name === 'AbortError' ? "連線逾時" : e.message;
@@ -3949,6 +3983,13 @@ function generateCustomEvents(year) {
     "001"
   ));
   events.push(createEventObj(
+    new Date("2026-09-22"),
+    "DELTA",
+    "台達電海參加永豐金證券舉辦之法人說明會",
+    "#3498db",
+    "001"
+  ));
+  events.push(createEventObj(
     new Date("2026-09-23"),
     "TSM",
     "台積電北美技術論壇",
@@ -3956,9 +3997,30 @@ function generateCustomEvents(year) {
     "001"
   ));
   events.push(createEventObj(
+    new Date("2026-09-24"),
+    "川習會",
+    "川習會高峰會談與核心議程",
+    "#3498db",
+    "001"
+  ));
+  events.push(createEventObj(
+    new Date("2026-10-05"),
+    "DELTA",
+    "台達電海參加Jefferies法人說明會",
+    "#3498db",
+    "001"
+  ));
+  events.push(createEventObj(
     new Date("2026-10-29"),
     "DELTA",
     "台達電法說會",
+    "#3498db",
+    "001"
+  ));
+  events.push(createEventObj(
+    new Date("2026-11-03"),
+    "DELTA",
+    "台達電海參加大和國泰證券法人說明會",
     "#3498db",
     "001"
   ));

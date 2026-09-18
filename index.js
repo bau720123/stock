@@ -3690,7 +3690,7 @@ async function loadMyStock() {
   await loadTickers(); // 預先載入 tickers，供 openMyStockSettings autocomplete 使用
 
   // 平行抓取所有自選股票的相關屬性資訊
-  const [quoteResults, volumeResults, historyResults, institutionalResults, margintradingbalanceResults, smaResults, rsiResults, kdjResults, macdResults, brandsResults] =
+  const [quoteResults, volumeResults, historyResults, statsResults, institutionalResults, margintradingbalanceResults, smaResults, rsiResults, kdjResults, macdResults, brandsResults] =
   /*await Promise.all([
      Promise.all(
      MY_STOCKS.map(s => fetch(WORKER + '/stock/quote/' + s.symbol).then(r => r.json()).catch(() => ({ success: false })))
@@ -3724,6 +3724,7 @@ async function loadMyStock() {
     fetchMetricsSequentially('quote', 400),
     fetchMetricsSequentially('volume', 400),
     fetchMetricsSequentially('history', 400),
+    fetchMetricsSequentially('stats', 400),
     fetchMetricsSequentially('institutional', 400),
     fetchMetricsSequentially('margintradingbalance', 400),
     fetchMetricsSequentially('sma', 400),
@@ -3738,6 +3739,7 @@ async function loadMyStock() {
     quoteResults,
     volumeResults,
     historyResults,
+    statsResults,
     institutionalResults,
     margintradingbalanceResults,
     smaResults,
@@ -3774,6 +3776,7 @@ function _renderMyStock({
   quoteResults,
   volumeResults,
   historyResults,
+  statsResults,
   institutionalResults,
   margintradingbalanceResults,
   smaResults,
@@ -3838,6 +3841,10 @@ function _renderMyStock({
       html += row('均價', data.avgPrice.toFixed(2));
       html += row('漲跌', sign + data.change, cls);
       html += row('低減開', lowMinusOpen, lowMinusOpenCls);
+      if (statsResults[i].success) {
+        html += row('52週高點', statsResults[i].week52High, 'accent');
+        html += row('52週低點', statsResults[i].week52Low, 'accent');
+      }
 
       // 委託簿
       html += `
