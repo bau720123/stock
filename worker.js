@@ -3983,11 +3983,25 @@ function generateCustomEvents(year) {
     "001"
   ));
   events.push(createEventObj(
+    new Date("2026-09-21"),
+    "JAPAN",
+    "日股休市（敬老之日）",
+    "#3498db",
+    "001"
+  ));
+  events.push(createEventObj(
     new Date("2026-09-22"),
     "DELTA",
     "台達電海參加永豐金證券舉辦之法人說明會",
     "#3498db",
     "001"
+  ));
+  events.push(createEventObj(
+    new Date("2026-09-22"),
+    "JAPAN",
+    "日股休市（國民之休日）",
+    "#3498db",
+    "002"
   ));
   events.push(createEventObj(
     new Date("2026-09-23"),
@@ -3997,9 +4011,30 @@ function generateCustomEvents(year) {
     "001"
   ));
   events.push(createEventObj(
+    new Date("2026-09-23"),
+    "JAPAN",
+    "日股休市（休分之日）",
+    "#3498db",
+    "002"
+  ));
+  events.push(createEventObj(
     new Date("2026-09-24"),
     "川習會",
     "川習會高峰會談與核心議程",
+    "#3498db",
+    "001"
+  ));
+  events.push(createEventObj(
+    new Date("2026-09-24"),
+    "KOREA",
+    "韓股休市（秋夕前夕）",
+    "#3498db",
+    "002"
+  ));
+  events.push(createEventObj(
+    new Date("2026-09-25"),
+    "KOREA",
+    "韓股休市（秋夕當夕）",
     "#3498db",
     "001"
   ));
@@ -4742,14 +4777,14 @@ async function buildComprehensiveSnapshot() {
     snapshot.nasdaq100Futures_updown = cnbcPreMarkets.fairValue.nasdaq;
 
     // 美債殖利率
-    snapshot.us2y = cnbcPreMarkets.bondyield.US2Y.last;
-    snapshot.us5y_updown = cnbcPreMarkets.bondyield.US2Y.change;
-    snapshot.us5y = cnbcPreMarkets.bondyield.US5Y.last;
-    snapshot.us5y_updown = cnbcPreMarkets.bondyield.US5Y.change;
-    snapshot.us10y = cnbcPreMarkets.bondyield.US10Y.last;
-    snapshot.us10y_updown = cnbcPreMarkets.bondyield.US10Y.change;
-    snapshot.us30y = cnbcPreMarkets.bondyield.US30Y.last;
-    snapshot.us30y_updown = cnbcPreMarkets.bondyield.US30Y.change;
+    // snapshot.us2y = cnbcPreMarkets.bondyield.US2Y.last;
+    // snapshot.us5y_updown = cnbcPreMarkets.bondyield.US2Y.change;
+    // snapshot.us5y = cnbcPreMarkets.bondyield.US5Y.last;
+    // snapshot.us5y_updown = cnbcPreMarkets.bondyield.US5Y.change;
+    // snapshot.us10y = cnbcPreMarkets.bondyield.US10Y.last;
+    // snapshot.us10y_updown = cnbcPreMarkets.bondyield.US10Y.change;
+    // snapshot.us30y = cnbcPreMarkets.bondyield.US30Y.last;
+    // snapshot.us30y_updown = cnbcPreMarkets.bondyield.US30Y.change;
   }
 
   if (robinHood?.TSM?.success) {

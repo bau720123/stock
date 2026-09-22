@@ -6740,9 +6740,9 @@ function gotoCalendarDetail(link = '') {
 const COMPREHENSIVE_FIELDS = [
   { key: 'taifexDay', key_updown: 'taifexDay_updown', label: '台指期', color: '#5a9eff' },
   { key: 'nasdaq100Futures', key_updown: 'nasdaq100Futures_updown', label: '那斯達克100期貨', color: '#ff9f43' },
-  { key: 'us5y', key_updown: 'us5y_updown', label: '美5年期公債殖利率', color: '#778ca3' },
-  { key: 'us10y', key_updown: 'us10y_updown', label: '美10年期公債殖利率', color: '#a5b1c2' },
-  { key: 'us30y', key_updown: 'us30y_updown', label: '美30年期公債殖利率', color: '#d1d8e0' },
+  // { key: 'us5y', key_updown: 'us5y_updown', label: '美5年期公債殖利率', color: '#778ca3' },
+  // { key: 'us10y', key_updown: 'us10y_updown', label: '美10年期公債殖利率', color: '#a5b1c2' },
+  // { key: 'us30y', key_updown: 'us30y_updown', label: '美30年期公債殖利率', color: '#d1d8e0' },
   { key: 'tsm', key_updown: 'tsm_updown', label: '台積電ADR', color: '#ff9f43' },
   // { key: 'bitcoin', key_updown: 'bitcoin_updown', label: '比特幣', color: '#f7b731' },
   { key: 'nikkei225', key_updown: 'nikkei225_updown', label: '日經225指數', color: '#ff4d6a' },
