@@ -4777,14 +4777,14 @@ async function buildComprehensiveSnapshot() {
     snapshot.nasdaq100Futures_updown = cnbcPreMarkets.fairValue.nasdaq;
 
     // 美債殖利率
-    // snapshot.us2y = cnbcPreMarkets.bondyield.US2Y.last;
-    // snapshot.us5y_updown = cnbcPreMarkets.bondyield.US2Y.change;
-    // snapshot.us5y = cnbcPreMarkets.bondyield.US5Y.last;
-    // snapshot.us5y_updown = cnbcPreMarkets.bondyield.US5Y.change;
-    // snapshot.us10y = cnbcPreMarkets.bondyield.US10Y.last;
-    // snapshot.us10y_updown = cnbcPreMarkets.bondyield.US10Y.change;
-    // snapshot.us30y = cnbcPreMarkets.bondyield.US30Y.last;
-    // snapshot.us30y_updown = cnbcPreMarkets.bondyield.US30Y.change;
+    snapshot.us2y = cnbcPreMarkets.bondyield.US2Y.last;
+    snapshot.us2y_updown = cnbcPreMarkets.bondyield.US2Y.change;
+    snapshot.us5y = cnbcPreMarkets.bondyield.US5Y.last;
+    snapshot.us5y_updown = cnbcPreMarkets.bondyield.US5Y.change;
+    snapshot.us10y = cnbcPreMarkets.bondyield.US10Y.last;
+    snapshot.us10y_updown = cnbcPreMarkets.bondyield.US10Y.change;
+    snapshot.us30y = cnbcPreMarkets.bondyield.US30Y.last;
+    snapshot.us30y_updown = cnbcPreMarkets.bondyield.US30Y.change;
   }
 
   if (robinHood?.TSM?.success) {
