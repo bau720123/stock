@@ -4845,7 +4845,7 @@ async function buildComprehensiveSnapshot() {
   return snapshot;
 }
 
-// 判斷是否為台股日盤時段（08:30~13:45，週一至週五），比照前端 getMarketEmoji 的 isDaySession
+// 判斷是否為台股日盤時段（08:30~14:30，週一至週五），比照前端 getMarketEmoji 的 isDaySession
 function isTaiwanDaySession() {
   const now = new Date();
   const twTime = new Date(now.getTime() + 8 * 60 * 60 * 1000);
@@ -4854,7 +4854,7 @@ function isTaiwanDaySession() {
   const minute = twTime.getUTCMinutes();
   const hm = hour * 100 + minute;
   const isWeekday = day >= 1 && day <= 5;
-  return isWeekday && hm >= 830 && hm <= 1345;
+  return isWeekday && hm >= 830 && hm <= 1430;
 }
 
 // 專供 /write-history-background 及 cron 使用：worker 主動抓取 12 項指標並寫入 history
