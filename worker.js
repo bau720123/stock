@@ -4046,6 +4046,13 @@ function generateCustomEvents(year) {
     "001"
   ));
   events.push(createEventObj(
+    new Date("2026-10-16"),
+    "00962",
+    "台新AI優息動能（除息）",
+    "#3498db",
+    "001"
+  ));
+  events.push(createEventObj(
     new Date("2026-10-29"),
     "DELTA",
     "台達電法說會",

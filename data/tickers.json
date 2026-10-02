@@ -2,7 +2,7 @@
   "success": true,
   "data": [
     {
-      "symbol": "000115"
+      "symbol": "000313"
     },
     {
       "symbol": "00400A",
@@ -1310,34 +1310,82 @@
       "name": "元大加權N"
     },
     {
-      "symbol": "03658U"
+      "symbol": "03097T"
     },
     {
-      "symbol": "04443U"
+      "symbol": "06890U"
     },
     {
-      "symbol": "05886U"
+      "symbol": "07885U"
     },
     {
-      "symbol": "07125U"
+      "symbol": "07887U"
     },
     {
-      "symbol": "08714U"
+      "symbol": "07898U"
     },
     {
-      "symbol": "08717U"
+      "symbol": "08295U"
     },
     {
-      "symbol": "08719U"
+      "symbol": "08326U"
     },
     {
-      "symbol": "08721U"
+      "symbol": "08492U"
     },
     {
-      "symbol": "08722U"
+      "symbol": "08493U"
     },
     {
-      "symbol": "08725U"
+      "symbol": "08494U"
+    },
+    {
+      "symbol": "08495U"
+    },
+    {
+      "symbol": "08497U"
+    },
+    {
+      "symbol": "08505U"
+    },
+    {
+      "symbol": "08507U"
+    },
+    {
+      "symbol": "08514U"
+    },
+    {
+      "symbol": "08515U"
+    },
+    {
+      "symbol": "08518U"
+    },
+    {
+      "symbol": "08520U"
+    },
+    {
+      "symbol": "08521U"
+    },
+    {
+      "symbol": "08523U"
+    },
+    {
+      "symbol": "08525U"
+    },
+    {
+      "symbol": "08531U"
+    },
+    {
+      "symbol": "08532U"
+    },
+    {
+      "symbol": "08548U"
+    },
+    {
+      "symbol": "08549U"
+    },
+    {
+      "symbol": "08550U"
     },
     {
       "symbol": "1101",
@@ -1913,11 +1961,6 @@
       "symbol": "1522",
       "industry": "12",
       "name": "堤維西"
-    },
-    {
-      "symbol": "1522A",
-      "industry": "12",
-      "name": "堤維西甲特"
     },
     {
       "symbol": "1524",
@@ -2725,9 +2768,9 @@
       "name": "鴻海"
     },
     {
-      "symbol": "2323",
-      "industry": "26",
-      "name": "中環"
+      "symbol": "2321",
+      "industry": "27",
+      "name": "東訊"
     },
     {
       "symbol": "2324",
@@ -3493,11 +3536,6 @@
       "symbol": "2597",
       "industry": "14",
       "name": "潤弘"
-    },
-    {
-      "symbol": "2601",
-      "industry": "15",
-      "name": "益航"
     },
     {
       "symbol": "2603",
@@ -4380,6 +4418,11 @@
       "name": "麗清"
     },
     {
+      "symbol": "3356",
+      "industry": "26",
+      "name": "奇偶"
+    },
+    {
       "symbol": "3376",
       "industry": "28",
       "name": "新日興"
@@ -4528,6 +4571,11 @@
       "symbol": "3588",
       "industry": "24",
       "name": "通嘉"
+    },
+    {
+      "symbol": "3591",
+      "industry": "26",
+      "name": "艾笛森"
     },
     {
       "symbol": "3592",
@@ -6358,6 +6406,11 @@
       "symbol": "7803",
       "industry": "22",
       "name": "雲象科技-創"
+    },
+    {
+      "symbol": "7812",
+      "industry": "27",
+      "name": "稜研科技*-創"
     },
     {
       "symbol": "7818",
