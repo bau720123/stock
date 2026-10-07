@@ -1998,6 +1998,8 @@ async function loadAmerica() {
     html += row('納斯達克100期貨', formatChange(cnbcPreMarkets.fairValue.nasdaq), changeClass(cnbcPreMarkets.fairValue.nasdaq));
     window.marketSnapshot.nasdaq100Futures = cnbcPreMarkets.fairValue.nasdaq;
     html += row('羅素2000期貨', formatChange(cnbcPreMarkets.fairValue.russell), changeClass(cnbcPreMarkets.fairValue.russell));
+  } else {
+    html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
   }
 
   // 美股四大指數
@@ -2007,6 +2009,8 @@ async function loadAmerica() {
     html += row('標普500指數', formatChange(cnbcPreMarkets.market.spx), changeClass(cnbcPreMarkets.market.spx));
     html += row('納斯達克指數', formatChange(cnbcPreMarkets.market.ixic), changeClass(cnbcPreMarkets.market.ixic));
     html += row('費城半導體指數', formatChange(cnbcPreMarkets.market.sox), changeClass(cnbcPreMarkets.market.sox));
+  } else {
+    html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
   }
 
   // // 那斯達克 100 期貨
