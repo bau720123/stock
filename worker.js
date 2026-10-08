@@ -1856,6 +1856,19 @@ async function fetchFugleHistory(symbol, env) {
     const d = await res.json();
     const data = d.data || [];
 
+    // 新增 lowMinusPreClose：當天最低價 - 上個交易日收盤價
+    // data 為 desc 排序，所以前一個交易日是 data[i + 1]
+    const round2 = (n) => Math.round(n * 100) / 100;
+
+    data.forEach((item, i) => {
+      const prev = data[i + 1];
+      // 最舊的一筆沒有前一天資料，用 close - change 反推昨收
+      const preClose = prev ? prev.close : (item.change != null ? item.close - item.change : null);
+
+      item.lowMinusOpen = round2(item.low - item.open);
+      item.lowMinusPreClose = preClose != null ? round2(item.low - preClose) : null;
+    });
+
     // 歷史 K 線動態故事分析
     const result = analyzeHistoryData(data);
 

@@ -3843,6 +3843,7 @@ function _renderMyStock({
       const lowMinusOpen = (data.lowPrice - data.openPrice).toFixed(2);
       const lowMinusOpenCls = lowMinusOpen > 0 ? 'up' : lowMinusOpen < 0 ? 'down' : '';
       const closePrice = data.closePrice.toFixed(2);
+      const lowMinusPrevClose = (data.lowPrice - data.previousClose).toFixed(2);
 
       html += row('上個收盤價', data.previousClose.toFixed(2));
       html += row('開盤價', data.openPrice.toFixed(2));
@@ -3852,6 +3853,7 @@ function _renderMyStock({
       html += row('均價', data.avgPrice.toFixed(2));
       html += row('漲跌', sign + data.change, cls);
       html += row('低減開', lowMinusOpen, lowMinusOpenCls);
+      html += row('低減上個收盤價', lowMinusPrevClose);
       if (statsResults[i].success) {
         html += row('52週高點', statsResults[i].week52High, 'accent');
         html += row('52週低點', statsResults[i].week52Low, 'accent');
@@ -6014,7 +6016,7 @@ function renderStockHistory(data) {
   const headerRow = `
   <tr>
     <th style="position:sticky;left:0;top:0;z-index:3;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);">日期</th>
-    ${['開盤', '最高', '最低', '收盤', '漲跌', '成交量', '成交金額'].map(h =>
+    ${['開盤', '最高', '最低', '收盤', '漲跌', '低減開', '低減昨收', '成交量', '成交金額'].map(h =>
     `<th style="position:sticky;top:0;z-index:2;background:#1a2332;padding:6px 10px;white-space:nowrap;border-bottom:1px solid var(--border);text-align:center;">${h}</th>`
     ).join('')}
   </tr>`;
@@ -6033,6 +6035,8 @@ function renderStockHistory(data) {
       <td style="padding:6px 10px;text-align:center;font-size:12px;">${d.low}</td>
       <td style="padding:6px 10px;text-align:center;font-size:12px;">${d.close}</td>
       <td style="padding:6px 10px;text-align:center;font-size:12px;${changeCls}">${sign}${d.change}</td>
+      <td style="padding:6px 10px;text-align:center;font-size:12px;">${d.lowMinusOpen}</td>
+      <td style="padding:6px 10px;text-align:center;font-size:12px;">${d.lowMinusPreClose}</td>
       <td style="padding:6px 10px;text-align:center;font-size:12px;">${volume}</td>
       <td style="padding:6px 10px;text-align:center;font-size:12px;">${turnover}億</td>
       </tr>
