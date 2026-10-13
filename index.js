@@ -7037,13 +7037,18 @@ function showSweetAlert(icon = 'info', title = '', text = '') {
 }
 
 function gotoHistock(behavior, symbol) {
-  var link = 'https://histock.tw/stock/';
-  Swal.fire({
-    grow: "fullscreen",
-    html: '<iframe src="' + link + behavior + '.aspx?no=' + symbol + '" frameborder="0" style="width:100%; height:80vh; display:block;"></iframe>',
-    showCloseButton: true,
-    showConfirmButton: false,
-  });
+  var link = 'https://histock.tw/stock/' + behavior + '.aspx?no=' + symbol;
+
+  if (behavior == 'branch') {
+    window.open(link, '_blank');
+  } else {
+    Swal.fire({
+      grow: "fullscreen",
+      html: '<iframe src="' + link + '" frameborder="0" style="width:100%; height:80vh; display:block;"></iframe>',
+      showCloseButton: true,
+      showConfirmButton: false,
+    });
+  }
 }
 
 function openMenu() {
