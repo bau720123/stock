@@ -4107,6 +4107,27 @@ function generateCustomEvents(year) {
     "#3498db",
     "001"
   ));
+  events.push(createEventObj(
+    new Date("2026-11-03"),
+    "AMERICA",
+    "美國期中選舉（19:00開始）",
+    "#3498db",
+    "001"
+  ));
+  events.push(createEventObj(
+    new Date("2026-11-04"),
+    "AMERICA",
+    "美國期中選舉（12:00結束）",
+    "#3498db",
+    "001"
+  ));
+  events.push(createEventObj(
+    new Date("2026-11-28"),
+    "TAIWAN",
+    "台北市長選舉（2026年地方公職人員九合一選舉）",
+    "#3498db",
+    "001"
+  ));
 
   return events;
 }
