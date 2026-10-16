@@ -4122,6 +4122,13 @@ function generateCustomEvents(year) {
     "001"
   ));
   events.push(createEventObj(
+    new Date("2026-11-6"),
+    "00962",
+    "台新AI優息動能（股利發放日）",
+    "#3498db",
+    "001"
+  ));
+  events.push(createEventObj(
     new Date("2026-11-28"),
     "TAIWAN",
     "台北市長選舉（2026年地方公職人員九合一選舉）",
