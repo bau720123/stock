@@ -557,7 +557,7 @@ async function fetchTaifex(objId, contractName) {
         "User-Agent": UA,
         "Accept": "application/json"
       }
-    }, 8000);
+    });
     const data = await res.json();
 
     // const item = data.find(d => d.contract === contract);
