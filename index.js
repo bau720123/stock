@@ -6996,8 +6996,11 @@ let _countdownTimer = null;
 
 function startCountdown() {
   clearInterval(_countdownTimer);
-  let count = REFRESH_INTERVAL;
+  var count = REFRESH_INTERVAL;
   document.getElementById('countdown').textContent = count;
+  if (!isDaySession) {
+    count = 999;
+  }
 
   _countdownTimer = setInterval(() => {
     count--;
