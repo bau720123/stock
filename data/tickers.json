@@ -2,7 +2,7 @@
   "success": true,
   "data": [
     {
-      "symbol": "000304"
+      "symbol": "000037"
     },
     {
       "symbol": "00400A",
@@ -63,6 +63,11 @@
       "symbol": "00412A",
       "industry": "00",
       "name": "主動安聯亞半導體"
+    },
+    {
+      "symbol": "00415A",
+      "industry": "00",
+      "name": "主動群益核心50"
     },
     {
       "symbol": "0050",
@@ -1110,6 +1115,16 @@
       "name": "平衡兆豐台美動能"
     },
     {
+      "symbol": "009831",
+      "industry": "00",
+      "name": "FT核心AI電力算力"
+    },
+    {
+      "symbol": "009832",
+      "industry": "00",
+      "name": "兆豐美國黃金"
+    },
+    {
       "symbol": "00983A",
       "industry": "00",
       "name": "主動中信ARK創新"
@@ -1860,6 +1875,11 @@
       "name": "力山"
     },
     {
+      "symbol": "1516",
+      "industry": "20",
+      "name": "川飛"
+    },
+    {
       "symbol": "1517",
       "industry": "05",
       "name": "利奇"
@@ -2477,7 +2497,7 @@
     {
       "symbol": "2072",
       "industry": "35",
-      "name": "世紀風電"
+      "name": "世紀能源"
     },
     {
       "symbol": "2101",
@@ -4695,6 +4715,11 @@
       "name": "全宇生技-KY"
     },
     {
+      "symbol": "4155",
+      "industry": "22",
+      "name": "訊映"
+    },
+    {
       "symbol": "4164",
       "industry": "22",
       "name": "承業醫"
@@ -5335,6 +5360,11 @@
       "name": "柏承"
     },
     {
+      "symbol": "6142",
+      "industry": "27",
+      "name": "友勁"
+    },
+    {
       "symbol": "6152",
       "industry": "27",
       "name": "百一"
@@ -5623,6 +5653,11 @@
       "symbol": "6464",
       "industry": "20",
       "name": "台數科"
+    },
+    {
+      "symbol": "6467",
+      "industry": "22",
+      "name": "泰合"
     },
     {
       "symbol": "6472",
@@ -6225,6 +6260,11 @@
       "name": "三商餐飲"
     },
     {
+      "symbol": "7710",
+      "industry": "25",
+      "name": "東擎科技"
+    },
+    {
       "symbol": "7711",
       "industry": "25",
       "name": "永擎"
@@ -6638,6 +6678,11 @@
       "symbol": "8499",
       "industry": "31",
       "name": "鼎炫-KY"
+    },
+    {
+      "symbol": "8908",
+      "industry": "23",
+      "name": "欣雄"
     },
     {
       "symbol": "8926",
