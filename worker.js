@@ -619,16 +619,24 @@ function stripPercentSigns(obj) {
 // CNBC（美股四大指數 + TSM ADR + 盤前電子盤）
 async function fetchCnbc() {
   try {
-    // 1. 盤前 Fair Value (邏輯保持不變)
-    // https://www.cnbc.com/pre-markets/
+    const cnbcHeaders = {
+      "User-Agent": UA,
+      "Accept": "application/json, text/plain, */*",
+      "Accept-Language": "en-US,en;q=0.9",
+      "Referer": "https://www.cnbc.com/",
+    };
+
+    // 1. 盤前 Fair Value
     const fvRes = await fetchWithTimeout(
       "https://quote.cnbc.com/quote-html-webservice/fvquote.htm?requestMethod=quick&noform=0&realtime=0&client=fairValue&output=json&symbols=DJ|SP|ND|TF", {
-        headers: {
-          "User-Agent": UA
-        }
+        headers: cnbcHeaders
       }
     );
-    const fvData = await fvRes.json();
+    const fvText = await fvRes.text();
+    if (!fvRes.ok || fvText.trim().startsWith("<")) {
+      throw new Error(`CNBC FairValue 來源異常 (HTTP ${fvRes.status})`);
+    }
+    const fvData = JSON.parse(fvText);
     const fvQuotes = fvData?.FairValueQuoteResult?.FairValueQuote || [];
 
     const fv = {
@@ -640,31 +648,34 @@ async function fetchCnbc() {
     };
     for (const q of fvQuotes) {
       if (q.symbol in fv) {
-          fv[q.symbol] = q.fmt_change || 0;
-          fv[q.symbol + "_last"] = q.last || 0;
+        fv[q.symbol] = q.fmt_change || 0;
+        fv[q.symbol + "_last"] = q.last || 0;
       }
       if (fv.updateTime === "未知" && q.last_timedate) fv.updateTime = q.last_timedate;
     }
 
-    // 2. 四大指數 + 個股 (未來可在 symbols 繼續累加，如 |NVDA|AAPL)
+    // 2. 四大指數 + 債券
     // |TSM|NVDA|AAPL|MSFT|GOOGL|AMZN|META|TSLA
     const qRes = await fetchWithTimeout(
       "https://quote.cnbc.com/quote-html-webservice/restQuote/symbolType/symbol?symbols=.DJI|.SPX|.IXIC|.SOX|US2Y|US5Y|US10Y|US30Y&requestMethod=itv&noform=1&partnerId=2&fund=1&exthrs=1&output=json&events=1", {
-        headers: {
-          "User-Agent": UA
-        }
+        headers: cnbcHeaders
       }
     );
-    const qData = await qRes.json();
+    const qText = await qRes.text();
+    if (!qRes.ok || qText.trim().startsWith("<")) {
+      throw new Error(`CNBC Quotes 來源異常 (HTTP ${qRes.status})`);
+    }
+    const qData = JSON.parse(qText);
     const quotes = qData?.FormattedQuoteResult?.FormattedQuote || [];
 
-    // 初始化回應容器
+    // 初始化容器與解析
     const market = {
       dji: "N/A",
       spx: "N/A",
       ixic: "N/A",
       sox: "N/A"
     };
+
     const stock = {};
     const bondyield = {};
 
@@ -682,7 +693,7 @@ async function fetchCnbc() {
       // 如果是四大指數
       if (indexMap[sym]) {
         market[indexMap[sym]] = q.change || "N/A";
-      } else if (sym == 'US2Y' || sym == 'US5Y' || sym == 'US10Y' || sym == 'US30Y') {
+      } else if (sym === 'US2Y' || sym === 'US5Y' || sym === 'US10Y' || sym === 'US30Y') {
         bondyield[sym] = stripPercentSigns({
           last: q.last || "N/A",
           last_time: q.last_time ? toTaipeiTimeString(q.last_time) : "N/A",
@@ -715,7 +726,7 @@ async function fetchCnbc() {
       },
       market,
       bondyield,
-      stock, // 這裡現在會是 { TSM: { regular: "...", type: "...", market: "..." } }
+      stock,
     });
   } catch (e) {
     const errorMsg = e.name === 'AbortError' ? "連線逾時" : e.message;
