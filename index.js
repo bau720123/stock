@@ -43,7 +43,7 @@ function groupHeader(label, settingsKey = null, wording = '') {
 
   var space = settingsKey != '' ? '&nbsp;' : '';
 
-  const usStocks = ['TSM', 'NVDA', 'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'TSLA', 'AVGO', 'SMCI', 'ASML', 'SPCX', 'AMD', 'INTC'];
+  const usStocks = ['TSM', 'NVDA', 'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'TSLA', 'AVGO', 'SMCI', 'ASML', 'SPCX', 'AMD', 'INTC', 'ANT'];
 
   var settingsButton = '';
   if (settingsKey) {
@@ -2711,6 +2711,42 @@ async function loadAmerica() {
     html += row('台積電（2330）：Intel Arrow Lake / Lunar Lake 等 CPU 控制晶粒（Tile）、Arc 獨立顯示卡及 Gaudi 3 AI 晶片之先進製程（3奈米/4奈米/5奈米）外包代工');
     html += row('聯電（2303）：與 Intel 合作開發亞利桑那州 12 奈米成熟與中階製程平台，提供行動、通訊與網路晶片代工服務');
     html += row('力積電（6770）：提供高階矽電容（IPD）產品，通過 Intel 認證並打入其 EMIB 先進封裝供應鏈');
+    html += `</div>`;
+  } else {
+    html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;
+  }
+
+  // Anthropic
+  html += groupHeader('【Anthropic】', 'ANT', 'Anthropic PBC是一家總部位於美國舊金山的人工智慧公司，由一批前OpenAI研究人員於2021年創立，開發了Claude系列大型語言模型。 Anthropic強調以安全為導向的人工智慧研發，並以公益公司形式組建，即一種在營利之外亦以產生積極社會影響為目標的企業形式。');
+  if (robinHood.ANT.success && robinHood.ANT.changeText != '') {
+    html += row('前次', robinHood.ANT.previousClose, 'accent');
+    html += row('今日漲跌', robinHood.ANT.changeText, changeClass(robinHood.ANT.changeText));
+    if (robinHood.ANT.tertiaryText) {
+      html += row('隔夜漲跌', robinHood.ANT.tertiaryText, changeClass(robinHood.ANT.tertiaryText));
+    }
+    html += row('更新時間', robinHood.ANT.updated_at);
+    html += `
+    <div class="row">
+    <span class="row-label">對應台股如下</span>
+    <span style="cursor:pointer;user-select:none;" onclick="
+      const ob = document.getElementById('ANT');
+      const btn = this;
+      if (ob.style.display === 'none') {
+      ob.style.display = 'block';
+      btn.textContent = '－';
+      } else {
+      ob.style.display = 'none';
+      btn.textContent = '＋';
+      }
+    ">＋</span>
+    </div>`;
+    html += `<div id="ANT" style="display:none;">`;
+    html += row('台積電（2330）：獨家代工 Anthropic 算力底座之 NVIDIA GPU、AWS Trainium 及 Google TPU 先進製程晶片');
+    html += row('世芯-KY（3661）：主要夥伴 AWS 自研 AI 訓練晶片（Trainium）核心 ASIC 設計服務供應商');
+    html += row('廣達（2382）：AWS 與 Google AI 伺服器主力代工廠，受惠 Claude 模型擴充算力叢集需求');
+    html += row('緯穎（6669）：專攻雲端資料中心，供應 AWS 客製化 AI 伺服器與訓練機櫃');
+    html += row('智邦（2345）：AWS 與 Google 資料中心 400G/800G 高速交換器主力，支撐大型模型叢集互連');
+    html += row('台達電（2308）：供應北美雲端資料中心 AI 伺服器高效率電源與散熱系統');
     html += `</div>`;
   } else {
     html += `<div class="error-text">暫時無法取得資料，請稍後再試</div>`;

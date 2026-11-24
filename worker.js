@@ -21,6 +21,7 @@ const ROBINHOOD_INSTRUMENTS = {
   SPCX: "ef5d2600-32d1-41f5-bfbe-abacac264d2a", // SpaceX
   AMD: "940fc3f5-1db5-4fed-b452-f3a2e4562b5f", // 超微
   INTC: "ad059c69-0c1c-4c6b-8322-f53f1bbd69d4", // 英特爾
+  ANT: "08ab6c19-c83d-424b-bf4d-f5dc4e3a0aa6", // Anthropic
 };
 
 const github_pages = "https://bau720123.github.io";
